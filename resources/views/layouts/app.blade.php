@@ -19,7 +19,7 @@
         content="admin,admin dashboard,admin dashboard template,admin panel template,admin template,admin theme,bootstrap 4 admin template,bootstrap 4 dashboard,bootstrap admin,bootstrap admin dashboard,bootstrap admin panel,bootstrap admin template,bootstrap admin theme,bootstrap dashboard,bootstrap form template,bootstrap panel,bootstrap ui kit,dashboard bootstrap 4,dashboard design,dashboard html,dashboard template,dashboard ui kit,envato templates,flat ui,html,html and css templates,html dashboard template,html5,jquery html,premium,premium quality,sidebar bootstrap 4,template admin bootstrap 4" />
     <!-- Title -->
     <title>
-        Azira - Premium dashboard ui bootstrap rwd admin html5 template
+        Cyber froud and social media
     </title>
     <!--- Favicon --->
     <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/x-icon" />
@@ -40,23 +40,18 @@
     <link href="{{ asset('css/switcher.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/demo.css') }}" rel="stylesheet" />
 
+    <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet" />
 
+    <script src="{{ asset('js/jquery.min.js') }}"></script>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- coustom style to render   --}}
     @yield('styles');
 
 
 
     <meta http-equiv="imagetoolbar" content="no" />
-    {{-- <style type="text/css">
-            <!-- input,textarea{-webkit-touch-callout:default;-webkit-user-select:auto;-khtml-user-select:auto;-moz-user-select:text;-ms-user-select:text;user-select:text} *{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:-moz-none;-ms-user-select:none;user-select:none} -->
-        </style> --}}
-    {{-- <style type="text/css" media="print">
-            <!-- body{display:none} -->
-        </style> --}}
-    <!--[if gte IE 5]>
-            <frame> </frame>
-        <![endif]-->
+
     <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
         type="module" crossorigin="true"
         data-resources-url="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/"

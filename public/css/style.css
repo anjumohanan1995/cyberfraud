@@ -12686,7 +12686,7 @@ a.text-dark:focus {
 /*shadow variables*/
 /* ###### 3.7 Grid ###### */
 .row-sm {
-     
+
 }
 
 .row-sm>div {
@@ -18424,7 +18424,7 @@ body {
 .breadcrumb-header {
     display: flex;
     margin-top: 20px;
-    
+
     width: 100%;
     margin-top: 10px;
     z-index: 0;
@@ -77492,9 +77492,9 @@ button.bg-purple-gradient:focus {
     width: 100vw;
 }
 
- 
+
 @-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}
- 
+
 .eva-animation {
   animation-duration: 1s;
   animation-fill-mode: both; }
@@ -77579,5 +77579,18 @@ body.dark-theme {
     color: #fff;
     background-color: #3d425d !important;
 }
-	
+
  .jqstooltip { position: absolute;left: 0px;top: 0px;visibility: hidden;background: rgb(0, 0, 0) transparent;background-color: rgba(0,0,0,0.6);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";color: white;font: 10px arial, san serif;text-align: left;white-space: nowrap;padding: 5px;border: 1px solid white;box-sizing: content-box;z-index: 10000;}.jqsfield { color: white;font: 10px arial, san serif;text-align: left;}
+
+
+
+
+ /* coustom code starts here  */
+
+
+.edit-btn,
+.delete-btn {
+    padding: 1px 10px;
+    font-size: 13px;
+    margin-right:5px;
+}
