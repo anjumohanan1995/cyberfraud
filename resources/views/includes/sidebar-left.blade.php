@@ -64,7 +64,7 @@
                 </a>
                 <ul class="slide-menu">
                     <li>
-                        <a class="slide-item" href="cards.html">Users</a>
+                        <a class="slide-item" href="{{url('users')}}">Users</a>
                     </li>
                     <li>
                         <a class="slide-item" href="darggablecards.html">Roles</a>

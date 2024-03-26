@@ -6,6 +6,10 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -24,6 +28,13 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', function () {
+
+    User::create([
+        'name' => 'Super Admin',
+        'email' => 'superadmin@email.com',
+        'password' => Hash::make('12345678'), // You should hash the password for security
+        'role' => 'super admin', // Assuming 1 is the role ID for super admin
+    ]);
     return view('login.login');
 });
 
@@ -38,6 +49,10 @@ Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("
 //users route starts here.
 Route::resource('users', UsersController::class);
 Route::get('users-management/users/get', [UsersController::class, 'getUsers'])->name("get.users");
+
+
+
+
 
 
 //permmission route starts here.
