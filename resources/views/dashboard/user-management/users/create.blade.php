@@ -15,7 +15,7 @@
                             <a href="#">User Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Permission
+                             Role
                         </li>
                     </ol>
                 </nav>

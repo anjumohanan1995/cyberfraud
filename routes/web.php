@@ -4,8 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -48,7 +48,10 @@ Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("
 
 //users route starts here.
 Route::resource('users', UsersController::class);
-Route::get('users-management/users/get', [UsersController::class, 'getUsers'])->name("get.users");
+Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
+
+Route::resource('roles', RoleController::class);
+Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
 
 

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
 
-class UsersController extends Controller
+
+class RoleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,7 +17,7 @@ class UsersController extends Controller
      */
     public function index()
     {
-        return view("dashboard.user-management.users.index");
+        return view("dashboard.user-management.role.index");
     }
 
     /**
@@ -28,8 +27,8 @@ class UsersController extends Controller
      */
     public function create()
     {
-        $role =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view("dashboard.user-management.users.create",compact('role'));
+        
+        return view("dashboard.user-management.role.create");
     }
 
     /**
@@ -45,9 +44,7 @@ class UsersController extends Controller
         $validate = Validator::make($request->all(),
         [
           'name' => 'required',
-          'email' => 'required|email|unique:users,deleted_at,NULL',
-          'password' => 'required' ,
-          'role' => 'required' ,
+          
 
       
         ]);
@@ -56,15 +53,12 @@ class UsersController extends Controller
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
-        User::create([
+        Role::create([
             'name' => @$request->name? $request->name:'',
-            'last_name' => @$request->lname?$request->lname:'',
-            'email' => @$request->email?$request->email:'',
-            'password' => Hash::make($request->password),
-            'role' => @$request->role?$request->role:''
+       
         ]);
 
-        return redirect()->route('users.index')->with('success','User Added successfully.');
+        return redirect()->route('roles.index')->with('success','Role Added successfully.');
 
    
     }
@@ -88,10 +82,10 @@ class UsersController extends Controller
      */
     public function edit($id)
     {
-        $data = User::findOrFail($id);
+        $data = Role::findOrFail($id);
 
-        $role =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view('dashboard.user-management.users.edit', ['data' => $data,'role'=>$role]);
+     
+        return view('dashboard.user-management.roles.edit', ['data' => $data,]);
     }
 
     /**
@@ -109,21 +103,18 @@ class UsersController extends Controller
             // Add more validation rules as needed
         ]);
 
-        // Find the permission by its ID.
-        $data = User::findOrFail($id);
+        // Find the role by its ID.
+        $data = Role::findOrFail($id);
 
-        // Update the permission with the data from the request
+        // Update the role with the data from the request
         $data->name = $request->name;
-        $data->last_name = $request->last_name;
-        $data->email = $request->email;
-        $data->role = $request->role;
+      
         // Update other attributes as needed
-
-        // Save the updated permission
+        // Save the updated role
         $data->save();
 
         // Redirect back with success message
-        return redirect()->route('users.index')->with('success', 'User updated successfully!');
+        return redirect()->route('roles.index')->with('success', 'Role updated successfully!');
     }
 
     /**
@@ -134,16 +125,16 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $data = User::findOrFail($id);
+        $data = Role::findOrFail($id);
 
         $data->delete();
 
-        return back()->with('success', 'User successfully deleted!');
+        return response()->json(['success' => 'Role successfully deleted!']);
     }
 
 
 
-    public function getUsersList(Request $request)
+    public function getRoles(Request $request)
     {
         
         ## Read value
@@ -162,15 +153,15 @@ class UsersController extends Controller
         $searchValue = $search_arr['value']; // Search value
 
             // Total records
-            $totalRecord = User::where('deleted_at',null)->orderBy('created_at','desc');
+            $totalRecord = Role::where('deleted_at',null)->orderBy('created_at','desc');
             $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
 
-            $totalRecordswithFilte = User::where('deleted_at',null)->orderBy('created_at','desc');
+            $totalRecordswithFilte = Role::where('deleted_at',null)->orderBy('created_at','desc');
             $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
             // Fetch records
-            $items = User::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
+            $items = Role::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
             $records = $items->skip($start)->take($rowperpage)->get();
     
             $data_arr = array();
@@ -180,15 +171,13 @@ class UsersController extends Controller
                 $i++;
                 $id = $record->id;
                 $name = $record->name;
-                $email =  $record->email;
-                $role  =  $record->role;
-                $edit = '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                
+                $edit = '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
 
                 $data_arr[] = array(
                     "id" => $i,
                     "name" => $name,
-                    "email" => $email,
-                    "role" => $role,
+
                     "edit" => $edit
                 );
             }

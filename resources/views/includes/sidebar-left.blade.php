@@ -67,7 +67,7 @@
                         <a class="slide-item" href="{{url('users')}}">Users</a>
                     </li>
                     <li>
-                        <a class="slide-item" href="darggablecards.html">Roles</a>
+                        <a class="slide-item" href="{{url('roles')}}">Roles</a>
                     </li>
                     <li>
                         <a class="slide-item" href="rangeslider.html">Permissions</a>
