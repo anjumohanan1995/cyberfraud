@@ -12,10 +12,10 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Role Management</a>
+                            <a href="#">Modus Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Roles
+                            Modus
                         </li>
                     </ol>
                 </nav>
@@ -52,11 +52,11 @@
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    All Roles
+                                    All Modus
                                 </h4>
                                 <div class="col-md-1 col-6 text-center">
                                     <div class="task-box primary  mb-0">
-                                        <a class="text-white" href="{{ route('roles.create') }}">
+                                        <a class="text-white" href="{{ route('modus.create') }}">
                                             <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
@@ -102,7 +102,7 @@
 	        ],
              "ajax": {
 
-			       	"url": "{{ route('get.roles') }}",
+			       	"url": "{{ route('get.modus') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
 				           
@@ -124,7 +124,7 @@
         var Id = $(this).data('id');
         if (confirm('Are you sure you want to delete this item?')) {
             $.ajax({
-                url: '/roles/' + Id,
+                url: '/modus/' + Id,
                 type: 'POST', // Use POST method
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

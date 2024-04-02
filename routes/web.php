@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ModusController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -54,9 +55,8 @@ Route::resource('roles', RoleController::class);
 Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
 
-
-
-
+Route::resource('modus', ModusController::class);
+Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
 
 //permmission route starts here.
 Route::resource('permissions', PermissionController::class);

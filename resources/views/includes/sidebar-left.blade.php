@@ -76,9 +76,9 @@
                 </ul>
             </li>
             <li class="slide">
-                <a class="side-menu__item" href="widgets.html">
+                <a class="side-menu__item" href="{{url('modus')}}">
                     <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Widgets</span>
+                    <span class="side-menu__label">Modus</span>
                 </a>
             </li>
             

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
+use App\Models\Modus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 
 
-class RoleController extends Controller
+class ModusController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,7 +17,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        return view("dashboard.user-management.role.index");
+        return view("dashboard.modus.index");
     }
 
     /**
@@ -28,7 +28,7 @@ class RoleController extends Controller
     public function create()
     {
         
-        return view("dashboard.user-management.role.create");
+        return view("dashboard.modus.create");
     }
 
     /**
@@ -53,12 +53,12 @@ class RoleController extends Controller
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
-        Role::create([
+        Modus::create([
             'name' => @$request->name? $request->name:'',
        
         ]);
 
-        return redirect()->route('roles.index')->with('success','Role Added successfully.');
+        return redirect()->route('modus.index')->with('success','Modus Added successfully.');
 
    
     }
@@ -82,10 +82,10 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        $data = Role::findOrFail($id);
+        $data = Modus::findOrFail($id);
 
      
-        return view('dashboard.user-management.role.edit', ['data' => $data,]);
+        return view('dashboard.modus.edit', ['data' => $data,]);
     }
 
     /**
@@ -104,7 +104,7 @@ class RoleController extends Controller
         ]);
 
         // Find the role by its ID.
-        $data = Role::findOrFail($id);
+        $data = Modus::findOrFail($id);
 
         // Update the role with the data from the request
         $data->name = $request->name;
@@ -114,7 +114,7 @@ class RoleController extends Controller
         $data->save();
 
         // Redirect back with success message
-        return redirect()->route('roles.index')->with('success', 'Role updated successfully!');
+        return redirect()->route('modus.index')->with('success', 'Modus updated successfully!');
     }
 
     /**
@@ -125,16 +125,16 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        $data = Role::findOrFail($id);
+        $data = Modus::findOrFail($id);
 
         $data->delete();
 
-        return response()->json(['success' => 'Role successfully deleted!']);
+        return response()->json(['success' => 'Modus successfully deleted!']);
     }
 
 
 
-    public function getRoles(Request $request)
+    public function getModus(Request $request)
     {
         
         ## Read value
@@ -153,15 +153,15 @@ class RoleController extends Controller
         $searchValue = $search_arr['value']; // Search value
 
             // Total records
-            $totalRecord = Role::where('deleted_at',null)->orderBy('created_at','desc');
+            $totalRecord = Modus::where('deleted_at',null)->orderBy('created_at','desc');
             $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
 
-            $totalRecordswithFilte = Role::where('deleted_at',null)->orderBy('created_at','desc');
+            $totalRecordswithFilte = Modus::where('deleted_at',null)->orderBy('created_at','desc');
             $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
             // Fetch records
-            $items = Role::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
+            $items = Modus::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
             $records = $items->skip($start)->take($rowperpage)->get();
     
             $data_arr = array();
@@ -172,7 +172,7 @@ class RoleController extends Controller
                 $id = $record->id;
                 $name = $record->name;
                 
-                $edit = '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                $edit = '<a  href="' . url('modus/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
 
                 $data_arr[] = array(
                     "id" => $i,
