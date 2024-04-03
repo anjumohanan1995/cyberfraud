@@ -55,6 +55,7 @@ Route::resource('roles', RoleController::class);
 Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
 
+
 Route::resource('modus', ModusController::class);
 Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
 
