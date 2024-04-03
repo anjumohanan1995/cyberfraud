@@ -81,7 +81,7 @@
                     <span class="side-menu__label">Modus</span>
                 </a>
             </li>
-            
+
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
                     <i class="side-menu__icon fe fe-mail menu-icons">
@@ -106,6 +106,13 @@
                         <a class="slide-item" href="chat.html">Chat</a>
                     </li>
                 </ul>
+            </li>
+
+            <li class="slide">
+                <a class="side-menu__item" href="{{url('police_station')}}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Police Station</span>
+                </a>
             </li>
 
         </ul>
