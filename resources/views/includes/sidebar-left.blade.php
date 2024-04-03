@@ -109,9 +109,9 @@
             </li>
 
             <li class="slide">
-                <a class="side-menu__item" href="{{url('police_station')}}">
+                <a class="side-menu__item" href="{{url('police_stations')}}">
                     <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Police Station</span>
+                    <span class="side-menu__label">Police Stations</span>
                 </a>
             </li>
 

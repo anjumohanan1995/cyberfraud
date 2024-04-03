@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-// use App\Models\;
+use App\Models\District;
+use App\Models\PoliceStations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +20,7 @@ class PoliceStationsController extends Controller
      */
     public function index()
     {
-        return view("dashboard.modus.index");
+        return view("dashboard.police_stations.index");
     }
 
     /**
@@ -29,8 +30,12 @@ class PoliceStationsController extends Controller
      */
     public function create()
     {
+        // Fetch all districts from the District model
+        $districts = District::get();
+        dd($districts);
 
-        return view("dashboard.modus.create");
+        // Pass the districts data to the view
+        return view("dashboard.police_stations.create", compact('districts'));
     }
 
     /**
@@ -45,9 +50,11 @@ class PoliceStationsController extends Controller
 
         $validate = Validator::make($request->all(),
         [
-          'name' => 'required',
-
-
+            'station_name' => 'required',
+            'district_id' => 'required',
+            'place' => 'required',
+            'address' => 'required',
+            'phone' => 'required',
 
         ]);
         if ($validate->fails()) {
@@ -55,144 +62,148 @@ class PoliceStationsController extends Controller
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
-        Modus::create([
-            'name' => @$request->name? $request->name:'',
+        PoliceStations::create([
+            'name' => $request->station_name,
+            'district_id' => $request->district_id,
+            'place' => $request->place,
+            'address' => $request->address,
+            'phone' => $request->phone,
 
         ]);
 
-        return redirect()->route('modus.index')->with('success','Modus Added successfully.');
+        return redirect()->route('police_stations.index')->with('success','Police Station Added successfully.');
 
 
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+    // /**
+    //  * Display the specified resource.
+    //  *
+    //  * @param  int  $id
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function show($id)
+    // {
+    //     //
+    // }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $data = Modus::findOrFail($id);
-
-
-        return view('dashboard.modus.edit', ['data' => $data,]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-         // Validate the incoming request data
-         $request->validate([
-            'name' => 'required|string|max:255',
-            // Add more validation rules as needed
-        ]);
-
-        // Find the role by its ID.
-        $data = Modus::findOrFail($id);
-
-        // Update the role with the data from the request
-        $data->name = $request->name;
-
-        // Update other attributes as needed
-        // Save the updated role
-        $data->save();
-
-        // Redirect back with success message
-        return redirect()->route('modus.index')->with('success', 'Modus updated successfully!');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $data = Modus::findOrFail($id);
-
-        $data->delete();
-
-        return response()->json(['success' => 'Modus successfully deleted!']);
-    }
+    // /**
+    //  * Show the form for editing the specified resource.
+    //  *
+    //  * @param  int  $id
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function edit($id)
+    // {
+    //     $data = Modus::findOrFail($id);
 
 
+    //     return view('dashboard.modus.edit', ['data' => $data,]);
+    // }
 
-    public function getModus(Request $request)
-    {
+    // /**
+    //  * Update the specified resource in storage.
+    //  *
+    //  * @param  \Illuminate\Http\Request  $request
+    //  * @param  int  $id
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function update(Request $request, $id)
+    // {
+    //      // Validate the incoming request data
+    //      $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         // Add more validation rules as needed
+    //     ]);
 
-        ## Read value
-        $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
+    //     // Find the role by its ID.
+    //     $data = Modus::findOrFail($id);
 
-        $columnIndex_arr = $request->get('order');
-        $columnName_arr = $request->get('columns');
-        $order_arr = $request->get('order');
-        $search_arr = $request->get('search');
+    //     // Update the role with the data from the request
+    //     $data->name = $request->name;
 
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+    //     // Update other attributes as needed
+    //     // Save the updated role
+    //     $data->save();
 
-            // Total records
-            $totalRecord = Modus::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+    //     // Redirect back with success message
+    //     return redirect()->route('modus.index')->with('success', 'Modus updated successfully!');
+    // }
+
+    // /**
+    //  * Remove the specified resource from storage.
+    //  *
+    //  * @param  int  $id
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function destroy($id)
+    // {
+    //     $data = Modus::findOrFail($id);
+
+    //     $data->delete();
+
+    //     return response()->json(['success' => 'Modus successfully deleted!']);
+    // }
 
 
-            $totalRecordswithFilte = Modus::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
-            // Fetch records
-            $items = Modus::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
+    // public function getModus(Request $request)
+    // {
 
-            $data_arr = array();
-            $i=$start;
+    //     ## Read value
+    //     $draw = $request->get('draw');
+    //     $start = $request->get("start");
+    //     $rowperpage = $request->get("length"); // Rows display per page
 
-            foreach($records as $record){
-                $i++;
-                $id = $record->id;
-                $name = $record->name;
+    //     $columnIndex_arr = $request->get('order');
+    //     $columnName_arr = $request->get('columns');
+    //     $order_arr = $request->get('order');
+    //     $search_arr = $request->get('search');
 
-                $edit = '<a  href="' . url('modus/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+    //     $columnIndex = $columnIndex_arr[0]['column']; // Column index
+    //     $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+    //     $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+    //     $searchValue = $search_arr['value']; // Search value
 
-                $data_arr[] = array(
-                    "id" => $i,
-                    "name" => $name,
+    //         // Total records
+    //         $totalRecord = Modus::where('deleted_at',null)->orderBy('created_at','desc');
+    //         $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
-                    "edit" => $edit
-                );
-            }
 
-            $response = array(
-            "draw" => intval($draw),
-            "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
-            "aaData" => $data_arr
-            );
+    //         $totalRecordswithFilte = Modus::where('deleted_at',null)->orderBy('created_at','desc');
+    //         $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
-            return response()->json($response);
-    }
+    //         // Fetch records
+    //         $items = Modus::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
+    //         $records = $items->skip($start)->take($rowperpage)->get();
+
+    //         $data_arr = array();
+    //         $i=$start;
+
+    //         foreach($records as $record){
+    //             $i++;
+    //             $id = $record->id;
+    //             $name = $record->name;
+
+    //             $edit = '<a  href="' . url('modus/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+
+    //             $data_arr[] = array(
+    //                 "id" => $i,
+    //                 "name" => $name,
+
+    //                 "edit" => $edit
+    //             );
+    //         }
+
+    //         $response = array(
+    //         "draw" => intval($draw),
+    //         "iTotalRecords" => $totalRecords,
+    //         "iTotalDisplayRecords" => $totalRecordswithFilter,
+    //         "aaData" => $data_arr
+    //         );
+
+    //         return response()->json($response);
+    // }
 
 
 }
