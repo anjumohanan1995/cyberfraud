@@ -47,6 +47,7 @@ Route::post('/login', [AuthController::class, 'login'])->name("login");
 Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
 
 
+
 //users route starts here.
 Route::resource('users', UsersController::class);
 Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
