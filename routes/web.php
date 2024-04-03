@@ -6,6 +6,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ModusController;
+use App\Http\Controllers\PoliceStationsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -30,12 +31,12 @@ use App\Models\User;
 
 Route::get('/', function () {
 
-    User::create([
-        'name' => 'Super Admin',
-        'email' => 'superadmin@email.com',
-        'password' => Hash::make('12345678'), // You should hash the password for security
-        'role' => 'super admin', // Assuming 1 is the role ID for super admin
-    ]);
+    // User::create([
+    //     'name' => 'Super Admin',
+    //     'email' => 'superadmin@email.com',
+    //     'password' => Hash::make('12345678'), // You should hash the password for security
+    //     'role' => 'super admin', // Assuming 1 is the role ID for super admin
+    // ]);
     return view('login.login');
 });
 
@@ -63,3 +64,7 @@ Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.mo
 //permmission route starts here.
 Route::resource('permissions', PermissionController::class);
 Route::get('users-management/permissions/get', [PermissionController::class, 'getPermissions'])->name("get.permissions");
+
+
+Route::resource('police_stations', PoliceStationsController::class);
+Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
