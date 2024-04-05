@@ -56,6 +56,10 @@ Route::get('users-management/users-list/get', [UsersController::class, 'getUsers
 Route::resource('roles', RoleController::class);
 Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
+Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission');
+Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store');
+
+
 
 
 Route::resource('modus', ModusController::class);
@@ -64,6 +68,10 @@ Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.mo
 //permmission route starts here.
 Route::resource('permissions', PermissionController::class);
 Route::get('users-management/permissions/get', [PermissionController::class, 'getPermissions'])->name("get.permissions");
+
+Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
+Route::post('users-management/subpermissions', [PermissionController::class, 'storeSubPermissions'])->name("subpermissions.store");
+Route::post('users-management/subpermissions/{id}', [PermissionController::class, 'deleteSubPermissions'])->name("subpermissions.destroy");
 
 
 Route::resource('police_stations', PoliceStationsController::class);

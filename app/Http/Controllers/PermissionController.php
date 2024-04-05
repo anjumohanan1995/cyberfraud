@@ -124,15 +124,146 @@ class PermissionController extends Controller
 
         return back()->with('success', 'Permission successfully deleted!');
     }
-    public function getPermissions()
+    public function getPermissions(Request $request)
     {
-       // Fetch permissions from the database with pagination
-       $permissions = Permission::paginate(2); // Assuming you want 10 permissions per page
+    //    // Fetch permissions from the database with pagination
+    //    $permissions = Permission::paginate(2); // Assuming you want 10 permissions per page
 
-       // Return permissions data along with pagination links in JSON format
-       return response()->json([
-           'data' => $permissions->items(), // Permissions data for the current page
-           'links' => $permissions->links()->toHtml(), // Pagination links HTML
-       ]);
+    //    // Return permissions data along with pagination links in JSON format
+    //    return response()->json([
+    //        'data' => $permissions->items(), // Permissions data for the current page
+    //        'links' => $permissions->links()->toHtml(), // Pagination links HTML
+    //    ]);
+
+
+       # Read value
+       $draw = $request->get('draw');
+       $start = $request->get("start");
+       $rowperpage = $request->get("length"); // Rows display per page
+
+       $columnIndex_arr = $request->get('order');
+       $columnName_arr = $request->get('columns');
+       $order_arr = $request->get('order');
+       $search_arr = $request->get('search');
+
+       $columnIndex = $columnIndex_arr[0]['column']; // Column index
+       $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+       $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+       $searchValue = $search_arr['value']; // Search value
+
+           // Total records
+           $totalRecord = Permission::where('deleted_at',null)->orderBy('created_at','desc');
+           $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+
+
+           $totalRecordswithFilte = Permission::where('deleted_at',null)->orderBy('created_at','desc');
+           $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+
+           // Fetch records
+           $items = Permission::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
+           $records = $items->skip($start)->take($rowperpage)->get();
+   
+           $data_arr = array();
+           $i=$start;
+
+           foreach($records as $record){
+               $i++;
+               $id = $record->id;
+               $name = $record->name;
+               
+               $edit = '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
+
+               $data_arr[] = array(
+                   "id" => $i,
+                   "name" => $name,
+
+                   "edit" => $edit
+               );
+           }
+           
+           $response = array(
+           "draw" => intval($draw),
+           "iTotalRecords" => $totalRecords,
+           "iTotalDisplayRecords" => $totalRecordswithFilter,
+           "aaData" => $data_arr
+           );
+
+           return response()->json($response);
+
+
+
+
     }
+
+    public function addSubpermission(Request $request,$id)
+    {
+
+        $subpermission= Permission::where('_id',$id)->first();   
+        //dd($subpermission);
+        $jsonString= $subpermission->sub_permission;
+       // dd($jsonString);
+      $subpermissions =json_decode($jsonString, true); 
+        //$subpermissions=$subpermission->sub_permission;
+        return view('dashboard.user-management.permissions.subpermission',compact('subpermissions','subpermission'));
+    }
+    public function storeSubPermissions(Request $request)
+    {
+
+        $id            =  $request->permission_id;
+        $subpermission =  Permission::where('_id',$id)->first(); 
+
+        $existingSubpermissionsJson = $subpermission->sub_permission;
+
+        // Decode the JSON string to an array
+        $existingSubpermissions = json_decode($existingSubpermissionsJson, true);
+
+        // Add the new subpermission to the array (e.g., from the request)
+        $newSubpermission = $request->input('sub_permission');
+        $existingSubpermissions[] = $newSubpermission;
+
+        // Encode the updated array back to a JSON string
+        $updatedSubpermissionsJson = json_encode($existingSubpermissions);
+
+        // Update the 'sub_permission' field in the database with the new JSON string
+        $subpermission->update(['sub_permission' => $updatedSubpermissionsJson]);
+
+        return back()->with('success', 'Sub Permission successfully Added!');
+
+
+
+
+    }
+
+    public function deleteSubPermissions(Request $request,$id)
+    {
+        $pid            =  $request->permission_id;
+        $subpermission =  Permission::where('_id',$pid)->first(); 
+
+        $permission = $id;
+
+
+        $existingSubpermissionsJson = $subpermission->sub_permission;
+
+        // Decode the JSON string to an array
+        $existingSubpermissions = json_decode($existingSubpermissionsJson, true);
+    
+        // Remove the subpermission from the array
+        $subpermissionToRemove = $permission;
+        $updatedSubpermissions = array_diff($existingSubpermissions, [$subpermissionToRemove]);
+    
+        // Encode the updated array back to a JSON string
+        $updatedSubpermissionsJson = json_encode($updatedSubpermissions);
+    
+        // Update the 'sub_permission' field in the database with the new JSON string
+        $subpermission->update(['sub_permission' => $updatedSubpermissionsJson]);
+        return back()->with('success', 'Sub Permission successfully deleted!');
+
+    }
+
+    
+
+    
+
+
+    
 }
