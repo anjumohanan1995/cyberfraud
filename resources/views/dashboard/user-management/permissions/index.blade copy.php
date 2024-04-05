@@ -85,72 +85,79 @@
         <!-- /row -->
     </div>
 
-    {{-- <script>
-        jQuery(document).ready(function() {
-
-            $('#users-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '{{ route('get.permissions') }}', // Provide the route for fetching data
-                columns: [{
-                        data: null,
-                        render: function(data, type, row, meta) {
-                            return meta.row + 1;
-                        },
-                        name: 'si_no'
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: null,
-                        render: function(data, type, row) {
-                            return '<a href="/permissions/' + data.id +
-                                '/edit" class = "btn btn-primary edit-btn"> Edit </a>' +
-                                '<button class="btn btn-danger delete-btn"zzzz data - id = "' + data
-                                .id + '">Delete</button>';
-                        }
-                    }
-                ]
-            });
-        });
-    </script> --}}
-
     <script>
-       $(document).ready(function() {
-    $('#users-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '{{ route('get.permissions') }}',
-            data: function(d) {
-                return d; // Sending all DataTable parameters
-            }
-        },
-        columns: [{
-                data: null,
-                render: function(data, type, row) {
-                    return type === 'display' && data.rowIndex + 1; // Add 1 to row index to start numbering from 1
-                }
-            },
-            {
-                data: 'name',
-                name: 'name'
-            },
-            {
-                data: null,
-                render: function(data, type, row) {
-                    return '<a href="/permissions/' + data.id + '/edit" class="btn btn-primary edit-btn">Edit</a>' +
-                        '<button class="btn btn-danger delete-btn" data-id="' + data.id + '">Delete</button>';
-                }
-            }
-        ]
-    }).on('error.dt', function(e, settings, techNote, message) {
-        console.error('DataTables error:', message);
-    });
-});
+        function fetchPermissions(page) {
+            $.ajax({
+                url: '{{ route('get.permissions') }}',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    page: page
+                },
+                success: function(response) {
+                    // Populate table body with received data
+                    var usersTableBody = $('#users-table tbody');
+                    usersTableBody.empty(); // Clear existing table rows
+                    $.each(response.data, function(index, permission) {
+                        var row = $('<tr>').append(
+                            $('<td>').text(index + 1),
+                            $('<td>').text(permission.name),
+                            $('<td>').append(
+                                $('<a>').attr('href', '/permissions/' + permission.id + '/edit')
+                                .addClass('btn btn-primary edit-btn').text('Edit'),
+                                $('<button>').addClass('btn btn-danger delete-btn').attr('data-id',
+                                    permission.id).text('Delete')
+                            )
+                        );
+                        usersTableBody.append(row);
+                    });
 
+                    // Populate pagination links
+                    $('#pagination-links').html(response.links);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+
+        // Initial fetch of permissions data for the first page
+        fetchPermissions(1);
+
+
+        // Event listener for pagination links
+        $(document).on('click', '#pagination-links a', function(event) {
+            event.preventDefault();
+            var page = $(this).attr('href').split('page=')[1]; // Extract page number from pagination link
+            fetchPermissions(page); // Fetch permissions data for the clicked page
+        });
+
+
+
+        $(document).on('click', '.delete-btn', function() {
+            var permissionId = $(this).data('id');
+            if (confirm('Are you sure you want to delete this item?')) {
+                $.ajax({
+                    url: '/permissions/' + permissionId,
+                    type: 'POST', // Use POST method
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        _method: 'DELETE' // Override method to DELETE
+                    },
+                    success: function(response) {
+                        // Handle success response
+                        // Reload the page
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response
+                        console.error(xhr.responseText)
+                    }
+                });
+            }
+        });
     </script>
-
 @endsection

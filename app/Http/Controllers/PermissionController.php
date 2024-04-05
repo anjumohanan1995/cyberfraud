@@ -124,15 +124,37 @@ class PermissionController extends Controller
 
         return back()->with('success', 'Permission successfully deleted!');
     }
+
+
     public function getPermissions()
     {
-       // Fetch permissions from the database with pagination
-       $permissions = Permission::paginate(2); // Assuming you want 10 permissions per page
+        // Fetch permissions from the database with pagination
+        $permissions = Permission::paginate(1); // Assuming you want 10 permissions per page
 
-       // Return permissions data along with pagination links in JSON format
-       return response()->json([
-           'data' => $permissions->items(), // Permissions data for the current page
-           'links' => $permissions->links()->toHtml(), // Pagination links HTML
-       ]);
+        // Return permissions data along with pagination links in JSON format
+        return response()->json([
+            'data' => $permissions->items(), // Permissions data for the current page
+        ]);
     }
+
+
+
+    // public function getPermissions(Request $request)
+    // {
+
+    //     if ($request->ajax()) {
+    //         $permissions = Permission::query();
+
+    //         return datatables()->of($permissions)
+    //             ->addColumn('action', function ($permission) {
+    //                 return '<a href="/permissions/' . $permission->id . '/edit" class="btn btn-primary edit-btn">Edit</a>' .
+    //                        '<button class="btn btn-danger delete-btn" data-id="' . $permission->id . '">Delete</button>';
+    //             })
+    //             ->rawColumns(['action'])
+    //             ->toJson();
+    //     }
+
+    //     return response()->json([]);
+
+    // }
 }
