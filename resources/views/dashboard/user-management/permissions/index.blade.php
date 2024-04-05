@@ -61,7 +61,7 @@
 
 
                             <div class="table-responsive mb-0">
-                                <table id="users-table"
+                                <table id="example"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                     <thead>
                                         <tr>
@@ -86,52 +86,84 @@
     </div>
 
     <script>
-        function fetchPermissions(page) {
-            $.ajax({
-                url: '{{ route('get.permissions') }}',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    page: page
-                },
-                success: function(response) {
+
+      $(document).ready(function(){
+     	var table = $('#example').DataTable({
+            processing: true,
+            serverSide: true,
+	        buttons: [
+	            'copyHtml5',
+	            'excelHtml5',
+	            'csvHtml5',
+	            'pdfHtml5'
+	        ],
+             "ajax": {
+
+			       	"url": "{{ route('get.permissions') }}",
+			       	"data": function ( d ) {
+			        	return $.extend( {}, d, {
+				           
+			          	});
+       				}
+       			},
+
+            columns: [
+                { data: 'id' },
+                { data: 'name' },
+                { data: 'edit' }
+			],
+            "order": [0, 'desc'],
+            'ordering': true
+        });
+      	table.draw();
+    });
+       // function fetchPermissions(page) {
+            //$.ajax({
+               // url: '{{ route('get.permissions') }}',
+               // type: 'GET',
+               // dataType: 'json',
+               // data: {
+               //     page: page
+              //  },
+               // success: function(response) {
                     // Populate table body with received data
-                    var usersTableBody = $('#users-table tbody');
-                    usersTableBody.empty(); // Clear existing table rows
-                    $.each(response.data, function(index, permission) {
-                        var row = $('<tr>').append(
-                            $('<td>').text(index + 1),
-                            $('<td>').text(permission.name),
-                            $('<td>').append(
-                                $('<a>').attr('href', '/permissions/' + permission.id + '/edit')
-                                .addClass('btn btn-primary edit-btn').text('Edit'),
-                                $('<button>').addClass('btn btn-danger delete-btn').attr('data-id',
-                                    permission.id).text('Delete')
-                            )
-                        );
-                        usersTableBody.append(row);
-                    });
+                  //  var usersTableBody = $('#users-table tbody');
+                   // usersTableBody.empty(); // Clear existing table rows
+                   // $.each(response.data, function(index, permission) {
+                        //var row = $('<tr>').append(
+//$('<td>').text(index + 1),
+                          //  $('<td>').text(permission.name),
+                          //  $('<td>').append(
+                            //    $('<a>').attr('href', '/permissions/' + permission.id + '/edit')
+                             //   .addClass('btn btn-primary edit-btn').text('Edit'),
+                               // $('<button>').addClass('btn btn-danger delete-btn').attr('data-id',
+                        //            permission.id).text('Delete')
+                       //     )
+                     //   );
+                     ///   usersTableBody.append(row);
+                   // });
 
                     // Populate pagination links
-                    $('#pagination-links').html(response.links);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                }
-            });
-        }
+                  //  $('#pagination-links').html(response.links);
+               // },
+                //error: function(xhr, status, error) {
+                //    console.error('Error:', error);
+               // }
+            //});
+        //}
 
 
         // Initial fetch of permissions data for the first page
-        fetchPermissions(1);
+        //fetchPermissions(1);
 
 
         // Event listener for pagination links
-        $(document).on('click', '#pagination-links a', function(event) {
-            event.preventDefault();
-            var page = $(this).attr('href').split('page=')[1]; // Extract page number from pagination link
-            fetchPermissions(page); // Fetch permissions data for the clicked page
-        });
+        //$(document).on('click', '#pagination-links a', function(event) {
+            //event.preventDefault();
+            //var page = $(this).attr('href').split('page=')[1]; // Extract page number from pagination link
+           // fetchPermissions(page); // Fetch permissions data for the clicked page
+       // });
+       
 
 
 
