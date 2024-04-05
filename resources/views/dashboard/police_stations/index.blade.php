@@ -70,8 +70,11 @@
                                     <thead>
                                         <tr>
                                             <th>SL No</th>
-                                            <th>NAME</th>
-
+                                            <th>STATION NAME</th>
+                                            <th>District</th>
+                                            <th>Place</th>
+                                            <th>Address</th>
+                                            <th>Phone</th>
                                             <th>ACTION</th>
                                         </tr>
                                     </thead>
@@ -102,7 +105,7 @@
 	        ],
              "ajax": {
 
-			       	"url": "{{ route('get.modus') }}",
+			       	"url": "{{ route('get.police_stations') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
 
@@ -113,6 +116,10 @@
             columns: [
                 { data: 'id' },
                 { data: 'name' },
+                { data: 'district' },
+                { data: 'place' },
+                { data: 'address' },
+                { data: 'phone' },
                 { data: 'edit' }
 			],
             "order": [0, 'desc'],
@@ -122,9 +129,10 @@
     });
     $(document).on('click', '.delete-btn', function() {
         var Id = $(this).data('id');
+        // alert(Id);
         if (confirm('Are you sure you want to delete this item?')) {
             $.ajax({
-                url: '/modus/' + Id,
+                url: '/police_stations/' + Id,
                 type: 'POST', // Use POST method
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

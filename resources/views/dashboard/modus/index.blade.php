@@ -44,7 +44,7 @@
                                     </div>
                                 @endif
                                 <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
-                                       
+
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -71,7 +71,7 @@
                                         <tr>
                                             <th>SL No</th>
                                             <th>NAME</th>
-                                         
+
                                             <th>ACTION</th>
                                         </tr>
                                     </thead>
@@ -105,7 +105,7 @@
 			       	"url": "{{ route('get.modus') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
-				           
+
 			          	});
        				}
        			},
@@ -136,9 +136,9 @@
                     // Handle success response
                     // Reload the page
                     $('.alert-success-one').html(response.success +'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +'<span aria-hidden="true">&times;</span>' +'</button>').show();
-                   
+
       	            //table.draw();
-                   
+
                     location.reload();
                 },
                 error: function(xhr, status, error) {
