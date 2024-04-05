@@ -12,10 +12,10 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">User Management</a>
+                            <a href="#">Modus Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Users
+                            Modus
                         </li>
                     </ol>
                 </nav>
@@ -43,14 +43,20 @@
                                         </button>
                                     </div>
                                 @endif
+                                <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
+
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    All Users
+                                    All Modus
                                 </h4>
                                 <div class="col-md-1 col-6 text-center">
                                     <div class="task-box primary  mb-0">
-                                        <a class="text-white" href="{{ route('users.create') }}">
+                                        <a class="text-white" href="{{ route('modus.create') }}">
                                             <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
@@ -65,8 +71,7 @@
                                         <tr>
                                             <th>SL No</th>
                                             <th>NAME</th>
-                                            <th>EMAIL</th>
-                                            <th>ROLE</th>
+
                                             <th>ACTION</th>
                                         </tr>
                                     </thead>
@@ -97,10 +102,10 @@
 	        ],
              "ajax": {
 
-			       	"url": "{{ route('get.users-list') }}",
+			       	"url": "{{ route('get.modus') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
-				           
+
 			          	});
        				}
        			},
@@ -108,8 +113,6 @@
             columns: [
                 { data: 'id' },
                 { data: 'name' },
-                { data: 'email' },
-                { data: 'role' },
                 { data: 'edit' }
 			],
             "order": [0, 'desc'],
@@ -121,7 +124,7 @@
         var Id = $(this).data('id');
         if (confirm('Are you sure you want to delete this item?')) {
             $.ajax({
-                url: '/users/' + Id,
+                url: '/modus/' + Id,
                 type: 'POST', // Use POST method
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -132,6 +135,10 @@
                 success: function(response) {
                     // Handle success response
                     // Reload the page
+                    $('.alert-success-one').html(response.success +'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +'<span aria-hidden="true">&times;</span>' +'</button>').show();
+
+      	            //table.draw();
+
                     location.reload();
                 },
                 error: function(xhr, status, error) {

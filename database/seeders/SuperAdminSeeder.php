@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class SuperAdminSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class SuperAdminSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
+        User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@email.com',
             'password' => Hash::make('12345678'), // You should hash the password for security
