@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
@@ -68,3 +69,6 @@ Route::get('users-management/permissions/get', [PermissionController::class, 'ge
 
 Route::resource('police_stations', PoliceStationsController::class);
 Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
+
+Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
+Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
