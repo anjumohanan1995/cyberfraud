@@ -70,7 +70,7 @@
                         <a class="slide-item" href="{{ url('roles') }}">Roles</a>
                     </li>
                     <li>
-                        <a class="slide-item" href="rangeslider.html">Permissions</a>
+                        <a class="slide-item" href="{{url('permissions')}}">Permissions</a>
                     </li>
 
                 </ul>

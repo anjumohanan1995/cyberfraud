@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankCasedataController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
@@ -57,6 +58,12 @@ Route::get('users-management/users-list/get', [UsersController::class, 'getUsers
 Route::resource('roles', RoleController::class);
 Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
+Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission');
+Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store');
+
+
+
+
 Route::resource('modus', ModusController::class);
 Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
 
@@ -72,3 +79,13 @@ Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpol
 Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index");
 Route::post('bank-case-data/store', [BankCasedataController::class, 'store'])->name("bank-case-data.store");
 
+Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
+Route::post('users-management/subpermissions', [PermissionController::class, 'storeSubPermissions'])->name("subpermissions.store");
+Route::post('users-management/subpermissions/{id}', [PermissionController::class, 'deleteSubPermissions'])->name("subpermissions.destroy");
+
+
+Route::resource('police_stations', PoliceStationsController::class);
+Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
+
+Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
+Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\Permission;
+use App\Models\RolePermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -172,7 +174,7 @@ class RoleController extends Controller
                 $id = $record->id;
                 $name = $record->name;
                 
-                $edit = '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                $edit = '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button><a href="' . url('roles/'.$name.'/editPermission') . '"><button class="btn-btn-primary">Permission</button></a>';
 
                 $data_arr[] = array(
                     "id" => $i,
@@ -191,6 +193,64 @@ class RoleController extends Controller
 
             return response()->json($response);
     }
+
+    public function editPermission( $id)
+    {
+        $role_name = $id;
+        $totalRecord = Permission::where('deleted_at',null)->get();
+        $role = \Auth::user()->role;
+        $checked = RolePermission::where('role',$role_name)->first();
+        return view('dashboard.user-management.role.editpermission',compact('totalRecord','role_name','checked'));
+
+    }
+    public function addPermission(Request $request, $id)
+    {
+
+        $validate = Validator::make($request->all(),
+        [
+         'permission' => 'required',
+
+         ]);
+        if ($validate->fails()) {
+            /*return response()->json([
+                'error' => $validate->errors()->all()
+            ]);*/
+            return Redirect::back()->withErrors($validate);
+
+        }
+        $sub="";
+        if($request->sub_permission) {
+            $content = $request->sub_permission;
+            $content = array_values($content);
+            $sub = ($content)? json_encode($content): null;
+        }
+        $data =$request->all();
+        $book=RolePermission::where('role',$id)->first();
+        if($book == null){
+            RolePermission::create([
+                'role' => $id,
+                'permission' => $data['permission'],
+                'sub_permissions' =>$sub
+            ]);
+             return redirect()->route('roles.index')
+
+                    ->with('success','Permission added successfully');
+          
+
+        }
+        else{
+            $book->update([
+                'role' => $id,
+                'permission' => $data['permission'],
+                'sub_permissions' =>$sub
+            ]);
+       
+            return redirect()->route('roles.index')
+
+            ->with('success','Permission added successfully');
+       }
+    }
+
 
     
 }
