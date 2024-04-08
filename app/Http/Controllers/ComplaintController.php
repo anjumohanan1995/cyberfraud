@@ -19,15 +19,13 @@ class ComplaintController extends Controller
             'complaint_file' => 'required'
         ]);
 
-       // dd($request->file);
-        try{
-            Excel::import(new ComplaintImport, $request->complaint_file);
-        }
-        catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            Log::alert($e->failures());
-        }
-       return redirect()->route('patients.index')
-                        ->with('success','Patients Added successfully');
+
+        $file = $request->file('complaint_file');
+
+        // Process the Excel file
+        Excel::import(new ComplaintImport, $file);
+
+        return redirect()->back()->with('success', 'Excel file imported successfully!');
     }
 
 }
