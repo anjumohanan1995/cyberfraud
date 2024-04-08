@@ -11,8 +11,9 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.7",
-        "maatwebsite/excel": "^3.1",
-        "mongodb/mongodb": "^1.18"
+        "mongodb/mongodb": "^1.16",
+        "rap2hpoutre/fast-excel": "^5.4",
+        "maatwebsite/excel": "^3.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
