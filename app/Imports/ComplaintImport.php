@@ -22,11 +22,11 @@ class ComplaintImport implements ToCollection
             ];
         });
         foreach ($collection as $row) {
-           // dd($row['Acknowledgement No']);
-            // Use the correct key to access the data
-            $patient = new Complaint();
-            $patient->acknowledgement_no = @$row['Acknowledgement No']; // Use 'Acknowledgement No' as key
-            $patient->save();
+
+            Complaint::create([
+                'acknowledgement_no' => @$row['Acknowledgement No'],
+            ]);
+
         }
     }
 }
