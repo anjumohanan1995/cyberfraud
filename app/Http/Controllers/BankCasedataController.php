@@ -37,12 +37,12 @@ class BankCasedataController extends Controller
                 $bank_case_data = (new FastExcel)->import($file, function ($line) {
                     // Import each row into the database
                     return BankCasedata::create([
-                        'account_no' => $line['name'],
-                        'layer' => $line['age']
+                        'sl_no' => $line['S No.'],
+                        'acknowledgement_no' => $line['Acknowledgement No.'],
+                        'district' => $line['District']
                     ]);
                 });
 
-                dd('ho');
 
                 // Provide feedback to the user
                 return response()->json([
@@ -62,5 +62,4 @@ class BankCasedataController extends Controller
             return response()->json(['error' => 'No file uploaded'], 400);
         }
     }
-
 }
