@@ -64,10 +64,10 @@
                 </a>
                 <ul class="slide-menu">
                     <li>
-                        <a class="slide-item" href="{{url('users')}}">Users</a>
+                        <a class="slide-item" href="{{ url('users') }}">Users</a>
                     </li>
                     <li>
-                        <a class="slide-item" href="{{url('roles')}}">Roles</a>
+                        <a class="slide-item" href="{{ url('roles') }}">Roles</a>
                     </li>
                     <li>
                         <a class="slide-item" href="rangeslider.html">Permissions</a>
@@ -76,7 +76,23 @@
                 </ul>
             </li>
             <li class="slide">
-                <a class="side-menu__item" href="{{url('modus')}}">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="side-menu__icon fe fe-box"> </i>
+                    <span class="side-menu__label">Upload CaseData</span>
+                    <i class="angle fe fe-chevron-down"> </i>
+                </a>
+                <ul class="slide-menu">
+                    <li>
+                        <a class="slide-item" href="{{ url('users') }}">Form victim</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Form Bank</a>
+                    </li>
+
+                </ul>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('modus') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Modus</span>
                 </a>
@@ -109,7 +125,7 @@
             </li>
 
             <li class="slide">
-                <a class="side-menu__item" href="{{url('police_stations')}}">
+                <a class="side-menu__item" href="{{ url('police_stations') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Police Stations</span>
                 </a>
