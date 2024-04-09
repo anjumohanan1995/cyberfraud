@@ -83,7 +83,7 @@
                 </a>
                 <ul class="slide-menu">
                     <li>
-                        <a class="slide-item" href="{{ url('users') }}">Form victim</a>
+                        <a class="slide-item" href="{{ url('import-complaints') }}">Form victim</a>
                     </li>
                     <li>
                         <a class="slide-item" href="{{ route('bank-case-data.index') }}">Form Bank</a>

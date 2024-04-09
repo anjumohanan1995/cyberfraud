@@ -35,11 +35,12 @@ class BankCasedataController extends Controller
             try {
                 // Import data from the file
                 $bank_case_data = (new FastExcel)->import($file, function ($line) {
+                  //  dd($line);
                     // Import each row into the database
                     return BankCasedata::create([
                         'sl_no' => $line['S No.'],
                         'acknowledgement_no' => $line['Acknowledgement No.'],
-                        'district' => $line['District']
+                        'district' => $line['District ']
                     ]);
                 });
 
