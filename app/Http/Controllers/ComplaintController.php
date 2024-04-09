@@ -35,8 +35,14 @@ class ComplaintController extends Controller
                 return redirect()->back()->with('success', 'Form submitted successfully!');
 
             } catch (\Exception $e) {
-                // Handle exceptions gracefully
-                return redirect()->back()->withErrors($e->getMessage())->withInput();
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    // Retrieve the validation errors
+                    $errors = $e->validator->getMessageBag()->all();
+
+                    // Redirect back with validation errors and input data
+                    return redirect()->back()->withErrors($errors)->withInput();
+                }
+
                 // return response()->json([
                 //     'error' => 'An error occurred during import',
                 //     'message' => $e->getMessage()

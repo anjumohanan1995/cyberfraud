@@ -69,11 +69,11 @@ class ComplaintImport implements ToCollection, WithStartRow
                 ];
             });
 
-            Validator::make($collection->toArray(), [
+            $validate = Validator::make($collection->toArray(), [
                 '*.acknowledgement_no' => 'required|max:150',
-                '*.district' => 'required',
-
+                '*.district' => 'required', // Corrected validation rule
             ])->validate();
+
 
             foreach($collection as $collect){
 

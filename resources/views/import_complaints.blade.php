@@ -34,7 +34,9 @@
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
+
                                 @if ($errors->any())
+
                                 <div class="alert alert-danger">
                                     <ul>
                                         @foreach ($errors->all() as $error)
