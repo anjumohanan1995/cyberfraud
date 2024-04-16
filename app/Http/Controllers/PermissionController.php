@@ -162,7 +162,7 @@ class PermissionController extends Controller
            // Fetch records
            $items = Permission::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
            $records = $items->skip($start)->take($rowperpage)->get();
-   
+
            $data_arr = array();
            $i=$start;
 
@@ -170,7 +170,7 @@ class PermissionController extends Controller
                $i++;
                $id = $record->id;
                $name = $record->name;
-               
+
                $edit = '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
 
                $data_arr[] = array(
@@ -180,7 +180,7 @@ class PermissionController extends Controller
                    "edit" => $edit
                );
            }
-           
+
            $response = array(
            "draw" => intval($draw),
            "iTotalRecords" => $totalRecords,
@@ -198,11 +198,11 @@ class PermissionController extends Controller
     public function addSubpermission(Request $request,$id)
     {
 
-        $subpermission= Permission::where('_id',$id)->first();   
+        $subpermission= Permission::where('_id',$id)->first();
         //dd($subpermission);
         $jsonString= $subpermission->sub_permission;
        // dd($jsonString);
-      $subpermissions =json_decode($jsonString, true); 
+      $subpermissions =json_decode($jsonString, true);
         //$subpermissions=$subpermission->sub_permission;
         return view('dashboard.user-management.permissions.subpermission',compact('subpermissions','subpermission'));
     }
@@ -210,7 +210,7 @@ class PermissionController extends Controller
     {
 
         $id            =  $request->permission_id;
-        $subpermission =  Permission::where('_id',$id)->first(); 
+        $subpermission =  Permission::where('_id',$id)->first();
 
         $existingSubpermissionsJson = $subpermission->sub_permission;
 
@@ -237,7 +237,7 @@ class PermissionController extends Controller
     public function deleteSubPermissions(Request $request,$id)
     {
         $pid            =  $request->permission_id;
-        $subpermission =  Permission::where('_id',$pid)->first(); 
+        $subpermission =  Permission::where('_id',$pid)->first();
 
         $permission = $id;
 
@@ -246,24 +246,24 @@ class PermissionController extends Controller
 
         // Decode the JSON string to an array
         $existingSubpermissions = json_decode($existingSubpermissionsJson, true);
-    
+
         // Remove the subpermission from the array
         $subpermissionToRemove = $permission;
         $updatedSubpermissions = array_diff($existingSubpermissions, [$subpermissionToRemove]);
-    
+
         // Encode the updated array back to a JSON string
         $updatedSubpermissionsJson = json_encode($updatedSubpermissions);
-    
+
         // Update the 'sub_permission' field in the database with the new JSON string
         $subpermission->update(['sub_permission' => $updatedSubpermissionsJson]);
         return back()->with('success', 'Sub Permission successfully deleted!');
 
     }
 
-    
-
-    
 
 
-    
+
+
+
+
 }

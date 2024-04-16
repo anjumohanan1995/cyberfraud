@@ -22,10 +22,37 @@ class ComplaintController extends Controller
 
         $file = $request->file('complaint_file');
 
-        // Process the Excel file
-        Excel::import(new ComplaintImport, $file);
+        if ($file) {
+            try {
+                // Import data from the file
+                $source_type = $request->source_type;
 
-        return redirect()->back()->with('success', 'Excel file imported successfully!');
+            // Import data from the file
+            Excel::import(new ComplaintImport($source_type), $file);
+
+
+                // Provide feedback to the user
+                return redirect()->back()->with('success', 'Form submitted successfully!');
+
+            } catch (\Exception $e) {
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    // Retrieve the validation errors
+                    $errors = $e->validator->getMessageBag()->all();
+
+                    // Redirect back with validation errors and input data
+                    return redirect()->back()->withErrors($errors)->withInput();
+                }
+
+                // return response()->json([
+                //     'error' => 'An error occurred during import',
+                //     'message' => $e->getMessage()
+                // ], 500);
+            }
+            dd('ho');
+        } else {
+            // No file uploaded
+            return response()->json(['error' => 'No file uploaded'], 400);
+        }
     }
 
 }

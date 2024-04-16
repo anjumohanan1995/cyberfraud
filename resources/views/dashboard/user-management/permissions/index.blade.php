@@ -102,7 +102,7 @@
 			       	"url": "{{ route('get.permissions') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
-				           
+
 			          	});
        				}
        			},
@@ -163,7 +163,7 @@
             //var page = $(this).attr('href').split('page=')[1]; // Extract page number from pagination link
            // fetchPermissions(page); // Fetch permissions data for the clicked page
        // });
-       
+
 
 
 
@@ -176,20 +176,58 @@
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    data: {
-                        _method: 'DELETE' // Override method to DELETE
+                    {
+                        data: 'name',
+                        name: 'name'
                     },
-                    success: function(response) {
-                        // Handle success response
-                        // Reload the page
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle error response
-                        console.error(xhr.responseText)
+                    {
+                        data: null,
+                        render: function(data, type, row) {
+                            return '<a href="/permissions/' + data.id +
+                                '/edit" class = "btn btn-primary edit-btn"> Edit </a>' +
+                                '<button class="btn btn-danger delete-btn"zzzz data - id = "' + data
+                                .id + '">Delete</button>';
+                        }
                     }
-                });
-            }
+                ]
+            });
         });
+    </script> --}}
+
+    <script>
+       $(document).ready(function() {
+    $('#users-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route('get.permissions') }}',
+            data: function(d) {
+                return d; // Sending all DataTable parameters
+            }
+        },
+        columns: [{
+                data: null,
+                render: function(data, type, row) {
+                    return type === 'display' && data.rowIndex + 1; // Add 1 to row index to start numbering from 1
+                }
+            },
+            {
+                data: 'name',
+                name: 'name'
+            },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return '<a href="/permissions/' + data.id + '/edit" class="btn btn-primary edit-btn">Edit</a>' +
+                        '<button class="btn btn-danger delete-btn" data-id="' + data.id + '">Delete</button>';
+                }
+            }
+        ]
+    }).on('error.dt', function(e, settings, techNote, message) {
+        console.error('DataTables error:', message);
+    });
+});
+
     </script>
+
 @endsection

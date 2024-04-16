@@ -138,6 +138,80 @@
                             <span class="side-menu__label">Police Stations</span>
                         </a>
                     </li> 
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="side-menu__icon fe fe-box"> </i>
+                    <span class="side-menu__label">Users Management</span>
+                    <i class="angle fe fe-chevron-down"> </i>
+                </a>
+                <ul class="slide-menu">
+                    <li>
+                        <a class="slide-item" href="{{ url('users') }}">Users</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="{{ url('roles') }}">Roles</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="{{url('permissions')}}">Permissions</a>
+                    </li>
+
+                </ul>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="side-menu__icon fe fe-box"> </i>
+                    <span class="side-menu__label">Upload CaseData</span>
+                    <i class="angle fe fe-chevron-down"> </i>
+                </a>
+                <ul class="slide-menu">
+                    <li>
+                        <a class="slide-item" href="{{ url('import-complaints') }}">Form victim</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Form Bank</a>
+                    </li>
+
+                </ul>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('modus') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Modus</span>
+                </a>
+            </li>
+
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="side-menu__icon fe fe-mail menu-icons">
+                    </i>
+                    <span class="side-menu__label">Mail</span>
+                    <span class="badge badge-warning side-badge">5</span>
+                </a>
+                <ul class="slide-menu">
+                    <li>
+                        <a class="slide-item" href="mail.html">Mail</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="mail-compose.html">Mail Compose</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="mail-read.html">Read-mail</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="mail-settings.html">mail-settings</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="chat.html">Chat</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('police_stations') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Police Stations</span>
+                </a>
+            </li>
 
         </ul>
     </div>
