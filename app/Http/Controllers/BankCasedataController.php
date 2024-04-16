@@ -16,9 +16,6 @@ class BankCasedataController extends Controller
 
     public function index()
     {
-
-
-
         return view('dashboard.bank-case-data.index');
     }
 
@@ -181,18 +178,18 @@ class BankCasedataController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the uploaded file
+        // Validate the uploaded file.
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,txt'
         ]);
 
-        // Get the uploaded file
+        // Get the uploaded file.
         $file = $request->file('file');
 
-        // Check if a file was uploaded
+        // Check if a file was uploaded.
         if ($file) {
             try {
-                // Import data from the file
+                // Import data from the file.
                 $bank_case_data = (new FastExcel)->import($file, function ($line) {
 
 
@@ -206,7 +203,7 @@ class BankCasedataController extends Controller
                     try {
                         $values = array_values($line);
 
-                        // Validation Rules
+                        // Validation Rules.
                         $rules = [
                             0 => 'required', // sl_no is required
                             1 => 'required', // acknowledgement_no is required
@@ -214,35 +211,35 @@ class BankCasedataController extends Controller
                             3 => 'required', // Layer is required.
                             10 => 'filled',
                             23 => 'filled',
-                            // Add more validation rules as needed
+                            // Add more validation rules as needed.
                         ];
 
-                        // Validate the data
+                        // Validate the data.
                         $validator = Validator::make($values, $rules);
 
-                        // Check if validation fails
+                        // Check if validation fails.
                         if ($validator->fails()) {
-                            // Get the validation error messages
+                            // Get the validation error messages.
                             $errors = $validator->errors()->all();
 
                             dd($errors);
 
-                            // Return JSON response with validation errors
+                            // Return JSON response with validation errors.
                             return response()->json([
                                 'error' => 'Validation failed',
                                 'errors' => $errors
                             ], 422);
                         }
 
-                        // Check if there's an existing record with matching acknowledgement_no or transaction_id_or_utr_no
+                        // Check if there's an existing record with matching acknowledgement_no or transaction_id_or_utr_no.
                         $existingRecord = BankCasedata::where('acknowledgement_no', $values[1])->orWhere('transaction_id_or_utr_no', $values[2])->first();
 
                         if ($existingRecord) {
-                            // Update existing record
+                            // Update existing record.
                             $existingRecord->update([
                                 'sl_no' => $values[0],
                                 'Layer' => $values[3],
-                                // Add more fields as needed
+                                // Add more fields as needed.
                             ]);
                         } else {
                             // Create new record
@@ -251,11 +248,11 @@ class BankCasedataController extends Controller
                                 'acknowledgement_no' => $values[1],
                                 'transaction_id_or_utr_no' => $values[2],
                                 'Layer' => $values[3],
-                                // Add more fields as needed
+                                // Add more fields as needed.
                             ]);
                         }
                     } catch (Exception $e) {
-                        // Handle any exceptions or errors during import
+                        // Handle any exceptions or errors during import.
                         Log::error('Error importing data: ' . $e->getMessage());
                     }
                 });
@@ -272,6 +269,9 @@ class BankCasedataController extends Controller
                     'message' => $e->getMessage()
                 ], 500);
             }
+
+
+
         } else {
             // No file uploaded
             return response()->json(['error' => 'No file uploaded'], 400);
