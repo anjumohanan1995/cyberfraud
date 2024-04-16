@@ -25,10 +25,24 @@ class PermissionSeeder extends Seeder
     {
         return [
             
-             ['name' => 'user-management', 'sub_permission' => json_encode([
-                "users",
+            //  ['name' => 'user-management', 'sub_permission' => json_encode([
+            //     "users-list",
+            //     "add-user",
+            //     "edit-user"
+
+            //     ]
+            // )],
+            ['name' => 'role-management', 'sub_permission' => json_encode([
+                "role-list",
                 "add-role",
-                "permission"
+                "edit-role"
+
+                ]
+            )],
+            ['name' => 'permission-management', 'sub_permission' => json_encode([
+                "permission-list",
+                "add-permission",
+                "edit-permission"
 
                 ]
             )],

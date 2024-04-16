@@ -21,7 +21,7 @@ class SuperAdminSeeder extends Seeder
             'name' => 'Super Admin',
             'email' => 'superadmin@email.com',
             'password' => Hash::make('12345678'), // You should hash the password for security
-            'role' => 'super admin', // Assuming 1 is the role ID for super admin
+            'role' => 'Super Admin', // Assuming 1 is the role ID for super admin
         ]);
     }
 }
