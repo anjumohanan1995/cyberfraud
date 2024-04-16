@@ -24,9 +24,16 @@ class ComplaintImport implements ToCollection
         foreach ($collection as $row) {
            // dd($row['Acknowledgement No']);
             // Use the correct key to access the data
-            $patient = new Complaint();
-            $patient->acknowledgement_no = @$row['Acknowledgement No']; // Use 'Acknowledgement No' as key
-            $patient->save();
+            // $patient = new Complaint();
+            // $patient->acknowledgement_no = @$row['Acknowledgement No']; // Use 'Acknowledgement No' as key
+            // $patient->save();
+
+            Complaint::create([
+                'acknowledgement_no' =>  @$row[0],
+                // 'email' => 'superadmin@email.com',
+                // 'password' => Hash::make('12345678'), // You should hash the password for security
+                // 'role' => 'super admin', // Assuming 1 is the role ID for super admin
+            ]);
         }
     }
 }
