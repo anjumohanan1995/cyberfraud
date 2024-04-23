@@ -27,7 +27,7 @@ class ModusController extends Controller
      */
     public function create()
     {
-        
+
         return view("dashboard.modus.create");
     }
 
@@ -39,28 +39,28 @@ class ModusController extends Controller
      */
     public function store(Request $request)
     {
-        
 
-        $validate = Validator::make($request->all(),
-        [
-          'name' => 'required',
-          
 
-      
-        ]);
+        $validate = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+
+
+
+            ]
+        );
         if ($validate->fails()) {
             //dd($validate);
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
         Modus::create([
-            'name' => @$request->name? $request->name:'',
-       
+            'name' => @$request->name ? $request->name : '',
+
         ]);
 
-        return redirect()->route('modus.index')->with('success','Modus Added successfully.');
-
-   
+        return redirect()->route('modus.index')->with('success', 'Modus Added successfully.');
     }
 
     /**
@@ -84,7 +84,7 @@ class ModusController extends Controller
     {
         $data = Modus::findOrFail($id);
 
-     
+
         return view('dashboard.modus.edit', ['data' => $data,]);
     }
 
@@ -97,8 +97,8 @@ class ModusController extends Controller
      */
     public function update(Request $request, $id)
     {
-         // Validate the incoming request data
-         $request->validate([
+        // Validate the incoming request data
+        $request->validate([
             'name' => 'required|string|max:255',
             // Add more validation rules as needed
         ]);
@@ -108,7 +108,7 @@ class ModusController extends Controller
 
         // Update the role with the data from the request
         $data->name = $request->name;
-      
+
         // Update other attributes as needed
         // Save the updated role
         $data->save();
@@ -136,7 +136,7 @@ class ModusController extends Controller
 
     public function getModus(Request $request)
     {
-        
+
         ## Read value
         $draw = $request->get('draw');
         $start = $request->get("start");
@@ -152,45 +152,76 @@ class ModusController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-            // Total records
-            $totalRecord = Modus::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        // Total records
+        $totalRecord = Modus::where('deleted_at', null)->orderBy('created_at', 'desc');
+        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
 
-            $totalRecordswithFilte = Modus::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        $totalRecordswithFilte = Modus::where('deleted_at', null)->orderBy('created_at', 'desc');
+        $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
-            // Fetch records
-            $items = Modus::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
-    
-            $data_arr = array();
-            $i=$start;
+        // Fetch records
+        $items = Modus::where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+        $records = $items->skip($start)->take($rowperpage)->get();
 
-            foreach($records as $record){
-                $i++;
-                $id = $record->id;
-                $name = $record->name;
-                
-                $edit = '<a  href="' . url('modus/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+        $data_arr = array();
+        $i = $start;
 
-                $data_arr[] = array(
-                    "id" => $i,
-                    "name" => $name,
+        foreach ($records as $record) {
+            $i++;
+            $id = $record->id;
+            $source_type = $record->source_type;
+            $acknowledgement_no = $record->acknowledgement_no;
+            $district = $record->district;
+            $police_station = $record->police_station;
+            $complainant_name = $record->complainant_name;
+            $complainant_mobile = $record->complainant_mobile;
+            $transaction_id = $record->transaction_id;
+            $bank_name = $record->bank_name;
+            $account_id = $record->account_id;
+            $amount = $record->amount;
+            $entry_date = $record->entry_date;
+            $current_status = $record->current_status;
+            $date_of_action = $record->date_of_action;
+            $action_taken_by_name = $record->action_taken_by_name;
+            $action_taken_by_designation = $record->action_taken_by_designation;
+            $action_taken_by_mobile = $record->action_taken_by_mobile;
+            $action_taken_by_email = $record->action_taken_by_email;
+            $action_taken_by_bank = $record->action_taken_by_bank;
 
-                    "edit" => $edit
-                );
-            }
-            
-            $response = array(
+
+            $edit = '<a  href="' . url('modus/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
+
+            $data_arr[] = array(
+                "source_type" => $source_type,
+                "acknowledgement_no" => $acknowledgement_no,
+                "district" => $district,
+                "police_station" => $police_station,
+                "complainant_name" => $complainant_name,
+                "complainant_mobile" => $complainant_mobile,
+                "transaction_id" => $transaction_id,
+                "bank_name" => $bank_name,
+                "account_id" => $account_id,
+                "amount" => $amount,
+                "entry_date" => $entry_date,
+                "current_status" => $current_status,
+                "date_of_action" => $date_of_action,
+                "action_taken_by_name" => $action_taken_by_name,
+                "action_taken_by_designation" => $action_taken_by_designation,
+                "action_taken_by_mobile" => $action_taken_by_mobile,
+                "action_taken_by_email" => $action_taken_by_email,
+                "action_taken_by_bank" => $action_taken_by_bank,
+                "edit" => $edit
+            );
+        }
+
+        $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
             "iTotalDisplayRecords" => $totalRecordswithFilter,
             "aaData" => $data_arr
-            );
+        );
 
-            return response()->json($response);
+        return response()->json($response);
     }
-
-    
 }

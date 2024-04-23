@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankCasedataController;
+use App\Http\Controllers\CaseData;
+use App\Http\Controllers\CaseDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\PermissionController;
@@ -89,3 +91,10 @@ Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpol
 
 Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
 Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
+
+
+//case data controller starts here.
+Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
+Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
+Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
+Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");

@@ -57,11 +57,11 @@
                 </a>
             </li>
             @php
-           
+
                 $permission = \App\Models\RolePermission::where('role',\Auth::user()->role)->first();
-            
+
                 @$sub_permission= ($permission->sub_permissions)? json_decode($permission->sub_permissions,true) :  null;
-            
+
             @endphp
             @if ( !empty($permission) )
 
@@ -77,17 +77,17 @@
                             <i class="angle fe fe-chevron-down"> </i>
                         </a>
                         <ul class="slide-menu">
-                            @if(!empty($sub_permission) && (in_array("users-list" ,$sub_permission )) ) 
+                            @if(!empty($sub_permission) && (in_array("users-list" ,$sub_permission )) )
                                 <li>
                                     <a class="slide-item" href="{{url('users')}}">Users</a>
                                 </li>
                             @endif
-                            @if(!empty($sub_permission) && (in_array("role-list" ,$sub_permission )) ) 
+                            @if(!empty($sub_permission) && (in_array("role-list" ,$sub_permission )) )
                                 <li>
                                     <a class="slide-item" href="{{url('roles')}}">Roles</a>
                                 </li>
                             @endif
-                            @if(!empty($sub_permission) && (in_array("permission-list" ,$sub_permission )) ) 
+                            @if(!empty($sub_permission) && (in_array("permission-list" ,$sub_permission )) )
                                 <li>
                                     <a class="slide-item" href="{{url('permissions')}}">Permissions</a>
                                 </li>
@@ -96,7 +96,7 @@
                         </ul>
                     </li>
                     @endif
-                  
+
                 @endforeach
             @endif
               <li class="slide">
@@ -137,7 +137,7 @@
                             <i class="side-menu__icon fe fe-database"> </i>
                             <span class="side-menu__label">Police Stations</span>
                         </a>
-                    </li> 
+                    </li>
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
                     <i class="side-menu__icon fe fe-box"> </i>
@@ -172,6 +172,12 @@
                     </li>
 
                 </ul>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('case-data') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Case Data</span>
+                </a>
             </li>
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">

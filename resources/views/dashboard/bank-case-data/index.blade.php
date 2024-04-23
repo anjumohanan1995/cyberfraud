@@ -55,7 +55,7 @@
                                 @endif
                             </div>
 
-                            
+
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Police Stations!
@@ -68,7 +68,7 @@
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="form-group">
+                                            {{-- <div class="form-group">
                                                 <label for="source_type">Source Type:</label>
                                                 <select class="form-control" id="source_type" name="source_type">
                                                     <option value="NCRP Portal"
@@ -90,7 +90,7 @@
                                                 @error('source_type')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
-                                            </div>
+                                            </div> --}}
 
                                             <div class="form-group">
                                                 <label for="source_type">Upload Excel:</label>

@@ -60,7 +60,6 @@ class BankImports implements ToCollection, WithStartRow
                 'action_taken_email' => $values[22],
                 'branch_location' => $values[23],
                 'branch_manager_details' => $values[24],
-
             ];
         });
 
