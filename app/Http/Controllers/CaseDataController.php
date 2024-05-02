@@ -29,6 +29,11 @@ class CaseDataController extends Controller
         $account_id = intval($request->account_id);
 
 
+        // dd($acknowledgement_no +'-'+ $account_id);
+        // dd($acknowledgement_no);
+        // dd($account_id);
+
+
         ## Read value
         $draw = $request->get('draw');
         $start = $request->get("start");
@@ -49,6 +54,9 @@ class CaseDataController extends Controller
             ->where('account_no_1', $account_id)
             ->whereNull('deleted_at')
             ->orderBy('created_at', 'desc');
+
+
+        // dd($totalRecordsQuery);
 
         $totalRecords = $totalRecordsQuery->count();
 

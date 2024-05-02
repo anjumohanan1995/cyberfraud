@@ -50,6 +50,8 @@ Route::get('/', function () {
 //login route starts here
 Route::post('/login', [AuthController::class, 'login'])->name("login");
 
+
+
 //dashboard pages starts here.
 Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
 

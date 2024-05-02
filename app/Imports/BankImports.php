@@ -55,7 +55,7 @@ class BankImports implements ToCollection, WithStartRow
                 'reference_no' => $values[17],
                 'remarks' => $values[18],
                 'date_of_action' => $values[19],
-                'action_taken_by_bank' => $values[20],
+                // 'action_taken_by_bank' => $values[20],
                 'action_taken_name' => $values[21],
                 'action_taken_email' => $values[22],
                 'branch_location' => $values[23],
@@ -70,6 +70,10 @@ class BankImports implements ToCollection, WithStartRow
 
 
         foreach ($collection as $collect) {
+
+
+
+
             // Check if there's an existing record with matching acknowledgement_no and transaction_id_or_utr_no.
             $existingRecord = BankCasedata::where('acknowledgement_no', $collect['acknowledgement_no'])
                 ->where('transaction_id_or_utr_no', $collect['transaction_id_or_utr_no'])
