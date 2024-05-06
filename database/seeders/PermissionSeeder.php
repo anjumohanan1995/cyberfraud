@@ -24,7 +24,7 @@ class PermissionSeeder extends Seeder
     public function getPermissions()
     {
         return [
-            
+
             //  ['name' => 'user-management', 'sub_permission' => json_encode([
             //     "users-list",
             //     "add-user",
@@ -32,6 +32,8 @@ class PermissionSeeder extends Seeder
 
             //     ]
             // )],
+
+            
             ['name' => 'role-management', 'sub_permission' => json_encode([
                 "role-list",
                 "add-role",
@@ -47,7 +49,7 @@ class PermissionSeeder extends Seeder
                 ]
             )],
 
-           
+
         ];
     }
 }
