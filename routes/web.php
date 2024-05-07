@@ -6,6 +6,7 @@ use App\Http\Controllers\CaseData;
 use App\Http\Controllers\CaseDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
+use App\Http\Controllers\DropCollectionController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RoleController;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use MongoDB\Operation\DropCollection;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,3 +102,7 @@ Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.i
 Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
 Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
 Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
+
+
+//collection drop controller
+Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
