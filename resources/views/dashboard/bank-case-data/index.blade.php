@@ -58,7 +58,7 @@
 
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    Add Police Stations!
+                                    Add Bank data!
                                 </h4>
                             </div>
 
