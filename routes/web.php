@@ -7,6 +7,7 @@ use App\Http\Controllers\CaseDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\DropCollectionController;
+use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RoleController;
@@ -52,57 +53,68 @@ Route::get('/', function () {
 //login route starts here
 Route::post('/login', [AuthController::class, 'login'])->name("login");
 
+//logout route starts here.
+Route::get('logout', [LogoutController::class, 'logout']);
 
 
-//dashboard pages starts here.
-Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
-
-//users route starts here.
-Route::resource('users', UsersController::class);
-Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
-
-Route::resource('roles', RoleController::class);
-Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
-
-Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission');
-Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store');
+// used default middlewire for authentication.
+Route::middleware('auth')->group(function () {
 
 
 
-
-Route::resource('modus', ModusController::class);
-Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
-
-//permmission route starts here.
-Route::resource('permissions', PermissionController::class);
-Route::get('users-management/permissions/get', [PermissionController::class, 'getPermissions'])->name("get.permissions");
-
-Route::resource('police_stations', PoliceStationsController::class);
-Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
+    //dashboard pages starts here.
+    Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
 
 
-//bank case status route starts here.
-Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index");
-Route::post('bank-case-data/store', [BankCasedataController::class, 'store'])->name("bank-case-data.store");
+    //users route starts here.
+    Route::resource('users', UsersController::class);
+    Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
 
-Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
-Route::post('users-management/subpermissions', [PermissionController::class, 'storeSubPermissions'])->name("subpermissions.store");
-Route::post('users-management/subpermissions/{id}', [PermissionController::class, 'deleteSubPermissions'])->name("subpermissions.destroy");
+    Route::resource('roles', RoleController::class);
+    Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
-
-Route::resource('police_stations', PoliceStationsController::class);
-Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
-
-Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
-Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
+    Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission');
+    Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store');
 
 
-//case data controller starts here.
-Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
-Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
-Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
-Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
 
 
-//collection drop controller
-Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
+    Route::resource('modus', ModusController::class);
+    Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
+
+    //permmission route starts here.
+    Route::resource('permissions', PermissionController::class);
+    Route::get('users-management/permissions/get', [PermissionController::class, 'getPermissions'])->name("get.permissions");
+
+    Route::resource('police_stations', PoliceStationsController::class);
+    Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
+
+
+    //bank case status route starts here.
+    Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index");
+    Route::post('bank-case-data/store', [BankCasedataController::class, 'store'])->name("bank-case-data.store");
+
+    Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
+    Route::post('users-management/subpermissions', [PermissionController::class, 'storeSubPermissions'])->name("subpermissions.store");
+    Route::post('users-management/subpermissions/{id}', [PermissionController::class, 'deleteSubPermissions'])->name("subpermissions.destroy");
+
+
+    Route::resource('police_stations', PoliceStationsController::class);
+    Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
+
+    Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
+    Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
+
+
+    //case data controller starts here.
+    Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
+    Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
+    Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
+    Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
+
+
+    //collection drop controller
+    Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
+
+
+});

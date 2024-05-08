@@ -42,7 +42,7 @@
                 </a>
             </li>
             <li class="nav-item" data-toggle="tooltip" data-placement="top" title="" data-original-title="Logout">
-                <a class="nav-link text-center m-2">
+                <a class="nav-link text-center m-2" href="{{url('logout')}}">
                     <i class="fe fe-power"> </i>
                 </a>
             </li>
