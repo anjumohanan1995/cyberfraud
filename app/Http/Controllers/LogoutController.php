@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PasswordResetMail;
+use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
 
 class LogoutController extends Controller
 {
@@ -15,27 +22,84 @@ class LogoutController extends Controller
         return redirect('/');
     }
 
+
+
     public function showLinkRequestForm()
     {
         return view('auth.passwords.email');
     }
 
-    /**
-     * Send a reset link to the given user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function sendResetLinkEmail(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
-        return $status == Password::RESET_LINK_SENT
-            ? back()->with(['status' => trans($status)])
-            : back()->withErrors(['email' => trans($status)]);
+
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            $token = Str::random(50);
+            $user->reset_password_token = $token;
+            $user->save();
+
+            // dd($user->name, $token);
+
+            Mail::to($user->email)->send(new PasswordResetMail($user, $token));
+
+            return "Password reset link sent successfully!";
+        } else {
+            return "User not found!";
+        }
+    }
+
+    public function resetPassword($token)
+    {
+        //dd($token);
+        $user = User::where('reset_password_token', $token)->first();
+
+        if ($user) {
+
+            $id = $user->id;
+            return view('auth.passwords.reset_password', compact(['id']));
+        } else {
+
+
+            return view('auth.passwords.email')->with('error', 'Invalid token!');
+        }
+    }
+
+    public function resetPasswordView()
+    {
+
+        return view('auth.passwords.reset_password');
+    }
+
+    public function passwordUpdate(Request $request)
+
+    {
+
+
+        $request->validate([
+            'id' => 'required',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+
+        $user = User::find($request->id);
+
+        if (!$user) {
+            return view('auth.passwords.email')->with('error', 'User not found!');
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect(url('/'))->with('success', 'Password updated successfully!');
     }
 }

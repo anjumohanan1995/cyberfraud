@@ -59,6 +59,9 @@ Route::get('logout', [LogoutController::class, 'logout']);
 //password reset
 Route::get('forgot-password', [LogoutController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('forgot-password', [LogoutController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('reset--password/{token}', [LogoutController::class, 'resetPassword'])->name('reset.password');
+Route::get('reset-password-view', [LogoutController::class, 'resetPasswordView'])->name('reset.password.view');
+Route::post('password-update', [LogoutController::class, 'passwordUpdate'])->name('password.update');
 
 
 
@@ -122,11 +125,4 @@ Route::middleware('auth')->group(function () {
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
-
-
-
-
-
-
 });
-
