@@ -53,46 +53,31 @@
     <!-- /Loader -->
     <!-- Start Switcher -->
 
-    <div class="page"> <!-- main-signin-wrapper -->
+    <div class="page">
         <div class="my-auto page page-h">
             <div class="main-signin-wrapper">
                 <div class="main-card-signin d-md-flex">
                     <div class="p-5">
-                        <div class="main-signin-header">
-                            <img src="img/logo.png" class="" alt="" />
-
-                            <h4><br>Please sign in to continue</h4>
-
-                            <form action="{{ route('login') }}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input id="email" name="email" class="form-control" placeholder="Enter your email" type="email">
-                                    @error('email')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
+                        <form action="{{ route('password.email') }}" method="POST">
+                            @csrf
+                            <div class="form-group">
+                                <label for="email" style="color: black;">Email Address</label><br>
+                                <input id="email" type="email" name="email" value="{{ old('email') }}" required style="color: black;">
+                                <div><br>
+                                    <button type="submit" class="btn btn-success">Send Password Reset Link</button>
                                 </div>
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input id="password" name="password" class="form-control" placeholder="Enter your password" type="password">
-                                    @error('password')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                                <button class="btn btn-main-primary btn-block">Sign In</button>
-                            </form>
-
-                        </div>
-                        <div class="main-signin-footer mt-3 mg-t-5">
-                            <p><a href="{{ route('password.request') }}">Forgot password?</a></p>
-                            {{-- <p>Don't have an account? <a href="page-signup.html">Create an Account</a></p> --}}
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+
 </body>
 
 </html>
+
+
+

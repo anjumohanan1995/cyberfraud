@@ -13,7 +13,7 @@
         "laravel/tinker": "^2.7",
         "laravel/ui": "^4.1",
         "maatwebsite/excel": "^3.0.1",
-        "mongodb/mongodb": "^1.15"
+        "mongodb/mongodb": "^1.16"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

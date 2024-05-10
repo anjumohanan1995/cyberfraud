@@ -56,6 +56,11 @@ Route::post('/login', [AuthController::class, 'login'])->name("login");
 //logout route starts here.
 Route::get('logout', [LogoutController::class, 'logout']);
 
+//password reset
+Route::get('forgot-password', [LogoutController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('forgot-password', [LogoutController::class, 'sendResetLinkEmail'])->name('password.email');
+
+
 
 // used default middlewire for authentication.
 Route::middleware('auth')->group(function () {
@@ -68,6 +73,8 @@ Route::middleware('auth')->group(function () {
 
     //users route starts here.
     Route::resource('users', UsersController::class);
+    //profile
+    Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
     Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
 
     Route::resource('roles', RoleController::class);
@@ -117,4 +124,9 @@ Route::middleware('auth')->group(function () {
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
 
 
+
+
+
+
 });
+

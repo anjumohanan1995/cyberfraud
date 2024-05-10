@@ -167,32 +167,33 @@
 
 
 
-        $(document).on('click', '.delete-btn', function() {
-            var permissionId = $(this).data('id');
-            if (confirm('Are you sure you want to delete this item?')) {
-                $.ajax({
-                    url: '/permissions/' + permissionId,
-                    type: 'POST', // Use POST method
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: null,
-                        render: function(data, type, row) {
-                            return '<a href="/permissions/' + data.id +
-                                '/edit" class = "btn btn-primary edit-btn"> Edit </a>' +
-                                '<button class="btn btn-danger delete-btn"zzzz data - id = "' + data
-                                .id + '">Delete</button>';
-                        }
-                    }
-                ]
-            });
+       $(document).on('click', '.delete-btn', function() {
+    var permissionId = $(this).data('id');
+    if (confirm('Are you sure you want to delete this item?')) {
+        $.ajax({
+            url: '/permissions/' + permissionId,
+            type: 'POST', // Use POST method
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                // Include any data you want to send with the request
+                // For example, if you want to send the permission name, you can do:
+                // name: 'permission_name'
+            },
+            success: function(response) {
+                // Handle success response here
+                console.log('Item deleted successfully');
+            },
+            error: function(xhr, status, error) {
+                // Handle error response here
+                console.error('Error deleting item:', error);
+            }
         });
-    </script> --}}
+    }
+});
+
+    </script>
 
     <script>
        $(document).ready(function() {

@@ -22,7 +22,7 @@
         </div>
     </div>
     <!-- /user -->
-    <div class="sidebar-navs">
+    {{-- <div class="sidebar-navs">
         <ul class="nav nav-pills-circle">
             <li class="nav-item" data-toggle="tooltip" data-placement="top" title=""
                 data-original-title="Settings">
@@ -47,11 +47,11 @@
                 </a>
             </li>
         </ul>
-    </div>
+    </div> --}}
     <div class="main-sidebar-body">
         <ul class="side-menu">
             <li class="slide active">
-                <a class="side-menu__item active" href="index.html">
+                <a class="side-menu__item active" href="dashboard">
                     <i class="side-menu__icon fe fe-airplay"> </i>
                     <span class="side-menu__label">Dashboard</span>
                 </a>
@@ -99,7 +99,7 @@
 
                 @endforeach
             @endif
-              <li class="slide">
+              {{-- <li class="slide">
                         <a class="side-menu__item" href="{{url('modus')}}">
                             <i class="side-menu__icon fe fe-database"> </i>
                             <span class="side-menu__label">Modus</span>
@@ -137,10 +137,10 @@
                             <i class="side-menu__icon fe fe-database"> </i>
                             <span class="side-menu__label">Police Stations</span>
                         </a>
-                    </li>
+                    </li> --}}
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <i class="side-menu__icon fe fe-box"> </i>
+                    <i class="side-menu__icon fe fe-user"> </i>
                     <span class="side-menu__label">Users Management</span>
                     <i class="angle fe fe-chevron-down"> </i>
                 </a>
@@ -179,7 +179,7 @@
                     <span class="side-menu__label">Case Data</span>
                 </a>
             </li>
-            <li class="slide">
+            {{-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Modus</span>
@@ -217,7 +217,7 @@
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Police Stations</span>
                 </a>
-            </li>
+            </li> --}}
 
         </ul>
     </div>
