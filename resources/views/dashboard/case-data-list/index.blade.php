@@ -71,25 +71,17 @@
                                     <thead>
                                         <tr>
                                             <th>SL No</th>
-                                            <th>Source Type</th>
                                             <th>Acknowledgement No</th>
-                                            <th>District</th>
-                                            <th>Police Station</th>
-                                            <th>Complainant Name</th>
-                                            <th>Complainant Mobile</th>
-                                            <th>Transaction ID</th>
-                                            <th>Bank Name</th>
+                                            <th>District/Police Station</th>
+                                            <th>Complainant Name & Mobile number</th>
+                                            <th>Transaction ID/UTR Number</th>
+                                            <th>Bank/Wallet/Merchant</th>
                                             <th>Account ID</th>
                                             <th>Amount</th>
                                             <th>Entry Date</th>
                                             <th>Current Status</th>
                                             <th>Date of Action</th>
-                                            <th>Action Taken By Name</th>
-                                            <th>Action Taken By Designation</th>
-                                            <th>Action Taken By Mobile</th>
-                                            <th>Action Taken By Email</th>
-                                            <th>Action Taken By Bank</th>
-
+                                            <th>Action Taken By</th>
                                             <th>ACTION</th>
                                         </tr>
                                     </thead>
@@ -108,10 +100,11 @@
         <!-- /row -->
     </div>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function(){
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
+             
                 buttons: [
                     'copyHtml5',
                     'excelHtml5',
@@ -124,27 +117,21 @@
                         return $.extend({}, d, {});
                     }
                 },
-                columns: [{
+                columns:[{
                         data: 'id'
                     },
-                    {
-                        data: 'source_type'
-                    },
+                  
                     {
                         data: 'acknowledgement_no'
                     },
                     {
                         data: 'district'
                     },
-                    {
-                        data: 'police_station'
-                    },
+                   
                     {
                         data: 'complainant_name'
                     },
-                    {
-                        data: 'complainant_mobile'
-                    },
+                   
                     {
                         data: 'transaction_id'
                     },
@@ -169,18 +156,7 @@
                     {
                         data: 'action_taken_by_name'
                     },
-                    {
-                        data: 'action_taken_by_designation'
-                    },
-                    {
-                        data: 'action_taken_by_mobile'
-                    },
-                    {
-                        data: 'action_taken_by_email'
-                    },
-                    {
-                        data: 'action_taken_by_bank'
-                    },
+                  
                     {
                         data: 'edit'
                     }
@@ -188,109 +164,8 @@
                 "order": [0, 'desc'],
                 'ordering': true
             });
+                
         });
-
-
-
-
-
-
-        // $(document).on('click', '.bank-case-btn', function() {
-
-        //     var Id = $(this).data('id');
-        //     var acknowledgement_no = $(this).data('acknowledgement_no');
-        //     var account_id = $(this).data('account_id');
-
-        //     // alert(Id + '-' + acknowledgement_no + '-' + account_id);
-
-        //     $.ajax({
-        //         url: 'case-data/bank-case-data',
-        //         type: 'get',
-        //         headers: {
-        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //         },
-        //         data: {
-        //             acknowledgement_no: acknowledgement_no, // Pass the name.
-        //             account_id: account_id // Pass the place.
-        //         },
-        //         success: function(response) {
-        //             // Handle success response
-        //             console.log(response);
-        //         },
-        //         error: function(xhr, status, error) {
-        //             // Handle error response
-        //             console.error(xhr.responseText);
-        //         }
-        //     });
-        // });
-
-
-        // $(document).on('click', '.bank-case-btn', function() {
-
-        //     var Id = $(this).data('id');
-        //     var acknowledgement_no = $(this).data('acknowledgement_no');
-        //     var account_id = $(this).data('account_id');
-
-        //     $.ajax({
-        //         url: '/case-data-list/',
-        //         type: 'POST', // Use POST method.
-        //         headers: {
-        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //         },
-        //         data: {
-        //             acknowledgement_no: acknowledgement_no, // Pass the name.
-        //             account_id: account_id // Pass the place.
-        //         },
-        //         success: function(response) {
-        //             // Handle success response.
-        //             // Reload the page.
-        //             $('.alert-success-one').html(response.success +
-        //                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-        //                 '<span aria-hidden="true">&times;</span>' + '</button>').show();
-
-        //             //table.draw();
-
-        //             location.reload();
-        //         },
-        //         error: function(xhr, status, error) {
-        //             // Handle error response.
-        //             console.error(xhr.responseText)
-        //         }
-        //     });
-        // });
-
-
-
-        // $(document).on('click', '.show-case-btn', function() {
-        //     var Id = $(this).data('id');
-        //     var acknowledgement_no = $(this).data('acknowledgement_no');
-        //     var account_id = $(this).data('account_id');
-        //     $.ajax({
-        //         url: '/case-data-list/',
-        //         type: 'POST', // Use POST method.
-        //         headers: {
-        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //         },
-        //         data: {
-        //             acknowledgement_no: acknowledgement_no, // Pass the name.
-        //             account_id: account_id // Pass the place.
-        //         },
-        //         success: function(response) {
-        //             // Handle success response.
-        //             // Reload the page.
-        //             $('.alert-success-one').html(response.success +
-        //                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-        //                 '<span aria-hidden="true">&times;</span>' + '</button>').show();
-        //             //table.draw();
-        //             location.reload();
-        //         },
-        //         error: function(xhr, status, error) {
-        //             // Handle error response.
-        //             console.error(xhr.responseText)
-        //         }
-        //     });
-        // });
-
 
 
     </script>

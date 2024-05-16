@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\BankCasedata;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use MongoDB\Client;
+
+
 
 class CaseDataController extends Controller
 {
@@ -134,8 +138,7 @@ class CaseDataController extends Controller
 
 
     public function getDatalist(Request $request)
-    {
-        ## Read value.
+    {      
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows display per page.
@@ -144,60 +147,84 @@ class CaseDataController extends Controller
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
-
+        
         $columnIndex = $columnIndex_arr[0]['column']; // Column index.
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
         $searchValue = $search_arr['value']; // Search value.
 
         // Total records.
-        $totalRecord = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc');
-        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
-
-
+        $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+        //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
+     
         $totalRecordswithFilte = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc');
-        $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        //$totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        $totalRecordswithFilter = Complaint::groupBy('acknowledgement_no')->get()->count();
 
-        // Fetch records.
-        $items = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+        //Fetch records.
+            $items = Complaint::groupBy('acknowledgement_no')
+            ->where('deleted_at', null)
+            ->orderBy('created_at', 'desc')
+            ->orderBy($columnName, $columnSortOrder);
+            echo $items->count();
+        if($searchValue){
+            $items = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+            ->orWhere('district', 'like', '%' . $searchValue . '%')
+            ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+            ->orWhere('police_station', 'like', '%' . $searchValue . '%')
+            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+            ->where('deleted_at', null)
+            ->orderBy('created_at', 'desc')
+            ->orderBy($columnName, $columnSortOrder); 
+
+      
+
+            $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
+
+            $totalRecordswithFilter = $totalRecords;
+        }
+
         $records = $items->skip($start)->take($rowperpage)->get();
-
-
         $data_arr = array();
         $i = $start;
 
-        foreach ($records as $record) {
+        foreach ($records as $record){
+            $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
             $i++;
             $id = $record->id;
             $source_type = $record->source_type;
             $acknowledgement_no = $record->acknowledgement_no;
-            $district = $record->district;
-            $police_station = $record->police_station;
-            $complainant_name = $record->complainant_name;
-            $complainant_mobile = $record->complainant_mobile;
-            $transaction_id = $record->transaction_id;
-            $bank_name = $record->bank_name;
-            $account_id = $record->account_id;
-            $amount = $record->amount;
-            $entry_date = $record->entry_date;
-            $current_status = $record->current_status;
-            $date_of_action = $record->date_of_action;
-            $action_taken_by_name = $record->action_taken_by_name;
-            $action_taken_by_designation = $record->action_taken_by_designation;
-            $action_taken_by_mobile = $record->action_taken_by_mobile;
-            $action_taken_by_email = $record->action_taken_by_email;
-            $action_taken_by_bank = $record->action_taken_by_bank;
-
+           
+            $transaction_id="";$amount="";
+            foreach($com as $com){
+                $transaction_id .= $com->transaction_id."<br>"; 
+                $amount .= $com->amount."<br>";
+                $complainant_name = $com->complainant_name;
+                $complainant_mobile = $com->complainant_mobile;
+                $bank_name = $com->bank_name;
+                $district = $com->district;
+                $police_station = $com->police_station;
+                $account_id = $com->account_id;
+                $entry_date = $com->entry_date;
+                $current_status = $com->current_status;
+                $date_of_action = $com->date_of_action;
+                $action_taken_by_name = $com->action_taken_by_name;
+                $action_taken_by_designation = $com->action_taken_by_designation;
+                $action_taken_by_mobile = $com->action_taken_by_mobile;
+                $action_taken_by_email = $com->action_taken_by_email;
+                $action_taken_by_bank = $com->action_taken_by_bank;
+            }
+       
             $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
-
+           
             $data_arr[] = array(
                 "id" => $i,
-                "source_type" => $source_type,
-                "acknowledgement_no" => $acknowledgement_no,
-                "district" => $district,
-                "police_station" => $police_station,
-                "complainant_name" => $complainant_name,
-                "complainant_mobile" => $complainant_mobile,
+                "acknowledgement_no" => '<a href="'.url("case-data/details-view").'">'.$acknowledgement_no.'</a>',
+                "district" => $district."<br>".$police_station,
+                "complainant_name" => $complainant_name."<br>".$complainant_mobile,
                 "transaction_id" => $transaction_id,
                 "bank_name" => $bank_name,
                 "account_id" => $account_id,
@@ -206,10 +233,6 @@ class CaseDataController extends Controller
                 "current_status" => $current_status,
                 "date_of_action" => $date_of_action,
                 "action_taken_by_name" => $action_taken_by_name,
-                "action_taken_by_designation" => $action_taken_by_designation,
-                "action_taken_by_mobile" => $action_taken_by_mobile,
-                "action_taken_by_email" => $action_taken_by_email,
-                "action_taken_by_bank" => $action_taken_by_bank,
                 "edit" => $edit
             );
         }
@@ -222,5 +245,9 @@ class CaseDataController extends Controller
         );
 
         return response()->json($response);
+    }
+
+    public function detailsView(){
+        return view('dashboard.case-data-list.index');
     }
 }

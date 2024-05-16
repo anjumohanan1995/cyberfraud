@@ -42,6 +42,8 @@
 
     <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet" />
 
+    <link href="{{ asset('https://editor.datatables.net/extensions/Editor/css/editor.dataTables.css') }}" rel="stylesheet" />
+    
     <script src="{{ asset('js/jquery.min.js') }}"></script>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -169,6 +171,7 @@
     <script src="{{ asset('js/custom.js') }}"></script>
 
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
 
 
 

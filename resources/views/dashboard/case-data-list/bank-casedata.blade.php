@@ -120,12 +120,13 @@
         var account_id = '{{ $account_id }}';
 
 
-        $(document).ready(function() {
-
+        $(document).ready(function(){
+          
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
-                buttons: [
+               
+                buttons:[
                     'copyHtml5',
                     'excelHtml5',
                     'csvHtml5',
