@@ -6,13 +6,13 @@ use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Role extends Eloquent
+class SourceType extends Eloquent
 {
     use SoftDeletes;
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'roles';
+    protected $collection = 'sourcetype';
 
     /**
      * The attributes which are mass assigned will be used.
@@ -20,10 +20,8 @@ class Role extends Eloquent
      * It will return @var array
      */
     protected $fillable = [
-        'name','user_id'
+        'name',
+        'status'
     ];
 
-    public function user() {
-        return $this->belongsTo('App\User');
-    }
-}  
+}
