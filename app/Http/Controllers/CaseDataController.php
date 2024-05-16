@@ -7,6 +7,7 @@ use App\Models\Complaint;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
+use Illuminate\Support\Facades\DB;
 
 class CaseDataController extends Controller
 {
@@ -16,7 +17,8 @@ class CaseDataController extends Controller
         $banks = [
             ['id' => 1, 'name' => 'Ratnakar Bank Limited (RBL)'],
             ['id' => 2, 'name' => 'State Bank of India'],
-            ['id' => 3, 'name' => 'Dhanlaxmi Bank']
+            ['id' => 3, 'name' => 'Dhanlaxmi Bank'],
+            ['id' => 4, 'name' => 'Federal Bank']
         ];
 
         // // Assuming $banks is an array of bank data
@@ -207,7 +209,7 @@ class CaseDataController extends Controller
             $totalRecordQuery->where('complainant_mobile', $mobile);
             $items->where('complainant_mobile', $mobile);
         }
-        if ($options) {
+        if ($options && $options!='null') {
             $totalRecordQuery->where('bank_name', $options);
             $items->where('bank_name', $options);
         }
@@ -293,13 +295,26 @@ if ($search_by) {
 
         // Total records count after filtering
         $totalRecordswithFilter = $items->count();
-
+        // DB::connection()->enableQueryLog();
+        // DB::enableQueryLog();
         // Fetch filtered records with pagination
         $records = $items->orderBy('created_at', 'desc')
                     ->orderBy($columnName, $columnSortOrder)
                     ->skip($start)
                     ->take($rowperpage)
                     ->get();
+                    // dd($records->toSql());
+                    // dd(DB::getQueryLog());
+
+//First You will need to enable the query log by calling:
+
+
+// $queries = DB::getQueryLog();
+
+// // Print or log the queries
+// foreach ($queries as $query) {
+//     Log::info($query['query']);
+// }
 
         // Prepare data for response
         $data_arr = array();

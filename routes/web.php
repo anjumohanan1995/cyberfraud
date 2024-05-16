@@ -127,7 +127,6 @@ Route::middleware('auth')->group(function () {
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
-<<<<<<< HEAD
 
 
     Route::resource('sourcetype', SourceTypeController::class);
@@ -138,6 +137,4 @@ Route::middleware('auth')->group(function () {
 
 
 
-=======
->>>>>>> e670293bfb6af1de83721f663e8f8f2594e4dca1
 });

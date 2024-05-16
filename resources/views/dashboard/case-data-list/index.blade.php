@@ -88,8 +88,8 @@
                                   <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="type">Transaction Type:</label><br>
-                                        <select class="form-control">
-                                            <option value="">--Select--</option>
+                                        <select class="form-control" id="type">
+                                            <option>--Select--</option>
                                             <option value="bank">Bank</option>
                                             <option value="wallet">Wallet/PG/PA</option>
                                             <option value="merchant">Merchant</option>
@@ -120,6 +120,12 @@
                                   </div>
                                   <div class="col-md-3">
                                     <div class="form-group">
+                                      <label for="acknowledgement_no">Acknowledgement No: </label>
+                                      <input type="text" class="form-control" id="acknowledgement_no" name="acknowledgement_no">
+                                    </div>
+                                  </div>
+                                  <div class="col-md-3" hidden>
+                                    <div class="form-group">
                                       <label for="complaint-reported">Complaint Reported:</label>
                                       <select class="form-control" id="complaint-reported" name="complaint-reported">
                                         <option value="">All</option>
@@ -128,7 +134,7 @@
                                       </select>
                                     </div>
                                   </div>
-                                  <div class="col-md-3">
+                                  <div class="col-md-3" hidden>
                                     <div class="form-group">
                                       <label for="fir-lodge">FIR Lodge:</label>
                                       <select class="form-control" id="fir-lodge" name="fir-lodge">
@@ -141,13 +147,13 @@
                                 </div>
 
                                 <div class="row">
-                                  <div class="col-md-3">
+                                  <div class="col-md-3" hidden>
                                     <div class="form-group">
                                       <label for="acknowledgement_no">Acknowledgement No: </label>
                                       <input type="text" class="form-control" id="acknowledgement_no" name="acknowledgement_no">
                                     </div>
                                   </div>
-                                  <div class="col-md-3">
+                                  <div class="col-md-3" hidden>
                                     <div class="form-group">
                                       <label for="sub-category">Sub category:</label>
                                       <select class="form-control" id="sub-category" name="sub-category">
@@ -157,7 +163,7 @@
                                       </select>
                                     </div>
                                   </div>
-                                  <div class="col-md-3">
+                                  <div class="col-md-3" hidden>
                                     <div class="form-group">
                                       <label for="search-by">Search by:</label>
                                       <select class="form-control" id="search-by" name="search-by">
@@ -219,7 +225,7 @@
         <!-- /row -->
     </div>
 
-    {{-- <script>
+    <script>
         $("#type").on('change', function() {
             var type = document.getElementById("type").value;
             var dropdown = document.getElementById("options");
@@ -238,7 +244,7 @@
             }
             // Add similar logic for other types if needed
         });
-    </script> --}}
+    </script>
 
      <script>
 $(document).ready(function() {
@@ -330,10 +336,10 @@ $(document).ready(function() {
         var acknowledgement_no = $("#acknowledgement_no").val();
         var filled_by = $("#filled-by").val();
         var search_by = $("#search-by").val();
-        // var options = $("#options").val();
+        var options = $("#options").val();
 
         // Construct the URL with query parameters
-        var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date + "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" + filled_by + "&search_by=" + search_by;
+        var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date + "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" + filled_by + "&search_by=" + search_by + "&options=" + options;
 
         // Reload DataTable with new data based on selected filters
         table.ajax.url(url).load();
