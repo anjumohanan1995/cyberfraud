@@ -70,17 +70,16 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="source_type">Source Type:</label>
-                                             <select class="form-control" name="source_type">
-                                                <option value="NCRP Portal">NCRP Portal</option>
-                                                <option value="Public">Public</option>
-                                                <option value="Cyber Dome">Cyber Dome</option>
-                                                <option value="Special Branch">Special Branch</option>
-                                                <option value="Cyber Operation">Cyber Operation</option>
-                                             </select>
+                                                <select class="form-control" name="source_type">
+                                                    @foreach($sourceTypes as $sourceType)
+                                                        <option value="{{ $sourceType->id }}">{{ $sourceType->name }}</option>
+                                                    @endforeach
+                                                </select>
                                                 @error('source_type')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
+
 
                                             <div class="form-group">
                                                 <label for="place">File:</label>

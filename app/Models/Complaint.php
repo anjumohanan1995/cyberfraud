@@ -16,6 +16,12 @@ class Complaint extends Eloquent
      *
      * It will return @var array
      */
+
+    protected $casts = [
+
+        'entry_date' => 'date',
+
+    ];
     protected $fillable = [
         'source_type',
         'acknowledgement_no',
@@ -27,7 +33,7 @@ class Complaint extends Eloquent
         'bank_name',
         'account_id',
         'amount',
-        'entry_date',
+        // 'entry_date',
         'current_status',
         'date_of_action',
         'action_taken_by_name',

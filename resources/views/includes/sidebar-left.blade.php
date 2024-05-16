@@ -179,6 +179,12 @@
                     <span class="side-menu__label">Case Data</span>
                 </a>
             </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('sourcetype') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Source Type</span>
+                </a>
+            </li>
             {{-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">
                     <i class="side-menu__icon fe fe-database"> </i>

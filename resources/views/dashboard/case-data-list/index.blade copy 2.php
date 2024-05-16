@@ -87,26 +87,30 @@
                                   </div>
                                   <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="type">Transaction Type:</label><br>
-                                        <select class="form-control">
-                                            <option value="">--Select--</option>
-                                            <option value="bank">Bank</option>
-                                            <option value="wallet">Wallet/PG/PA</option>
-                                            <option value="merchant">Merchant</option>
-                                            <option value="tsurunc">Insurance</option>
-                                        </select>
-                                        <br>
-
+                                      <label for="transaction-type">Transaction Type:</label>
+                                      <select class="form-control" id="transaction-type" name="transaction_type">
+                                        <option value="">All</option>
+                                        <option value="bank">Bank</option>
+                                        <option value="wallet">Wallet</option>
+                                        <option value="merchant">Merchant</option>
+                                        <option value="tsurunc">Insurance</option>
+                                      </select>
                                     </div>
                                   </div>
                                 </div>
+
                                 <div class="row">
                                   <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="options">Bank/Wallet/Merchant/Insurance:</label>
-                                        <select class="form-control" id="options"></select>
-                                        </select>
-                                      </div>
+                                      <label for="bank-wallet-merchant">Bank/Wallet/Merchant/Insurance:</label>
+                                      <select class="form-control" id="bank-wallet-merchant" name="bank_wallet_merchant">
+                                        <option value="">--Select--</option>
+                                        <option value="bank">Bank</option>
+                                        <option value="wallet">Wallet</option>
+                                        <option value="merchant">Merchant</option>
+                                        <option value="tsurunc">Insurance</option>
+                                      </select>
+                                    </div>
                                   </div>
                                   <div class="col-md-3">
                                     <div class="form-group">
@@ -143,8 +147,18 @@
                                 <div class="row">
                                   <div class="col-md-3">
                                     <div class="form-group">
-                                      <label for="acknowledgement_no">Acknowledgement No: </label>
-                                      <input type="text" class="form-control" id="acknowledgement_no" name="acknowledgement_no">
+                                      <label for="acknowledgement-no">Acknowledgement No: </label>
+                                      <input type="text" class="form-control" id="acknowledgement-no" name="acknowledgement-no">
+                                    </div>
+                                  </div>
+                                  <div class="col-md-3">
+                                    <div class="form-group">
+                                      <label for="sub-category">Sub category:</label>
+                                      <select class="form-control" id="sub-category" name="sub-category">
+                                        <option value="">--Select--</option>
+                                        <option value="#">Yes</option>
+                                        <option value="#">No</option>
+                                      </select>
                                     </div>
                                   </div>
                                   <div class="col-md-3">
@@ -162,8 +176,8 @@
                                       <label for="search-by">Search by:</label>
                                       <select class="form-control" id="search-by" name="search-by">
                                         <option value="">--Select--</option>
-                                        <option value="account_id">Account ID/Account Number/UPI ID</option>
-                                        <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
+                                        <option value="#">Yes</option>
+                                        <option value="#">No</option>
                                       </select>
                                     </div>
                                   </div>
@@ -218,31 +232,9 @@
         </div>
         <!-- /row -->
     </div>
+    <script>
 
-    {{-- <script>
-        $("#type").on('change', function() {
-            var type = document.getElementById("type").value;
-            var dropdown = document.getElementById("options");
-
-            dropdown.innerHTML = ""; // Clear previous options
-
-            if (type === "bank") {
-                // Assuming `banks` is defined somewhere in your code
-                var banks = @json($banks); // Convert the PHP array to JSON
-
-                banks.forEach(function(bank) {
-                    var option = document.createElement("option");
-                    option.text = bank.name; // Accessing the `name` property of each bank
-                    dropdown.add(option);
-                });
-            }
-            // Add similar logic for other types if needed
-        });
-    </script> --}}
-
-     <script>
 $(document).ready(function() {
-
     var table = $('#example').DataTable({
         processing: true,
         serverSide: true,
@@ -326,27 +318,259 @@ $(document).ready(function() {
 
         var from_date = $("#from-date").val();
         var to_date = $("#to-date").val();
-        var mobile = $("#mobile").val();
-        var acknowledgement_no = $("#acknowledgement_no").val();
-        var filled_by = $("#filled-by").val();
-        var search_by = $("#search-by").val();
-        // var options = $("#options").val();
 
-        // Construct the URL with query parameters
-        var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date + "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" + filled_by + "&search_by=" + search_by;
-
-        // Reload DataTable with new data based on selected filters
-        table.ajax.url(url).load();
+        // Reload DataTable with new data based on selected date range
+        table.ajax.url("{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date).load();
     });
-
-
-
 });
 
 </script>
 @endsection
 
 
+
+
+
+
+
+
+//         $(document).ready(function() {
+//             var table = $('#example').DataTable({
+//                 processing: true,
+//                 serverSide: true,
+//                 buttons: [
+//                     'copyHtml5',
+//                     'excelHtml5',
+//                     'csvHtml5',
+//                     'pdfHtml5'
+//                 ],
+//                 "ajax": {
+//                     "url": "{{ route('get.datalist') }}",
+//                     "data": function(d) {
+//                         return $.extend({}, d, {});
+//                     }
+//                 },
+//                 columns: [{
+//                         data: 'id'
+//                     },
+//                     {
+//                         data: 'source_type'
+//                     },
+//                     {
+//                         data: 'acknowledgement_no'
+//                     },
+//                     {
+//                         data: 'district'
+//                     },
+//                     {
+//                         data: 'police_station'
+//                     },
+//                     {
+//                         data: 'complainant_name'
+//                     },
+//                     {
+//                         data: 'complainant_mobile'
+//                     },
+//                     {
+//                         data: 'transaction_id'
+//                     },
+//                     {
+//                         data: 'bank_name'
+//                     },
+//                     {
+//                         data: 'account_id'
+//                     },
+//                     {
+//                         data: 'amount'
+//                     },
+//                     {
+//                         data: 'entry_date'
+//                     },
+//                     {
+//                         data: 'current_status'
+//                     },
+//                     {
+//                         data: 'date_of_action'
+//                     },
+//                     {
+//                         data: 'action_taken_by_name'
+//                     },
+//                     {
+//                         data: 'action_taken_by_designation'
+//                     },
+//                     {
+//                         data: 'action_taken_by_mobile'
+//                     },
+//                     {
+//                         data: 'action_taken_by_email'
+//                     },
+//                     {
+//                         data: 'action_taken_by_bank'
+//                     },
+//                     {
+//                         data: 'edit'
+//                     }
+//                 ],
+//                 "order": [0, 'desc'],
+//                 'ordering': true
+//             });
+//         });
+
+
+
+//     // Form submission event handler
+//     $('#your-form-id').submit(function(event) {
+//         event.preventDefault();
+//     var keytable = $('#example').DataTable();
+//     keytable.destroy();
+//     var table = $('#example').DataTable({
+//         processing: true,
+//         serverSide: true,
+//         buttons: [
+//             'copyHtml5',
+//             'excelHtml5',
+//             'csvHtml5',
+//             'pdfHtml5'
+//         ],
+//         ajax: {
+//             url: "{{ route('get.datalist') }}",
+//             data: function (d) {
+//                 return $.extend({}, d, {
+//                     "from_date": $("#from-date").val(),
+//                     "to_date": $("#to-date").val(),
+//                 });
+//             }
+//         },
+
+
+//         columns: [
+//             { data: 'id' },
+//             { data: 'source_type' },
+//             { data: 'acknowledgement_no' },
+//             { data: 'district' },
+//             { data: 'police_station' },
+//             { data: 'complainant_name' },
+//             { data: 'complainant_mobile' },
+//             { data: 'transaction_id' },
+//             { data: 'bank_name' },
+//             { data: 'account_id' },
+//             { data: 'amount' },
+//             { data: 'entry_date' },
+//             { data: 'current_status' },
+//             { data: 'date_of_action' },
+//             { data: 'action_taken_by_name' },
+//             { data: 'action_taken_by_designation' },
+//             { data: 'action_taken_by_mobile' },
+//             { data: 'action_taken_by_email' },
+//             { data: 'action_taken_by_bank' },
+//             { data: 'edit' }
+//         ],
+//         order: [0, 'desc'],
+//         ordering: true
+//     });
+// }
+
+
+
+
+
+
+
+        // $(document).on('click', '.bank-case-btn', function() {
+
+        //     var Id = $(this).data('id');
+        //     var acknowledgement_no = $(this).data('acknowledgement_no');
+        //     var account_id = $(this).data('account_id');
+
+        //     // alert(Id + '-' + acknowledgement_no + '-' + account_id);
+
+        //     $.ajax({
+        //         url: 'case-data/bank-case-data',
+        //         type: 'get',
+        //         headers: {
+        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //         },
+        //         data: {
+        //             acknowledgement_no: acknowledgement_no, // Pass the name.
+        //             account_id: account_id // Pass the place.
+        //         },
+        //         success: function(response) {
+        //             // Handle success response
+        //             console.log(response);
+        //         },
+        //         error: function(xhr, status, error) {
+        //             // Handle error response
+        //             console.error(xhr.responseText);
+        //         }
+        //     });
+        // });
+
+
+        // $(document).on('click', '.bank-case-btn', function() {
+
+        //     var Id = $(this).data('id');
+        //     var acknowledgement_no = $(this).data('acknowledgement_no');
+        //     var account_id = $(this).data('account_id');
+
+        //     $.ajax({
+        //         url: '/case-data-list/',
+        //         type: 'POST', // Use POST method.
+        //         headers: {
+        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //         },
+        //         data: {
+        //             acknowledgement_no: acknowledgement_no, // Pass the name.
+        //             account_id: account_id // Pass the place.
+        //         },
+        //         success: function(response) {
+        //             // Handle success response.
+        //             // Reload the page.
+        //             $('.alert-success-one').html(response.success +
+        //                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+        //                 '<span aria-hidden="true">&times;</span>' + '</button>').show();
+
+        //             //table.draw();
+
+        //             location.reload();
+        //         },
+        //         error: function(xhr, status, error) {
+        //             // Handle error response.
+        //             console.error(xhr.responseText)
+        //         }
+        //     });
+        // });
+
+
+
+        // $(document).on('click', '.show-case-btn', function() {
+        //     var Id = $(this).data('id');
+        //     var acknowledgement_no = $(this).data('acknowledgement_no');
+        //     var account_id = $(this).data('account_id');
+        //     $.ajax({
+        //         url: '/case-data-list/',
+        //         type: 'POST', // Use POST method.
+        //         headers: {
+        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        //         },
+        //         data: {
+        //             acknowledgement_no: acknowledgement_no, // Pass the name.
+        //             account_id: account_id // Pass the place.
+        //         },
+        //         success: function(response) {
+        //             // Handle success response.
+        //             // Reload the page.
+        //             $('.alert-success-one').html(response.success +
+        //                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+        //                 '<span aria-hidden="true">&times;</span>' + '</button>').show();
+        //             //table.draw();
+        //             location.reload();
+        //         },
+        //         error: function(xhr, status, error) {
+        //             // Handle error response.
+        //             console.error(xhr.responseText)
+        //         }
+        //     });
+        // });
 
 
 

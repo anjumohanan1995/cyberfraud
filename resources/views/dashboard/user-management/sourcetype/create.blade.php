@@ -7,15 +7,15 @@
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-
+                    Hi, welcome back!
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">User Management</a>
+                            <a href="#">Source Type Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Edit Role
+                            Source Type
                         </li>
                     </ol>
                 </nav>
@@ -35,26 +35,37 @@
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    Edit Role Here!
+                                    Add Source Type!
                                 </h4>
 
                             </div>
 
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('roles.update', ['role' => $data->id]) }}" method="POST">
+                                <form action="{{ route('sourcetype.store') }}" method="POST">
                                     @csrf
-                                    @method('put')
-
-                                     <div class="row">
+                                    <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="name">Name:</label>
-                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter Role" value="{{ old('name') ?: $data->name  }}" required>
+                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter Source Type" value="{{ old('name') }}" required>
                                                 @error('name')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="status">Status:</label>
+                                                <select class="form-control" name="status" required>
+                                                    <option value="active">Active</option>
+                                                    <option value="inactive">Inactive</option>
+                                                </select>
+                                                @error('status')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
