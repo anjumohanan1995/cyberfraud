@@ -57,12 +57,30 @@
         <div class="my-auto page page-h">
             <div class="main-signin-wrapper">
                 <div class="main-card-signin d-md-flex">
+                    <div>
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
+                        @endif
+                    </div>
                     <div class="p-5">
                         <form action="{{ route('password.email') }}" method="POST">
                             @csrf
                             <div class="form-group">
                                 <label for="email" style="color: black;">Email Address</label><br>
-                                <input id="email" type="email" name="email" value="{{ old('email') }}" required style="color: black;">
+                                <input id="email" type="email" name="email" value="{{ old('email') }}"
+                                    required style="color: black;">
                                 <div><br>
                                     <button type="submit" class="btn btn-success">Send Password Reset Link</button>
                                 </div>
@@ -78,6 +96,3 @@
 </body>
 
 </html>
-
-
-

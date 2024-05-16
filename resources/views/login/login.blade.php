@@ -60,6 +60,25 @@
                     <div class="p-5">
                         <div class="main-signin-header">
                             <img src="img/logo.png" class="" alt="" />
+                            <br>
+                            <div>
+
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('success') }}
+                                        {{-- <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button> --}}
+                                    </div>
+                                @endif
+
+                                @if (session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('error') }}
+                                        {{-- <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button> --}}
+                                    </div>
+                                @endif
+                            </div>
 
                             <h4><br>Please sign in to continue</h4>
 
@@ -67,20 +86,23 @@
                                 @csrf
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    <input id="email" name="email" class="form-control" placeholder="Enter your email" type="email">
+                                    <input id="email" name="email" class="form-control"
+                                        placeholder="Enter your email" type="email">
                                     @error('email')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input id="password" name="password" class="form-control" placeholder="Enter your password" type="password">
+                                    <input id="password" name="password" class="form-control"
+                                        placeholder="Enter your password" type="password">
                                     @error('password')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <button class="btn btn-main-primary btn-block">Sign In</button>
                             </form>
+
 
                         </div>
                         <div class="main-signin-footer mt-3 mg-t-5">

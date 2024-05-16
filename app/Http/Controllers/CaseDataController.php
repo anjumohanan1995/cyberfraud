@@ -30,7 +30,7 @@ class CaseDataController extends Controller
         return view('dashboard.case-data-list.index')->with('banks', $banks);
     }
 
-    public function bankCaseData(Request $request)
+     public function bankCaseData(Request $request)
     {
 
         $acknowledgement_no = $request->acknowledgement_no;
