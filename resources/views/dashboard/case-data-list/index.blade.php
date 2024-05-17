@@ -64,8 +64,7 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <form id="complaint-form">
+<form id="complaint-form">
                                 <div class="row">
                                   <div class="col-md-3">
                                     <div class="form-group">
@@ -181,7 +180,6 @@
                                     </div>
                                 </div>
                             </form>
-
                             <div class="table-responsive mb-0">
                                 <table id="example"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
@@ -216,9 +214,27 @@
         </div>
         <!-- /row -->
     </div>
+        <script>
+        $("#type").on('change', function() {
+            var type = document.getElementById("type").value;
+            var dropdown = document.getElementById("options");
 
+            dropdown.innerHTML = ""; // Clear previous options
+
+            if (type === "bank") {
+                // Assuming `banks` is defined somewhere in your code
+                var banks = @json($banks); // Convert the PHP array to JSON
+
+                banks.forEach(function(bank) {
+                    var option = document.createElement("option");
+                    option.text = bank.name; // Accessing the `name` property of each bank
+                    dropdown.add(option);
+                });
+            }
+            // Add similar logic for other types if needed
+        });
+    </script>
     <script>
-<<<<<<< HEAD
         $(document).ready(function(){
             var table = $('#example').DataTable({
                 processing: true,
@@ -241,50 +257,6 @@
                     },
                   
                     {
-=======
-        $("#type").on('change', function() {
-            var type = document.getElementById("type").value;
-            var dropdown = document.getElementById("options");
-
-            dropdown.innerHTML = ""; // Clear previous options
-
-            if (type === "bank") {
-                // Assuming `banks` is defined somewhere in your code
-                var banks = @json($banks); // Convert the PHP array to JSON
-
-                banks.forEach(function(bank) {
-                    var option = document.createElement("option");
-                    option.text = bank.name; // Accessing the `name` property of each bank
-                    dropdown.add(option);
-                });
-            }
-            // Add similar logic for other types if needed
-        });
-    </script>
-
-     <script>
-$(document).ready(function() {
-
-    var table = $('#example').DataTable({
-        processing: true,
-        serverSide: true,
-        buttons: [
-            'copyHtml5',
-            'excelHtml5',
-            'csvHtml5',
-            'pdfHtml5'
-        ],
-        ajax: {
-            url: "{{ route('get.datalist') }}",
-            data: function(d) {
-                return $.extend({}, d, {});
-            }
-        },
-        columns: [
-            { data: 'id' },
-            { data: 'source_type' },
-            {
->>>>>>> 0b77ab2928cb24296a1f6ec510ec94e3b72d6706
                         data: 'acknowledgement_no'
                     },
                     {
@@ -323,23 +295,11 @@ $(document).ready(function() {
                     {
                         data: 'edit'
                     }
-<<<<<<< HEAD
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
             });
-                
-        });
-
-
-    </script>
-=======
-        ],
-        order: [0, 'desc'],
-        ordering: true
-    });
-
-    // Form submission event handler
+                // Form submission event handler
     $('#complaint-form').submit(function(event) {
         event.preventDefault(); // Prevent default form submission
 
@@ -357,16 +317,9 @@ $(document).ready(function() {
         // Reload DataTable with new data based on selected filters
         table.ajax.url(url).load();
     });
+                
+        });
 
 
-
-});
-
-</script>
->>>>>>> 0b77ab2928cb24296a1f6ec510ec94e3b72d6706
+    </script>
 @endsection
-
-
-
-
-

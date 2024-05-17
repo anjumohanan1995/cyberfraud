@@ -5,16 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\BankCasedata;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
-<<<<<<< HEAD
+use Carbon\Carbon;
+use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
 
 
-=======
-use Carbon\Carbon;
-use MongoDB\BSON\UTCDateTime;
-use Illuminate\Support\Facades\DB;
->>>>>>> 0b77ab2928cb24296a1f6ec510ec94e3b72d6706
 
 class CaseDataController extends Controller
 {
@@ -38,7 +34,6 @@ class CaseDataController extends Controller
         // Pass the $banks data to the view
         return view('dashboard.case-data-list.index')->with('banks', $banks);
     }
-
      public function bankCaseData(Request $request)
     {
 
@@ -74,8 +69,6 @@ class CaseDataController extends Controller
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
         $searchValue = $search_arr['value']; // Search value.
-
-
 
         // Total records.
         $totalRecordsQuery = BankCasedata::where('acknowledgement_no', $acknowledgement_no)
@@ -176,10 +169,16 @@ class CaseDataController extends Controller
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
         $searchValue = $search_arr['value']; // Search value.
-
-<<<<<<< HEAD
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+        $mobile = $request->get('mobile');
+        $acknowledgement_no= $request->get('acknowledgement_no');
+        $filled_by = $request->get('filled_by');
+        $search_by = $request->get('search_by');
+        $options = $request->get('options');
         // Total records.
-        $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+        $totalRecordQuery = Complaint::where('deleted_at', null);        $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+        
         //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
         $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
      
@@ -192,78 +191,35 @@ class CaseDataController extends Controller
             ->where('deleted_at', null)
             ->orderBy('created_at', 'desc')
             ->orderBy($columnName, $columnSortOrder);
-            echo $items->count();
-        if($searchValue){
-            $items = Complaint::groupBy('acknowledgement_no')
-            ->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
-            ->orWhere('district', 'like', '%' . $searchValue . '%')
-            ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
-            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
-            ->orWhere('police_station', 'like', '%' . $searchValue . '%')
-            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
-            ->where('deleted_at', null)
-            ->orderBy('created_at', 'desc')
-            ->orderBy($columnName, $columnSortOrder); 
-
-      
-
-            $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
-
-            $totalRecordswithFilter = $totalRecords;
-        }
-
-        $records = $items->skip($start)->take($rowperpage)->get();
-=======
-        // Retrieve parameters from the request
-        $fromDate = $request->get('from_date');
-        $toDate = $request->get('to_date');
-        $mobile = $request->get('mobile');
-        $acknowledgement_no= $request->get('acknowledgement_no');
-        $filled_by = $request->get('filled_by');
-        $search_by = $request->get('search_by');
-        $options = $request->get('options');
-        // dd($acknowledgement_no);
-        // dd($filled_by );
-
-
-        // Base query for total records
-        $totalRecordQuery = Complaint::where('deleted_at', null);
-
-        // Base query for filtered records
-        $items = Complaint::where('deleted_at', null);
-
         // Apply filter conditions
         if ($fromDate && $toDate) {
-        // Parse and format dates using Carbon
-        $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
-        $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
-
-        // Convert Carbon objects to UTCDateTime
-        $fromUTC = new UTCDateTime($from->getTimestamp() * 1000);
-        $toUTC = new UTCDateTime($to->getTimestamp() * 1000);
-
-        // Filter records based on the formatted dates
-        $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
-        $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
-        }
-
-        if ($mobile) {
-            $mobile = (int)$mobile;
-            $totalRecordQuery->where('complainant_mobile', $mobile);
-            $items->where('complainant_mobile', $mobile);
-        }
-        if ($options && $options!='null') {
-            $totalRecordQuery->where('bank_name', $options);
-            $items->where('bank_name', $options);
-        }
-        if ($acknowledgement_no) {
-            $acknowledgement_no = (int)$acknowledgement_no;
-            $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
-            $items->where('acknowledgement_no', $acknowledgement_no);
-        }
-
-
-// Apply "Filled by" filter
+            // Parse and format dates using Carbon
+            $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
+            $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
+    
+            // Convert Carbon objects to UTCDateTime
+            $fromUTC = new UTCDateTime($from->getTimestamp() * 1000);
+            $toUTC = new UTCDateTime($to->getTimestamp() * 1000);
+    
+            // Filter records based on the formatted dates
+            $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
+            $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
+            }
+            if ($mobile) {
+                $mobile = (int)$mobile;
+                $totalRecordQuery->where('complainant_mobile', $mobile);
+                $items->where('complainant_mobile', $mobile);
+            }
+            if ($options && $options!='null') {
+                $totalRecordQuery->where('bank_name', $options);
+                $items->where('bank_name', $options);
+            }
+            if ($acknowledgement_no) {
+                $acknowledgement_no = (int)$acknowledgement_no;
+                $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
+                $items->where('acknowledgement_no', $acknowledgement_no);
+            }
+            // Apply "Filled by" filter
 if ($filled_by) {
     switch ($filled_by) {
         case 'citizen':
@@ -289,10 +245,6 @@ if ($filled_by) {
             break;
     }
 }
-
-
-
-
 // Apply filter based on selected option
 if ($search_by) {
     switch ($search_by) {
@@ -331,38 +283,29 @@ if ($search_by) {
             break;
     }
 }
+        if($searchValue){
+            $items = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+            ->orWhere('district', 'like', '%' . $searchValue . '%')
+            ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+            ->orWhere('police_station', 'like', '%' . $searchValue . '%')
+            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+            ->where('deleted_at', null)
+            ->orderBy('created_at', 'desc')
+            ->orderBy($columnName, $columnSortOrder); 
 
+            $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
 
-        // Total records count
+            $totalRecordswithFilter = $totalRecords;
+        }
         $totalRecords = $totalRecordQuery->count();
 
         // Total records count after filtering
         $totalRecordswithFilter = $items->count();
-        // DB::connection()->enableQueryLog();
-        // DB::enableQueryLog();
-        // Fetch filtered records with pagination
-        $records = $items->orderBy('created_at', 'desc')
-                    ->orderBy($columnName, $columnSortOrder)
-                    ->skip($start)
-                    ->take($rowperpage)
-                    ->get();
-                    // dd($records->toSql());
-                    // dd(DB::getQueryLog());
-
-//First You will need to enable the query log by calling:
-
-
-// $queries = DB::getQueryLog();
-
-// // Print or log the queries
-// foreach ($queries as $query) {
-//     Log::info($query['query']);
-// }
-
-        // Prepare data for response
->>>>>>> 0b77ab2928cb24296a1f6ec510ec94e3b72d6706
+        $records = $items->skip($start)->take($rowperpage)->get();
         $data_arr = array();
-        $i = $start + 1; // Adjust pagination number
+        $i = $start + 1; 
 
         foreach ($records as $record){
             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
@@ -370,19 +313,19 @@ if ($search_by) {
             $id = $record->id;
             $source_type = $record->source_type;
             $acknowledgement_no = $record->acknowledgement_no;
-<<<<<<< HEAD
            
-            $transaction_id="";$amount="";
+            $transaction_id="";$amount="";$bank_name="";
             foreach($com as $com){
                 $transaction_id .= $com->transaction_id."<br>"; 
                 $amount .= $com->amount."<br>";
+                $bank_name .= $com->bank_name."<br>";
                 $complainant_name = $com->complainant_name;
                 $complainant_mobile = $com->complainant_mobile;
-                $bank_name = $com->bank_name;
+              
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $entry_date = $com->entry_date;
+                $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
                 $current_status = $com->current_status;
                 $date_of_action = $com->date_of_action;
                 $action_taken_by_name = $com->action_taken_by_name;
@@ -392,25 +335,6 @@ if ($search_by) {
                 $action_taken_by_bank = $com->action_taken_by_bank;
             }
        
-=======
-            $district = $record->district;
-            $police_station = $record->police_station;
-            $complainant_name = $record->complainant_name;
-            $complainant_mobile = $record->complainant_mobile;
-            $transaction_id = $record->transaction_id;
-            $bank_name = $record->bank_name;
-            $account_id = $record->account_id;
-            $amount = $record->amount;
-            $entry_date = Carbon::parse($record->entry_date)->format('Y-m-d H:i:s');
-            $current_status = $record->current_status;
-            $date_of_action = $record->date_of_action;
-            $action_taken_by_name = $record->action_taken_by_name;
-            $action_taken_by_designation = $record->action_taken_by_designation;
-            $action_taken_by_mobile = $record->action_taken_by_mobile;
-            $action_taken_by_email = $record->action_taken_by_email;
-            $action_taken_by_bank = $record->action_taken_by_bank;
-
->>>>>>> 0b77ab2928cb24296a1f6ec510ec94e3b72d6706
             $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
            
             $data_arr[] = array(
@@ -430,24 +354,17 @@ if ($search_by) {
             );
         }
 
-// dd($data_arr);
-
         $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
             "iTotalDisplayRecords" => $totalRecordswithFilter,
-            "aaData" => $data_arr,
+            "aaData" => $data_arr
         );
-
 
         return response()->json($response);
     }
 
-<<<<<<< HEAD
     public function detailsView(){
         return view('dashboard.case-data-list.index');
     }
-=======
-
->>>>>>> 0b77ab2928cb24296a1f6ec510ec94e3b72d6706
 }
