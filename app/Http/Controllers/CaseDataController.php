@@ -188,12 +188,13 @@ class CaseDataController extends Controller
             $action_taken_by_email = $record->action_taken_by_email;
             $action_taken_by_bank = $record->action_taken_by_bank;
 
+            $ack_no = '<a  href="' . url('case-data/'.$acknowledgement_no.'/view') . '">'.$acknowledgement_no.'</a>';
             $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
 
             $data_arr[] = array(
                 "id" => $i,
                 "source_type" => $source_type,
-                "acknowledgement_no" => $acknowledgement_no,
+                "acknowledgement_no" => $ack_no,
                 "district" => $district,
                 "police_station" => $police_station,
                 "complainant_name" => $complainant_name,
@@ -222,5 +223,13 @@ class CaseDataController extends Controller
         );
 
         return response()->json($response);
+    }
+    public function caseDataView(Request $request,$id){
+        $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
+        $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
+        $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->sum('amount');
+        $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
+        //dd($bank_datas);
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount'));
     }
 }
