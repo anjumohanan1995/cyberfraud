@@ -7,6 +7,7 @@ use App\Http\Controllers\CaseDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\DropCollectionController;
+use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
@@ -124,6 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
     Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
     Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
+    Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
 
 
     //collection drop controller
@@ -134,7 +136,12 @@ Route::middleware('auth')->group(function () {
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
 
 
-
+//evidence
+    Route::resource('evidence', EvidenceController::class);
+    Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
+    Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
+    Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
+    Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
 
 
 
