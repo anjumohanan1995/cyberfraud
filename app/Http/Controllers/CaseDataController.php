@@ -5,14 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\BankCasedata;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use MongoDB\BSON\UTCDateTime;
+use Illuminate\Support\Facades\DB;
+use MongoDB\Client;
+
+
 
 class CaseDataController extends Controller
 {
     public function index()
     {
-        return view('dashboard.case-data-list.index');
-    }
+        // Assuming $banks is an array of bank data
+        $banks = [
+            ['id' => 1, 'name' => 'Ratnakar Bank Limited (RBL)'],
+            ['id' => 2, 'name' => 'State Bank of India'],
+            ['id' => 3, 'name' => 'Dhanlaxmi Bank'],
+            ['id' => 4, 'name' => 'Federal Bank']
+        ];
 
+        // // Assuming $banks is an array of bank data
+        // $wallet = [
+        //     ['id' => 1, 'name' => 'Ratnakar Bank Limited (RBL)'],
+        //     ['id' => 2, 'name' => 'State Bank of India'],
+        //     ['id' => 3, 'name' => 'Dhanlaxmi Bank']
+        // ];
+
+        // Pass the $banks data to the view
+        return view('dashboard.case-data-list.index')->with('banks', $banks);
+    }
      public function bankCaseData(Request $request)
     {
 
@@ -135,7 +156,6 @@ class CaseDataController extends Controller
 
     public function getDatalist(Request $request)
     {
-        ## Read value.
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows display per page.
@@ -149,56 +169,180 @@ class CaseDataController extends Controller
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
         $searchValue = $search_arr['value']; // Search value.
-
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+        $mobile = $request->get('mobile');
+        $acknowledgement_no= $request->get('acknowledgement_no');
+        $filled_by = $request->get('filled_by');
+        $search_by = $request->get('search_by');
+        $options = $request->get('options');
         // Total records.
-        $totalRecord = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc');
-        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $totalRecordQuery = Complaint::where('deleted_at', null);        $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
 
+        //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
 
         $totalRecordswithFilte = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc');
-        $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        //$totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        $totalRecordswithFilter = Complaint::groupBy('acknowledgement_no')->get()->count();
 
-        // Fetch records.
-        $items = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+        //Fetch records.
+            $items = Complaint::groupBy('acknowledgement_no')
+            ->where('deleted_at', null)
+            ->orderBy('created_at', 'desc')
+            ->orderBy($columnName, $columnSortOrder);
+        // Apply filter conditions
+        if ($fromDate && $toDate) {
+            // Parse and format dates using Carbon
+            $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
+            $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
+
+            // Convert Carbon objects to UTCDateTime
+            $fromUTC = new UTCDateTime($from->getTimestamp() * 1000);
+            $toUTC = new UTCDateTime($to->getTimestamp() * 1000);
+
+            // Filter records based on the formatted dates
+            $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
+            $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
+            }
+            if ($mobile) {
+                $mobile = (int)$mobile;
+                $totalRecordQuery->where('complainant_mobile', $mobile);
+                $items->where('complainant_mobile', $mobile);
+            }
+            if ($options && $options!='null') {
+                $totalRecordQuery->where('bank_name', $options);
+                $items->where('bank_name', $options);
+            }
+            if ($acknowledgement_no) {
+                $acknowledgement_no = (int)$acknowledgement_no;
+                $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
+                $items->where('acknowledgement_no', $acknowledgement_no);
+            }
+            // Apply "Filled by" filter
+if ($filled_by) {
+    switch ($filled_by) {
+        case 'citizen':
+            // Filter citizen filled entries within 24 hours
+            $startOfDay = Carbon::now()->subDay()->startOfDay();
+            $endOfDay = Carbon::now()->endOfDay();
+            $items->where('entry_date', '>=', new UTCDateTime($startOfDay->timestamp * 1000))
+                ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
+            // Filter citizen filled entries
+            $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
+            break;
+        case 'cyber':
+            // Filter cyber filled entries within 24 hours
+            $startOfDay = Carbon::now()->subDay()->startOfDay();
+            $endOfDay = Carbon::now()->endOfDay();
+            $items->where('entry_date', '>=', new UTCDateTime($startOfDay->timestamp * 1000))
+                ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
+            // Filter cyber filled entries
+            $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
+            break;
+        default:
+            // Do nothing for 'All' option
+            break;
+    }
+}
+// Apply filter based on selected option
+if ($search_by) {
+    switch ($search_by) {
+        case 'account_id':
+            // Fetch records from the complaints collection where account_id exists
+            $complaints = Complaint::where('account_id', 'exists', true)->get()->pluck('account_id');
+
+            // Fetch records from the bank_casedata collection where account_no_1 exists
+            $bankData = BankCasedata::where('account_no_1', 'exists', true)->get()->pluck('account_no_1');
+
+            // Compare the account_id fields from both collections
+            $matchingIds = $complaints->intersect($bankData)->toArray();
+
+            // Filter items where the account_id exists in both collections
+            $items->whereIn('complaints.account_id', $matchingIds);
+            $items->whereIn('bank_casedata.account_no_1', $matchingIds);
+
+            break;
+        case 'transaction_id':
+            // Fetch records from the complaints collection where transaction_id exists
+            $complaints = Complaint::where('transaction_id', 'exists', true)->get()->pluck('transaction_id');
+
+            // Fetch records from the bank_casedata collection where transaction_id_or_utr_no exists
+            $bankData = BankCasedata::where('transaction_id_or_utr_no', 'exists', true)->get()->pluck('transaction_id_or_utr_no');
+
+            // Compare the transaction_id fields from both collections
+            $matchingIds = $complaints->intersect($bankData);
+
+            // Filter items where the transaction_id exists in both collections
+            $items->whereIn('complaints.transaction_id', $matchingIds);
+            $items->whereIn('bank_casedata.transaction_id_or_utr_no', $matchingIds);
+           // dd($items);
+            break;
+        default:
+            // Do nothing for other options
+            break;
+    }
+}
+        if($searchValue){
+            $items = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+            ->orWhere('district', 'like', '%' . $searchValue . '%')
+            ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+            ->orWhere('police_station', 'like', '%' . $searchValue . '%')
+            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+            ->where('deleted_at', null)
+            ->orderBy('created_at', 'desc')
+            ->orderBy($columnName, $columnSortOrder);
+
+            $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
+
+            $totalRecordswithFilter = $totalRecords;
+        }
+        $totalRecords = $totalRecordQuery->count();
+
+        // Total records count after filtering
+        $totalRecordswithFilter = $items->count();
         $records = $items->skip($start)->take($rowperpage)->get();
-
-
         $data_arr = array();
-        $i = $start;
+        $i = $start + 1;
 
-        foreach ($records as $record) {
+        foreach ($records as $record){
+            $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
             $i++;
             $id = $record->id;
             $source_type = $record->source_type;
             $acknowledgement_no = $record->acknowledgement_no;
-            $district = $record->district;
-            $police_station = $record->police_station;
-            $complainant_name = $record->complainant_name;
-            $complainant_mobile = $record->complainant_mobile;
-            $transaction_id = $record->transaction_id;
-            $bank_name = $record->bank_name;
-            $account_id = $record->account_id;
-            $amount = $record->amount;
-            $entry_date = $record->entry_date;
-            $current_status = $record->current_status;
-            $date_of_action = $record->date_of_action;
-            $action_taken_by_name = $record->action_taken_by_name;
-            $action_taken_by_designation = $record->action_taken_by_designation;
-            $action_taken_by_mobile = $record->action_taken_by_mobile;
-            $action_taken_by_email = $record->action_taken_by_email;
-            $action_taken_by_bank = $record->action_taken_by_bank;
 
+            $transaction_id="";$amount="";$bank_name="";
+            foreach($com as $com){
+                $transaction_id .= $com->transaction_id."<br>";
+                $amount .= $com->amount."<br>";
+                $bank_name .= $com->bank_name."<br>";
+                $complainant_name = $com->complainant_name;
+                $complainant_mobile = $com->complainant_mobile;
+
+                $district = $com->district;
+                $police_station = $com->police_station;
+                $account_id = $com->account_id;
+                $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
+                $current_status = $com->current_status;
+                $date_of_action = $com->date_of_action;
+                $action_taken_by_name = $com->action_taken_by_name;
+                $action_taken_by_designation = $com->action_taken_by_designation;
+                $action_taken_by_mobile = $com->action_taken_by_mobile;
+                $action_taken_by_email = $com->action_taken_by_email;
+                $action_taken_by_bank = $com->action_taken_by_bank;
+            }
             $ack_no = '<a  href="' . url('case-data/'.$acknowledgement_no.'/view') . '">'.$acknowledgement_no.'</a>';
+
             $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
 
             $data_arr[] = array(
                 "id" => $i,
-                "source_type" => $source_type,
                 "acknowledgement_no" => $ack_no,
-                "district" => $district,
-                "police_station" => $police_station,
-                "complainant_name" => $complainant_name,
-                "complainant_mobile" => $complainant_mobile,
+                "district" => $district."<br>".$police_station,
+                "complainant_name" => $complainant_name."<br>".$complainant_mobile,
                 "transaction_id" => $transaction_id,
                 "bank_name" => $bank_name,
                 "account_id" => $account_id,
@@ -207,10 +351,6 @@ class CaseDataController extends Controller
                 "current_status" => $current_status,
                 "date_of_action" => $date_of_action,
                 "action_taken_by_name" => $action_taken_by_name,
-                "action_taken_by_designation" => $action_taken_by_designation,
-                "action_taken_by_mobile" => $action_taken_by_mobile,
-                "action_taken_by_email" => $action_taken_by_email,
-                "action_taken_by_bank" => $action_taken_by_bank,
                 "edit" => $edit
             );
         }
@@ -223,6 +363,10 @@ class CaseDataController extends Controller
         );
 
         return response()->json($response);
+    }
+
+    public function detailsView(){
+        return view('dashboard.case-data-list.index');
     }
     public function caseDataView(Request $request,$id){
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();

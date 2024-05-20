@@ -13,6 +13,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ModusController;
 use App\Http\Controllers\PoliceStationsController;
+use App\Http\Controllers\SourceTypeController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -119,11 +120,28 @@ Route::middleware('auth')->group(function () {
     //case data controller starts here.
     Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
     Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
+    // Route::post('case-data/post-datalist/filter', [CaseDataController::class, 'getDatalist'])->name("post.datalist-filter");
     Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
     Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
+    Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
     Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
 
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
+
+
+    Route::resource('sourcetype', SourceTypeController::class);
+    Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
+
+
+//evidence
+    Route::resource('evidence', EvidenceController::class);
+    Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
+    Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
+    Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
+    Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
+
+
+
 });

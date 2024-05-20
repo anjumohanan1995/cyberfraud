@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
+use App\Models\SourceType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Excel;
@@ -11,8 +12,13 @@ class ComplaintController extends Controller
 {
     public function importComplaints()
     {
-        return view("import_complaints");
+        // Fetch only active source types from the database
+        $sourceTypes = SourceType::where('status', 'active')->get();
+
+        // Pass the fetched data to the view
+        return view("import_complaints", compact('sourceTypes'));
     }
+
     public function complaintStore(Request $request)
     {
         $request->validate([

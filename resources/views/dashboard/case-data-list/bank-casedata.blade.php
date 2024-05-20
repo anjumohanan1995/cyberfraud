@@ -51,19 +51,31 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class=" m-4 d-flex justify-content-between">
+                            <div class="m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Bank Case Data list.
                                 </h4>
-                                <div class="col-md-1 col-6 text-center">
-                                    <div class="task-box primary  mb-0">
+                                <div class="col-md-1 col-6 text-center d-flex flex-row">
+                                    <div class="task-box primary mb-0 mr-2" style="width: 100%; padding: 6px">
+                                        <a class="text-white" href="#">
+                                            <div>
+                                                <h3 class="mb-0"><i class="fa fa-upload"></i></h3>
+                                                <a class="text-white"
+                                                    href="{{ route('evidence.create', ['acknowledgement_no' => $acknowledgement_no]) }}">
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="task-box primary mb-0" style="width: 100%; padding: 16px">
                                         <a class="text-white" href="{{ route('modus.create') }}">
-                                            <p class="mb-0 tx-12">Add </p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <div>
+                                                <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                                <p class="mb-0 tx-12">Add</p>
+                                            </div>
                                         </a>
                                     </div>
                                 </div>
                             </div>
+
 
                             <div class="table-responsive mb-0">
                                 <table id="example"
@@ -114,8 +126,6 @@
 
 
     <script>
-
-
         var acknowledgement_no = '{{ $acknowledgement_no }}';
         var account_id = '{{ $account_id }}';
 
@@ -125,6 +135,7 @@
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
+
                 buttons: [
                     'copyHtml5',
                     'excelHtml5',

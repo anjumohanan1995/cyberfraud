@@ -63,7 +63,7 @@
                 @$sub_permission= ($permission->sub_permissions)? json_decode($permission->sub_permissions,true) :  null;
 
             @endphp
-            @if ( !empty($permission) )
+            {{-- @if ( !empty($permission) )
 
                 @foreach(@$permission->permission as $permissions)
 
@@ -98,7 +98,7 @@
                     @endif
 
                 @endforeach
-            @endif
+            @endif --}}
               {{-- <li class="slide">
                         <a class="side-menu__item" href="{{url('modus')}}">
                             <i class="side-menu__icon fe fe-database"> </i>
@@ -177,6 +177,12 @@
                 <a class="side-menu__item" href="{{ url('case-data') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Case Data</span>
+                </a>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('sourcetype') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Source Type</span>
                 </a>
             </li>
             {{-- <li class="slide">
