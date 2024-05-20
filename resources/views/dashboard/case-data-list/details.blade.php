@@ -121,6 +121,26 @@
                         </div>
 
                     </div>
+                    <div class="row">
+                        <div class="col-md-2 col-6 text-center">
+                            <div class="task-box primary  mb-0">
+                                <a class="text-white"
+                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                    <p class="mb-0 tx-12">Add Evidence</p>
+                                    <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-6 text-center">
+                            <div class="task-box primary  mb-0">
+                                <a
+                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                    <p class="mb-0 tx-12">View Evidence</p>
+                                    <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                </a>
+                            </div>
+                        </div>
+                    </div><br>
 
                     <div class="card overflow-hidden review-project">
 

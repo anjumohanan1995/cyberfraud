@@ -7,6 +7,7 @@ use App\Http\Controllers\CaseDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\DropCollectionController;
+use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
