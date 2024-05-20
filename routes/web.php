@@ -134,7 +134,12 @@ Route::middleware('auth')->group(function () {
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
 
 
-
+//evidence
+    Route::resource('evidence', EvidenceController::class);
+    Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
+    Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
+    Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
+    Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
 
 
 
