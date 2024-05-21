@@ -60,7 +60,8 @@
                                         <a class="text-white" href="#">
                                             <div>
                                                 <h3 class="mb-0"><i class="fa fa-upload"></i></h3>
-                                                <p class="mb-0 tx-12">Upload Evidence</p>
+                                                <a class="text-white"
+                                                    href="{{ route('evidence.create', ['acknowledgement_no' => $acknowledgement_no]) }}">
                                             </div>
                                         </a>
                                     </div>
@@ -125,8 +126,6 @@
 
 
     <script>
-
-
         var acknowledgement_no = '{{ $acknowledgement_no }}';
         var account_id = '{{ $account_id }}';
 
@@ -136,6 +135,7 @@
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
+
                 buttons: [
                     'copyHtml5',
                     'excelHtml5',

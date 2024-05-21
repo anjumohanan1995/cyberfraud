@@ -64,8 +64,7 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <form id="complaint-form">
+<form id="complaint-form">
                                 <div class="row">
                                   <div class="col-md-3">
                                     <div class="form-group">
@@ -181,32 +180,23 @@
                                     </div>
                                 </div>
                             </form>
-
                             <div class="table-responsive mb-0">
                                 <table id="example"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                     <thead>
                                         <tr>
                                             <th>SL No</th>
-                                            <th>Source Type</th>
                                             <th>Acknowledgement No</th>
-                                            <th>District</th>
-                                            <th>Police Station</th>
-                                            <th>Complainant Name</th>
-                                            <th>Complainant Mobile</th>
-                                            <th>Transaction ID</th>
-                                            <th>Bank Name</th>
+                                            <th>District/Police Station</th>
+                                            <th>Complainant Name & Mobile number</th>
+                                            <th>Transaction ID/UTR Number</th>
+                                            <th>Bank/Wallet/Merchant</th>
                                             <th>Account ID</th>
                                             <th>Amount</th>
                                             <th>Entry Date</th>
                                             <th>Current Status</th>
                                             <th>Date of Action</th>
-                                            <th>Action Taken By Name</th>
-                                            <th>Action Taken By Designation</th>
-                                            <th>Action Taken By Mobile</th>
-                                            <th>Action Taken By Email</th>
-                                            <th>Action Taken By Bank</th>
-
+                                            <th>Action Taken By</th>
                                             <th>ACTION</th>
                                         </tr>
                                     </thead>
@@ -224,8 +214,7 @@
         </div>
         <!-- /row -->
     </div>
-
-    <script>
+        <script>
         $("#type").on('change', function() {
             var type = document.getElementById("type").value;
             var dropdown = document.getElementById("options");
@@ -278,43 +267,39 @@
             // Add similar logic for other types if needed
         });
     </script>
-
-     <script>
-$(document).ready(function() {
-
-    var table = $('#example').DataTable({
-        processing: true,
-        serverSide: true,
-        buttons: [
-            'copyHtml5',
-            'excelHtml5',
-            'csvHtml5',
-            'pdfHtml5'
-        ],
-        ajax: {
-            url: "{{ route('get.datalist') }}",
-            data: function(d) {
-                return $.extend({}, d, {});
-            }
-        },
-        columns: [
-            { data: 'id' },
-            { data: 'source_type' },
-            {
+    <script>
+        $(document).ready(function(){
+            var table = $('#example').DataTable({
+                processing: true,
+                serverSide: true,
+             
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'csvHtml5',
+                    'pdfHtml5'
+                ],
+                "ajax": {
+                    "url": "{{ route('get.datalist') }}",
+                    "data": function(d) {
+                        return $.extend({}, d, {});
+                    }
+                },
+                columns:[{
+                        data: 'id'
+                    },
+                  
+                    {
                         data: 'acknowledgement_no'
                     },
                     {
                         data: 'district'
                     },
-                    {
-                        data: 'police_station'
-                    },
+                   
                     {
                         data: 'complainant_name'
                     },
-                    {
-                        data: 'complainant_mobile'
-                    },
+                   
                     {
                         data: 'transaction_id'
                     },
@@ -339,27 +324,15 @@ $(document).ready(function() {
                     {
                         data: 'action_taken_by_name'
                     },
-                    {
-                        data: 'action_taken_by_designation'
-                    },
-                    {
-                        data: 'action_taken_by_mobile'
-                    },
-                    {
-                        data: 'action_taken_by_email'
-                    },
-                    {
-                        data: 'action_taken_by_bank'
-                    },
+                  
                     {
                         data: 'edit'
                     }
-        ],
-        order: [0, 'desc'],
-        ordering: true
-    });
-
-    // Form submission event handler
+                ],
+                "order": [0, 'desc'],
+                'ordering': true
+            });
+                // Form submission event handler
     $('#complaint-form').submit(function(event) {
         event.preventDefault(); // Prevent default form submission
 
@@ -377,15 +350,9 @@ $(document).ready(function() {
         // Reload DataTable with new data based on selected filters
         table.ajax.url(url).load();
     });
+                
+        });
 
 
-
-});
-
-</script>
+    </script>
 @endsection
-
-
-
-
-
