@@ -130,7 +130,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="pdf_{{ $index }}">PDF:</label>
+                                                                    <label for="pdf_{{ $index }}">Document:</label>
                                                                     <input type="file" name="pdf[]" class="form-control" multiple>
                                                                     @error('pdf.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -171,7 +171,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="pdf_{{ $index }}">PDF:</label>
+                                                                    <label for="pdf_{{ $index }}">Document:</label>
                                                                     <input type="file" name="pdf[]" class="form-control" multiple>
                                                                     @error('pdf.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>

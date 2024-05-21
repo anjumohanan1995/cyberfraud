@@ -84,7 +84,7 @@
 
                                                     {{-- Explode PDFs --}}
                                                     @if($evidence->pdf)
-                                                    <p class="card-text">PDF:
+                                                    <p class="card-text">Document:
                                                         @foreach(explode(',', $evidence->pdf) as $pdfKey => $pdf)
                                                             <a target="_blank" href="{{ Storage::url(trim($pdf)) }}" class="">View Document{{ $pdfKey + 1 }}</a>
                                                         @endforeach
