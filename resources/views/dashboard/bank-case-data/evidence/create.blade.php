@@ -1,14 +1,14 @@
 @extends('layouts.app')
 @php use Illuminate\Support\Facades\Crypt;
            $id = request()->segment(count(request()->segments()));
-        $new_id = Crypt::decrypt($id); @endphp
+        $new_id = Crypt::encrypt($id); @endphp
 
 @section('content')
     <!-- container -->
     <div class="container-fluid">
         <div class="task-box primary  mb-0 col-1">
             <a class="text-white" data-toggle="tooltip" data-placement="top"
-                title="Back" href="{{ route('case-data.view', ['id' => @$new_id ]) }}">
+                title="Back" href="{{ route('case-data.view', ['id' => @$id ]) }}">
                 <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
             </a>
         </div>
@@ -22,7 +22,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('case-data.view', ['id' => @$new_id ]) }}">Case Data</a>
+                            <a href="{{ route('case-data.view', ['id' => @$id ]) }}">Case Data</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
                             Add Evidence
