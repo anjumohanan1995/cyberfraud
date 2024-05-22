@@ -146,65 +146,74 @@
 
 
                         <div class="card-body" width="500px">
-
+                            Action Taken By Bank
                             <br>
                             <div style="overflow-x: auto;">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Account No./(Wallet/PG/PA) Id<br>
-                                                <hr> Transaction ID / UTR Number
-                                            </th>
-                                            <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
-                                            <th>Bank<br>
-                                                <hr>(Wallet/PG/PA)<br>
-                                                <hr> Merchant<br>
-                                                <hr>Insurance
-                                            </th>
-                                            <th>Account Details</th>
-                                            <th>Transaction Details</th>
-                                            <th>Branch Location<br>
-                                                <hr>Branch Manager Name & Contact Details
-                                            </th>
-                                            <th>Reference No / Remarks</th>
-                                            <th>ATM ID<br>
-                                                <hr>Place / Location of ATM
-                                            </th>
-                                            <th>Action Taken By<br>
-                                                <hr>Date of Action
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($bank_datas as $bank_data)
+                                @if ($bank_datas->isEmpty())
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <div class="alert alert-info col-6 text-center mt-3 mb-3">
+                                            No Data available yet!
+                                        </div>
+
+                                    </div>
+                                @else
+                                    <table class="table table-bordered">
+                                        <thead>
                                             <tr>
-                                                <td>{{ @$bank_data->account_no_1 }}<br><br>
-                                                    {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
-                                                    Layer : {{ @$bank_data->Layer }}</td>
-                                                <td>{{ @$bank_data->action_taken_by_bank }}<br><br>
-                                                    Txn Date: {{ @$bank_data->transaction_date }}</td>
-                                                <td>{{ @$bank_data->bank }}</td>
-                                                <td>A/C No : {{ @$bank_data->account_no_2 }}<br>
-                                                    ifsc Code : {{ @$bank_data->ifsc_code }}</td>
-                                                <td>
-                                                    Transaction ID /UTR Number :
-                                                    {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
-                                                    Transaction Amount : {{ @$bank_data->transaction_amount }}</td>
-                                                <td>{{ @$bank_data->branch_location }}<br><br>
-                                                    {{ @$bank_data->branch_manager_details }} </td>
-                                                <td>{{ @$bank_data->reference_no }}<br><br>
-                                                    {{ @$bank_data->remarks }}</td>
-                                                <td></td>
-                                                <td><i class="side-menu__icon fe fe-user"> </i> :
-                                                    {{ @$bank_data->action_taken_name }}<br>
-                                                    <i class="side-menu__icon fe fe-mail"> </i>
-                                                    {{ @$bank_data->action_taken_email }}
-                                                    {{ @$bank_data->date_of_action }}
-                                                </td>
+                                                <th>Account No./(Wallet/PG/PA) Id<br>
+                                                    <hr> Transaction ID / UTR Number
+                                                </th>
+                                                <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
+                                                <th>Bank<br>
+                                                    <hr>(Wallet/PG/PA)<br>
+                                                    <hr> Merchant<br>
+                                                    <hr>Insurance
+                                                </th>
+                                                <th>Account Details</th>
+                                                <th>Transaction Details</th>
+                                                <th>Branch Location<br>
+                                                    <hr>Branch Manager Name & Contact Details
+                                                </th>
+                                                <th>Reference No / Remarks</th>
+                                                <th>ATM ID<br>
+                                                    <hr>Place / Location of ATM
+                                                </th>
+                                                <th>Action Taken By<br>
+                                                    <hr>Date of Action
+                                                </th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($bank_datas as $bank_data)
+                                                <tr>
+                                                    <td>{{ @$bank_data->account_no_1 }}<br><br>
+                                                        {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
+                                                        Layer : {{ @$bank_data->Layer }}</td>
+                                                    <td>{{ @$bank_data->action_taken_by_bank }}<br><br>
+                                                        Txn Date: {{ @$bank_data->transaction_date }}</td>
+                                                    <td>{{ @$bank_data->bank }}</td>
+                                                    <td>A/C No : {{ @$bank_data->account_no_2 }}<br>
+                                                        ifsc Code : {{ @$bank_data->ifsc_code }}</td>
+                                                    <td>
+                                                        Transaction ID /UTR Number :
+                                                        {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
+                                                        Transaction Amount : {{ @$bank_data->transaction_amount }}</td>
+                                                    <td>{{ @$bank_data->branch_location }}<br><br>
+                                                        {{ @$bank_data->branch_manager_details }} </td>
+                                                    <td>{{ @$bank_data->reference_no }}<br><br>
+                                                        {{ @$bank_data->remarks }}</td>
+                                                    <td></td>
+                                                    <td><i class="side-menu__icon fe fe-user"> </i> :
+                                                        {{ @$bank_data->action_taken_name }}<br>
+                                                        <i class="side-menu__icon fe fe-mail"> </i>
+                                                        {{ @$bank_data->action_taken_email }}
+                                                        {{ @$bank_data->date_of_action }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @endif
                             </div>
 
                         </div>
