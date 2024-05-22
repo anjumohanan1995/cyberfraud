@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Evidence;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
 
 class EvidenceController extends Controller
 {
@@ -24,8 +25,10 @@ class EvidenceController extends Controller
         try {
             // Retrieve ACKNOWLEDGEMENT_NO from the URL
             $ack_no = $request->acknowledgement_number;
+            $new_id = Crypt::encrypt($ack_no);
             $pdfPathsString = '';
             $screenshotPathsString = '';
+
              $validator = Validator::make($request->all(), [
         'evidence_type.*' => 'required',
         'url.*' => 'required|url',
@@ -58,6 +61,7 @@ class EvidenceController extends Controller
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
+            //dd($request);
             foreach ($request->evidence_type as $key => $type) {
                 $evidence = new Evidence();
                 $evidence->evidence_type = $type;
@@ -101,28 +105,28 @@ class EvidenceController extends Controller
                         $evidence->ip = $request->ip[$key];
                         $evidence->registrar = $request->registrar[$key];
                         break;
-                    case 'instagram':
-                    case 'telegram':
+                    default:
                         $evidence->url = $request->url[$key];
                         break;
                 }
 
                 $evidence->remarks = $request->remarks[$key];
-
                 $evidence->save();
             }
-        return redirect()->back()->with('success', 'Evidence added successfully!');
+            return redirect()->route('evidence.index', ['acknowledgement_no' => $new_id])->with('success', 'Evidence added successfully!');
         } catch (\Exception $e) {
-            dd($e);
+            //dd($e);
             return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.');
         }
     }
 
     public function index($ack_no)
     {
-        $evidences = Evidence::where('ack_no', $ack_no)->get();
 
-        return view('dashboard.bank-case-data.evidence.index', compact('evidences'));
+        $new_id = Crypt::decrypt($ack_no);
+        $evidences = Evidence::where('ack_no', $new_id)->get();
+
+        return view('dashboard.bank-case-data.evidence.index', compact('evidences', 'new_id'));
     }
 
 

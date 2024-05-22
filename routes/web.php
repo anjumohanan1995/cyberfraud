@@ -74,7 +74,7 @@ Route::middleware('auth')->group(function () {
 
     //dashboard pages starts here.
     Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
-    Route::get('filter-case-data', [DashboardPagesController::class, 'filterCaseData'])->name("filter-case-data");
+    // Route::get('filter-case-data', [DashboardPagesController::class, 'filterCaseData'])->name("filter-case-data");
 
 
     //users route starts here.
@@ -129,6 +129,7 @@ Route::middleware('auth')->group(function () {
     Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
 
 
+    Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
 
 
     //collection drop controller

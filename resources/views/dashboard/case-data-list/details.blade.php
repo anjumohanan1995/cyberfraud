@@ -58,37 +58,74 @@
 
 
                         <div class="card-body" width="500px">
+                            <div class=" m-4 d-flex justify-content-between">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span>Complainant Name</span></td>
+                                                    <td>: </td>
+                                                    <td>{{ @$complaint->complainant_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mobile</td>
+                                                    <td>:</td>
+                                                    <td>{{ @$complaint->complainant_mobile }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>District</td>
+                                                    <td>:</td>
+                                                    <td>{{ @$complaint->district }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Police Station</td>
+                                                    <td>:</td>
+                                                    <td>{{ @$complaint->police_station }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-6 text-center">
+                                    <div class="row justify-content-end">
 
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td><span>Complainant Name</span></td>
-                                        <td>: </td>
-                                        <td> {{ @$complaint->complainant_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Mobile</td>
-                                        <td>:</td>
-                                        <td> {{ @$complaint->complainant_mobile }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>District</td>
-                                        <td>:</td>
-                                        <td>{{ @$complaint->district }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Police Station</td>
-                                        <td>:</td>
-                                        <td>{{ @$complaint->police_station }}</td>
-                                    </tr>
+                                        <div class="col-4 px-1">
+                                            <div class="task-box primary  mb-0">
+                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                                    title="Back" href="{{ route('case-data.index') }}">
+                                                    <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 px-1">
+                                            <div class="task-box primary  mb-0">
+                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                                    title="Add Evidence"
+                                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                                    <h3 class="mb-0"><i class="ti ti-plus"></i></h3>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 px-1">
+                                            <div class="task-box primary  mb-0">
+                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                                    title="View Evidence"
+                                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                                    <h3 class="mb-0"><i class="ti ti-eye"></i></h3>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
 
 
-                                </tbody>
-                            </table>
                             <br>
-                            Total Fraudulent Amount reported by Complainant : <span style="color: red;">₹
-                                {{ number_format($sum_amount, 2) }}</span>
-                            <br> <br>
+                            Total Fraudulent Amount reported by Complainant : <span
+                                style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
+                            <br><br>
                             Debited Transaction Details
 
                             <table class="table table-bordered">
@@ -113,98 +150,86 @@
                                             <td>{{ @$complnt->current_status }}</td>
                                         </tr>
                                     @endforeach
-
-
                                 </tbody>
                             </table>
-
                         </div>
+
 
                     </div>
-                    <div class="row">
-                        <div class="col-md-2 col-6 text-center">
-                            <div class="task-box primary  mb-0">
-                                <a class="text-white"
-                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
-                                    <p class="mb-0 tx-12">Add Evidence</p>
-                                    <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-6 text-center">
-                            <div class="task-box primary  mb-0">
-                                <a
-                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
-                                    <p class="mb-0 tx-12">View Evidence</p>
-                                    <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                </a>
-                            </div>
-                        </div>
-                    </div><br>
+
 
                     <div class="card overflow-hidden review-project">
 
 
                         <div class="card-body" width="500px">
-
+                            Action Taken By Bank
                             <br>
                             <div style="overflow-x: auto;">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Account No./(Wallet/PG/PA) Id<br>
-                                                <hr> Transaction ID / UTR Number
-                                            </th>
-                                            <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
-                                            <th>Bank<br>
-                                                <hr>(Wallet/PG/PA)<br>
-                                                <hr> Merchant<br>
-                                                <hr>Insurance
-                                            </th>
-                                            <th>Account Details</th>
-                                            <th>Transaction Details</th>
-                                            <th>Branch Location<br>
-                                                <hr>Branch Manager Name & Contact Details
-                                            </th>
-                                            <th>Reference No / Remarks</th>
-                                            <th>ATM ID<br>
-                                                <hr>Place / Location of ATM
-                                            </th>
-                                            <th>Action Taken By<br>
-                                                <hr>Date of Action
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($bank_datas as $bank_data)
+                                @if ($bank_datas->isEmpty())
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <div class="alert alert-info col-6 text-center mt-3 mb-3">
+                                            No Data available yet!
+                                        </div>
+
+                                    </div>
+                                @else
+                                    <table class="table table-bordered">
+                                        <thead>
                                             <tr>
-                                                <td>{{ @$bank_data->account_no_1 }}<br><br>
-                                                    {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
-                                                    Layer : {{ @$bank_data->Layer }}</td>
-                                                <td>{{ @$bank_data->action_taken_by_bank }}<br><br>
-                                                    Txn Date: {{ @$bank_data->transaction_date }}</td>
-                                                <td>{{ @$bank_data->bank }}</td>
-                                                <td>A/C No : {{ @$bank_data->account_no_2 }}<br>
-                                                    ifsc Code : {{ @$bank_data->ifsc_code }}</td>
-                                                <td>
-                                                    Transaction ID /UTR Number :
-                                                    {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
-                                                    Transaction Amount : {{ @$bank_data->transaction_amount }}</td>
-                                                <td>{{ @$bank_data->branch_location }}<br><br>
-                                                    {{ @$bank_data->branch_manager_details }} </td>
-                                                <td>{{ @$bank_data->reference_no }}<br><br>
-                                                    {{ @$bank_data->remarks }}</td>
-                                                <td></td>
-                                                <td><i class="side-menu__icon fe fe-user"> </i> :
-                                                    {{ @$bank_data->action_taken_name }}<br>
-                                                    <i class="side-menu__icon fe fe-mail"> </i>
-                                                    {{ @$bank_data->action_taken_email }}
-                                                    {{ @$bank_data->date_of_action }}
-                                                </td>
+                                                <th>Account No./(Wallet/PG/PA) Id<br>
+                                                    <hr> Transaction ID / UTR Number
+                                                </th>
+                                                <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
+                                                <th>Bank<br>
+                                                    <hr>(Wallet/PG/PA)<br>
+                                                    <hr> Merchant<br>
+                                                    <hr>Insurance
+                                                </th>
+                                                <th>Account Details</th>
+                                                <th>Transaction Details</th>
+                                                <th>Branch Location<br>
+                                                    <hr>Branch Manager Name & Contact Details
+                                                </th>
+                                                <th>Reference No / Remarks</th>
+                                                <th>ATM ID<br>
+                                                    <hr>Place / Location of ATM
+                                                </th>
+                                                <th>Action Taken By<br>
+                                                    <hr>Date of Action
+                                                </th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($bank_datas as $bank_data)
+                                                <tr>
+                                                    <td>{{ @$bank_data->account_no_1 }}<br><br>
+                                                        {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
+                                                        Layer : {{ @$bank_data->Layer }}</td>
+                                                    <td>{{ @$bank_data->action_taken_by_bank }}<br><br>
+                                                        Txn Date: {{ @$bank_data->transaction_date }}</td>
+                                                    <td>{{ @$bank_data->bank }}</td>
+                                                    <td>A/C No : {{ @$bank_data->account_no_2 }}<br>
+                                                        ifsc Code : {{ @$bank_data->ifsc_code }}</td>
+                                                    <td>
+                                                        Transaction ID /UTR Number :
+                                                        {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
+                                                        Transaction Amount : {{ @$bank_data->transaction_amount }}</td>
+                                                    <td>{{ @$bank_data->branch_location }}<br><br>
+                                                        {{ @$bank_data->branch_manager_details }} </td>
+                                                    <td>{{ @$bank_data->reference_no }}<br><br>
+                                                        {{ @$bank_data->remarks }}</td>
+                                                    <td></td>
+                                                    <td><i class="side-menu__icon fe fe-user"> </i> :
+                                                        {{ @$bank_data->action_taken_name }}<br>
+                                                        <i class="side-menu__icon fe fe-mail"> </i>
+                                                        {{ @$bank_data->action_taken_email }}
+                                                        {{ @$bank_data->date_of_action }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @endif
                             </div>
 
                         </div>
@@ -227,6 +252,8 @@
     </div>
     <script>
         $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,

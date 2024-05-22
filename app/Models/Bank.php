@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 
-class DummyBank extends Eloquent
+class Bank extends Eloquent
 {
     use HasFactory;
 
     protected $connection = 'mongodb';
 
-    protected $collection = 'dummy_bank';
+    protected $collection = 'banks';
 }
 

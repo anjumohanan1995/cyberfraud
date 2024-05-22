@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\BankCasedata;
 use App\Models\Complaint;
-use App\Models\DummyBank;
-use App\Models\DummyWallet;
-use App\Models\DummyMerchant;
-use App\Models\DummyInsurance;
+use App\Models\Bank;
+use App\Models\Wallet;
+use App\Models\Merchant;
+use App\Models\Insurance;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
+use Illuminate\Support\Facades\Crypt;
+
 
 
 
@@ -20,8 +22,8 @@ class CaseDataController extends Controller
 {
     public function index()
     {
-        // Retrieve the bank data from the DummyBank model
-        $banks = DummyBank::all()->map(function($bank) {
+        // Retrieve the bank data from the Bank model
+        $banks = Bank::all()->map(function($bank) {
             return [
                 'id' => $bank->id,
                 'name' => $bank->bank
@@ -30,7 +32,7 @@ class CaseDataController extends Controller
 
         // dd($banks);
 
-        $wallets = DummyWallet::all()->map(function($wallet) {
+        $wallets = Wallet::all()->map(function($wallet) {
             return [
                 'id' => $wallet->id,
                 'name' => $wallet->wallet
@@ -39,7 +41,7 @@ class CaseDataController extends Controller
 
         // dd($wallets);
 
-        $merchants = DummyMerchant::all()->map(function($merchant) {
+        $merchants = Merchant::all()->map(function($merchant) {
             return [
                 'id' => $merchant->id,
                 'name' => $merchant->merchant
@@ -48,7 +50,7 @@ class CaseDataController extends Controller
 
         // dd($merchants);
 
-        $insurances = DummyInsurance::all()->map(function($insurance) {
+        $insurances = Insurance::all()->map(function($insurance) {
             return [
                 'id' => $insurance->id,
                 'name' => $insurance->insurance
@@ -213,7 +215,7 @@ class CaseDataController extends Controller
         //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
         $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
 
-        $totalRecordswithFilte = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc');
+        $totalRecordswithFilte = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc');
         //$totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
         $totalRecordswithFilter = Complaint::groupBy('acknowledgement_no')->get()->count();
 
@@ -222,6 +224,7 @@ class CaseDataController extends Controller
             ->where('deleted_at', null)
             ->orderBy('created_at', 'desc')
             ->orderBy($columnName, $columnSortOrder);
+
         // Apply filter conditions
         if ($fromDate && $toDate) {
             // Parse and format dates using Carbon
@@ -235,20 +238,32 @@ class CaseDataController extends Controller
             // Filter records based on the formatted dates
             $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
             $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+                            ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
+            $totalRecordswithFilter = $totalRecords;
             }
-            if ($mobile) {
+            if ($mobile){
                 $mobile = (int)$mobile;
                 $totalRecordQuery->where('complainant_mobile', $mobile);
                 $items->where('complainant_mobile', $mobile);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                            ->where('complainant_mobile', $mobile)->get()->count();
+                $totalRecordswithFilter = $totalRecords;
             }
             if ($options && $options!='null') {
                 $totalRecordQuery->where('bank_name', $options);
                 $items->where('bank_name', $options);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('bank_name', $options)->get()->count();
+                $totalRecordswithFilter = $totalRecords;
             }
             if ($acknowledgement_no) {
                 $acknowledgement_no = (int)$acknowledgement_no;
                 $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
                 $items->where('acknowledgement_no', $acknowledgement_no);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('acknowledgement_no', $acknowledgement_no)->get()->count();
+                $totalRecordswithFilter = $totalRecords;
             }
             // Apply "Filled by" filter
 if ($filled_by) {
@@ -261,6 +276,9 @@ if ($filled_by) {
                 ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
             // Filter citizen filled entries
             $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->get()->count();
+                $totalRecordswithFilter = $totalRecords;
             break;
         case 'cyber':
             // Filter cyber filled entries within 24 hours
@@ -270,6 +288,9 @@ if ($filled_by) {
                 ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
             // Filter cyber filled entries
             $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->get()->count();
+                $totalRecordswithFilter = $totalRecords;
             break;
         default:
             // Do nothing for 'All' option
@@ -330,13 +351,13 @@ if ($search_by) {
 
             $totalRecordswithFilter = $totalRecords;
         }
-        $totalRecords = $totalRecordQuery->count();
+        //$totalRecords = $totalRecordQuery->count();
 
         // Total records count after filtering
-        $totalRecordswithFilter = $items->count();
+        //$totalRecordswithFilter = $items->count();
         $records = $items->skip($start)->take($rowperpage)->get();
         $data_arr = array();
-        $i = $start + 1;
+        $i = $start;
 
         foreach ($records as $record){
             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
@@ -348,7 +369,7 @@ if ($search_by) {
             $transaction_id="";$amount="";$bank_name="";
             foreach($com as $com){
                 $transaction_id .= $com->transaction_id."<br>";
-                $amount .= $com->amount."<br>";
+                $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
                 $bank_name .= $com->bank_name."<br>";
                 $complainant_name = $com->complainant_name;
                 $complainant_mobile = $com->complainant_mobile;
@@ -365,8 +386,14 @@ if ($search_by) {
                 $action_taken_by_email = $com->action_taken_by_email;
                 $action_taken_by_bank = $com->action_taken_by_bank;
             }
-            $ack_no = '<a  href="' . url('case-data/'.$acknowledgement_no.'/view') . '">'.$acknowledgement_no.'</a>';
-
+            // $ack_no ='<form action="' . route('case-data.view') . '" method="POST">' .
+            // '<input type="hidden" name="_token" value="' . csrf_token() . '">' . // Add CSRF token
+            // '<input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '">' . // Hidden field for the acknowledgment number
+            // '<button class="btn btn-outline-success" type="submit">' . $acknowledgement_no . '</button>' . // Submit button with the acknowledgment number as text
+            // '</form>';
+            $id = Crypt::encrypt($acknowledgement_no);
+            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
+           // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
             $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
 
             $data_arr[] = array(
@@ -400,6 +427,8 @@ if ($search_by) {
         return view('dashboard.case-data-list.index');
     }
     public function caseDataView(Request $request,$id){
+        $id = Crypt::decrypt($id);
+
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->sum('amount');
@@ -409,4 +438,20 @@ if ($search_by) {
     }
 
 
+    public function editdataList(Request $request){
+        $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
+                                ->where('transaction_id',(int)$request->transaction)
+                                ->where('amount',(int)$request->amount)
+                                ->first();
+        if($complaint){
+            $complaint->update([
+                'amount' => (int)$request->new_amount
+            ]);
+            return redirect()->route('case-data.index')->with('message','success');
+        }
+        else{
+            return response()->json(['error' => true, 'message' => 'error']);
+        }
+
+    }
 }
