@@ -15,16 +15,20 @@ class DashboardPagesController extends Controller
 
     public function dashboard(){
 
-        $totalComplaints = Complaint::count();
+        $totalComplaints = Complaint::groupBy('acknowledgement_no')->get()->count();
     // Get the current date in ISO 8601 format
-    $currentDate = now()->toDateString();
-    // dd($currentDate);
+    $currentDate = now()->startOfDay();
+    $nextDate = now()->addDay()->startOfDay();
 
+    // Create MongoDB UTCDateTime objects for the date range
+    $currentDateUTC = new \MongoDB\BSON\UTCDateTime($currentDate->timestamp * 1000);
+    $nextDateUTC = new \MongoDB\BSON\UTCDateTime($nextDate->timestamp * 1000);
 
-    $newComplaints = Complaint::where('entry_date', '>=', new \MongoDB\BSON\UTCDateTime(strtotime($currentDate) * 1000))
-                               ->where('entry_date', '<', new \MongoDB\BSON\UTCDateTime(strtotime($currentDate . ' +1 day') * 1000))
+    $newComplaints = Complaint::where('entry_date', '>=', $currentDateUTC)
+                               ->where('entry_date', '<', $nextDateUTC)
+                               ->groupBy('acknowledgement_no')
+                               ->get()
                                ->count();
-
     // dd($newComplaints);
 
         return view('dashboard.dashboard',compact('totalComplaints', 'newComplaints'));
