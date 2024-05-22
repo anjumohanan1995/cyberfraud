@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\BankCasedata;
 use App\Models\Complaint;
-use App\Models\DummyBank;
-use App\Models\DummyWallet;
-use App\Models\DummyMerchant;
-use App\Models\DummyInsurance;
+use App\Models\Bank;
+use App\Models\Wallet;
+use App\Models\Merchant;
+use App\Models\Insurance;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
+use Illuminate\Support\Facades\Crypt;
+
 
 
 
@@ -20,8 +22,8 @@ class CaseDataController extends Controller
 {
     public function index()
     {
-        // Retrieve the bank data from the DummyBank model
-        $banks = DummyBank::all()->map(function($bank) {
+        // Retrieve the bank data from the Bank model
+        $banks = Bank::all()->map(function($bank) {
             return [
                 'id' => $bank->id,
                 'name' => $bank->bank
@@ -30,7 +32,7 @@ class CaseDataController extends Controller
 
         // dd($banks);
 
-        $wallets = DummyWallet::all()->map(function($wallet) {
+        $wallets = Wallet::all()->map(function($wallet) {
             return [
                 'id' => $wallet->id,
                 'name' => $wallet->wallet
@@ -39,7 +41,7 @@ class CaseDataController extends Controller
 
         // dd($wallets);
 
-        $merchants = DummyMerchant::all()->map(function($merchant) {
+        $merchants = Merchant::all()->map(function($merchant) {
             return [
                 'id' => $merchant->id,
                 'name' => $merchant->merchant
@@ -48,7 +50,7 @@ class CaseDataController extends Controller
 
         // dd($merchants);
 
-        $insurances = DummyInsurance::all()->map(function($insurance) {
+        $insurances = Insurance::all()->map(function($insurance) {
             return [
                 'id' => $insurance->id,
                 'name' => $insurance->insurance
@@ -365,8 +367,14 @@ if ($search_by) {
                 $action_taken_by_email = $com->action_taken_by_email;
                 $action_taken_by_bank = $com->action_taken_by_bank;
             }
-            $ack_no = '<a  href="' . url('case-data/'.$acknowledgement_no.'/view') . '">'.$acknowledgement_no.'</a>';
-
+            // $ack_no ='<form action="' . route('case-data.view') . '" method="POST">' .
+            // '<input type="hidden" name="_token" value="' . csrf_token() . '">' . // Add CSRF token
+            // '<input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '">' . // Hidden field for the acknowledgment number
+            // '<button class="btn btn-outline-success" type="submit">' . $acknowledgement_no . '</button>' . // Submit button with the acknowledgment number as text
+            // '</form>';
+            $id = Crypt::encrypt($acknowledgement_no);
+            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
+           // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
             $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
 
             $data_arr[] = array(
@@ -400,6 +408,8 @@ if ($search_by) {
         return view('dashboard.case-data-list.index');
     }
     public function caseDataView(Request $request,$id){
+        $id = Crypt::decrypt($id);
+
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->sum('amount');

@@ -58,37 +58,74 @@
 
 
                         <div class="card-body" width="500px">
+                            <div class=" m-4 d-flex justify-content-between">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td><span>Complainant Name</span></td>
+                                                    <td>: </td>
+                                                    <td>{{ @$complaint->complainant_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mobile</td>
+                                                    <td>:</td>
+                                                    <td>{{ @$complaint->complainant_mobile }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>District</td>
+                                                    <td>:</td>
+                                                    <td>{{ @$complaint->district }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Police Station</td>
+                                                    <td>:</td>
+                                                    <td>{{ @$complaint->police_station }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-6 text-center">
+                                    <div class="row justify-content-end">
 
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td><span>Complainant Name</span></td>
-                                        <td>: </td>
-                                        <td> {{ @$complaint->complainant_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Mobile</td>
-                                        <td>:</td>
-                                        <td> {{ @$complaint->complainant_mobile }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>District</td>
-                                        <td>:</td>
-                                        <td>{{ @$complaint->district }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Police Station</td>
-                                        <td>:</td>
-                                        <td>{{ @$complaint->police_station }}</td>
-                                    </tr>
+                                        <div class="col-4 px-1">
+                                            <div class="task-box primary  mb-0">
+                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                                    title="Back" href="{{ route('case-data.index') }}">
+                                                    <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 px-1">
+                                            <div class="task-box primary  mb-0">
+                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                                    title="Add Evidence"
+                                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                                    <h3 class="mb-0"><i class="ti ti-plus"></i></h3>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 px-1">
+                                            <div class="task-box primary  mb-0">
+                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                                    title="View Evidence"
+                                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                                    <h3 class="mb-0"><i class="ti ti-eye"></i></h3>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
 
 
-                                </tbody>
-                            </table>
                             <br>
-                            Total Fraudulent Amount reported by Complainant : <span style="color: red;">₹
-                                {{ number_format($sum_amount, 2) }}</span>
-                            <br> <br>
+                            Total Fraudulent Amount reported by Complainant : <span
+                                style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
+                            <br><br>
                             Debited Transaction Details
 
                             <table class="table table-bordered">
@@ -113,34 +150,13 @@
                                             <td>{{ @$complnt->current_status }}</td>
                                         </tr>
                                     @endforeach
-
-
                                 </tbody>
                             </table>
-
                         </div>
+
 
                     </div>
-                    <div class="row">
-                        <div class="col-md-2 col-6 text-center">
-                            <div class="task-box primary  mb-0">
-                                <a class="text-white"
-                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
-                                    <p class="mb-0 tx-12">Add Evidence</p>
-                                    <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-6 text-center">
-                            <div class="task-box primary  mb-0">
-                                <a
-                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
-                                    <p class="mb-0 tx-12">View Evidence</p>
-                                    <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                </a>
-                            </div>
-                        </div>
-                    </div><br>
+
 
                     <div class="card overflow-hidden review-project">
 
@@ -236,6 +252,8 @@
     </div>
     <script>
         $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
