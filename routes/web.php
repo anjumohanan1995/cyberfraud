@@ -126,6 +126,7 @@ Route::middleware('auth')->group(function () {
     Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
     Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
     Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
+    Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
 
 
     //collection drop controller

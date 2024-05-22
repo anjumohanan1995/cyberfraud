@@ -299,6 +299,40 @@
                 "order": [0, 'desc'],
                 'ordering': true
             });
+        $('#example').on('click', '.editable', function(){
+           var $editable = $(this);
+           var oldValue = $editable.text();
+           var ackno = $editable.data('ackno'); 
+           var transaction = $editable.data('transaction'); 
+           var $input = $('<input type="text">').val(oldValue).addClass('edit-input');
+           $editable.empty().append($input);
+           $input.focus().select();
+            $input.on('blur', function() {
+                var newValue = $(this).val();
+                $editable.text(newValue);
+                $.ajax({
+                url: '{{ route('edit.datalist') }}',
+                headers: {
+                          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                          },
+                type: 'POST',
+                data: { ackno:ackno,transaction:transaction,amount:oldValue,new_amount:newValue },
+                success: function(response) {
+                  console.log(response);
+                  
+                },
+                error: function(xhr, status,error) {
+                  $editable.text(oldData);
+                  alert(response.message);
+                }
+            });
+                
+                // Remove input field
+                $(this).remove();
+            });
+           
+        })
+        
                 // Form submission event handler
     $('#complaint-form').submit(function(event) {
         event.preventDefault(); // Prevent default form submission

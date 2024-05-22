@@ -182,7 +182,7 @@ class CaseDataController extends Controller
         //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
         $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
 
-        $totalRecordswithFilte = Complaint::where('deleted_at', null)->orderBy('created_at', 'desc');
+        $totalRecordswithFilte = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc');
         //$totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
         $totalRecordswithFilter = Complaint::groupBy('acknowledgement_no')->get()->count();
 
@@ -191,6 +191,7 @@ class CaseDataController extends Controller
             ->where('deleted_at', null)
             ->orderBy('created_at', 'desc')
             ->orderBy($columnName, $columnSortOrder);
+
         // Apply filter conditions
         if ($fromDate && $toDate) {
             // Parse and format dates using Carbon
@@ -204,20 +205,32 @@ class CaseDataController extends Controller
             // Filter records based on the formatted dates
             $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
             $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+                            ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
+            $totalRecordswithFilter = $totalRecords; 
             }
-            if ($mobile) {
+            if ($mobile){
                 $mobile = (int)$mobile;
                 $totalRecordQuery->where('complainant_mobile', $mobile);
                 $items->where('complainant_mobile', $mobile);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                            ->where('complainant_mobile', $mobile)->get()->count();
+                $totalRecordswithFilter = $totalRecords; 
             }
             if ($options && $options!='null') {
                 $totalRecordQuery->where('bank_name', $options);
                 $items->where('bank_name', $options);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('bank_name', $options)->get()->count();
+                $totalRecordswithFilter = $totalRecords; 
             }
             if ($acknowledgement_no) {
                 $acknowledgement_no = (int)$acknowledgement_no;
                 $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
                 $items->where('acknowledgement_no', $acknowledgement_no);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('acknowledgement_no', $acknowledgement_no)->get()->count();
+                $totalRecordswithFilter = $totalRecords; 
             }
             // Apply "Filled by" filter
 if ($filled_by) {
@@ -230,6 +243,9 @@ if ($filled_by) {
                 ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
             // Filter citizen filled entries
             $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->get()->count();
+                $totalRecordswithFilter = $totalRecords; 
             break;
         case 'cyber':
             // Filter cyber filled entries within 24 hours
@@ -239,6 +255,9 @@ if ($filled_by) {
                 ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
             // Filter cyber filled entries
             $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+            ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->get()->count();
+                $totalRecordswithFilter = $totalRecords; 
             break;
         default:
             // Do nothing for 'All' option
@@ -299,13 +318,13 @@ if ($search_by) {
 
             $totalRecordswithFilter = $totalRecords;
         }
-        $totalRecords = $totalRecordQuery->count();
+        //$totalRecords = $totalRecordQuery->count();
 
         // Total records count after filtering
-        $totalRecordswithFilter = $items->count();
+        //$totalRecordswithFilter = $items->count();
         $records = $items->skip($start)->take($rowperpage)->get();
         $data_arr = array();
-        $i = $start + 1;
+        $i = $start;
 
         foreach ($records as $record){
             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
@@ -317,7 +336,7 @@ if ($search_by) {
             $transaction_id="";$amount="";$bank_name="";
             foreach($com as $com){
                 $transaction_id .= $com->transaction_id."<br>";
-                $amount .= $com->amount."<br>";
+                $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
                 $bank_name .= $com->bank_name."<br>";
                 $complainant_name = $com->complainant_name;
                 $complainant_mobile = $com->complainant_mobile;
@@ -375,5 +394,21 @@ if ($search_by) {
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         //dd($bank_datas);
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount'));
+    }
+    public function editdataList(Request $request){
+        $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
+                                ->where('transaction_id',(int)$request->transaction)
+                                ->where('amount',(int)$request->amount)
+                                ->first();
+        if($complaint){
+            $complaint->update([
+                'amount' => (int)$request->new_amount
+            ]);
+            return redirect()->route('case-data.index')->with('message','success');
+        }
+        else{
+            return response()->json(['error' => true, 'message' => 'error']);
+        }
+        
     }
 }
