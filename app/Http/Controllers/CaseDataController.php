@@ -407,4 +407,6 @@ if ($search_by) {
         //dd($bank_datas);
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount'));
     }
+
+
 }
