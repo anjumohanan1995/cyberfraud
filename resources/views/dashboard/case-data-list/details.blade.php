@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="col-md-2 col-6 text-center">
                                     <div class="row justify-content-end">
-
+                                        @php $id = Crypt::encrypt($complaint->acknowledgement_no); @endphp
                                         <div class="col-4 px-1">
                                             <div class="task-box primary  mb-0">
                                                 <a class="text-white" data-toggle="tooltip" data-placement="top"
@@ -102,7 +102,7 @@
                                             <div class="task-box primary  mb-0">
                                                 <a class="text-white" data-toggle="tooltip" data-placement="top"
                                                     title="Add Evidence"
-                                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$id]) }}">
                                                     <h3 class="mb-0"><i class="ti ti-plus"></i></h3>
                                                 </a>
                                             </div>
@@ -111,7 +111,7 @@
                                             <div class="task-box primary  mb-0">
                                                 <a class="text-white" data-toggle="tooltip" data-placement="top"
                                                     title="View Evidence"
-                                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$complaint->acknowledgement_no]) }}">
+                                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$id]) }}">
                                                     <h3 class="mb-0"><i class="ti ti-eye"></i></h3>
                                                 </a>
                                             </div>
