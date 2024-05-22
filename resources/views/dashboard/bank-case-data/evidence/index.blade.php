@@ -1,8 +1,16 @@
+
 @extends('layouts.app')
-
+@php use Illuminate\Support\Facades\Crypt;
+           $id = request()->segment(count(request()->segments()));
+        $new_id = Crypt::decrypt($id); @endphp
 @section('content')
-
 <div class="container-fluid">
+    <div class="task-box primary  mb-0 col-1">
+        <a class="text-white" data-toggle="tooltip" data-placement="top"
+            title="Back" href="{{ route('case-data.view', ['id' => @$new_id ]) }}">
+            <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
+        </a>
+    </div>
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div>
@@ -12,7 +20,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('case-data.view', ['id' => request()->segment(count(request()->segments())) ]) }}">Case Data</a>
+                        <a href="{{ route('case-data.view', ['id' => @$new_id ]) }}">Case Data</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
                         Uploaded Evidences
@@ -64,7 +72,9 @@
                                         <div class="col-md-6 mb-3">
                                             <div class="card">
                                                 <div class="card-body">
-                                                    <h6 class="card-title">URL : {{ $evidence->url }}</h6>
+
+
+                                                    <a href="{{ $evidence->url }}" target="_blank" rel="noopener noreferrer"><h6 class="card-title">URL : {{ $evidence->url }}</h6></a>
 
 <div class="text-right">
     <form action="{{ route('evidence.destroy', $evidence->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this evidence?');">

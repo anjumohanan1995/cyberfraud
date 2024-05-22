@@ -1,18 +1,28 @@
 @extends('layouts.app')
+@php use Illuminate\Support\Facades\Crypt;
+           $id = request()->segment(count(request()->segments()));
+        $new_id = Crypt::decrypt($id); @endphp
 
 @section('content')
     <!-- container -->
     <div class="container-fluid">
+        <div class="task-box primary  mb-0 col-1">
+            <a class="text-white" data-toggle="tooltip" data-placement="top"
+                title="Back" href="{{ route('case-data.view', ['id' => @$new_id ]) }}">
+                <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
+            </a>
+        </div>
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
                     Hi, welcome back!
                 </h4>
+
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('case-data.view', ['id' => request()->segment(count(request()->segments())) ]) }}">Case Data</a>
+                            <a href="{{ route('case-data.view', ['id' => @$new_id ]) }}">Case Data</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
                             Add Evidence
@@ -49,7 +59,7 @@
                                 <form id="evidenceForm" action="{{ route('evidence.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <!-- Hidden field to store acknowledgement number -->
-                                    <input type="hidden" name="acknowledgement_number" value="{{ request()->segment(count(request()->segments())) }}">
+                                    <input type="hidden" name="acknowledgement_number" value="{{ $id }}">
 
                                     <div id="evidence_fields">
                                         @foreach (old('evidence_type', ['']) as $index => $oldEvidenceType)
@@ -322,7 +332,8 @@
                                             <div class="form-group">
                                                 <label for="url">URL:</label>
                                                 <input type="text" name="url[]" class="form-control" placeholder="Enter URL" >
-                                            </div>
+
+                                                </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
