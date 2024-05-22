@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\BankCasedata;
 use App\Models\Complaint;
+use App\Models\DummyBank;
+use App\Models\DummyWallet;
+use App\Models\DummyMerchant;
+use App\Models\DummyInsurance;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
@@ -16,23 +20,50 @@ class CaseDataController extends Controller
 {
     public function index()
     {
-        // Assuming $banks is an array of bank data
-        $banks = [
-            ['id' => 1, 'name' => 'Ratnakar Bank Limited (RBL)'],
-            ['id' => 2, 'name' => 'State Bank of India'],
-            ['id' => 3, 'name' => 'Dhanlaxmi Bank'],
-            ['id' => 4, 'name' => 'Federal Bank']
-        ];
+        // Retrieve the bank data from the DummyBank model
+        $banks = DummyBank::all()->map(function($bank) {
+            return [
+                'id' => $bank->id,
+                'name' => $bank->bank
+            ];
+        })->toArray();
 
-        // // Assuming $banks is an array of bank data
-        // $wallet = [
-        //     ['id' => 1, 'name' => 'Ratnakar Bank Limited (RBL)'],
-        //     ['id' => 2, 'name' => 'State Bank of India'],
-        //     ['id' => 3, 'name' => 'Dhanlaxmi Bank']
-        // ];
+        // dd($banks);
 
-        // Pass the $banks data to the view
-        return view('dashboard.case-data-list.index')->with('banks', $banks);
+        $wallets = DummyWallet::all()->map(function($wallet) {
+            return [
+                'id' => $wallet->id,
+                'name' => $wallet->wallet
+            ];
+        })->toArray();
+
+        // dd($wallets);
+
+        $merchants = DummyMerchant::all()->map(function($merchant) {
+            return [
+                'id' => $merchant->id,
+                'name' => $merchant->merchant
+            ];
+        })->toArray();
+
+        // dd($merchants);
+
+        $insurances = DummyInsurance::all()->map(function($insurance) {
+            return [
+                'id' => $insurance->id,
+                'name' => $insurance->insurance
+            ];
+        })->toArray();
+
+        // dd($insurances);
+
+        // Pass the $banks and $wallets data to the view
+        return view('dashboard.case-data-list.index')->with([
+            'banks' => $banks,
+            'wallets' => $wallets,
+            'merchants' => $merchants,
+            'insurances' => $insurances
+    ]);
     }
      public function bankCaseData(Request $request)
     {

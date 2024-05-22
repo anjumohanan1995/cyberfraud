@@ -12,7 +12,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="#">Upload Evidence</a>
+                        <a href="{{ route('case-data.view', ['id' => request()->segment(count(request()->segments())) ]) }}">Case Data</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
                         Uploaded Evidences
@@ -84,7 +84,7 @@
 
                                                     {{-- Explode PDFs --}}
                                                     @if($evidence->pdf)
-                                                    <p class="card-text">PDF:
+                                                    <p class="card-text">Document:
                                                         @foreach(explode(',', $evidence->pdf) as $pdfKey => $pdf)
                                                             <a target="_blank" href="{{ Storage::url(trim($pdf)) }}" class="">View Document{{ $pdfKey + 1 }}</a>
                                                         @endforeach

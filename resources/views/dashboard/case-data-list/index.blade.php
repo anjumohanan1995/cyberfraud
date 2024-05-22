@@ -92,7 +92,7 @@
                                             <option value="bank">Bank</option>
                                             <option value="wallet">Wallet/PG/PA</option>
                                             <option value="merchant">Merchant</option>
-                                            <option value="tsurunc">Insurance</option>
+                                            <option value="insurance">Insurance</option>
                                         </select>
                                         <br>
 
@@ -228,6 +228,39 @@
                 banks.forEach(function(bank) {
                     var option = document.createElement("option");
                     option.text = bank.name; // Accessing the `name` property of each bank
+                    dropdown.add(option);
+                });
+            }
+
+            if (type === "wallet") {
+                // Assuming `walet` is defined somewhere in your code
+                var wallets = @json($wallets); // Convert the PHP array to JSON
+
+                wallets.forEach(function(wallet) {
+                    var option = document.createElement("option");
+                    option.text = wallet.name; // Accessing the `name` property of each bank
+                    dropdown.add(option);
+                });
+            }
+
+            if (type === "merchant") {
+                // Assuming `walet` is defined somewhere in your code
+                var merchants = @json($merchants); // Convert the PHP array to JSON
+
+                merchants.forEach(function(merchant) {
+                    var option = document.createElement("option");
+                    option.text = merchant.name; // Accessing the `name` property of each bank
+                    dropdown.add(option);
+                });
+            }
+
+            if (type === "insurance") {
+                // Assuming `walet` is defined somewhere in your code
+                var insurances = @json($insurances); // Convert the PHP array to JSON
+
+                insurances.forEach(function(insurance) {
+                    var option = document.createElement("option");
+                    option.text = insurance.name; // Accessing the `name` property of each bank
                     dropdown.add(option);
                 });
             }

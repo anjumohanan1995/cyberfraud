@@ -12,7 +12,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Bank Case Data</a>
+                            <a href="{{ route('case-data.view', ['id' => request()->segment(count(request()->segments())) ]) }}">Case Data</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
                             Add Evidence
@@ -130,7 +130,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="pdf_{{ $index }}">PDF:</label>
+                                                                    <label for="pdf_{{ $index }}">Document:</label>
                                                                     <input type="file" name="pdf[]" class="form-control" multiple>
                                                                     @error('pdf.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -171,7 +171,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="pdf_{{ $index }}">PDF:</label>
+                                                                    <label for="pdf_{{ $index }}">Document:</label>
                                                                     <input type="file" name="pdf[]" class="form-control" multiple>
                                                                     @error('pdf.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -286,7 +286,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="pdf">PDF:</label>
+                                                <label for="pdf">Document:</label>
                                                 <input type="file" name="pdf[]" class="form-control" multiple>
                                             </div>
                                         </div>
@@ -326,7 +326,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="pdf">PDF:</label>
+                                                <label for="pdf">Document:</label>
                                                 <input type="file" name="pdf[]" class="form-control" multiple>
                                             </div>
                                         </div>
