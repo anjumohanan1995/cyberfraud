@@ -6,12 +6,6 @@
 @section('content')
     <!-- container -->
     <div class="container-fluid">
-        <div class="task-box primary  mb-0 col-1">
-            <a class="text-white" data-toggle="tooltip" data-placement="top"
-                title="Back" href="{{ route('case-data.view', ['id' => @$id ]) }}">
-                <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
-            </a>
-        </div>
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
             <div>
@@ -39,11 +33,19 @@
                 <div class="col-md-12 col-xl-12">
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
+
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Evidence!
                                 </h4>
+                                <div class="task-box primary col-1">
+                                    <a class="text-white" data-toggle="tooltip" data-placement="top"
+                                        title="Back" href="{{ route('case-data.view', ['id' => @$id ]) }}">
+                                        <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
+                                    </a>
+                                </div>
                             </div>
+
                             @if (session('success'))
                             <div class="alert alert-success col-6">
                                 {{ session('success') }}
