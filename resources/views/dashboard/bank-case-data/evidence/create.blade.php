@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @php use Illuminate\Support\Facades\Crypt;
            $id = request()->segment(count(request()->segments()));
-        $new_id = Crypt::encrypt($id); @endphp
-
+        $new_id = Crypt::decrypt($id); @endphp
+{{-- @dd($id); --}}
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -61,7 +61,7 @@
                                 <form id="evidenceForm" action="{{ route('evidence.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <!-- Hidden field to store acknowledgement number -->
-                                    <input type="hidden" name="acknowledgement_number" value="{{ $id }}">
+                                    <input type="hidden" name="acknowledgement_number" value="{{ $new_id }}">
 
                                     <div id="evidence_fields">
                                         @foreach (old('evidence_type', ['']) as $index => $oldEvidenceType)

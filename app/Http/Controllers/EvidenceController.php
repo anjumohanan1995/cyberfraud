@@ -124,9 +124,10 @@ class EvidenceController extends Controller
     {
 
         $new_id = Crypt::decrypt($ack_no);
-        $evidences = Evidence::where('ack_no', $new_id)->get();
-
-        return view('dashboard.bank-case-data.evidence.index', compact('evidences', 'new_id'));
+        $numeric_id = preg_replace('/[^0-9]/', '', $new_id);
+        $evidences = Evidence::where('ack_no', $numeric_id)->get();
+//dd($numeric_id);
+        return view('dashboard.bank-case-data.evidence.index', compact('evidences'));
     }
 
 

@@ -67,7 +67,7 @@
 
                     @else
                         {{-- Group evidences by type --}}
-
+{{-- @dd($evidences); --}}
                         @foreach ($evidences->groupBy('evidence_type') as $type => $groupedEvidences)
                             <div class="mb-4">
                                 <h5 class="mb-3 title">{{ $type }}</h5> <!-- Show evidence type name once -->
@@ -130,5 +130,4 @@
     </div>
 </div>
 @endsection
-
 
