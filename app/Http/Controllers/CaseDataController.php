@@ -240,7 +240,7 @@ class CaseDataController extends Controller
             $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
             $totalRecords = Complaint::groupBy('acknowledgement_no')
                             ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
-            $totalRecordswithFilter = $totalRecords; 
+            $totalRecordswithFilter = $totalRecords;
             }
             if ($mobile){
                 $mobile = (int)$mobile;
@@ -248,14 +248,14 @@ class CaseDataController extends Controller
                 $items->where('complainant_mobile', $mobile);
                 $totalRecords = Complaint::groupBy('acknowledgement_no')
                             ->where('complainant_mobile', $mobile)->get()->count();
-                $totalRecordswithFilter = $totalRecords; 
+                $totalRecordswithFilter = $totalRecords;
             }
             if ($options && $options!='null') {
                 $totalRecordQuery->where('bank_name', $options);
                 $items->where('bank_name', $options);
                 $totalRecords = Complaint::groupBy('acknowledgement_no')
                 ->where('bank_name', $options)->get()->count();
-                $totalRecordswithFilter = $totalRecords; 
+                $totalRecordswithFilter = $totalRecords;
             }
             if ($acknowledgement_no) {
                 $acknowledgement_no = (int)$acknowledgement_no;
@@ -263,7 +263,7 @@ class CaseDataController extends Controller
                 $items->where('acknowledgement_no', $acknowledgement_no);
                 $totalRecords = Complaint::groupBy('acknowledgement_no')
                 ->where('acknowledgement_no', $acknowledgement_no)->get()->count();
-                $totalRecordswithFilter = $totalRecords; 
+                $totalRecordswithFilter = $totalRecords;
             }
             // Apply "Filled by" filter
 if ($filled_by) {
@@ -278,7 +278,7 @@ if ($filled_by) {
             $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
             $totalRecords = Complaint::groupBy('acknowledgement_no')
             ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->get()->count();
-                $totalRecordswithFilter = $totalRecords; 
+                $totalRecordswithFilter = $totalRecords;
             break;
         case 'cyber':
             // Filter cyber filled entries within 24 hours
@@ -290,7 +290,7 @@ if ($filled_by) {
             $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
             $totalRecords = Complaint::groupBy('acknowledgement_no')
             ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->get()->count();
-                $totalRecordswithFilter = $totalRecords; 
+                $totalRecordswithFilter = $totalRecords;
             break;
         default:
             // Do nothing for 'All' option
@@ -436,6 +436,8 @@ if ($search_by) {
         //dd($bank_datas);
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount'));
     }
+
+
     public function editdataList(Request $request){
         $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
                                 ->where('transaction_id',(int)$request->transaction)
@@ -450,6 +452,6 @@ if ($search_by) {
         else{
             return response()->json(['error' => true, 'message' => 'error']);
         }
-        
+
     }
 }
