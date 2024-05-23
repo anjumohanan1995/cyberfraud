@@ -55,14 +55,14 @@
                                 <h4 class="card-title mg-b-10">
                                     All Case Data
                                 </h4>
-                                <div class="col-md-1 col-6 text-center">
+                                {{-- <div class="col-md-1 col-6 text-center">
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('modus.create') }}">
                                             <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
 <form id="complaint-form">
                                 <div class="row">
@@ -197,7 +197,7 @@
                                             <th>Current Status</th>
                                             <th>Date of Action</th>
                                             <th>Action Taken By</th>
-                                            <th>ACTION</th>
+                                            {{-- <th>ACTION</th> --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -272,7 +272,7 @@
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
-             
+
                 buttons: [
                     'copyHtml5',
                     'excelHtml5',
@@ -288,18 +288,18 @@
                 columns:[{
                         data: 'id'
                     },
-                  
+
                     {
                         data: 'acknowledgement_no'
                     },
                     {
                         data: 'district'
                     },
-                   
+
                     {
                         data: 'complainant_name'
                     },
-                   
+
                     {
                         data: 'transaction_id'
                     },
@@ -324,10 +324,10 @@
                     {
                         data: 'action_taken_by_name'
                     },
-                  
-                    {
-                        data: 'edit'
-                    }
+
+                    // {
+                    //     data: 'edit'
+                    // }
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
@@ -335,8 +335,8 @@
         $('#example').on('click', '.editable', function(){
            var $editable = $(this);
            var oldValue = $editable.text();
-           var ackno = $editable.data('ackno'); 
-           var transaction = $editable.data('transaction'); 
+           var ackno = $editable.data('ackno');
+           var transaction = $editable.data('transaction');
            var $input = $('<input type="text">').val(oldValue).addClass('edit-input');
            $editable.empty().append($input);
            $input.focus().select();
@@ -352,20 +352,20 @@
                 data: { ackno:ackno,transaction:transaction,amount:oldValue,new_amount:newValue },
                 success: function(response) {
                   console.log(response);
-                  
+
                 },
                 error: function(xhr, status,error) {
                   $editable.text(oldData);
                   alert(response.message);
                 }
             });
-                
+
                 // Remove input field
                 $(this).remove();
             });
-           
+
         })
-        
+
                 // Form submission event handler
     $('#complaint-form').submit(function(event) {
         event.preventDefault(); // Prevent default form submission
@@ -384,7 +384,7 @@
         // Reload DataTable with new data based on selected filters
         table.ajax.url(url).load();
     });
-                
+
         });
 
 
