@@ -126,6 +126,16 @@
                                                 name="acknowledgement_no">
                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="com_status">Status </label>
+                                            <select class="form-control" id="com_status">
+                                                <option>--Select--</option>
+                                                <option value="1">Active</option>
+                                                <option value="0">Inactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="col-md-3" hidden>
                                         <div class="form-group">
                                             <label for="complaint-reported">Complaint Reported:</label>
@@ -230,7 +240,8 @@
     <script>
         function confirmActivation(identifier) {
             var isChecked = $(identifier).prop('checked');
-            var confirmationMessage = isChecked ? "Do you want to activate this link?" : "Do you want to deactivate this link?";
+            var confirmationMessage = isChecked ? "Do you want to activate this link?" :
+                "Do you want to deactivate this link?";
 
             if (confirm(confirmationMessage)) {
                 activateLink(identifier);
@@ -239,6 +250,7 @@
                 $(identifier).prop('checked', !isChecked);
             }
         }
+
         function activateLink(identifier) {
             //  alert("dsf");
             var status = $(identifier).prop('checked') == true ? 1 : 0;
@@ -255,7 +267,7 @@
                 success: function(data) {
                     console.log(data.status)
                     toastr.success(data.status, 'Success!');
-                    $('#example').DataTable().ajax.reload();
+                    // $('#example').DataTable().ajax.reload();
                 }
             });
         }
@@ -426,11 +438,13 @@
                 var filled_by = $("#filled-by").val();
                 var search_by = $("#search-by").val();
                 var options = $("#options").val();
+                var com_status = $("#com_status").val();
 
                 // Construct the URL with query parameters
                 var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date +
                     "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" +
-                    filled_by + "&search_by=" + search_by + "&options=" + options;
+                    filled_by + "&search_by=" + search_by + "&options=" + options + "&com_status=" +
+                    com_status;
 
                 // Reload DataTable with new data based on selected filters
                 table.ajax.url(url).load();

@@ -210,6 +210,8 @@ class CaseDataController extends Controller
         $filled_by = $request->get('filled_by');
         $search_by = $request->get('search_by');
         $options = $request->get('options');
+        $com_status = $request->get('com_status');
+
         // Total records.
         $totalRecordQuery = Complaint::where('deleted_at', null);        $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
 
@@ -223,7 +225,7 @@ class CaseDataController extends Controller
         //Fetch records.
             $items = Complaint::groupBy('acknowledgement_no')
             ->where('deleted_at', null)
-            ->where('com_status', 1)
+           // ->where('com_status', 1)
             ->orderBy('created_at', 'desc')
             ->orderBy($columnName, $columnSortOrder);
 
@@ -265,6 +267,15 @@ class CaseDataController extends Controller
                 $items->where('acknowledgement_no', $acknowledgement_no);
                 $totalRecords = Complaint::groupBy('acknowledgement_no')
                 ->where('acknowledgement_no', $acknowledgement_no)->get()->count();
+                $totalRecordswithFilter = $totalRecords;
+            }
+            if ($com_status != null) {
+               // dd((int)$com_status);
+                $totalRecordQuery->where('com_status', (int)$com_status);
+                $items->where('com_status', (int)$com_status);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('com_status', (int)$com_status)->get()->count();
+               // dd($totalRecords);
                 $totalRecordswithFilter = $totalRecords;
             }
             // Apply "Filled by" filter
@@ -433,7 +444,7 @@ if ($search_by) {
         $id = Crypt::decrypt($id);
 
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
-        $complaints = Complaint::where('acknowledgement_no',(int)$id)->where('com_status',1)->get();
+        $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         //dd($bank_datas);
