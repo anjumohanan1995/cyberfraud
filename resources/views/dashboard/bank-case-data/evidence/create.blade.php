@@ -5,6 +5,21 @@
 {{-- @dd($id); --}}
 @section('content')
     <!-- container -->
+    <style>
+    .ev-type{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .remove-btn {
+        margin-left: 10px;
+        cursor: pointer;
+    }
+</style>
+
+    </style>
     <div class="container-fluid">
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
@@ -68,7 +83,7 @@
                                             <div class="evidence-fields">
                                                 <div class="row">
                                                     <div class="col-md-6">
-                                                        <div class="form-group">
+                                                        <div class="form-group ev-type">
                                                             <label for="evidence_type_{{ $index }}">Evidence type:</label>
                                                             <select class="form-control evidence_type" name="evidence_type[]" required>
                                                                 <option value="">Select Option</option>
@@ -85,6 +100,7 @@
                                                                 <option value="twitter" {{ $oldEvidenceType == 'twitter' ? 'selected' : '' }}>Twitter</option>
                                                                 <option value="other" {{ $oldEvidenceType == 'other' ? 'selected' : '' }}>Other</option>
                                                             </select>
+                                                            <a class="text-danger remove-btn" style="display: none;"><i class="fas fa-trash-alt"></i></a>
                                                             @error('evidence_type.' . $index)
                                                                 <span class="text-danger">{{ $message }}</span>
                                                             @enderror
@@ -168,6 +184,30 @@
                                                                     @enderror
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="category_{{ $index }}">Category:</label>
+                                                                    <select class="form-control category" name="category[]">
+                                                                        <option value="">Select Option</option>
+                                                                        <option value="phishing" {{ $oldEvidenceType == 'phishing' ? 'selected' : '' }}>Phishing</option>
+                                                                        <option value="malware" {{ $oldEvidenceType == 'malware' ? 'selected' : '' }}>Malware</option>
+                                                                        <option value="fraud" {{ $oldEvidenceType == 'fraud' ? 'selected' : '' }}>Fraud</option>
+                                                                        <option value="other" {{ $oldEvidenceType == 'other' ? 'selected' : '' }}>Other</option>
+                                                                    </select>
+                                                                    @error('category.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket_{{ $index }}">Ticket No:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Ticket No" >
+                                                                    @error('ticket.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     @elseif (in_array($oldEvidenceType, ['instagram', 'telegram', 'facebook', 'linkedin', 'skype', 'gmail', 'youtube', 'mobile numbers', 'olx ad', 'twitter', 'other']))
                                                         <div class="row">
@@ -208,6 +248,30 @@
                                                                     @enderror
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="category_{{ $index }}">Category:</label>
+                                                                    <select class="form-control category" name="category[]">
+                                                                        <option value="">Select Option</option>
+                                                                        <option value="phishing" {{ $oldEvidenceType == 'phishing' ? 'selected' : '' }}>Phishing</option>
+                                                                        <option value="malware" {{ $oldEvidenceType == 'malware' ? 'selected' : '' }}>Malware</option>
+                                                                        <option value="fraud" {{ $oldEvidenceType == 'fraud' ? 'selected' : '' }}>Fraud</option>
+                                                                        <option value="other" {{ $oldEvidenceType == 'other' ? 'selected' : '' }}>Other</option>
+                                                                    </select>
+                                                                    @error('category.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket_{{ $index }}">Ticket No:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Ticket No" >
+                                                                    @error('ticket.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     @endif
                                                 </div>
@@ -228,29 +292,38 @@
         </div>
         <!-- /row -->
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Add event listener for the "Add More" button
             document.getElementById('addMore').addEventListener('click', function() {
-                var evidenceFields = document.getElementById('evidence_fields');
-                var evidenceTemplate = document.querySelector('.evidence-fields').cloneNode(true);
+    var evidenceFields = document.getElementById('evidence_fields');
+    var evidenceTemplate = document.querySelector('.evidence-fields').cloneNode(true);
 
-                // Clear previous selected values and input fields
-                var selects = evidenceTemplate.querySelectorAll('.evidence_type');
-                selects.forEach(function(select) {
-                    select.selectedIndex = 0;
-                });
+    // Clear previous selected values and input fields
+    var selects = evidenceTemplate.querySelectorAll('.evidence_type');
+    selects.forEach(function(select) {
+        select.selectedIndex = 0;
+    });
 
-                var inputs = evidenceTemplate.querySelectorAll('input, textarea');
-                inputs.forEach(function(input) {
-                    input.value = '';
-                });
+    var inputs = evidenceTemplate.querySelectorAll('input, textarea');
+    inputs.forEach(function(input) {
+        input.value = '';
+    });
 
-                var dynamicFields = evidenceTemplate.querySelector('.dynamicFields');
-                dynamicFields.innerHTML = '';
+    var dynamicFields = evidenceTemplate.querySelector('.dynamicFields');
+    dynamicFields.innerHTML = '';
 
-                evidenceFields.appendChild(evidenceTemplate);
-            });
+    // Show the remove button for the newly added field
+    var removeButton = evidenceTemplate.querySelector('.remove-btn');
+    removeButton.style.display = 'inline-block';
+    removeButton.addEventListener('click', function() {
+        evidenceTemplate.remove();
+    });
+
+    evidenceFields.appendChild(evidenceTemplate);
+});
+
 
             // Event delegation to handle change events for dynamically added select elements
             document.getElementById('evidence_fields').addEventListener('change', function(event) {
@@ -314,6 +387,26 @@
                                                 <textarea name="remarks[]" cols="30" rows="5" class="form-control"></textarea>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="category">Category:</label>
+                                                                    <select class="form-control category" name="category[]">
+                                                                        <option value="">Select Option</option>
+                                                                        <option value="phishing">Phishing</option>
+                                                                        <option value="malware">Malware</option>
+                                                                        <option value="fraud">Fraud</option>
+                                                                        <option value="other">Other</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket">Ticket No:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
+                                                                    </div>
+                                                            </div>
+
                                     </div>
                                 `;
                                 break;
@@ -355,6 +448,24 @@
                                                 <textarea name="remarks[]" cols="30" rows="5" class="form-control"></textarea>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="category">Category:</label>
+                                                                    <select class="form-control category" name="category[]">
+                                                                        <option value="">Select Option</option>
+                                                                        <option value="phishing">Phishing</option>
+                                                                        <option value="malware">Malware</option>
+                                                                        <option value="fraud">Fraud</option>
+                                                                        <option value="other">Other</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket">Ticket No:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
+                                                                    </div>
+                                                            </div>
                                     </div>
                                 `;
                                 break;

@@ -95,6 +95,8 @@
                                                     @if($evidence->registry_details)<p class="card-text">Registry Details: {{ $evidence->registry_details }}</p>@endif
                                                     @if($evidence->ip)<p class="card-text">IP Address: {{ $evidence->ip }}</p>@endif
                                                     @if($evidence->registrar)<p class="card-text">Registrar: {{ $evidence->registrar }}</p>@endif
+                                                    @if($evidence->category)<p class="card-text">Category: {{ $evidence->category }}</p>@endif
+                                                    @if($evidence->ticket)<p class="card-text">Ticket: {{ $evidence->ticket }}</p>@endif
 
                                                     {{-- Explode PDFs --}}
                                                     @if($evidence->pdf)
