@@ -22,6 +22,8 @@ class Evidence extends Eloquent
         'registrar',
         'pdf',
         'screenshots',
-        'remarks'
+        'remarks',
+        'category',
+        'ticket',
     ];
 }

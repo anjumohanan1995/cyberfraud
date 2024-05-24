@@ -28,7 +28,7 @@ class EvidenceController extends Controller
             $new_id = Crypt::encrypt($ack_no);
             $pdfPathsString = '';
             $screenshotPathsString = '';
-
+            //dd($request->all());
              $validator = Validator::make($request->all(), [
         'evidence_type.*' => 'required',
         'url.*' => 'required|url',
@@ -39,6 +39,8 @@ class EvidenceController extends Controller
         'pdf.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:2048',
         'screenshots.*' => 'nullable|file|mimes:jpeg,bmp,png|max:2048',
         'remarks.*' => 'nullable|string',
+        'ticket.*' => 'nullable|string',
+        'category.*' => 'nullable|string',
     ],[
         'evidence_type.*.required' => 'The evidence type field is required.',
         'url.*.required' => 'The URL field is required.',
@@ -50,13 +52,15 @@ class EvidenceController extends Controller
         'registrar.*.nullable' => 'The registrar field is optional.',
         'pdf.*.nullable' => 'The Document field is optional.',
         'pdf.*.file' => 'The Document must be a file.',
-        'pdf.*.mimes' => 'The Document must be a file of type: pdf.',
+        'pdf.*.mimes' => 'The Document must be a file of type: pdf, doc, docx, xls, xlsx, ppt, pptx.',
         'pdf.*.max' => 'The Document may not be greater than 2MB.',
         'screenshots.*.nullable' => 'The Screenshots field is optional.',
         'screenshots.*.file' => 'The screenshots must be a file.',
         'screenshots.*.mimes' => 'The screenshots must be a file of type: jpeg, bmp, png.',
         'screenshots.*.max' => 'The screenshots may not be greater than 2MB.',
         'remarks.*.nullable' => 'The remarks field is optional.',
+        'ticket.*.nullable' => 'The ticket field is optional.',
+        'category.*.nullable' => 'The category field is optional.',
     ]);
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
@@ -97,6 +101,8 @@ class EvidenceController extends Controller
                 $evidence->pdf = $pdfPathsString;;
                 $evidence->screenshots = $screenshotPathsString;
                 $evidence->ack_no = $ack_no;
+                $evidence->ticket = $request->ticket[$key];
+                $evidence->category = $request->category[$key];
                 switch ($type) {
                     case 'website':
                         $evidence->url = $request->url[$key];
@@ -111,6 +117,7 @@ class EvidenceController extends Controller
                 }
 
                 $evidence->remarks = $request->remarks[$key];
+                //dd($evidence);
                 $evidence->save();
             }
             return redirect()->route('evidence.index', ['acknowledgement_no' => $new_id])->with('success', 'Evidence added successfully!');
