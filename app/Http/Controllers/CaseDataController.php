@@ -408,8 +408,15 @@ if ($search_by) {
             $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
             // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
-            $edit = ' <div class="form-check form-switch form-switch-sm" dir="ltr"><input data-id="' . $acknowledgement_no . '" onchange="confirmActivation(this)" class="form-check-input" type="checkbox" id="SwitchCheckSizesm" ' . ($com->com_status==1 ? 'checked' : '') . '></div>';
-
+            $edit = '<div class="form-check form-switch form-switch-sm" dir="ltr">
+            <input
+                data-id="' . $acknowledgement_no . '"
+                onchange="confirmActivation(this)"
+                class="form-check-input"
+                type="checkbox"
+                id="SwitchCheckSizesm' . $com->id . '"
+                ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
+         </div>';
             $data_arr[] = array(
                 "id" => $i,
                 "acknowledgement_no" => $ack_no,
