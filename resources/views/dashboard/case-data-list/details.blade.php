@@ -137,6 +137,7 @@
                                         <th>Transaction Amount</th>
                                         <th>Bank</th>
                                         <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,6 +149,14 @@
                                             <td>{{ @$complnt->amount }}</td>
                                             <td>{{ @$complnt->bank_name }}</td>
                                             <td>{{ @$complnt->current_status }}</td>
+                                            <td>
+                                                <div class="form-check form-switch form-switch-sm" dir="ltr">
+                                                    <input data-id="{{ $complnt->id }}" onchange="confirmActivation(this)"
+                                                        class="form-check-input" type="checkbox"
+                                                        id="SwitchCheckSizesm{{ $complnt->id }}"
+                                                        {{ $complnt->com_status == 1 ? 'checked' : '' }}>
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -250,7 +259,45 @@
     </div>
     <!-- /row -->
     </div>
+    <link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
+
+    <script src="{{ asset('js/toastr.js') }}"></script>
     <script>
+        function confirmActivation(identifier) {
+            var isChecked = $(identifier).prop('checked');
+            var confirmationMessage = isChecked ? "Do you want to activate this?" :
+                "Do you want to deactivate this?";
+
+            if (confirm(confirmationMessage)) {
+                activateLink(identifier);
+            } else {
+                // Revert the checkbox state if the user cancels the action
+                $(identifier).prop('checked', !isChecked);
+            }
+        }
+
+        function activateLink(identifier) {
+            //  alert("dsf");
+            var status = $(identifier).prop('checked') == true ? 1 : 0;
+            var com_id = $(identifier).data('id');
+            // alert(com_id);
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: '/activateLinkIndividual',
+                data: {
+                    'status': status,
+                    'com_id': com_id
+                },
+                success: function(data) {
+                    console.log(data.status)
+                    toastr.success(data.status, 'Success!');
+
+                },
+
+            });
+
+        }
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
 

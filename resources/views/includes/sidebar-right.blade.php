@@ -34,10 +34,7 @@
                             <div class="checkbox">
                                 <label class="check-box">
                                     <label class="ckbox">
-                                        <input
-                                            checked=""
-                                            type="checkbox"
-                                        />
+                                        <input checked="" type="checkbox" />
                                         <span> </span>
                                     </label>
                                 </label>
@@ -139,27 +136,21 @@
                     <div class="row">
                         <div class="col-4 text-center">
                             <a class="" href="">
-                                <i
-                                    class="dropdown-icon mdi mdi-message-outline fs-20 m-0 leading-tight"
-                                >
+                                <i class="dropdown-icon mdi mdi-message-outline fs-20 m-0 leading-tight">
                                 </i>
                             </a>
                             <div>Inbox</div>
                         </div>
                         <div class="col-4 text-center">
                             <a class="" href="">
-                                <i
-                                    class="dropdown-icon mdi mdi-tune fs-20 m-0 leading-tight"
-                                >
+                                <i class="dropdown-icon mdi mdi-tune fs-20 m-0 leading-tight">
                                 </i>
                             </a>
                             <div>Settings</div>
                         </div>
                         <div class="col-4 text-center">
                             <a class="" href="">
-                                <i
-                                    class="dropdown-icon mdi mdi-logout-variant fs-20 m-0 leading-tight"
-                                >
+                                <i class="dropdown-icon mdi mdi-logout-variant fs-20 m-0 leading-tight">
                                 </i>
                             </a>
                             <div>Sign out</div>
@@ -169,21 +160,10 @@
             </div>
         </div>
         <div class="ps__rail-x" style="left: 0px; top: 0px">
-            <div
-                class="ps__thumb-x"
-                tabindex="0"
-                style="left: 0px; width: 0px"
-            ></div>
+            <div class="ps__thumb-x" tabindex="0" style="left: 0px; width: 0px"></div>
         </div>
-        <div
-            class="ps__rail-y"
-            style="top: 0px; height: 657px; right: 0px"
-        >
-            <div
-                class="ps__thumb-y"
-                tabindex="0"
-                style="top: 0px; height: 437px"
-            ></div>
+        <div class="ps__rail-y" style="top: 0px; height: 657px; right: 0px">
+            <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 437px"></div>
         </div>
     </div>
     <!--/Sidebar-right-->

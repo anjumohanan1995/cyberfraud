@@ -22,7 +22,7 @@
             </div>
             <div class="d-flex my-auto">
                 <div class="d-flex right-page">
-                    <div class="d-flex justify-content-center mr-5">
+                    {{--  <div class="d-flex justify-content-center mr-5">
                         <div class="">
                             <span class="d-block">
                                 <span class="label">EXPENSES</span>
@@ -61,7 +61,7 @@
                                 </canvas>
                             </span>
                         </div>
-                    </div>
+                    </div>  --}}
                 </div>
             </div>
         </div>

@@ -1,13 +1,13 @@
 <aside class="main-sidebar app-sidebar sidebar-scroll ps ps--active-y">
     <div class="main-sidebar-header active">
         <a class="desktop-logo logo-light active" href="index.html">
-            <img src="img/logo.png" class="main-logo" />
+            <img src="/img/logo.png" class="main-logo" />
         </a>
         <a class="desktop-logo icon-logo active" href="index.html">
             <img src="img/favicon.png" class="logo-icon" />
         </a>
         <a class="desktop-logo logo-dark active" href="index.html">
-            <img src="img/logo-white.png" class="main-logo dark-theme" alt="logo" />
+            <img src="/img/logo-white.png" class="main-logo dark-theme" alt="logo" />
         </a>
         <a class="logo-icon mobile-logo icon-dark active" href="index.html">
             <img src="img/favicon-white.png" class="logo-icon dark-theme" alt="logo" />
@@ -58,16 +58,18 @@
             </li>
             @php
 
-                $permission = \App\Models\RolePermission::where('role',\Auth::user()->role)->first();
+                $permission = \App\Models\RolePermission::where('role', \Auth::user()->role)->first();
 
-                @$sub_permission= ($permission->sub_permissions)? json_decode($permission->sub_permissions,true) :  null;
+                @$sub_permission = $permission->sub_permissions
+                    ? json_decode($permission->sub_permissions, true)
+                    : null;
 
             @endphp
-            {{-- @if ( !empty($permission) )
+            {{-- @if (!empty($permission))
 
-                @foreach(@$permission->permission as $permissions)
+                @foreach (@$permission->permission as $permissions)
 
-                    @if(@$permissions == "user-management")
+                    @if (@$permissions == 'user-management')
 
 
                     <li class="slide">
@@ -77,17 +79,17 @@
                             <i class="angle fe fe-chevron-down"> </i>
                         </a>
                         <ul class="slide-menu">
-                            @if(!empty($sub_permission) && (in_array("users-list" ,$sub_permission )) )
+                            @if (!empty($sub_permission) && in_array('users-list', $sub_permission))
                                 <li>
                                     <a class="slide-item" href="{{url('users')}}">Users</a>
                                 </li>
                             @endif
-                            @if(!empty($sub_permission) && (in_array("role-list" ,$sub_permission )) )
+                            @if (!empty($sub_permission) && in_array('role-list', $sub_permission))
                                 <li>
                                     <a class="slide-item" href="{{url('roles')}}">Roles</a>
                                 </li>
                             @endif
-                            @if(!empty($sub_permission) && (in_array("permission-list" ,$sub_permission )) )
+                            @if (!empty($sub_permission) && in_array('permission-list', $sub_permission))
                                 <li>
                                     <a class="slide-item" href="{{url('permissions')}}">Permissions</a>
                                 </li>
@@ -99,7 +101,7 @@
 
                 @endforeach
             @endif --}}
-              {{-- <li class="slide">
+            {{-- <li class="slide">
                         <a class="side-menu__item" href="{{url('modus')}}">
                             <i class="side-menu__icon fe fe-database"> </i>
                             <span class="side-menu__label">Modus</span>
@@ -152,7 +154,7 @@
                         <a class="slide-item" href="{{ url('roles') }}">Roles</a>
                     </li>
                     <li>
-                        <a class="slide-item" href="{{url('permissions')}}">Permissions</a>
+                        <a class="slide-item" href="{{ url('permissions') }}">Permissions</a>
                     </li>
 
                 </ul>

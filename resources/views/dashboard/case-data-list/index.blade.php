@@ -34,7 +34,9 @@
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
+                                <div id="alert_ajaxx" style="display:none">
 
+                                </div>
                                 @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
@@ -64,114 +66,116 @@
                                     </div>
                                 </div> --}}
                             </div>
-<form id="complaint-form">
+                            <form id="complaint-form">
                                 <div class="row">
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                      <label for="from-date">From Date:</label>
-                                      <input type="date" class="form-control" id="from-date" name="from_date">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="from-date">From Date:</label>
+                                            <input type="date" class="form-control" id="from-date" name="from_date">
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                      <label for="to-date">To Date:</label>
-                                      <input type="date" class="form-control" id="to-date" name="to_date">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="to-date">To Date:</label>
+                                            <input type="date" class="form-control" id="to-date" name="to_date">
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                      <label for="mobile">Complaint Mobile no: </label>
-                                      <input type="text" class="form-control" id="mobile" name="mobile">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="mobile">Complaint Mobile no: </label>
+                                            <input type="text" class="form-control" id="mobile" name="mobile">
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="type">Transaction Type:</label><br>
-                                        <select class="form-control" id="type">
-                                            <option>--Select--</option>
-                                            <option value="bank">Bank</option>
-                                            <option value="wallet">Wallet/PG/PA</option>
-                                            <option value="merchant">Merchant</option>
-                                            <option value="insurance">Insurance</option>
-                                        </select>
-                                        <br>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="type">Transaction Type:</label><br>
+                                            <select class="form-control" id="type">
+                                                <option>--Select--</option>
+                                                <option value="bank">Bank</option>
+                                                <option value="wallet">Wallet/PG/PA</option>
+                                                <option value="merchant">Merchant</option>
+                                                <option value="insurance">Insurance</option>
+                                            </select>
+                                            <br>
 
+                                        </div>
                                     </div>
-                                  </div>
                                 </div>
                                 <div class="row">
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label for="options">Bank/Wallet/Merchant/Insurance:</label>
-                                        <select class="form-control" id="options"></select>
-                                        </select>
-                                      </div>
-                                  </div>
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                      <label for="filled-by">Filled by(within 24 hrs):</label>
-                                      <select class="form-control" id="filled-by" name="filled-by">
-                                        <option value="">All</option>
-                                        <option value="citizen">Citizen</option>
-                                        <option value="cyber">Cyber</option>
-                                      </select>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="options">Bank/Wallet/Merchant/Insurance:</label>
+                                            <select class="form-control" id="options"></select>
+                                            </select>
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3">
-                                    <div class="form-group">
-                                      <label for="acknowledgement_no">Acknowledgement No: </label>
-                                      <input type="text" class="form-control" id="acknowledgement_no" name="acknowledgement_no">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="filled-by">Filled by(within 24 hrs):</label>
+                                            <select class="form-control" id="filled-by" name="filled-by">
+                                                <option value="">All</option>
+                                                <option value="citizen">Citizen</option>
+                                                <option value="cyber">Cyber</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3" hidden>
-                                    <div class="form-group">
-                                      <label for="complaint-reported">Complaint Reported:</label>
-                                      <select class="form-control" id="complaint-reported" name="complaint-reported">
-                                        <option value="">All</option>
-                                        <option value="#">Through Helpline(1930)</option>
-                                        <option value="#">Cyber Crime Portal</option>
-                                      </select>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="acknowledgement_no">Acknowledgement No: </label>
+                                            <input type="text" class="form-control" id="acknowledgement_no"
+                                                name="acknowledgement_no">
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3" hidden>
-                                    <div class="form-group">
-                                      <label for="fir-lodge">FIR Lodge:</label>
-                                      <select class="form-control" id="fir-lodge" name="fir-lodge">
-                                        <option value="">--Select--</option>
-                                        <option value="#">Yes</option>
-                                        <option value="#">No</option>
-                                      </select>
+                                    <div class="col-md-3" hidden>
+                                        <div class="form-group">
+                                            <label for="complaint-reported">Complaint Reported:</label>
+                                            <select class="form-control" id="complaint-reported" name="complaint-reported">
+                                                <option value="">All</option>
+                                                <option value="#">Through Helpline(1930)</option>
+                                                <option value="#">Cyber Crime Portal</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                  </div>
+                                    <div class="col-md-3" hidden>
+                                        <div class="form-group">
+                                            <label for="fir-lodge">FIR Lodge:</label>
+                                            <select class="form-control" id="fir-lodge" name="fir-lodge">
+                                                <option value="">--Select--</option>
+                                                <option value="#">Yes</option>
+                                                <option value="#">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">
-                                  <div class="col-md-3" hidden>
-                                    <div class="form-group">
-                                      <label for="acknowledgement_no">Acknowledgement No: </label>
-                                      <input type="text" class="form-control" id="acknowledgement_no" name="acknowledgement_no">
+                                    <div class="col-md-3" hidden>
+                                        <div class="form-group">
+                                            <label for="acknowledgement_no">Acknowledgement No: </label>
+                                            <input type="text" class="form-control" id="acknowledgement_no"
+                                                name="acknowledgement_no">
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3" hidden>
-                                    <div class="form-group">
-                                      <label for="sub-category">Sub category:</label>
-                                      <select class="form-control" id="sub-category" name="sub-category">
-                                        <option value="">--Select--</option>
-                                        <option value="#">Yes</option>
-                                        <option value="#">No</option>
-                                      </select>
+                                    <div class="col-md-3" hidden>
+                                        <div class="form-group">
+                                            <label for="sub-category">Sub category:</label>
+                                            <select class="form-control" id="sub-category" name="sub-category">
+                                                <option value="">--Select--</option>
+                                                <option value="#">Yes</option>
+                                                <option value="#">No</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                  </div>
-                                  <div class="col-md-3" hidden>
-                                    <div class="form-group">
-                                      <label for="search-by">Search by:</label>
-                                      <select class="form-control" id="search-by" name="search-by">
-                                        <option value="">--Select--</option>
-                                        <option value="account_id">Account ID/Account Number/UPI ID</option>
-                                        <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
-                                      </select>
+                                    <div class="col-md-3" hidden>
+                                        <div class="form-group">
+                                            <label for="search-by">Search by:</label>
+                                            <select class="form-control" id="search-by" name="search-by">
+                                                <option value="">--Select--</option>
+                                                <option value="account_id">Account ID/Account Number/UPI ID</option>
+                                                <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                  </div>
                                 </div>
 
                                 <div class="row">
@@ -197,7 +201,7 @@
                                             <th>Current Status</th>
                                             <th>Date of Action</th>
                                             <th>Action Taken By</th>
-                                            {{-- <th>ACTION</th> --}}
+                                            <th>ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -214,7 +218,47 @@
         </div>
         <!-- /row -->
     </div>
+    <link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
+
+    <script src="{{ asset('js/toastr.js') }}"></script>
+
+    @if (session('status'))
         <script>
+            toastr.success('{{ session('status') }}', 'Success!')
+        </script>
+    @endif
+    <script>
+        function confirmActivation(identifier) {
+            var isChecked = $(identifier).prop('checked');
+            var confirmationMessage = isChecked ? "Do you want to activate this link?" : "Do you want to deactivate this link?";
+
+            if (confirm(confirmationMessage)) {
+                activateLink(identifier);
+            } else {
+                // Revert the checkbox state if the user cancels the action
+                $(identifier).prop('checked', !isChecked);
+            }
+        }
+        function activateLink(identifier) {
+            //  alert("dsf");
+            var status = $(identifier).prop('checked') == true ? 1 : 0;
+            var ack_id = $(identifier).data('id');
+            //  alert(ack_id);
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: 'activateLink',
+                data: {
+                    'status': status,
+                    'ack_id': ack_id
+                },
+                success: function(data) {
+                    console.log(data.status)
+                    toastr.success(data.status, 'Success!');
+                    $('#example').DataTable().ajax.reload();
+                }
+            });
+        }
         $("#type").on('change', function() {
             var type = document.getElementById("type").value;
             var dropdown = document.getElementById("options");
@@ -268,7 +312,7 @@
         });
     </script>
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
@@ -285,7 +329,7 @@
                         return $.extend({}, d, {});
                     }
                 },
-                columns:[{
+                columns: [{
                         data: 'id'
                     },
 
@@ -325,68 +369,73 @@
                         data: 'action_taken_by_name'
                     },
 
-                    // {
-                    //     data: 'edit'
-                    // }
+                    {
+                        data: 'edit'
+                    }
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
             });
-        $('#example').on('click', '.editable', function(){
-           var $editable = $(this);
-           var oldValue = $editable.text();
-           var ackno = $editable.data('ackno');
-           var transaction = $editable.data('transaction');
-           var $input = $('<input type="text">').val(oldValue).addClass('edit-input');
-           $editable.empty().append($input);
-           $input.focus().select();
-            $input.on('blur', function() {
-                var newValue = $(this).val();
-                $editable.text(newValue);
-                $.ajax({
-                url: '{{ route('edit.datalist') }}',
-                headers: {
-                          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                          },
-                type: 'POST',
-                data: { ackno:ackno,transaction:transaction,amount:oldValue,new_amount:newValue },
-                success: function(response) {
-                  console.log(response);
+            $('#example').on('click', '.editable', function() {
+                var $editable = $(this);
+                var oldValue = $editable.text();
+                var ackno = $editable.data('ackno');
+                var transaction = $editable.data('transaction');
+                var $input = $('<input type="text">').val(oldValue).addClass('edit-input');
+                $editable.empty().append($input);
+                $input.focus().select();
+                $input.on('blur', function() {
+                    var newValue = $(this).val();
+                    $editable.text(newValue);
+                    $.ajax({
+                        url: '{{ route('edit.datalist') }}',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        type: 'POST',
+                        data: {
+                            ackno: ackno,
+                            transaction: transaction,
+                            amount: oldValue,
+                            new_amount: newValue
+                        },
+                        success: function(response) {
+                            console.log(response);
 
-                },
-                error: function(xhr, status,error) {
-                  $editable.text(oldData);
-                  alert(response.message);
-                }
+                        },
+                        error: function(xhr, status, error) {
+                            $editable.text(oldData);
+                            alert(response.message);
+                        }
+                    });
+
+                    // Remove input field
+                    $(this).remove();
+                });
+
+            })
+
+            // Form submission event handler
+            $('#complaint-form').submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                var from_date = $("#from-date").val();
+                var to_date = $("#to-date").val();
+                var mobile = $("#mobile").val();
+                var acknowledgement_no = $("#acknowledgement_no").val();
+                var filled_by = $("#filled-by").val();
+                var search_by = $("#search-by").val();
+                var options = $("#options").val();
+
+                // Construct the URL with query parameters
+                var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date +
+                    "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" +
+                    filled_by + "&search_by=" + search_by + "&options=" + options;
+
+                // Reload DataTable with new data based on selected filters
+                table.ajax.url(url).load();
             });
-
-                // Remove input field
-                $(this).remove();
-            });
-
-        })
-
-                // Form submission event handler
-    $('#complaint-form').submit(function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        var from_date = $("#from-date").val();
-        var to_date = $("#to-date").val();
-        var mobile = $("#mobile").val();
-        var acknowledgement_no = $("#acknowledgement_no").val();
-        var filled_by = $("#filled-by").val();
-        var search_by = $("#search-by").val();
-        var options = $("#options").val();
-
-        // Construct the URL with query parameters
-        var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date + "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" + filled_by + "&search_by=" + search_by + "&options=" + options;
-
-        // Reload DataTable with new data based on selected filters
-        table.ajax.url(url).load();
-    });
 
         });
-
-
     </script>
 @endsection

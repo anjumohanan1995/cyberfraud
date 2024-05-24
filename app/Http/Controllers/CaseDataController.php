@@ -189,6 +189,7 @@ class CaseDataController extends Controller
 
     public function getDatalist(Request $request)
     {
+      //  Complaint::query()->update(['com_status' => 1]);
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows display per page.
@@ -222,6 +223,7 @@ class CaseDataController extends Controller
         //Fetch records.
             $items = Complaint::groupBy('acknowledgement_no')
             ->where('deleted_at', null)
+            ->where('com_status', 1)
             ->orderBy('created_at', 'desc')
             ->orderBy($columnName, $columnSortOrder);
 
@@ -394,7 +396,8 @@ if ($search_by) {
             $id = Crypt::encrypt($acknowledgement_no);
             $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
-            $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
+            // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
+            $edit = ' <div class="form-check form-switch form-switch-sm" dir="ltr"><input data-id="' . $acknowledgement_no . '" onchange="confirmActivation(this)" class="form-check-input" type="checkbox" id="SwitchCheckSizesm" ' . ($com->com_status==1 ? 'checked' : '') . '></div>';
 
             $data_arr[] = array(
                 "id" => $i,
@@ -430,8 +433,8 @@ if ($search_by) {
         $id = Crypt::decrypt($id);
 
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
-        $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
-        $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->sum('amount');
+        $complaints = Complaint::where('acknowledgement_no',(int)$id)->where('com_status',1)->get();
+        $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         //dd($bank_datas);
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount'));
@@ -453,5 +456,30 @@ if ($search_by) {
             return response()->json(['error' => true, 'message' => 'error']);
         }
 
+    }
+    public function activateLink(Request $request)
+    {
+
+        $ackId = (int) $request->ack_id;
+        $status = (int) $request->status;
+
+        Complaint::where('acknowledgement_no', $ackId)
+                 ->update(['com_status' => $status]);
+
+
+        return response()->json(['status'=>'Status changed successfully.']);
+    }
+    public function activateLinkIndividual(Request $request)
+    {
+
+        //$id = Crypt::decrypt($request->com_id);
+        $com_id =$request->com_id;
+        $status = (int) $request->status;
+
+        Complaint::where('_id', $com_id)
+                 ->update(['com_status' => $status]);
+
+
+        return response()->json(['status'=>'Status changed successfully.']);
     }
 }

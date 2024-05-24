@@ -130,7 +130,8 @@ Route::middleware('auth')->group(function () {
 
 
     Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
-
+    Route::get('activateLink', [CaseDataController::class, 'activateLink']);
+    Route::get('activateLinkIndividual', [CaseDataController::class, 'activateLinkIndividual']);
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
