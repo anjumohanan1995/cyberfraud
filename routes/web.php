@@ -148,6 +148,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
     Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
 
-
+    Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');
+    Route::get('download-fir/{ak_no}', [CaseDataController::class, 'downloadFIR'])->name('download.fir');
+    Route::post('profile-update', [CaseDataController::class, 'profileUpdate'])->name('profile.update');
 
 });

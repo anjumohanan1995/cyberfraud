@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\BankCasedata;
 use App\Models\Complaint;
 use App\Models\Bank;
+use App\Models\ComplaintAdditionalData;
+use App\Models\Fir;
 use App\Models\Wallet;
 use App\Models\Merchant;
 use App\Models\Insurance;
@@ -408,7 +410,7 @@ if ($search_by) {
             $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
             // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
-            $edit = '<div class="form-check form-switch form-switch-sm" dir="ltr">
+            $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
             <input
                 data-id="' . $acknowledgement_no . '"
                 onchange="confirmActivation(this)"
@@ -454,8 +456,9 @@ if ($search_by) {
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
-        //dd($bank_datas);
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount'));
+        $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
+       // dd($id);
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional'));
     }
 
 
@@ -500,4 +503,61 @@ if ($search_by) {
 
         return response()->json(['status'=>'Status changed successfully.']);
     }
+    public function firUpload(Request $request)
+    {
+
+        if(!empty($request->fir_file)){
+
+            $fileName = uniqid().'.'.$request->fir_file->extension();
+
+            $request->fir_file->move(public_path('/fir_doc'), $fileName);
+
+        }
+        $complaint = ComplaintAdditionalData::where('ack_no',$request->acknowledgement_no)->first();
+
+        if($complaint == ''){
+
+            $complaint=   ComplaintAdditionalData::create([
+            'ack_no' => @$request->acknowledgement_no? $request->acknowledgement_no:'']);
+        }
+        $complaint->ack_no=$request->acknowledgement_no;
+        $complaint->fir_doc=$fileName;
+        $complaint->save();
+
+        return redirect()->back()->with('status', 'FIR uploaded successfully.');
+    }
+    public function downloadFIR(Request $request, $id)
+    {
+        $complaint = ComplaintAdditionalData::where('ack_no', $id)->first();
+
+        if ($complaint && $complaint->fir_doc) {
+            $filePath = public_path('fir_doc/' . $complaint->fir_doc);
+
+            if (file_exists($filePath)) {
+                return response()->download($filePath);
+            } else {
+                return redirect()->back()->with('error', 'FIR file not found.');
+            }
+        } else {
+            return redirect()->back()->with('error', 'FIR file information not available.');
+        }
+    }
+
+    public function profileUpdate(Request $request)
+    {
+
+        $complaint = ComplaintAdditionalData::where('ack_no',$request->acknowledgement_no)->first();
+        if($complaint == ''){
+
+            $complaint=   ComplaintAdditionalData::create([
+            'ack_no' => @$request->acknowledgement_no? $request->acknowledgement_no:'']);
+        }
+        $complaint->ack_no=$request->acknowledgement_no;
+        $complaint->age=$request->age;
+        $complaint->profession=$request->profession;
+        $complaint->save();
+
+        return redirect()->back()->with('status', 'Profile updated successfully.');
+    }
+
 }
