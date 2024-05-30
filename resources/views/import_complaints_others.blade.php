@@ -76,9 +76,17 @@
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
-                                            
-                                            <input type="hidden" id="sourcetype" value="NCRP" name="source_type">
-                                               
+                                            <div class="form-group">
+                                                <label for="source_type">Source Type:</label>
+                                                <select class="form-control" id="sourcetype" name="source_type">
+                                                    @foreach($sourceTypes as $sourceType)
+                                                        <option value="{{ $sourceType->id }}">{{ $sourceType->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('source_type')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                             <input type="hidden" name="sourcetypetext" id="sourcetypetext">
 
                                            <div id="cyberdomaindisplay" style="display:none"> 

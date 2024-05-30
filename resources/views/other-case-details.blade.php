@@ -12,10 +12,10 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Import Complaints</a>
+                            <a href="#">Other Case Data Details</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Import
+                            Details
                         </li>
                     </ol>
                 </nav>
@@ -65,54 +65,43 @@
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    Add Complaints!
+                                    Case Number -  {{ $case_details[0]->case_number }}
                                 </h4>
 
                             </div>
 
-
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('complaints.store') }}" method="POST" enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            
-                                            <input type="hidden" id="sourcetype" value="NCRP" name="source_type">
-                                               
-                                            <input type="hidden" name="sourcetypetext" id="sourcetypetext">
-
-                                           <div id="cyberdomaindisplay" style="display:none"> 
-                                           <div class="form-group">
-                                                <label for="source_type">Case Number</label>
-                                                <input type="text" class="form-control" name="case_number">
-                                                @error('case_number')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="place">Letter Upload:</label>
-                                                <input type="file" id="letter" name="letter" class="form-control">
-                                                @error('letter')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div> 
-                                           </div>
-
-                                            <div class="form-group">
-                                                <label for="place">File:</label>
-                                                <input type="file" id="place" name="complaint_file" class="form-control">
-                                                @error('complaint_file')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
-
+                                <table class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>SL No</th>
+                                            <th>URL</th>
+                                            <th>Domain</th>
+                                            <th>Registry Details</th>
+                                            <th>IP</th>
+                                            <th>Registrar</th>
+                                            <th>Remarks</th>
+                                            <th>ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach ($case_details as $case)
+                                        <tr>
+                                        <td> {{ $loop->iteration }} </td>
+                                        <td> {{ $case->url }} </td>
+                                        <td> {{ $case->domain }}  </td>
+                                        <td> {{ $case->registry_details }}  </td>
+                                        <td> {{ $case->ip }}  </td>
+                                        <td> {{ $case->registrar }}  </td>
+                                        <td> {{ $case->remarks }}  </td>
+                                        <td> <a href="{{ route('edit-others-caseData',$case->_id) }}"> <button class="btn btn-success"> <i class="fa fa-edit"></i> </button>  </a> </td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
                             </div>
+
+                            
                         </div>
                     </div>
                 </div>
@@ -124,19 +113,5 @@
         <!-- /row -->
     </div>
 
-<script>
-$(document).ready(function(){
-    $('#sourcetype').on('change', function() {
-    var sourcetype = $(this).find('option:selected').text();
-    if(sourcetype == 'Cyber Domain'){
-        $('#sourcetypetext').val('Cyber Domain');
-       $('#cyberdomaindisplay').show();
-    }
-    else{
-        $('#cyberdomaindisplay').hide();
-    }
-});
-});
-</script>
 
 @endsection
