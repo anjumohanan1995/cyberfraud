@@ -130,7 +130,6 @@
                                         <div class="form-group">
                                             <label for="com_status">Status </label>
                                             <select class="form-control" id="com_status">
-                                                <option>--Select--</option>
                                                 <option value="1">Active</option>
                                                 <option value="0">Inactive</option>
                                             </select>
