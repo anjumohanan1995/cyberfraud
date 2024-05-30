@@ -162,23 +162,36 @@
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
                     <i class="side-menu__icon fe fe-box"> </i>
-                    <span class="side-menu__label">Upload CaseData</span>
+                    <span class="side-menu__label">Upload NCRP CaseData</span>
                     <i class="angle fe fe-chevron-down"> </i>
                 </a>
                 <ul class="slide-menu">
                     <li>
-                        <a class="slide-item" href="{{ url('import-complaints') }}">Form victim</a>
+                        <a class="slide-item" href="{{ url('import-complaints') }}">Primary Data</a>
                     </li>
                     <li>
-                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Form Bank</a>
+                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Bank Action</a>
                     </li>
 
                 </ul>
             </li>
+             <li class="slide">
+                <a class="side-menu__item"  href="{{ route('upload-others-caseData') }}">
+                    <i class="side-menu__icon fe fe-box"> </i>
+                    <span class="side-menu__label">Upload Others CaseData</span>
+                   
+                </a>
+            </li>
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('case-data') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Case Data</span>
+                    <span class="side-menu__label">NCRP Case Data</span>
+                </a>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('case-data-others') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Others Case Data </span>
                 </a>
             </li>
             <li class="slide">
