@@ -27,7 +27,7 @@ class ComplaintController extends Controller
         $file = $request->file('complaint_file');
         $source_type = $request->input('source_type');
         if($source_type){
-            if($request->sourcetypetext == 'Cyber Domain'){
+            if($request->sourcetypetext !== 'NCP portal'){
               
                 $request->validate([
                     'case_number' => 'required',

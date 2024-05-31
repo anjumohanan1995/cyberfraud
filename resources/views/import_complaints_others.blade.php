@@ -35,17 +35,6 @@
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
 
-                                @if ($errors->any())
-
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-
                                 @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
@@ -70,57 +59,76 @@
 
                             </div>
 
-
-                            <div class="table-responsive mb-0">
                                 <form action="{{ route('complaints.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="source_type">Source Type:</label>
-                                                <select class="form-control" id="sourcetype" name="source_type">
-                                                    @foreach($sourceTypes as $sourceType)
-                                                        <option value="{{ $sourceType->id }}">{{ $sourceType->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                                @error('source_type')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="source_type">Source Type:</label>
+                                                        <select class="form-control" id="sourcetype" name="source_type">
+                                                        @foreach($sourceTypes as $sourceType)
+                                                        <option value="{{ $sourceType->id }}" @if(old('source_type') == $sourceType->id ) selected  @endif>{{ $sourceType->name }}</option>
+                                                        @endforeach
+                                                        </select>
+                                                        @error('source_type')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <input type="hidden" name="sourcetypetext" id="sourcetypetext">
-
-                                           <div id="cyberdomaindisplay" style="display:none"> 
-                                           <div class="form-group">
-                                                <label for="source_type">Case Number</label>
-                                                <input type="text" class="form-control" name="case_number">
-                                                @error('case_number')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="source_type">Case Number</label>
+                                                        <input type="text" value="{{ old('case_number') }}" class="form-control" name="case_number">
+                                                        @error('case_number')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            <div class="form-group">
-                                                <label for="place">Letter Upload:</label>
-                                                <input type="file" id="letter" name="letter" class="form-control">
-                                                @error('letter')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div> 
-                                           </div>
-
-                                            <div class="form-group">
-                                                <label for="place">File:</label>
-                                                <input type="file" id="place" name="complaint_file" class="form-control">
-                                                @error('complaint_file')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label for="place">Letter Upload:</label>
+                                                        <input type="file" value="{{ old('letter') }}" id="letter" name="letter" class="form-control">
+                                                        @error('letter')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                        @enderror
+                                                        </div> 
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="place">File:</label>
+                                                        <input type="file" id="place" name="complaint_file" class="form-control">
 
+                                                        @error('complaint_file')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 justify-content-center align-self-center">
+                                                    <a href="{{ asset('case_others_template/template.xlsx')  }}" download="case_data_others_template.xlsx" ><button type="button" class="btn btn-primary btn-sm">Template <br> 
+                                                    <i class="fa fa-download"></i></button>
+                                                    </a> 
+                                                </div>
+                                            </div>
+                                        </div>                                       
+                                    </div>
+                                    <div class="row">
+                                    <div class="form-group">
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
                                 </form>
-
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -132,7 +140,7 @@
         <!-- /row -->
     </div>
 
-<script>
+{{-- <script>
 $(document).ready(function(){
     $('#sourcetype').on('change', function() {
     var sourcetype = $(this).find('option:selected').text();
@@ -145,6 +153,6 @@ $(document).ready(function(){
     }
 });
 });
-</script>
+</script> --}}
 
 @endsection
