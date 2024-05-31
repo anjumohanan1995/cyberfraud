@@ -67,6 +67,9 @@ class CaseDataController extends Controller
             'insurances' => $insurances
     ]);
     }
+
+
+
      public function bankCaseData(Request $request)
     {
 
@@ -454,4 +457,62 @@ if ($search_by) {
         }
 
     }
+
+    // public function complaintChart(Request $request)
+    // {
+    //     try {
+    //         $specifiedDate = $request->input('specified_date');
+
+    //         $specifiedDate = Carbon::parse($specifiedDate)->toDateString();
+    //     //dd($specifiedDate);
+    //         // Fetch complaints for the specified date and group by day
+    //         $casesPerDay = Complaint::whereDate('created_at', $specifiedDate)
+    //             ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+    //             ->groupBy('date')
+    //             ->get();
+    //             $query = Complaint::whereDate('created_at', $specifiedDate)
+    //             ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+    //             ->groupBy('date');
+
+    //         // $sql = $query->toSql();
+    //         // dd($sql);
+    //         // Debugging: Inspect $casesPerDay
+    //         // dd($casesPerDay);
+
+    //         // Fetch complaints for the specified date and group by month
+    //         $casesPerMonth = Complaint::whereYear('created_at', Carbon::parse($specifiedDate)->year)
+    //             ->whereMonth('created_at', Carbon::parse($specifiedDate)->month)
+    //             ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total')
+    //             ->groupBy('month')
+    //             ->get();
+
+    //         // Debugging: Inspect $casesPerMonth
+    //         // dd($casesPerMonth);
+
+    //         // Fetch complaints for the specified date and group by year
+    //         $casesPerYear = Complaint::whereYear('created_at', Carbon::parse($specifiedDate)->year)
+    //             ->selectRaw('YEAR(created_at) as year, COUNT(*) as total')
+    //             ->groupBy('year')
+    //             ->get();
+
+    //         // Debugging: Inspect $casesPerYear
+    //         // dd($casesPerYear);
+
+    //         // Return the data as JSON
+    //         return response()->json([
+    //             'casesPerDay' => $casesPerDay,
+    //             'casesPerMonth' => $casesPerMonth,
+    //             'casesPerYear' => $casesPerYear,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         // Handle any potential errors
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+
+
+
+
 }
