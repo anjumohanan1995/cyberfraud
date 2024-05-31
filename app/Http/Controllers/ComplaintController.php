@@ -23,20 +23,25 @@ class ComplaintController extends Controller
 
     public function complaintStore(Request $request)
     {
-       
+
         $file = $request->file('complaint_file');
         $source_type = $request->input('source_type');
         if($source_type){
+<<<<<<< HEAD
             if($request->sourcetypetext !== 'NCP portal'){
               
+=======
+            if($request->sourcetypetext == 'Cyber Domain'){
+
+>>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
                 $request->validate([
                     'case_number' => 'required',
                     'letter' =>      'required|mimes:pdf',
                     'complaint_file' => 'required',
-                    
+
                 ]);
                 $case_number_check = ComplaintOthers::where('case_number',$request->case_number)->get()->count();
-                
+
                 if($case_number_check > 0){
                     return redirect()->back()->with('error', 'Case number exists!!');
                 }
@@ -45,39 +50,39 @@ class ComplaintController extends Controller
                    $extension = $file->getClientOriginalExtension();
                    $fileName = 'cyb-'. date('Y-m-d_H-i-s').'.'.$extension;
                    $path = $file->storeAs('uploads/complaints/others/', $fileName);
-        
+
                 }
 
             Excel::import(new ComplaintImportOthers($source_type,$request->case_number,$fileName), $request->complaint_file);
             return redirect()->back()->with('success', 'Form submitted successfully!');
             }
             else{
-               
+
                 $request->validate([
                     'complaint_file' => 'required'
                 ]);
-        
+
                 if ($file){
                     try {
                         // Import data from the file
                         $source_type = $request->source_type;
-        
+
                     // Import data from the file
                     Excel::import(new ComplaintImport($source_type), $file);
-        
-        
+
+
                         // Provide feedback to the user
                         return redirect()->back()->with('success', 'Form submitted successfully!');
-        
+
                     } catch (\Exception $e) {
                         if ($e instanceof \Illuminate\Validation\ValidationException) {
                             // Retrieve the validation errors
                             $errors = $e->validator->getMessageBag()->all();
-        
+
                             // Redirect back with validation errors and input data
                             return redirect()->back()->withErrors($errors)->withInput();
                         }
-        
+
                         // return response()->json([
                         //     'error' => 'An error occurred during import',
                         //     'message' => $e->getMessage()
@@ -94,5 +99,7 @@ class ComplaintController extends Controller
 
 
     }
+
+
 
 }

@@ -17,7 +17,7 @@ use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\SourceType; 
+use App\Models\SourceType;
 
 
 
@@ -71,6 +71,9 @@ class CaseDataController extends Controller
             'insurances' => $insurances
     ]);
     }
+
+
+
      public function bankCaseData(Request $request)
     {
 
@@ -214,10 +217,10 @@ class CaseDataController extends Controller
         $search_by = $request->get('search_by');
         $options = $request->get('options');
         $com_status = $request->get('com_status');
-        
-         
+
+
         // Total records.
-        $totalRecordQuery = Complaint::where('deleted_at', null);  
+        $totalRecordQuery = Complaint::where('deleted_at', null);
         $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
 
         //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
@@ -264,7 +267,7 @@ class CaseDataController extends Controller
             if ($mobile){
                 $mobile = (int)$mobile;
                 $totalRecordQuery->where('complainant_mobile', $mobile);
-                
+
                 $items->where('complainant_mobile', $mobile);
                 $totalRecords = Complaint::groupBy('acknowledgement_no')
                             ->where('complainant_mobile', $mobile)->where('com_status',(int)$com_status)->get()->count();
@@ -287,12 +290,12 @@ class CaseDataController extends Controller
                 $totalRecordswithFilter = $totalRecords;
             }
             // if ($com_status){
-                
+
             //     $totalRecordQuery->where('com_status', (int)$com_status);
             //     $items->where('com_status', (int)$com_status);
             //     $totalRecords = Complaint::groupBy('acknowledgement_no')
             //     ->where('com_status', (int)$com_status)->get()->count();
-               
+
             //     $totalRecordswithFilter = $totalRecords;
             // }
             // Apply "Filled by" filter
@@ -385,9 +388,9 @@ if ($search_by) {
 
         // Total records count after filtering
         //$totalRecordswithFilter = $items->count();
-        
+
         $records = $items->skip($start)->take($rowperpage)->get();
-       
+
         $data_arr = array();
         $i = $start;
 
@@ -459,7 +462,7 @@ if ($search_by) {
             "iTotalDisplayRecords" => $totalRecordswithFilter,
             "aaData" => $data_arr
         );
-        
+
         return response()->json($response);
     }
 
@@ -562,17 +565,27 @@ if ($search_by) {
                 ],
                 [
                     '$sort' => [
+<<<<<<< HEAD
                         '_id' => 1,
                 ]
+=======
+                        '_id' => 1
+                    ]
                 ],
                 [
-                    '$skip' => (int)$start 
+                    '$sort' => [
+                        'created_at' => -1
+                    ]
+>>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
                 ],
                 [
-                    '$limit' => (int)$rowperpage 
+                    '$skip' => (int)$start
+                ],
+                [
+                    '$limit' => (int)$rowperpage
                 ]
             ];
-        
+
             if (isset($casenumber)){
                 $pipeline = array_merge([
                     [
@@ -591,6 +604,7 @@ if ($search_by) {
                     ]
                 ], $pipeline);
             }
+<<<<<<< HEAD
             if (isset($domain)){
                 $pipeline = array_merge([
                     [
@@ -607,6 +621,15 @@ if ($search_by) {
         $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
          
             $pipeline = [
+=======
+
+            return $collection->aggregate($pipeline);
+        });
+
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection){
+        return $collection->aggregate([
+
+>>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
                 [
                     '$group' => [
                         '_id' => '$case_number'
@@ -646,20 +669,25 @@ if ($search_by) {
         });
 
 
-     
-      
+
+
         $totalRecords = count($distinctCaseNumbers);
         $data_arr = array();
         $i = $start;
-   
 
-        $totalRecordswithFilter =  $totalRecords;                                 
+
+        $totalRecordswithFilter =  $totalRecords;
         foreach($complaints as $record){
-                  
+
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
+<<<<<<< HEAD
             
             $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
+=======
+
+            $case_number = '<a href="' . route('other-case-details', ['id' => $record->_id]) . '">'.$record->_id.'</a>';
+>>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
 
             foreach ($record->url as $item) {
                 $url .= $item."<br>";
@@ -683,7 +711,7 @@ if ($search_by) {
             foreach ($record->remarks as $item) {
                 $remarks .= $item."<br>";
             }
-        
+
             $data_arr[] = array(
                     "id" => $i,
                     "source_type" => $source_type,
@@ -694,9 +722,9 @@ if ($search_by) {
                     "registrar"=>$registrar,
                     "remarks" => $remarks,
                     );
-            
+
         }
-        
+
         $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,

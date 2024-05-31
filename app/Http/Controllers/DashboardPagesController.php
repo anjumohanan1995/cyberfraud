@@ -34,7 +34,6 @@ class DashboardPagesController extends Controller
         return view('dashboard.dashboard',compact('totalComplaints', 'newComplaints'));
     }
 
-
     // public function filterCaseData()
     // {
     //     // Get the current date in ISO 8601 format

@@ -15,6 +15,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ModusController;
 use App\Http\Controllers\PoliceStationsController;
 use App\Http\Controllers\SourceTypeController;
+use App\Http\Controllers\ComplaintGraphController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -150,6 +151,10 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('sourcetype', SourceTypeController::class);
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
+
+//dashboard graph
+Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->name('complaints.chart');
+
 
 
 //evidence

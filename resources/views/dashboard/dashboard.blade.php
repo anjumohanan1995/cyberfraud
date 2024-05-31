@@ -471,9 +471,128 @@
                     </div>
                 </div>
             </div>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <div class="row">
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">Please Select Date</h2>
+                                </div>
+                                <div class="card-body">
+                                    <input type="date" id="datePicker" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">Cases per Day</h2>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="casesPerDayChart" width="800" height="400"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">Cases per Month</h2>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="casesPerMonthChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2 class="card-title">Cases per Year</h2>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="casesPerYearChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Include Chart.js library -->
+
+
+<!-- Create canvas element for the chart -->
+
+
+<script>
+    $(document).ready(function () {
+        $('#datePicker').change(function () {
+        var specifiedDate = $(this).val();
+
+        // Make the AJAX request with the specified date
+        fetchComplaintChartData(specifiedDate);
+    });
+
+    // Function to fetch complaint chart data
+    function fetchComplaintChartData(specifiedDate) {
+        $.ajax({
+            url: '{{ route("complaints.chart") }}',
+            method: 'GET',
+            data: { specified_date: specifiedDate }, // Pass the specified date to the backend
+            success: function (data) {
+                renderChart(data);
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+
+    // Function to render the chart (same as before)
+    function renderChart(data) {
+        // Process data for each group (day, month, year)
+        renderBarChart('Cases per Day', data.casesPerDay, '#casesPerDayChart');
+        renderBarChart('Cases per Month', data.casesPerMonth, '#casesPerMonthChart');
+        renderBarChart('Cases per Year', data.casesPerYear, '#casesPerYearChart');
+    }
+
+
+            var ctx = document.getElementById(elementId).getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+    });
+</script>
+
+
+
+
+            </div>
             <!-- /row -->
             <!-- row -->
-            <div class="row row-sm">
+            {{-- <div class="row row-sm">
                 <div class="col-lg-6 col-xl-4 col-md-12 col-sm-12" hidden>
                     <div class="card overflow-hidden latest-tasks">
                         <div class="">
@@ -1765,7 +1884,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
         <!-- /row -->
     </div>
