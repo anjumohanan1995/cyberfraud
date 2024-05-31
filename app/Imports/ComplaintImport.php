@@ -71,12 +71,12 @@ class ComplaintImport implements ToCollection, WithStartRow
 
         $validate = Validator::make($collection->toArray(), [
             '*.acknowledgement_no' => 'required|max:150',
-            
+
         ])->validate();
 
 
         foreach ($collection as $collect) {
-            
+
             $complaint = new Complaint();
             $complaint->source_type = $this->source_type;
             $complaint->acknowledgement_no = $collect['acknowledgement_no'];
@@ -96,6 +96,7 @@ class ComplaintImport implements ToCollection, WithStartRow
             $complaint->action_taken_by_mobile = $collect['action_taken_by_mobile'];
             $complaint->action_taken_by_email = $collect['action_taken_by_email'];
             $complaint->action_taken_by_bank = $collect['action_taken_by_bank'];
+            $complaint->com_status = 1;
 
             $ack="";
             $ack = complaint::where('acknowledgement_no',$collect['acknowledgement_no']);
@@ -107,11 +108,11 @@ class ComplaintImport implements ToCollection, WithStartRow
                 else{
                     $complaint->save();
                 }
-                
+
             }
 
 
-            
+
         }
     }
 }

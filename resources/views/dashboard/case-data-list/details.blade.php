@@ -58,67 +58,182 @@
 
 
                         <div class="card-body" width="500px">
-                            <div class=" m-4 d-flex justify-content-between">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <table>
-                                            <tbody>
-                                                <tr>
-                                                    <td><span>Complainant Name</span></td>
-                                                    <td>: </td>
-                                                    <td>{{ @$complaint->complainant_name }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Mobile</td>
-                                                    <td>:</td>
-                                                    <td>{{ @$complaint->complainant_mobile }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>District</td>
-                                                    <td>:</td>
-                                                    <td>{{ @$complaint->district }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Police Station</td>
-                                                    <td>:</td>
-                                                    <td>{{ @$complaint->police_station }}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="col-md-2 col-6 text-center">
-                                    <div class="row justify-content-end">
-                                        @php $id = Crypt::encrypt($complaint->acknowledgement_no); @endphp
-                                        <div class="col-4 px-1">
-                                            <div class="task-box primary  mb-0">
-                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
-                                                    title="Back" href="{{ route('case-data.index') }}">
-                                                    <h3 class="mb-0"><i class="ti ti-arrow-left"></i></h3>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="col-4 px-1">
-                                            <div class="task-box primary  mb-0">
-                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
-                                                    title="Add Evidence"
-                                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$id]) }}">
-                                                    <h3 class="mb-0"><i class="ti ti-plus"></i></h3>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="col-4 px-1">
-                                            <div class="task-box primary  mb-0">
-                                                <a class="text-white" data-toggle="tooltip" data-placement="top"
-                                                    title="View Evidence"
-                                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$id]) }}">
-                                                    <h3 class="mb-0"><i class="ti ti-eye"></i></h3>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="m-4 d-flex justify-content-between align-items-start">
+                                <div class="col-7">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td><span>Acknowledgement No</span></td>
+                                                <td>:</td>
+                                                <td><strong>{{ @$complaint->acknowledgement_no }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td><span>Complainant Name</span></td>
+                                                <td>:</td>
+                                                <td>{{ @$complaint->complainant_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Mobile</td>
+                                                <td>:</td>
+                                                <td>{{ @$complaint->complainant_mobile }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>District</td>
+                                                <td>:</td>
+                                                <td>{{ @$complaint->district }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Police Station</td>
+                                                <td>:</td>
+                                                <td>{{ @$complaint->police_station }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Age</td>
+                                                <td>:</td>
+                                                <td>{{ @$additional->age }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Profession</td>
+                                                <td>:</td>
+                                                <td>{{ @$additional->profession }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
                                 </div>
 
+                                <div class="col-4">
+                                    <div class="row justify-content-end">
+                                        @php $id = Crypt::encrypt($complaint->acknowledgement_no); @endphp
+                                        <div class="col-2 px-1">
+                                            <div
+                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    data-toggle="tooltip" data-placement="top" title="Back"
+                                                    href="{{ route('case-data.index') }}">
+                                                    <i class="ti ti-arrow-left"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-2 px-1">
+                                            <div
+                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    data-toggle="modal" data-target="#updateProfile" data-toggle="tooltip"
+                                                    data-placement="top" title="Profile Update">
+                                                    <i class="ti ti-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-2 px-1">
+                                            <div
+                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    href="{{ route('download.fir', ['ak_no' => $complaint->acknowledgement_no]) }}"
+                                                    data-toggle="tooltip" data-placement="top" title="Download FIR">
+                                                    <i class="ti ti-download"></i>
+                                                </a>
+                                            </div>
+
+
+                                        </div>
+                                        <div class="col-2 px-1">
+                                            <div
+                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    data-toggle="modal" data-target="#uploadFIRModal" data-toggle="tooltip"
+                                                    data-placement="top" title="Upload FIR">
+                                                    <i class="ti ti-upload"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2 px-1">
+                                            <div
+                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    data-toggle="tooltip" data-placement="top" title="Add Evidence"
+                                                    href="{{ route('evidence.create', ['acknowledgement_no' => @$id]) }}">
+                                                    <i class="ti ti-plus"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-2 px-1">
+                                            <div
+                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    data-toggle="tooltip" data-placement="top" title="View Evidence"
+                                                    href="{{ route('evidence.index', ['acknowledgement_no' => @$id]) }}">
+                                                    <i class="ti ti-eye"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="updateProfile" tabindex="-1" role="dialog"
+                                aria-labelledby="updateProfileLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="updateProfileLabel">Update Profile</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ route('profile.update') }}" method="POST"
+                                                enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="form-group">
+                                                    <label for="age">Age</label>
+                                                    <input type="number" min="1" class="form-control" name="age"
+                                                        value="{{ @$additional->age }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="profession">Profession</label>
+                                                    <input type="text" class="form-control" name="profession"
+                                                        value="{{ @$additional->profession }}">
+                                                </div>
+                                                <input type="hidden" name="acknowledgement_no"
+                                                    value="{{ @$complaint->acknowledgement_no }}">
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Modal Structure -->
+                            <div class="modal fade" id="uploadFIRModal" tabindex="-1" role="dialog"
+                                aria-labelledby="uploadFIRModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="uploadFIRModalLabel">Upload FIR</h5>
+                                            <button type="button" class="close" data-dismiss="modal"
+                                                aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ route('fir_file.upload') }}" method="POST"
+                                                enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="form-group">
+                                                    <label for="firFile">Upload FIR File</label>
+                                                    <input type="file" class="form-control" id="firFile"
+                                                        name="fir_file">
+                                                    <input type="hidden" name="acknowledgement_no"
+                                                        value="{{ @$complaint->acknowledgement_no }}">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
 
@@ -137,6 +252,7 @@
                                         <th>Transaction Amount</th>
                                         <th>Bank</th>
                                         <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -148,6 +264,14 @@
                                             <td>{{ @$complnt->amount }}</td>
                                             <td>{{ @$complnt->bank_name }}</td>
                                             <td>{{ @$complnt->current_status }}</td>
+                                            <td>
+                                                <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center"
+                                                    dir="ltr"> <input data-id="{{ $complnt->id }}"
+                                                        onchange="confirmActivation(this)" class="form-check-input"
+                                                        type="checkbox" id="SwitchCheckSizesm{{ $complnt->id }}"
+                                                        {{ $complnt->com_status == 1 ? 'checked' : '' }}>
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -250,7 +374,51 @@
     </div>
     <!-- /row -->
     </div>
+    <link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
+
+    <script src="{{ asset('js/toastr.js') }}"></script>
+
+    @if (session('status'))
+        <script>
+            toastr.success('{{ session('status') }}', 'Success!')
+        </script>
+    @endif
     <script>
+        function confirmActivation(identifier) {
+            var isChecked = $(identifier).prop('checked');
+            var confirmationMessage = isChecked ? "Do you want to activate this?" :
+                "Do you want to deactivate this?";
+
+            if (confirm(confirmationMessage)) {
+                activateLink(identifier);
+            } else {
+                // Revert the checkbox state if the user cancels the action
+                $(identifier).prop('checked', !isChecked);
+            }
+        }
+
+        function activateLink(identifier) {
+            //  alert("dsf");
+            var status = $(identifier).prop('checked') == true ? 1 : 0;
+            var com_id = $(identifier).data('id');
+            // alert(com_id);
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: '/activateLinkIndividual',
+                data: {
+                    'status': status,
+                    'com_id': com_id
+                },
+                success: function(data) {
+                    console.log(data.status)
+                    toastr.success(data.status, 'Success!');
+
+                },
+
+            });
+
+        }
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
 

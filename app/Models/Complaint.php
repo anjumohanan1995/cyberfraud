@@ -41,5 +41,7 @@ class Complaint extends Eloquent
         'action_taken_by_mobile',
         'action_taken_by_email',
         'action_taken_by_bank',
+        'com_status',
+        'fir_file'
     ];
 }

@@ -129,9 +129,20 @@ Route::middleware('auth')->group(function () {
     Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
     Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
 
+    //for listing casedata of cyberdomain souurcetype
+    Route::get('case-data-others', [CaseDataController::class, 'caseDataOthers'])->name("case-data-others");
+    Route::get('case-data/get-datalist-others', [CaseDataController::class, 'getDatalistOthers'])->name("get.datalist.others");
 
     Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
+    Route::get('activateLink', [CaseDataController::class, 'activateLink']);
+    Route::get('activateLinkIndividual', [CaseDataController::class, 'activateLinkIndividual']);
 
+    //for uploading others case data
+    Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
+
+    //for other case data details innerpage
+    Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details");
+    Route::get('edit-others-caseData/{id}', [CaseDataController::class, 'editotherCaseDetails'])->name("edit-others-caseData");
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
@@ -152,6 +163,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
     Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
 
-
+    Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');
+    Route::get('download-fir/{ak_no}', [CaseDataController::class, 'downloadFIR'])->name('download.fir');
+    Route::post('profile-update', [CaseDataController::class, 'profileUpdate'])->name('profile.update');
 
 });

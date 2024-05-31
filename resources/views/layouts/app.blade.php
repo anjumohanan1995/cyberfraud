@@ -30,6 +30,8 @@
     <!--- Right-sidemenu css --->
     <link href="{{ asset('css/sidebar.css') }}" rel="stylesheet" />
     <!--- Style css --->
+    <link href="{{ asset('css/bootstrap.min.css') }}" id="bootstrap-style" rel="stylesheet" type="text/css" />
+
     <link href="{{ asset('css/style.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/skin-modes.css') }}" rel="stylesheet" />
     <!--- Sidemenu css --->
@@ -42,8 +44,9 @@
 
     <link href="{{ asset('css/jquery.dataTables.min.css') }}" rel="stylesheet" />
 
-    <link href="{{ asset('https://editor.datatables.net/extensions/Editor/css/editor.dataTables.css') }}" rel="stylesheet" />
-    
+    <link href="{{ asset('https://editor.datatables.net/extensions/Editor/css/editor.dataTables.css') }}"
+        rel="stylesheet" />
+
     <script src="{{ asset('js/jquery.min.js') }}"></script>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -116,7 +119,7 @@
     </a>
 
     <!-- Datatable CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" />
 
     <!-- jQuery Library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
