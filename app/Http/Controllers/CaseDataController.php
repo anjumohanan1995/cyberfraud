@@ -332,7 +332,7 @@ if ($filled_by){
 }
 // Apply filter based on selected option
 if ($search_by) {
-    switch ($search_by){
+    switch ($search_by) {
         case 'account_id':
             // Fetch records from the complaints collection where account_id exists
             $complaints = Complaint::where('account_id', 'exists', true)->get()->pluck('account_id');
@@ -565,18 +565,8 @@ if ($search_by) {
                 ],
                 [
                     '$sort' => [
-<<<<<<< HEAD
                         '_id' => 1,
                 ]
-=======
-                        '_id' => 1
-                    ]
-                ],
-                [
-                    '$sort' => [
-                        'created_at' => -1
-                    ]
->>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
                 ],
                 [
                     '$skip' => (int)$start
@@ -604,7 +594,6 @@ if ($search_by) {
                     ]
                 ], $pipeline);
             }
-<<<<<<< HEAD
             if (isset($domain)){
                 $pipeline = array_merge([
                     [
@@ -621,15 +610,6 @@ if ($search_by) {
         $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
          
             $pipeline = [
-=======
-
-            return $collection->aggregate($pipeline);
-        });
-
-        $distinctCaseNumbers = ComplaintOthers::raw(function($collection){
-        return $collection->aggregate([
-
->>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
                 [
                     '$group' => [
                         '_id' => '$case_number'
@@ -681,13 +661,8 @@ if ($search_by) {
 
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
-<<<<<<< HEAD
             
             $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
-=======
-
-            $case_number = '<a href="' . route('other-case-details', ['id' => $record->_id]) . '">'.$record->_id.'</a>';
->>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
 
             foreach ($record->url as $item) {
                 $url .= $item."<br>";
