@@ -238,7 +238,7 @@ class CaseDataController extends Controller
             $items = Complaint::groupBy('acknowledgement_no')
             ->where('deleted_at', null)
             ->where('com_status', (int)$com_status)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('_id', 'desc')
             ->orderBy($columnName, $columnSortOrder);
 
             $totalRecords  = Complaint::groupBy('acknowledgement_no')
@@ -299,7 +299,7 @@ class CaseDataController extends Controller
             //     $totalRecordswithFilter = $totalRecords;
             // }
             // Apply "Filled by" filter
-if ($filled_by) {
+if ($filled_by){
     switch ($filled_by){
         case 'citizen':
             // Filter citizen filled entries within 24 hours
@@ -370,14 +370,14 @@ if ($search_by) {
 }
         if($searchValue){
             $items = Complaint::groupBy('acknowledgement_no')
-            ->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+            ->where('acknowledgement_no', 'like', '%' .$searchValue . '%')
             ->orWhere('district', 'like', '%' . $searchValue . '%')
             ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
             ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
             ->orWhere('police_station', 'like', '%' . $searchValue . '%')
             ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
             ->where('deleted_at', null)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('_id', 'desc')
             ->orderBy($columnName, $columnSortOrder);
 
             $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
@@ -523,6 +523,233 @@ if ($search_by) {
 
         return response()->json(['status'=>'Status changed successfully.']);
     }
+
+    public function caseDataOthers(){
+       return view('dashboard.case-data-list.case-data-list-others');
+    }
+
+    public function getDatalistOthers(Request $request){
+
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows display per page.
+
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+
+        $columnIndex = $columnIndex_arr[0]['column']; // Column index.
+        $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
+        $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
+        $searchValue = $search_arr['value']; // Search value.
+
+        $source_types = SourceType::all();
+        $casenumber = $request->casenumber;
+        $domain = $request->domain;
+        $url = $request->url;
+        //dd($casenumber);
+        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain) {
+
+            $pipeline = [
+                [
+                    '$group' => [
+                        '_id' => '$case_number',
+                        'source_type' => ['$addToSet' => '$source_type'],
+                        'url' => ['$addToSet' => '$url'],
+                        'domain' => ['$addToSet' => '$domain'],
+                        'registry_details' => ['$addToSet' => '$registry_details'],
+                        'ip' => ['$addToSet' => '$ip'],
+                        'registrar' => ['$addToSet' => '$registrar'],
+                        'remarks' => ['$addToSet' => '$remarks'],
+                    ]
+                ],
+                [
+                    '$sort' => [
+                        '_id' => 1,
+                ]
+                ],
+                [
+                    '$skip' => (int)$start
+                ],
+                [
+                    '$limit' => (int)$rowperpage
+                ]
+            ];
+
+            if (isset($casenumber)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'case_number' => $casenumber
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+
+            return $collection->aggregate($pipeline);
+        });
+
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
+
+            $pipeline = [
+                [
+                    '$group' => [
+                        '_id' => '$case_number'
+                    ]
+                ]
+            ];
+
+            if (isset($casenumber)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'case_number' => $casenumber
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+
+            return $collection->aggregate($pipeline);
+        });
+
+
+
+
+        $totalRecords = count($distinctCaseNumbers);
+        $data_arr = array();
+        $i = $start;
+
+
+        $totalRecordswithFilter =  $totalRecords;
+        foreach($complaints as $record){
+
+            $i++;
+            $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
+
+            $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
+
+            foreach ($record->url as $item) {
+                $url .= $item."<br>";
+            }
+            foreach ($record->source_type as $item) {
+                foreach($source_types as $st){
+                    if($st->_id == $item){
+                        $source_type .= $st->name."<br>";
+                    }
+                }
+            }
+            foreach ($record->domain as $item) {
+                $domain .= $item."<br>";
+            }
+            foreach ($record->ip as $item) {
+                $ip .= $item."<br>";
+            }
+            foreach ($record->registrar as $item) {
+                $registrar .= $item."<br>";
+            }
+            foreach ($record->remarks as $item) {
+                $remarks .= $item."<br>";
+            }
+
+            $data_arr[] = array(
+                    "id" => $i,
+                    "source_type" => $source_type,
+                    "case_number" => $case_number,
+                    "url" => $url,
+                    "domain" => $domain,
+                    "ip" => $ip,
+                    "registrar"=>$registrar,
+                    "remarks" => $remarks,
+                    );
+
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        return response()->json($response);
+
+
+    }
+
+    public function uploadOthersCaseData(){
+
+        $sourceTypes = SourceType::where('status', 'active')->where('name', '!=', 'NCRP')->get();
+        return view("import_complaints_others", compact('sourceTypes'));
+    }
+
+    public function otherCaseDetails($case_number){
+
+        $case_details =  ComplaintOthers::where('case_number',Crypt::decryptString($case_number))->get();
+        return view('other-case-details',compact('case_details'));
+    }
+
+    public function editotherCaseDetails($id){
+
+       $complaint_others_by_id =  ComplaintOthers::find($id);
+       return view('other-case-details-view',compact('complaint_others_by_id'));
+    }
+
+    public function updateotherCaseDetails(Request $request,$id){
+
+        $com_oth = ComplaintOthers::find($id);
+
+        $com_oth->url = $request->url;
+        $com_oth->domain = $request->domain;
+        $com_oth->registry_details = $request->registry_details;
+        $com_oth->ip = $request->ip;
+        $com_oth->registrar = $request->registrar;
+        $com_oth->remarks = $request->remarks;
+
+        if($com_oth->update()){
+            return redirect()->route('other-case-details',['id' => Crypt::encryptString($com_oth->case_number)])->with('success', 'Updated successfully.');
+        }
+        else{
+            return redirect()->back()->with('error', 'error when update!!');
+        }
+    }
+
     public function firUpload(Request $request)
     {
 
@@ -569,7 +796,7 @@ if ($search_by) {
         $complaint = ComplaintAdditionalData::where('ack_no',$request->acknowledgement_no)->first();
         if($complaint == ''){
 
-            $complaint=   ComplaintAdditionalData::create([
+            $complaint =   ComplaintAdditionalData::create([
             'ack_no' => @$request->acknowledgement_no? $request->acknowledgement_no:'']);
         }
         $complaint->ack_no=$request->acknowledgement_no;

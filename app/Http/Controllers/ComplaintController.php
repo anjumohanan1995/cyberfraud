@@ -27,8 +27,8 @@ class ComplaintController extends Controller
         $file = $request->file('complaint_file');
         $source_type = $request->input('source_type');
         if($source_type){
-            if($request->sourcetypetext == 'Cyber Domain'){
-
+            if($source_type !== 'NCRP'){
+                   
                 $request->validate([
                     'case_number' => 'required',
                     'letter' =>      'required|mimes:pdf',
@@ -69,7 +69,7 @@ class ComplaintController extends Controller
                         // Provide feedback to the user
                         return redirect()->back()->with('success', 'Form submitted successfully!');
 
-                    } catch (\Exception $e) {
+                    } catch (\Exception $e){
                         if ($e instanceof \Illuminate\Validation\ValidationException) {
                             // Retrieve the validation errors
                             $errors = $e->validator->getMessageBag()->all();
@@ -93,6 +93,7 @@ class ComplaintController extends Controller
 
 
 
-    }
+    
+}
 
 }
