@@ -529,6 +529,7 @@ if ($search_by) {
     }
 
     public function getDatalistOthers(Request $request){
+        
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows display per page.
@@ -714,7 +715,7 @@ if ($search_by) {
 
     public function uploadOthersCaseData(){
 
-        $sourceTypes = SourceType::where('status', 'active')->where('name', '!=', 'NCP portal')->get();
+        $sourceTypes = SourceType::where('status', 'active')->where('name', '!=', 'NCRP')->get();
         return view("import_complaints_others", compact('sourceTypes'));
     }
 
