@@ -27,13 +27,8 @@ class ComplaintController extends Controller
         $file = $request->file('complaint_file');
         $source_type = $request->input('source_type');
         if($source_type){
-<<<<<<< HEAD
-            if($request->sourcetypetext !== 'NCP portal'){
-              
-=======
-            if($request->sourcetypetext == 'Cyber Domain'){
-
->>>>>>> 0eddd3e968758ba69982b0f1d8f3fe871fbcfd31
+            if($source_type !== 'NCRP'){
+                   
                 $request->validate([
                     'case_number' => 'required',
                     'letter' =>      'required|mimes:pdf',
@@ -74,7 +69,7 @@ class ComplaintController extends Controller
                         // Provide feedback to the user
                         return redirect()->back()->with('success', 'Form submitted successfully!');
 
-                    } catch (\Exception $e) {
+                    } catch (\Exception $e){
                         if ($e instanceof \Illuminate\Validation\ValidationException) {
                             // Retrieve the validation errors
                             $errors = $e->validator->getMessageBag()->all();
@@ -98,7 +93,8 @@ class ComplaintController extends Controller
 
 
 
-    }
+    
+}
 
 
 
