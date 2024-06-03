@@ -471,125 +471,151 @@
                     </div>
                 </div>
             </div>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <div class="row">
-                <div class="container mt-5">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h2 class="card-title">Please Select Date</h2>
-                                </div>
-                                <div class="card-body">
-                                    <input type="date" id="datePicker" class="form-control">
-                                </div>
+            <div class="container mt-5">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="yearSelect" class="form-label">Select Year:</label>
+                        <select id="yearSelect" class="form-select">
+                            <option value="">Select Year</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="monthSelect" class="form-label">Select Month:</label>
+                        <select id="monthSelect" class="form-select">
+                            <option value="">Select Month</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="daySelect" class="form-label">Select Day:</label>
+                        <select id="daySelect" class="form-select">
+                            <option value="">Select Day</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="sourceSelect" class="form-label">Select Source Type:</label>
+                        <select id="sourceSelect" class="form-select">
+                            <option value="NCRP" selected>NCRP</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Cases per Day</h2>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h2 class="card-title">Cases per Day</h2>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="casesPerDayChart" width="800" height="400"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h2 class="card-title">Cases per Month</h2>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="casesPerMonthChart"></canvas>
-                                </div>
+                            <div class="card-body">
+                                <canvas id="casesPerDayChart" width="800" height="400"></canvas>
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-5">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h2 class="card-title">Cases per Year</h2>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="casesPerYearChart"></canvas>
-                                </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Cases per Month</h2>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="casesPerMonthChart" width="800" height="400"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Include Chart.js library -->
-
-
-<!-- Create canvas element for the chart -->
-
-
-<script>
-    $(document).ready(function () {
-        $('#datePicker').change(function () {
-        var specifiedDate = $(this).val();
-
-        // Make the AJAX request with the specified date
-        fetchComplaintChartData(specifiedDate);
-    });
-
-    // Function to fetch complaint chart data
-    function fetchComplaintChartData(specifiedDate) {
-        $.ajax({
-            url: '{{ route("complaints.chart") }}',
-            method: 'GET',
-            data: { specified_date: specifiedDate }, // Pass the specified date to the backend
-            success: function (data) {
-                renderChart(data);
-            },
-            error: function (xhr, status, error) {
-                console.error(error);
-            }
-        });
-    }
-
-    // Function to render the chart (same as before)
-    function renderChart(data) {
-        // Process data for each group (day, month, year)
-        renderBarChart('Cases per Day', data.casesPerDay, '#casesPerDayChart');
-        renderBarChart('Cases per Month', data.casesPerMonth, '#casesPerMonthChart');
-        renderBarChart('Cases per Year', data.casesPerYear, '#casesPerYearChart');
-    }
-
-
-            var ctx = document.getElementById(elementId).getContext('2d');
-            var myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: title,
-                        data: values,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
-            });
-
-    });
-</script>
-
-
-
-
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Cases per Year</h2>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="casesPerYearChart" width="800" height="400"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Populate years dropdown
+                    var currentYear = new Date().getFullYear();
+                    for (var year = currentYear; year >= currentYear - 5; year--) {
+                        $('#yearSelect').append($('<option>', {
+                            value: year,
+                            text: year
+                        }));
+                    }
+
+                    // Populate months dropdown
+                    for (var month = 1; month <= 12; month++) {
+                        $('#monthSelect').append($('<option>', {
+                            value: month,
+                            text: moment(month, 'MM').format('MMMM')
+                        }));
+                    }
+
+                    // Populate days dropdown
+                    var daysInMonth = new Date(currentYear, $('#monthSelect').val(), 0).getDate();
+                    for (var day = 1; day <= daysInMonth; day++) {
+                        $('#daySelect').append($('<option>', {
+                            value: day,
+                            text: day
+                        }));
+                    }
+
+                    // Update days dropdown based on selected month
+                    $('#monthSelect').change(function() {
+                        var daysInMonth = new Date(currentYear, $(this).val(), 0).getDate();
+                        $('#daySelect').empty();
+                        for (var day = 1; day <= daysInMonth; day++) {
+                            $('#daySelect').append($('<option>', {
+                                value: day,
+                                text: day
+                            }));
+                        }
+                    });
+
+                    function fetchData(year, month, day, source) {
+                        $.ajax({
+                            url: '{{ route("complaints.chart") }}',
+                            method: 'GET',
+                            data: { year: year, month: month, day: day, source: source },
+                            success: function (data) {
+                                renderCharts(data);
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(error);
+                            }
+                        });
+                    }
+
+                    function renderCharts(data) {
+                        // Implement rendering of charts based on the received data
+                    }
+
+                    $('#yearSelect, #monthSelect, #daySelect, #sourceSelect').change(function() {
+                        var selectedYear = $('#yearSelect').val();
+                        var selectedMonth = $('#monthSelect').val();
+                        var selectedDay = $('#daySelect').val();
+                        var selectedSource = $('#sourceSelect').val();
+                        fetchData(selectedYear, selectedMonth, selectedDay, selectedSource);
+                    });
+
+                    fetchData(currentYear, $('#monthSelect').val(), $('#daySelect').val(), 'NCRP'); // Initial loading with default values
+                });
+            </script>
+
+
+
+
+
+
             <!-- /row -->
             <!-- row -->
             {{-- <div class="row row-sm">

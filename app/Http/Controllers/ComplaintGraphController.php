@@ -1,68 +1,76 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Complaint;
+use App\Models\ComplaintOther;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
+use MongoDB;
 class ComplaintGraphController extends Controller
 {
+
+
+    public function index()
+    {
+        return view('complaints.index');
+    }
+
     public function chartData(Request $request)
     {
-        $specifiedDate = $request->input('specified_date');
-        $date = Carbon::parse($specifiedDate);
-$Data = Complaint::whereDate('created_at', $date)->count();
-dd($Data);
-        // Fetch data for cases per day
-        $casesPerDayQuery = Complaint::whereDate('created_at', $date)
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-            ->groupBy('date')
-            ->orderBy('date');
+        $year = $request->input('year');
+        $month = $request->input('month');
+        $day = $request->input('day');
+        $source = $request->input('source');
 
-        $casesPerDay = $casesPerDayQuery->pluck('count', 'date')->toArray();
-
-        // Debug output
-        logger()->debug('Cases per Day Query:', ['query' => $casesPerDayQuery->toSql()]);
-        logger()->debug('Cases per Day Bindings:', ['bindings' => $casesPerDayQuery->getBindings()]);
-        logger()->debug('Cases per Day Result:', ['result' => $casesPerDay]);
-
-        // Fetch data for cases per month
-        $casesPerMonthQuery = Complaint::whereYear('created_at', $date->year)
-            ->select(DB::raw('MONTH(created_at) as month'), DB::raw('count(*) as count'))
-            ->groupBy('month')
-            ->orderBy('month');
-
-        $casesPerMonth = $casesPerMonthQuery->pluck('count', 'month')->toArray();
-
-        // Format month names
-        $formattedCasesPerMonth = [];
-        foreach ($casesPerMonth as $month => $count) {
-            $formattedCasesPerMonth[Carbon::createFromFormat('!m', $month)->format('F')] = $count;
+        if ($source == 'NCRP') {
+            $model = Complaint::class;
+        } else {
+            $model = ComplaintOther::class;
         }
 
-        // Debug output
-        logger()->debug('Cases per Month Query:', ['query' => $casesPerMonthQuery->toSql()]);
-        logger()->debug('Cases per Month Bindings:', ['bindings' => $casesPerMonthQuery->getBindings()]);
-        logger()->debug('Cases per Month Result:', ['result' => $formattedCasesPerMonth]);
+        $years = $model::selectRaw('YEAR(created_at) as year')
+                       ->distinct()
+                       ->pluck('year')
+                       ->toArray();
 
-        // Fetch data for cases per year
-        $casesPerYearQuery = Complaint::select(DB::raw('YEAR(created_at) as year'), DB::raw('count(*) as count'))
-            ->groupBy('year')
-            ->orderBy('year');
+        $months = $model::selectRaw('MONTH(created_at) as month')
+                        ->distinct()
+                        ->pluck('month')
+                        ->toArray();
 
-        $casesPerYear = $casesPerYearQuery->pluck('count', 'year')->toArray();
+        $days = $model::whereYear('created_at', $year)
+                      ->whereMonth('created_at', $month)
+                      ->selectRaw('DAY(created_at) as day')
+                      ->distinct()
+                      ->pluck('day')
+                      ->toArray();
 
-        // Debug output
-        logger()->debug('Cases per Year Query:', ['query' => $casesPerYearQuery->toSql()]);
-        logger()->debug('Cases per Year Bindings:', ['bindings' => $casesPerYearQuery->getBindings()]);
-        logger()->debug('Cases per Year Result:', ['result' => $casesPerYear]);
+        // Cases per day
+        $casesPerDay = $model::whereYear('created_at', $year)
+                            ->whereMonth('created_at', $month)
+                            ->whereDay('created_at', $day)
+                            ->selectRaw('DATE(created_at) as date, count(*) as cases')
+                            ->groupBy('date')
+                            ->get();
+
+        // Cases per month
+        $casesPerMonth = $model::whereYear('created_at', $year)
+                                ->whereMonth('created_at', $month)
+                                ->count();
+
+        // Cases per year
+        $casesPerYear = $model::whereYear('created_at', $year)
+                               ->count();
 
         return response()->json([
-            'casesPerDay' => $casesPerDay,
-            'casesPerMonth' => $formattedCasesPerMonth,
-            'casesPerYear' => $casesPerYear,
+            'years' => $years,
+            'months' => $months,
+            'days' => $days,
+            'cases_per_day' => $casesPerDay,
+            'cases_per_month' => $casesPerMonth,
+            'cases_per_year' => $casesPerYear
         ]);
     }
 }
