@@ -1,16 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\SourceType;
+use App\Models\EvidenceType;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class SourceTypeController extends Controller
+class EvidenceTypeController extends Controller
 {
     public function index()
     {
-        return view("dashboard.user-management.sourcetype.index");
+        return view("dashboard.evidencetype.index");
     }
 
     /**
@@ -21,7 +21,7 @@ class SourceTypeController extends Controller
     public function create()
     {
 
-        return view("dashboard.user-management.sourcetype.create");
+        return view("dashboard.evidencetype.create");
     }
 
     /**
@@ -47,13 +47,13 @@ class SourceTypeController extends Controller
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
-        SourceType::create([
+        EvidenceType::create([
             'name' => @$request->name? $request->name:'',
             'status' => $request->input('status'),
 
         ]);
 
-        return redirect()->route('sourcetype.index')->with('success','Source Type Added successfully.');
+        return redirect()->route('evidencetype.index')->with('success','Evidence Type Added successfully.');
 
 
     }
@@ -77,10 +77,10 @@ class SourceTypeController extends Controller
      */
     public function edit($id)
     {
-        $data = SourceType::findOrFail($id);
+        $data = EvidenceType::findOrFail($id);
 
 
-        return view('dashboard.user-management.sourcetype.edit', ['data' => $data,]);
+        return view('dashboard.evidencetype.edit', ['data' => $data,]);
     }
 
     /**
@@ -100,7 +100,7 @@ class SourceTypeController extends Controller
         ]);
 
         // Find the role by its ID.
-        $data = SourceType::findOrFail($id);
+        $data = EvidenceType::findOrFail($id);
 
         // Update the role with the data from the request
         $data->name = $request->name;
@@ -111,7 +111,7 @@ class SourceTypeController extends Controller
         $data->save();
 
         // Redirect back with success message
-        return redirect()->route('sourcetype.index')->with('success', 'Source Type updated successfully!');
+        return redirect()->route('evidencetype.index')->with('success', 'Evidence Type updated successfully!');
     }
 
     /**
@@ -122,16 +122,16 @@ class SourceTypeController extends Controller
      */
     public function destroy($id)
     {
-        $data = SourceType::findOrFail($id);
+        $data = EvidenceType::findOrFail($id);
 
         $data->delete();
 
-        return response()->json(['success' => 'Source Type successfully deleted!']);
+        return response()->json(['success' => 'Evidence Type successfully deleted!']);
     }
 
 
 
-    public function getsourcetype(Request $request)
+    public function getevidencetype(Request $request)
     {
 
         ## Read value
@@ -150,15 +150,15 @@ class SourceTypeController extends Controller
         $searchValue = $search_arr['value']; // Search value
 
             // Total records
-            $totalRecord = SourceType::where('deleted_at',null)->orderBy('created_at','desc');
+            $totalRecord = EvidenceType::where('deleted_at',null)->orderBy('created_at','desc');
             $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
 
-            $totalRecordswithFilte = SourceType::where('deleted_at',null)->orderBy('created_at','desc');
+            $totalRecordswithFilte = EvidenceType::where('deleted_at',null)->orderBy('created_at','desc');
             $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
             // Fetch records
-            $items = SourceType::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
+            $items = EvidenceType::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
             $records = $items->skip($start)->take($rowperpage)->get();
 
             $data_arr = array();
@@ -169,7 +169,7 @@ class SourceTypeController extends Controller
                 $id = $record->id;
                 $name = $record->name;
 
-                $edit = '<a  href="' . url('sourcetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                $edit = '<a  href="' . url('evidencetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
 
                 $data_arr[] = array(
                     "id" => $i,
