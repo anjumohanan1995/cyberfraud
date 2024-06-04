@@ -92,12 +92,12 @@
                                             <div class="row">
                                                 <div class="col-md-8">
                                                     <div class="form-group">
-                                                        <label for="place">Letter Upload:</label>
+                                                        <label for="place">Letter Upload: <span style="color: red;">(pdf only)</span></label>
                                                         <input type="file" value="{{ old('letter') }}" id="letter" name="letter" class="form-control">
                                                         @error('letter')
                                                         <div class="text-danger">{{ $message }}</div>
                                                         @enderror
-                                                        </div> 
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -113,12 +113,12 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2 justify-content-center align-self-center">
-                                                    <a href="{{ asset('case_others_template/template.xlsx')  }}" download="case_data_others_template.xlsx" ><button type="button" class="btn btn-primary btn-sm">Template <br> 
+                                                    <a href="{{ asset('case_others_template/template.xlsx')  }}" download="case_data_others_template.xlsx" ><button type="button" class="btn btn-primary btn-sm">Template <br>
                                                     <i class="fa fa-download"></i></button>
-                                                    </a> 
+                                                    </a>
                                                 </div>
                                             </div>
-                                        </div>                                       
+                                        </div>
                                     </div>
                                     <div class="row">
                                     <div class="form-group">
@@ -128,7 +128,7 @@
                                     </div>
                                     </div>
                                 </form>
-                            
+
                         </div>
                     </div>
                 </div>
