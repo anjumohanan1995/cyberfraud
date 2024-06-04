@@ -46,6 +46,7 @@
 
     <link href="{{ asset('https://editor.datatables.net/extensions/Editor/css/editor.dataTables.css') }}"
         rel="stylesheet" />
+        
 
     <script src="{{ asset('js/jquery.min.js') }}"></script>
 

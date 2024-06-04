@@ -16,6 +16,7 @@ use App\Http\Controllers\ModusController;
 use App\Http\Controllers\PoliceStationsController;
 use App\Http\Controllers\SourceTypeController;
 use App\Http\Controllers\ComplaintGraphController;
+use App\Http\Controllers\NoticeController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -167,5 +168,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');
     Route::get('download-fir/{ak_no}', [CaseDataController::class, 'downloadFIR'])->name('download.fir');
     Route::post('profile-update', [CaseDataController::class, 'profileUpdate'])->name('profile.update');
+
+    //notice module
+
+    Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
 
 });

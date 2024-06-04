@@ -64,7 +64,7 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="source_type">From Date</label>
                                                          <input type="date" class="form-control" name="from_date">
@@ -73,7 +73,7 @@
                                                         @enderror
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="source_type">To Date</label>
                                                          <input type="date" class="form-control" name="to_date">
@@ -82,16 +82,35 @@
                                                         @enderror
                                                     </div>
                                                 </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="source_type">Acknowledgement Number</label>
+                                                         <input type="text" class="form-control" name="acknowledgement_number">
+                                                        @error('to_date')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
                                             </div>
-                                           
+                                           <div class="row">
+                                            <div class="col-md-4">
+                                            <label for="source_type">Source Type</label>
+                                                <select class="form-control" name="source_type" id="">
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                            <label for="source_type">Evidence Type</label>
+                                                <select class="form-control" name="evidence_type" id=""></select>
+                                            </div>
+                                           </div>
                                         </div>                                       
                                     </div>
-                                    <div class="row">
-                                    <div class="form-group">
+                                    <div class="row mt-3">
+                                
                                         <div class="col-md-2">
                                             <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
-                                    </div>
+                                    
                                     </div>
                                 </form>
                             

@@ -200,6 +200,25 @@
                     <span class="side-menu__label">Source Type</span>
                 </a>
             </li>
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="side-menu__icon fe fe-file"> </i>
+                    <span class="side-menu__label">Notice Management</span>
+                    <i class="angle fe fe-chevron-down"> </i>
+                </a>
+                <ul class="slide-menu">
+                    <li>
+                        <a class="slide-item" href="{{ route('notice.evidence') }}">Against Evidence</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Bank</a>
+                    </li>
+                    <li>
+                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Mule Account</a>
+                    </li>
+
+                </ul>
+            </li>
             {{-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">
                     <i class="side-menu__icon fe fe-database"> </i>

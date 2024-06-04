@@ -123,7 +123,7 @@ class CaseDataController extends Controller
 
         // Total records with filter.
         $totalRecordswithFilterQuery = clone $totalRecordsQuery;
-        $totalRecordswithFilterQuery->where(function ($query) use ($searchValue) {
+        $totalRecordswithFilterQuery->where(function ($query) use ($searchValue){
             // Add your search conditions here.
         });
 
@@ -248,7 +248,7 @@ class CaseDataController extends Controller
             ->orderBy($columnName, $columnSortOrder)->get()->count();
             $totalRecordswithFilter = $totalRecords;
         // Apply filter conditions
-        if ($fromDate && $toDate) {
+        if ($fromDate && $toDate){
             // Parse and format dates using Carbon
             $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
             $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
