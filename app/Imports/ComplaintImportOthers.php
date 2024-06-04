@@ -54,17 +54,19 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
             return [
                 'url'        => $row[1],
                 'domain'     => $row[2],
-                'registry_details'=> $row[3],
-                'ip'=> $row[4],
-                'registrar'=> $row[5],
+                'ip'=> $row[3],
+                'registrar'=> $row[4],
+                'registry_details'=> $row[5],
                 'remarks'=> $row[6],
+                'ticket_number'=> $row[6],
+                'evidence_type' => $row[7],
             ];
         });
 
-        // $validate = Validator::make($collection->toArray(), [
-        //     '*.acknowledgement_no' => 'required|max:150',
-
-        // ])->validate();
+        $validate = Validator::make($collection->toArray(),[
+            '*.url' => 'required|max:150',
+           
+        ])->validate();
 
 
         foreach ($collection as $collect) {
@@ -72,12 +74,14 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
             $complaint = new ComplaintOthers();
             $complaint->source_type = $this->source_type;
             $complaint->case_number = $this->caseNumber;
-            $complaint->url = $collect['url'];
+            $complaint->url = preg_replace('/\s+/', '', $collect['url']);
             $complaint->domain = $collect['domain'];
             $complaint->registry_details = $collect['registry_details'];
             $complaint->ip = $collect['ip'];
             $complaint->registrar = $collect['registrar'];
             $complaint->remarks = $collect['remarks'];
+            $complaint->ticket_number = $collect['ticket_number'];
+            $complaint->evidence_type = $collect['evidence_type'];
             $complaint->filename = $this->filename;                 
             $complaint->save();
               

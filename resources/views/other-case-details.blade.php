@@ -35,17 +35,6 @@
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
 
-                                @if ($errors->any())
-
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-
                                 @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
@@ -81,7 +70,7 @@
                                             <th>IP</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
-                                            <th>ACTION</th>
+                                            <th colspan="2">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -94,7 +83,8 @@
                                         <td> {{ $case->ip }}  </td>
                                         <td> {{ $case->registrar }}  </td>
                                         <td> {{ $case->remarks }}  </td>
-                                        <td> <a href="{{ route('edit-others-caseData',$case->_id) }}"> <button class="btn btn-success"> <i class="fa fa-edit"></i> </button>  </a> </td>
+                                        <td> <a class="btn btn-success" href="{{ route('edit-others-caseData',$case->_id) }}"><i class="fa fa-edit"></i></a> </td>
+                                        <td> <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr"> <input data-id="31505240010711" onchange="confirmActivation(this)" class="form-check-input" type="checkbox" checked="" title="Deactivate">  </div> </td>
                                         </tr>
                                     @endforeach
                                     </tbody>

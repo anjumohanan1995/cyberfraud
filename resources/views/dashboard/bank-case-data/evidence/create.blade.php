@@ -113,13 +113,14 @@
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label for="url_{{ $index }}">URL:</label>
-                                                                    <input type="text" name="url[]" class="form-control" value="{{ old('url.' . $index) }}" placeholder="Enter URL">
+                                                                    <input type="text" name="url[]" class="form-control" value="{{ old('url.' . $index) }}" placeholder="Enter URL" oninput="extractDomain(this)">
                                                                     @if ($errors->has('url.' . $index))
                                                                         <span class="text-danger">{{ $errors->first('url.' . $index) }}</span>
                                                                     @endif
 
                                                                 </div>
                                                             </div>
+
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
                                                                     <label for="domain_{{ $index }}">Domain:</label>
@@ -292,6 +293,23 @@
         </div>
         <!-- /row -->
     </div>
+    <script>
+        function extractDomain(input) {
+            var url = input.value;
+            var domainInput = input.parentNode.parentNode.nextElementSibling.querySelector("input[name='domain[]']");
+            var domain = extractDomainFromUrl(url);
+            domainInput.value = domain;
+        }
+
+        function extractDomainFromUrl(url) {
+            var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+            if (match != null && match.length > 2 && typeof match[2] === 'string' && match[2].length > 0) {
+                return match[2];
+            } else {
+                return null;
+            }
+        }
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -341,8 +359,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="url">URL:</label>
-                                                <input type="text" name="url[]" class="form-control" placeholder="Enter URL" >
-
+                                                <input type="text" name="url[]" class="form-control" placeholder="Enter URL" oninput="extractDomain(this)">
                                                 </div>
                                         </div>
                                         <div class="col-md-6">

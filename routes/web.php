@@ -17,6 +17,7 @@ use App\Http\Controllers\PoliceStationsController;
 use App\Http\Controllers\SourceTypeController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\EvidenceTypeController;
+use App\Http\Controllers\ComplaintGraphController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -142,8 +143,9 @@ Route::middleware('auth')->group(function () {
     Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
 
     //for other case data details innerpage
-    Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details");
+    Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details")->middleware('no-cache');
     Route::get('edit-others-caseData/{id}', [CaseDataController::class, 'editotherCaseDetails'])->name("edit-others-caseData");
+    Route::put('others-caseData-update/{id}', [CaseDataController::class, 'updateotherCaseDetails'])->name("case-data-others.update");
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
@@ -151,6 +153,10 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('sourcetype', SourceTypeController::class);
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
+
+//dashboard graph
+Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->name('complaints.chart');
+
 
 
     Route::get('reports', [ReportsController::class, 'index'])->name("reports.index");

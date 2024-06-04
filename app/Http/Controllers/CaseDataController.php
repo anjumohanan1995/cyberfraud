@@ -71,6 +71,9 @@ class CaseDataController extends Controller
             'insurances' => $insurances
     ]);
     }
+
+
+
      public function bankCaseData(Request $request)
     {
 
@@ -235,7 +238,7 @@ class CaseDataController extends Controller
             $items = Complaint::groupBy('acknowledgement_no')
             ->where('deleted_at', null)
             ->where('com_status', (int)$com_status)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('_id', 'desc')
             ->orderBy($columnName, $columnSortOrder);
 
             $totalRecords  = Complaint::groupBy('acknowledgement_no')
@@ -296,7 +299,7 @@ class CaseDataController extends Controller
             //     $totalRecordswithFilter = $totalRecords;
             // }
             // Apply "Filled by" filter
-if ($filled_by) {
+if ($filled_by){
     switch ($filled_by){
         case 'citizen':
             // Filter citizen filled entries within 24 hours
@@ -367,14 +370,14 @@ if ($search_by) {
 }
         if($searchValue){
             $items = Complaint::groupBy('acknowledgement_no')
-            ->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+            ->where('acknowledgement_no', 'like', '%' .$searchValue . '%')
             ->orWhere('district', 'like', '%' . $searchValue . '%')
             ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
             ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
             ->orWhere('police_station', 'like', '%' . $searchValue . '%')
             ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
             ->where('deleted_at', null)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('_id', 'desc')
             ->orderBy($columnName, $columnSortOrder);
 
             $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
@@ -543,9 +546,11 @@ if ($search_by) {
 
         $source_types = SourceType::all();
         $casenumber = $request->casenumber;
+        $domain = $request->domain;
         $url = $request->url;
-        // dd($casenumber);
-        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber ,$url) {
+        //dd($casenumber);
+        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain) {
+
             $pipeline = [
                 [
                     '$group' => [
@@ -561,13 +566,8 @@ if ($search_by) {
                 ],
                 [
                     '$sort' => [
-                        '_id' => 1
-                    ]
-                ],
-                [
-                    '$sort' => [
-                        'created_at' => -1
-                    ]
+                        '_id' => 1,
+                ]
                 ],
                 [
                     '$skip' => (int)$start
@@ -595,19 +595,58 @@ if ($search_by) {
                     ]
                 ], $pipeline);
             }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
 
             return $collection->aggregate($pipeline);
         });
 
-        $distinctCaseNumbers = ComplaintOthers::raw(function($collection){
-        return $collection->aggregate([
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
 
+            $pipeline = [
                 [
                     '$group' => [
                         '_id' => '$case_number'
                     ]
                 ]
-            ]);
+            ];
+
+            if (isset($casenumber)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'case_number' => $casenumber
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+
+            return $collection->aggregate($pipeline);
         });
 
 
@@ -624,7 +663,7 @@ if ($search_by) {
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
 
-            $case_number = '<a href="' . route('other-case-details', ['id' => $record->_id]) . '">'.$record->_id.'</a>';
+            $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
 
             foreach ($record->url as $item) {
                 $url .= $item."<br>";
@@ -682,15 +721,35 @@ if ($search_by) {
 
     public function otherCaseDetails($case_number){
 
-        $case_details =  ComplaintOthers::where('case_number',$case_number)->get();
+        $case_details =  ComplaintOthers::where('case_number',Crypt::decryptString($case_number))->get();
         return view('other-case-details',compact('case_details'));
     }
 
     public function editotherCaseDetails($id){
 
        $complaint_others_by_id =  ComplaintOthers::find($id);
-       return view('other-case-details-view',compact($complaint_others_by_id));
+       return view('other-case-details-view',compact('complaint_others_by_id'));
     }
+
+    public function updateotherCaseDetails(Request $request,$id){
+
+        $com_oth = ComplaintOthers::find($id);
+
+        $com_oth->url = $request->url;
+        $com_oth->domain = $request->domain;
+        $com_oth->registry_details = $request->registry_details;
+        $com_oth->ip = $request->ip;
+        $com_oth->registrar = $request->registrar;
+        $com_oth->remarks = $request->remarks;
+
+        if($com_oth->update()){
+            return redirect()->route('other-case-details',['id' => Crypt::encryptString($com_oth->case_number)])->with('success', 'Updated successfully.');
+        }
+        else{
+            return redirect()->back()->with('error', 'error when update!!');
+        }
+    }
+
     public function firUpload(Request $request)
     {
 
@@ -737,7 +796,7 @@ if ($search_by) {
         $complaint = ComplaintAdditionalData::where('ack_no',$request->acknowledgement_no)->first();
         if($complaint == ''){
 
-            $complaint=   ComplaintAdditionalData::create([
+            $complaint =   ComplaintAdditionalData::create([
             'ack_no' => @$request->acknowledgement_no? $request->acknowledgement_no:'']);
         }
         $complaint->ack_no=$request->acknowledgement_no;

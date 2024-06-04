@@ -51,7 +51,7 @@
     <div class="main-sidebar-body">
         <ul class="side-menu">
             <li class="slide active">
-                <a class="side-menu__item active" href="dashboard">
+                <a class="side-menu__item active" href="/dashboard">
                     <i class="side-menu__icon fe fe-airplay"> </i>
                     <span class="side-menu__label">Dashboard</span>
                 </a>

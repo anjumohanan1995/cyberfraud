@@ -79,26 +79,8 @@
                                             
                                             <input type="hidden" id="sourcetype" value="NCRP" name="source_type">
                                                
-                                            <input type="hidden" name="sourcetypetext" id="sourcetypetext">
-
-                                           <div id="cyberdomaindisplay" style="display:none"> 
-                                           <div class="form-group">
-                                                <label for="source_type">Case Number</label>
-                                                <input type="text" class="form-control" name="case_number">
-                                                @error('case_number')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="place">Letter Upload:</label>
-                                                <input type="file" id="letter" name="letter" class="form-control">
-                                                @error('letter')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div> 
-                                           </div>
-
+                                            {{-- <input type="hidden" name="sourcetypetext" id="sourcetypetext"> --}}
+                                           
                                             <div class="form-group">
                                                 <label for="place">File:</label>
                                                 <input type="file" id="place" name="complaint_file" class="form-control">
@@ -124,7 +106,7 @@
         <!-- /row -->
     </div>
 
-<script>
+{{-- <script>
 $(document).ready(function(){
     $('#sourcetype').on('change', function() {
     var sourcetype = $(this).find('option:selected').text();
@@ -137,6 +119,6 @@ $(document).ready(function(){
     }
 });
 });
-</script>
+</script> --}}
 
 @endsection

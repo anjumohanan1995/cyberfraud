@@ -126,6 +126,7 @@
      <script>
         $(document).ready(function(){
             var table = $('#complaints').DataTable({
+                stateSave: true,
                 processing: true,
                 serverSide: true,
 
@@ -186,14 +187,14 @@ $(document).ready(function(){
         var url = $('#url').val();
         var domain = $('#domain').val();
 
-        if (casenumber || url || domain){
+       
         if ($.fn.DataTable.isDataTable('#complaints')){
           $('#complaints').DataTable().destroy();
         }
           var table = $('#complaints').DataTable({
                 processing: true,
                 serverSide: true,
-
+                
                 buttons: [
                     'copyHtml5',
                     'excelHtml5',
@@ -243,12 +244,8 @@ $(document).ready(function(){
                 'ordering': true
             });
             
-        }
-         else
-        {
-           
-            alert("No value entered!!");
-        }
+        
+       
 
     })
 })
