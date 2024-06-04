@@ -83,7 +83,7 @@ class ComplaintController extends Controller
                         //     'message' => $e->getMessage()
                         // ], 500);
                     }
-                    dd('ho');
+                    //dd('ho');
                 } else {
                     // No file uploaded
                     return response()->json(['error' => 'No file uploaded'], 400);
@@ -95,7 +95,5 @@ class ComplaintController extends Controller
 
     
 }
-
-
 
 }

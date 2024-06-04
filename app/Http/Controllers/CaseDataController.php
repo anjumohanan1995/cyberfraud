@@ -529,7 +529,7 @@ if ($search_by) {
     }
 
     public function getDatalistOthers(Request $request){
-        
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows display per page.
@@ -550,7 +550,7 @@ if ($search_by) {
         $url = $request->url;
         //dd($casenumber);
         $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain) {
-      
+
             $pipeline = [
                 [
                     '$group' => [
@@ -604,12 +604,12 @@ if ($search_by) {
                     ]
                 ], $pipeline);
             }
-        
+
             return $collection->aggregate($pipeline);
         });
 
         $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
-         
+
             $pipeline = [
                 [
                     '$group' => [
@@ -617,7 +617,7 @@ if ($search_by) {
                     ]
                 ]
             ];
-        
+
             if (isset($casenumber)){
                 $pipeline = array_merge([
                     [
@@ -645,7 +645,7 @@ if ($search_by) {
                     ]
                 ], $pipeline);
             }
-        
+
             return $collection->aggregate($pipeline);
         });
 
@@ -662,7 +662,7 @@ if ($search_by) {
 
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
-            
+
             $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
 
             foreach ($record->url as $item) {
@@ -720,13 +720,13 @@ if ($search_by) {
     }
 
     public function otherCaseDetails($case_number){
-        
+
         $case_details =  ComplaintOthers::where('case_number',Crypt::decryptString($case_number))->get();
         return view('other-case-details',compact('case_details'));
     }
 
     public function editotherCaseDetails($id){
-        
+
        $complaint_others_by_id =  ComplaintOthers::find($id);
        return view('other-case-details-view',compact('complaint_others_by_id'));
     }
