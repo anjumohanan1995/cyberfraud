@@ -15,6 +15,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ModusController;
 use App\Http\Controllers\PoliceStationsController;
 use App\Http\Controllers\SourceTypeController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\EvidenceTypeController;
 use App\Http\Controllers\ComplaintGraphController;
 use App\Http\Controllers\NoticeController;
 use App\Models\BankCasedata;
@@ -158,6 +160,14 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 
+    Route::get('reports', [ReportsController::class, 'index'])->name("reports.index");
+    Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
+    Route::get('get-datalist-othersourcetype', [ReportsController::class, 'getDatalistOthersourcetype'])->name("get.datalist.othersourcetype");
+
+    Route::resource('evidencetype', EvidenceTypeController::class);
+    Route::get('evidencetype-list/get', [EvidenceTypeController::class, 'getevidencetype'])->name("get.evidencetype");
+
+
 //evidence
     Route::resource('evidence', EvidenceController::class);
     Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
@@ -174,3 +184,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
 
 });
+
+
+
+
+

@@ -179,7 +179,7 @@
                 <a class="side-menu__item"  href="{{ route('upload-others-caseData') }}">
                     <i class="side-menu__icon fe fe-box"> </i>
                     <span class="side-menu__label">Upload Others CaseData</span>
-                   
+
                 </a>
             </li>
             <li class="slide">
@@ -218,6 +218,16 @@
                     </li>
 
                 </ul>
+                <a class="side-menu__item" href="{{ url('reports') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Reports</span>
+                </a>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('evidencetype') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Evidence Type</span>
+                </a>
             </li>
             {{-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">
