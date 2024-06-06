@@ -68,25 +68,25 @@
                             </div>
                             <form id="complaint-form">
                                 <div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="from-date">From Date:</label>
                                             <input type="date" class="form-control" id="from-date" name="from_date">
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="to-date">To Date:</label>
                                             <input type="date" class="form-control" id="to-date" name="to_date">
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="mobile">Complaint Mobile no: </label>
                                             <input type="text" class="form-control" id="mobile" name="mobile">
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="type">Transaction Type:</label><br>
                                             <select class="form-control" id="type">
@@ -100,8 +100,6 @@
 
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="options">Bank/Wallet/Merchant/Insurance:</label>
@@ -109,7 +107,10 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                </div>
+                                <div class="row">
+
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="filled-by">Filled by(within 24 hrs):</label>
                                             <select class="form-control" id="filled-by" name="filled-by">
@@ -119,14 +120,34 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="filled_by_who">Filled by:</label>
+                                            <select class="form-control" id="filled_by_who" name="filled_by_who">
+                                                <option value="">All</option>
+                                                <option value="citizen">Citizen</option>
+                                                <option value="cyber">Cyber</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="acknowledgement_no">Acknowledgement No: </label>
                                             <input type="text" class="form-control" id="acknowledgement_no"
                                                 name="acknowledgement_no">
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="fir_lodge">FIR Lodge:</label>
+                                            <select class="form-control" id="fir_lodge" name="fir_lodge">
+                                                <option value="">--Select--</option>
+                                                <option value="1">Yes</option>
+                                                <option value="0">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="com_status">Status </label>
                                             <select class="form-control" id="com_status">
@@ -135,7 +156,8 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3" hidden>
+
+                                    <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="complaint-reported">Complaint Reported:</label>
                                             <select class="form-control" id="complaint-reported" name="complaint-reported">
@@ -145,20 +167,46 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3" hidden>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2">
                                         <div class="form-group">
-                                            <label for="fir-lodge">FIR Lodge:</label>
-                                            <select class="form-control" id="fir-lodge" name="fir-lodge">
+                                            <label for="search-by">Search by:</label>
+                                            <select class="form-control" id="search-by" name="search-by" onchange="showTextBox()">
                                                 <option value="">--Select--</option>
-                                                <option value="#">Yes</option>
-                                                <option value="#">No</option>
+                                                <option value="account_id">Account ID/Account Number/UPI ID</option>
+                                                <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="account-id-input" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="account-id">Enter Account ID/Account Number/UPI ID:</label>
+                                            <input type="text" class="form-control" id="account-id" name="account-id">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="transaction-id-input" style="display: none;">
+                                        <div class="form-group">
+                                            <label for="transaction-id">Enter Transaction ID/UTR/RRN Number:</label>
+                                            <input type="text" class="form-control" id="transaction-id" name="transaction-id">
                                         </div>
                                     </div>
                                 </div>
 
+
                                 <div class="row">
-                                    <div class="col-md-3" hidden>
+                                    {{-- <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="search-by">Search by:</label>
+                                            <select class="form-control" id="search-by" name="search-by">
+                                                <option value="">--Select--</option>
+                                                <option value="account_id">Account ID/Account Number/UPI ID</option>
+                                                <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
+                                            </select>
+                                        </div>
+                                    </div> --}}
+                                    <div class="col-md-2" hidden>
                                         <div class="form-group">
                                             <label for="acknowledgement_no">Acknowledgement No: </label>
                                             <input type="text" class="form-control" id="acknowledgement_no"
@@ -175,16 +223,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-3" hidden>
-                                        <div class="form-group">
-                                            <label for="search-by">Search by:</label>
-                                            <select class="form-control" id="search-by" name="search-by">
-                                                <option value="">--Select--</option>
-                                                <option value="account_id">Account ID/Account Number/UPI ID</option>
-                                                <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
-                                            </select>
-                                        </div>
-                                    </div>
+
                                 </div>
 
                                 <div class="row">
@@ -438,17 +477,38 @@
                 var search_by = $("#search-by").val();
                 var options = $("#options").val();
                 var com_status = $("#com_status").val();
+                var fir_lodge = $("#fir_lodge").val();
+                var filled_by_who = $("#filled_by_who").val();
+                var account_id = $("#account-id").val();
+                var transaction_id = $("#transaction-id").val();
 
                 // Construct the URL with query parameters
                 var url = "{{ route('get.datalist') }}?from_date=" + from_date + "&to_date=" + to_date +
                     "&mobile=" + mobile + "&acknowledgement_no=" + acknowledgement_no + "&filled_by=" +
                     filled_by + "&search_by=" + search_by + "&options=" + options + "&com_status=" +
-                    com_status;
+                    com_status + "&fir_lodge=" + fir_lodge + "&filled_by_who=" + filled_by_who + "&account_id=" +
+                    account_id + "&transaction_id=" + transaction_id;
 
                 // Reload DataTable with new data based on selected filters
                 table.ajax.url(url).load();
             });
 
         });
+    </script>
+
+<script>
+    function showTextBox() {
+        var selectedValue = document.getElementById("search-by").value;
+        if (selectedValue === "account_id") {
+            document.getElementById("account-id-input").style.display = "block";
+            document.getElementById("transaction-id-input").style.display = "none";
+        } else if (selectedValue === "transaction_id") {
+            document.getElementById("transaction-id-input").style.display = "block";
+            document.getElementById("account-id-input").style.display = "none";
+        } else {
+            document.getElementById("account-id-input").style.display = "none";
+            document.getElementById("transaction-id-input").style.display = "none";
+        }
+    }
     </script>
 @endsection

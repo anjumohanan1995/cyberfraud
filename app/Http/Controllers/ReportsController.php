@@ -165,64 +165,130 @@ if ($normalizedBankActionStatus) {
 
         $records = $items->skip($start)->take($rowperpage)->get();
 
-        $data_arr = array();
+        $data_arr = [];
+        $acknowledgementNumbers = [];
         $i = $start;
 
-        foreach ($records as $record){
-            $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
+        foreach ($records as $record) {
             $i++;
-            $id = $record->id;
-            $source_type = $record->source_type;
-            $acknowledgement_no = $record->acknowledgement_no;
+            $current_i = $i;
+            // Check if the acknowledgement number has already been processed
+            if (!in_array($record->acknowledgement_no, $acknowledgementNumbers)) {
+                // Add the acknowledgement number to the processed list
+                $acknowledgementNumbers[] = $record->acknowledgement_no;
 
-            $transaction_id="";$amount="";$bank_name="";
-            foreach($com as $com){
-                $transaction_id .= $com->transaction_id."<br>";
-                $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
-                $bank_name .= $com->bank_name."<br>";
-                $complainant_name = $com->complainant_name;
-                $complainant_mobile = $com->complainant_mobile;
+                $com = Complaint::where('acknowledgement_no', $record->acknowledgement_no)->take(10)->get();
 
-                $district = $com->district;
-                $police_station = $com->police_station;
-                $account_id = $com->account_id;
-                $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
-                $current_status = $com->current_status;
-                $date_of_action = $com->date_of_action;
-                $action_taken_by_name = $com->action_taken_by_name;
-                $action_taken_by_designation = $com->action_taken_by_designation;
-                $action_taken_by_mobile = $com->action_taken_by_mobile;
-                $action_taken_by_email = $com->action_taken_by_email;
-                $action_taken_by_bank = $com->action_taken_by_bank;
+                $source_type = $record->source_type;
+                $acknowledgement_no = $record->acknowledgement_no;
+
+                $j = 0; // Counter for Sl.no within each acknowledgement_no
+                foreach ($com as $complaint) {
+                    $j++;
+                    $transaction_id = $complaint->transaction_id;
+                    $amount = '<span class="editable" data-ackno="' . $record->acknowledgement_no . '" data-transaction="' . $complaint->transaction_id . '">' . $complaint->amount . '</span>';
+                    $bank_name = $complaint->bank_name;
+                    $complainant_name = $complaint->complainant_name;
+                    $complainant_mobile = $complaint->complainant_mobile;
+                    $district = $complaint->district;
+                    $police_station = $complaint->police_station;
+                    $account_id = $complaint->account_id;
+                    $entry_date = Carbon::parse($complaint->entry_date)->format('Y-m-d H:i:s');
+                    $current_status = $complaint->current_status;
+                    $date_of_action = $complaint->date_of_action;
+                    $action_taken_by_name = $complaint->action_taken_by_name;
+                    // Add other fields as needed
+
+                    $data_arr[] = [
+                        "id" => $current_i,
+                        "acknowledgement_no" => ($j == 1) ? $acknowledgement_no : '', // Only display the acknowledgement number for the first row of each group
+                        "Sl.no" => ($j == 1) ? $i - $start : '', // Only display Sl.no for the first row of each group
+                        "district" => $district,
+                        "police_station" => $police_station,
+                        "complainant_name" => $complainant_name,
+                        "complainant_mobile" => $complainant_mobile,
+                        "transaction_id" => $transaction_id,
+                        "bank_name" => $bank_name,
+                        "account_id" => $account_id, // Add the appropriate value or leave blank as needed
+                        "amount" => $amount,
+                        "entry_date" => $entry_date, // Add the appropriate value or leave blank as needed
+                        "current_status" => $current_status, // Add the appropriate value or leave blank as needed
+                        "date_of_action" => $date_of_action, // Add the appropriate value or leave blank as needed
+                        "action_taken_by_name" => $action_taken_by_name, // Add the appropriate value or leave blank as needed
+                        "edit" => ''
+                    ];
+                    $current_i = '';
+                }
             }
-
-            $data_arr[] = array(
-                "id" => $i,
-                "acknowledgement_no" => $acknowledgement_no,
-                "district" => $district."<br>".$police_station,
-                "complainant_name" => $complainant_name."<br>".$complainant_mobile,
-                "transaction_id" => $transaction_id,
-                "bank_name" => $bank_name,
-                "account_id" => $account_id,
-                "amount" => $amount,
-                "entry_date" => $entry_date,
-                "current_status" => $current_status,
-                "date_of_action" => $date_of_action,
-                "action_taken_by_name" => $action_taken_by_name,
-                "edit" => ''
-            );
         }
 
-        $response = array(
+        $response = [
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
             "iTotalDisplayRecords" => $totalRecordswithFilter,
             "aaData" => $data_arr
-        );
+        ];
 
         return response()->json($response);
     }
 
+    //     $data_arr = array();
+    //     $i = $start;
+
+    //     foreach ($records as $record){
+    //         $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
+    //         $i++;
+    //         $id = $record->id;
+    //         $source_type = $record->source_type;
+    //         $acknowledgement_no = $record->acknowledgement_no;
+
+    //         $transaction_id="";$amount="";$bank_name="";
+    //         foreach($com as $com){
+    //             $transaction_id .= $com->transaction_id."<br>";
+    //             $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
+    //             $bank_name .= $com->bank_name."<br>";
+    //             $complainant_name = $com->complainant_name;
+    //             $complainant_mobile = $com->complainant_mobile;
+
+    //             $district = $com->district;
+    //             $police_station = $com->police_station;
+    //             $account_id = $com->account_id;
+    //             $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
+    //             $current_status = $com->current_status;
+    //             $date_of_action = $com->date_of_action;
+    //             $action_taken_by_name = $com->action_taken_by_name;
+    //             $action_taken_by_designation = $com->action_taken_by_designation;
+    //             $action_taken_by_mobile = $com->action_taken_by_mobile;
+    //             $action_taken_by_email = $com->action_taken_by_email;
+    //             $action_taken_by_bank = $com->action_taken_by_bank;
+    //         }
+
+    //         $data_arr[] = array(
+    //             "id" => $i,
+    //             "acknowledgement_no" => $acknowledgement_no,
+    //             "district" => $district."<br>".$police_station,
+    //             "complainant_name" => $complainant_name."<br>".$complainant_mobile,
+    //             "transaction_id" => $transaction_id,
+    //             "bank_name" => $bank_name,
+    //             "account_id" => $account_id,
+    //             "amount" => $amount,
+    //             "entry_date" => $entry_date,
+    //             "current_status" => $current_status,
+    //             "date_of_action" => $date_of_action,
+    //             "action_taken_by_name" => $action_taken_by_name,
+    //             "edit" => ''
+    //         );
+    //     }
+
+    //     $response = array(
+    //         "draw" => intval($draw),
+    //         "iTotalRecords" => $totalRecords,
+    //         "iTotalDisplayRecords" => $totalRecordswithFilter,
+    //         "aaData" => $data_arr
+    //     );
+
+    //     return response()->json($response);
+    // }
 
     public function getDatalistOthersourcetype(Request $request)
     {
@@ -248,8 +314,6 @@ if ($normalizedBankActionStatus) {
         $toDate = $request->get('to_date');
         $current_value = $request->get('current_value');
         // dd($current_value);
-
-
 
         $complaints = ComplaintOthers::raw(function ($collection) use ($start, $rowperpage, $current_value, $fromDate, $toDate) {
             $pipeline = [
@@ -306,7 +370,6 @@ if ($normalizedBankActionStatus) {
                 ], $pipeline);
             }
 
-
             return $collection->aggregate($pipeline);
         });
 
@@ -349,46 +412,71 @@ if ($normalizedBankActionStatus) {
 
         $totalRecordswithFilter = $totalRecords;
 
+
+        $uniqueCaseNumbers = []; // Array to store unique case numbers
+
         foreach ($complaints as $record) {
             $i++;
-            $url = ""; $domain = ""; $ip = ""; $registrar = ""; $remarks = ""; $source_type = "";
+            $current_i = $i;
 
-            $case_number = '<a href="' . route('other-case-details', ['id' => $record->_id]) . '">' . $record->_id . '</a>';
-
-            foreach ($record->url as $item) {
-                $url .= $item . "<br>";
+            // Store the case number if it's not already stored
+            if (!in_array($record->_id, $uniqueCaseNumbers)) {
+                $uniqueCaseNumbers[] = $record->_id;
+                $case_number = '<a href="' . route('other-case-details', ['id' => $record->_id]) . '">' . $record->_id . '</a>';
+            } else {
+                $case_number = ''; // If the case number is already stored, leave it empty
             }
-            foreach ($record->source_type as $item) {
+
+            // Get the total number of items for each field
+            $totalUrls = count($record->url);
+            $totalSourceTypes = count($record->source_type);
+            $totalDomains = count($record->domain);
+            $totalIps = count($record->ip);
+            $totalRegistrars = count($record->registrar);
+            $totalRemarks = count($record->remarks);
+
+            // Determine the maximum total to loop through
+            $maxTotal = max($totalUrls, $totalSourceTypes, $totalDomains, $totalIps, $totalRegistrars, $totalRemarks);
+
+            for ($j = 0; $j < $maxTotal; $j++) {
+                $url = $record->url[$j] ?? '';
+                $source_type = '';
                 foreach ($source_types as $st) {
-                    if ($st->_id == $item) {
-                        $source_type .= $st->name . "<br>";
+                    if ($j < $totalSourceTypes && $st->_id == $record->source_type[$j]) {
+                        $source_type = $st->name;
+                        break;
                     }
                 }
-            }
-            foreach ($record->domain as $item) {
-                $domain .= $item . "<br>";
-            }
-            foreach ($record->ip as $item) {
-                $ip .= $item . "<br>";
-            }
-            foreach ($record->registrar as $item) {
-                $registrar .= $item . "<br>";
-            }
-            foreach ($record->remarks as $item) {
-                $remarks .= $item . "<br>";
-            }
+                $domain = $record->domain[$j] ?? '';
+                $ip = $record->ip[$j] ?? '';
+                $registrar = $record->registrar[$j] ?? '';
+                $remarks = $record->remarks[$j] ?? '';
 
-            $data_arr[] = [
-                "id" => $i,
-                "source_type" => $source_type,
-                "case_number" => $case_number,
-                "url" => $url,
-                "domain" => $domain,
-                "ip" => $ip,
-                "registrar" => $registrar,
-                "remarks" => $remarks,
-            ];
+                // if($loop->iteration == 1){
+                //     dd("one");
+                // }
+
+                // Add each field to the data array as a separate row
+                $data_arr[] = [
+                    "id" => $current_i,
+                    "source_type" => nl2br(e($source_type)),
+                    "case_number" => $case_number,
+                    "url" => nl2br(e($url)),
+                    "domain" => nl2br(e($domain)),
+                    "ip" => nl2br(e($ip)),
+                    "registrar" => nl2br(e($registrar)),
+                    "remarks" => nl2br(e($remarks)),
+                ];
+
+                // Reset $case_number to empty after the first iteration
+                $case_number = '';
+                $current_i = '';
+
+            }
         }
+
+
+
 
         $response = [
             "draw" => intval($draw),
@@ -399,6 +487,185 @@ if ($normalizedBankActionStatus) {
 
         return response()->json($response);
     }
+
+
+
+
+    // public function getDatalistOthersourcetype(Request $request)
+    // {
+    //     // Get request parameters
+    //     $draw = $request->get('draw');
+    //     $start = $request->get("start");
+    //     $rowperpage = $request->get("length"); // Rows display per page
+
+    //     $columnIndex_arr = $request->get('order');
+    //     $columnName_arr = $request->get('columns');
+    //     $order_arr = $request->get('order');
+    //     $search_arr = $request->get('search');
+
+    //     $columnIndex = $columnIndex_arr[0]['column'] ?? 0; // Column index
+    //     $columnName = $columnName_arr[$columnIndex]['data'] ?? '_id'; // Column name
+    //     $columnSortOrder = $order_arr[0]['dir'] ?? 'asc'; // asc or desc
+    //     $searchValue = $search_arr['value'] ?? ''; // Search value
+
+    //     // Get all source types
+    //     $source_types = SourceType::all();
+
+    //     $fromDate = $request->get('from_date');
+    //     $toDate = $request->get('to_date');
+    //     $current_value = $request->get('current_value');
+    //     // dd($current_value);
+
+
+
+    //     $complaints = ComplaintOthers::raw(function ($collection) use ($start, $rowperpage, $current_value, $fromDate, $toDate) {
+    //         $pipeline = [
+
+    //             [
+    //                 '$group' => [
+    //                     '_id' => '$case_number',
+    //                     'source_type' => ['$addToSet' => '$source_type'],
+    //                     'url' => ['$addToSet' => '$url'],
+    //                     'domain' => ['$addToSet' => '$domain'],
+    //                     'registry_details' => ['$addToSet' => '$registry_details'],
+    //                     'ip' => ['$addToSet' => '$ip'],
+    //                     'registrar' => ['$addToSet' => '$registrar'],
+    //                     'remarks' => ['$addToSet' => '$remarks'],
+    //                 ]
+    //             ],
+    //             [
+    //                 '$sort' => [
+    //                     '_id' => 1
+    //                 ]
+    //             ],
+    //             [
+    //                 '$sort' => [
+    //                     'created_at' => -1
+    //                 ]
+    //             ],
+    //             [
+    //                 '$skip' => (int)$start
+    //             ],
+    //             [
+    //                 '$limit' => (int)$rowperpage
+    //             ],
+
+    //         ];
+
+    //         if ($current_value === 'today') {
+    //             $today = new DateTime('today');
+    //             $pipeline = array_merge([
+    //                 [
+    //                     '$match' => [
+    //                         'created_at' => ['$gte' => new UTCDateTime($today->getTimestamp() * 1000)]
+    //                     ]
+    //                 ]
+    //             ], $pipeline);
+    //         }
+
+    //         if ($fromDate && $toDate) {
+    //             $pipeline = array_merge([
+    //                 [
+    //                     '$match' => [
+    //                         'created_at' => ['$gte' => new UTCDateTime(strtotime($fromDate) * 1000), '$lte' => new UTCDateTime(strtotime($toDate) * 1000)]
+    //                     ]
+    //                 ]
+    //             ], $pipeline);
+    //         }
+
+
+    //         return $collection->aggregate($pipeline);
+    //     });
+
+    //     $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($current_value, $fromDate, $toDate) {
+    //         $pipeline = [
+
+    //             [
+    //                 '$group' => [
+    //                     '_id' => '$case_number'
+    //                 ]
+    //             ]
+    //         ];
+
+    //         if (isset($current_value)){
+    //             $today = new DateTime('today');
+    //             $pipeline = array_merge([
+    //                 [
+    //                     '$match' => [
+    //                         'created_at' => ['$gte' => new UTCDateTime($today->getTimestamp() * 1000)]
+    //                     ]
+    //                 ]
+    //             ], $pipeline);
+    //         }
+
+    //         if ($fromDate && $toDate){
+    //             $pipeline = array_merge([
+    //                 [
+    //                     '$match' => [
+    //                         'created_at' => ['$gte' => new UTCDateTime(strtotime($fromDate) * 1000), '$lte' => new UTCDateTime(strtotime($toDate) * 1000)]
+    //                     ]
+    //                 ]
+    //             ], $pipeline);
+    //         }
+    //         return $collection->aggregate($pipeline);
+    //     });
+
+    //     $totalRecords = count($distinctCaseNumbers->toArray());
+    //     $data_arr = [];
+    //     $i = $start;
+
+    //     $totalRecordswithFilter = $totalRecords;
+
+    //     foreach ($complaints as $record) {
+    //         $i++;
+    //         $url = ""; $domain = ""; $ip = ""; $registrar = ""; $remarks = ""; $source_type = "";
+
+    //         $case_number = '<a href="' . route('other-case-details', ['id' => $record->_id]) . '">' . $record->_id . '</a>';
+
+    //         foreach ($record->url as $item) {
+    //             $url .= $item . "<br>";
+    //         }
+    //         foreach ($record->source_type as $item) {
+    //             foreach ($source_types as $st) {
+    //                 if ($st->_id == $item) {
+    //                     $source_type .= $st->name . "<br>";
+    //                 }
+    //             }
+    //         }
+    //         foreach ($record->domain as $item) {
+    //             $domain .= $item . "<br>";
+    //         }
+    //         foreach ($record->ip as $item) {
+    //             $ip .= $item . "<br>";
+    //         }
+    //         foreach ($record->registrar as $item) {
+    //             $registrar .= $item . "<br>";
+    //         }
+    //         foreach ($record->remarks as $item) {
+    //             $remarks .= $item . "<br>";
+    //         }
+
+    //         $data_arr[] = [
+    //             "id" => $i,
+    //             "source_type" => $source_type,
+    //             "case_number" => $case_number,
+    //             "url" => $url,
+    //             "domain" => $domain,
+    //             "ip" => $ip,
+    //             "registrar" => $registrar,
+    //             "remarks" => $remarks,
+    //         ];
+    //     }
+
+    //     $response = [
+    //         "draw" => intval($draw),
+    //         "iTotalRecords" => $totalRecords,
+    //         "iTotalDisplayRecords" => $totalRecordswithFilter,
+    //         "aaData" => $data_arr
+    //     ];
+
+    //     return response()->json($response);
+    // }
 
 
 
