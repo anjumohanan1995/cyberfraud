@@ -219,6 +219,13 @@ class CaseDataController extends Controller
         $search_by = $request->get('search_by');
         $options = $request->get('options');
         $com_status = $request->get('com_status');
+        $fir_lodge = $request->get('fir_lodge');
+        $filled_by_who = $request->get('filled_by_who');
+        $transaction_id = $request->get('transaction_id');
+        $account_id = $request->get('account_id');
+        // dd($transaction_id);
+        // dd($filled_by_who);
+        // dd($fir_lodge);
 
         
         // Total records.
@@ -276,6 +283,32 @@ class CaseDataController extends Controller
                             ->where('complainant_mobile', $mobile)->where('com_status',(int)$com_status)->get()->count();
                 $totalRecordswithFilter = $totalRecords;
             }
+
+            if ($transaction_id){
+                $transaction_id = (int)$transaction_id;
+                // dd($transaction_id);
+                $totalRecordQuery->where('transaction_id', $transaction_id);
+                $items->where('transaction_id', $transaction_id);
+
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('transaction_id', $transaction_id)->where('com_status',(int)$com_status)->get()->count();
+                // dd($totalRecords);
+                $totalRecordswithFilter = $totalRecords;
+            }
+            // dd($items);
+
+            if ($account_id){
+                $account_id = (int)$account_id;
+                // dd($transaction_id);
+                $totalRecordQuery->where('account_id ', $account_id);
+                $items->where('account_id', $account_id);
+                // dd($items);
+                $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('account_id', $account_id)->where('com_status',(int)$com_status)->get()->count();
+                // dd($totalRecords);
+                $totalRecordswithFilter = $totalRecords;
+            }
+
             if ($options && $options!='null') {
                 $totalRecordQuery->where('bank_name', $options);
                 $items->where('bank_name', $options);
@@ -292,16 +325,36 @@ class CaseDataController extends Controller
                 ->where('acknowledgement_no', $acknowledgement_no)->where('com_status',(int)$com_status)->get()->count();
                 $totalRecordswithFilter = $totalRecords;
             }
-            // if ($com_status){
 
-            //     $totalRecordQuery->where('com_status', (int)$com_status);
-            //     $items->where('com_status', (int)$com_status);
-            //     $totalRecords = Complaint::groupBy('acknowledgement_no')
-            //     ->where('com_status', (int)$com_status)->get()->count();
+            if ($fir_lodge == "1") {
+                // Retrieve acknowledgement numbers where fir_doc is not null
+                $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
 
-            //     $totalRecordswithFilter = $totalRecords;
-            // }
-            // Apply "Filled by" filter
+                // Initialize total records count
+                $totalRecordswithFilter = 0;
+
+                // Loop through each acknowledgement number
+                foreach ($ackNumbers as $ackNumber) {
+                    // Apply the filter to the total record query
+                    $totalRecordQuery->where('acknowledgement_no', (int)$ackNumber)
+                                     ->where('com_status', (int)$com_status);
+
+                    // Apply the same filter to the items query
+                    $items->orWhere(function ($query) use ($ackNumber, $com_status) {
+                        $query->where('acknowledgement_no', (int)$ackNumber)
+                              ->where('com_status', (int)$com_status);
+                    });
+
+                    // Calculate the total records count with the applied filters
+                    $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', (int)$ackNumber)
+                                             ->where('com_status', (int)$com_status)
+                                             ->count();
+
+                    // Increment total records count
+                    $totalRecordswithFilter = $totalRecords;
+                }
+            }
+
 if ($filled_by){
     switch ($filled_by){
         case 'citizen':
@@ -333,44 +386,29 @@ if ($filled_by){
             break;
     }
 }
-// Apply filter based on selected option
-if ($search_by) {
-    switch ($search_by) {
-        case 'account_id':
-            // Fetch records from the complaints collection where account_id exists
-            $complaints = Complaint::where('account_id', 'exists', true)->get()->pluck('account_id');
 
-            // Fetch records from the bank_casedata collection where account_no_1 exists
-            $bankData = BankCasedata::where('account_no_1', 'exists', true)->get()->pluck('account_no_1');
-
-            // Compare the account_id fields from both collections
-            $matchingIds = $complaints->intersect($bankData)->toArray();
-
-            // Filter items where the account_id exists in both collections
-            $items->whereIn('complaints.account_id', $matchingIds);
-            $items->whereIn('bank_casedata.account_no_1', $matchingIds);
-
+if ($filled_by_who) {
+    switch ($filled_by_who) {
+        case 'citizen':
+            // Filter citizen filled entries
+            $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->where('com_status', (int)$com_status)->get()->count();
+            $totalRecordswithFilter = $totalRecords;
             break;
-        case 'transaction_id':
-            // Fetch records from the complaints collection where transaction_id exists
-            $complaints = Complaint::where('transaction_id', 'exists', true)->get()->pluck('transaction_id');
-
-            // Fetch records from the bank_casedata collection where transaction_id_or_utr_no exists
-            $bankData = BankCasedata::where('transaction_id_or_utr_no', 'exists', true)->get()->pluck('transaction_id_or_utr_no');
-
-            // Compare the transaction_id fields from both collections
-            $matchingIds = $complaints->intersect($bankData);
-
-            // Filter items where the transaction_id exists in both collections
-            $items->whereIn('complaints.transaction_id', $matchingIds);
-            $items->whereIn('bank_casedata.transaction_id_or_utr_no', $matchingIds);
-           // dd($items);
+        case 'cyber':
+            // Filter cyber filled entries
+            $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
+            $totalRecords = Complaint::groupBy('acknowledgement_no')
+                ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->where('com_status', (int)$com_status)->get()->count();
+            $totalRecordswithFilter = $totalRecords;
             break;
         default:
-            // Do nothing for other options
+            // Do nothing for 'All' option
             break;
     }
 }
+
         if($searchValue){
             $items = Complaint::groupBy('acknowledgement_no')
             ->where('acknowledgement_no', 'like', '%' .$searchValue . '%')
