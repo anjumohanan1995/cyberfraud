@@ -143,9 +143,15 @@ Route::middleware('auth')->group(function () {
     //for uploading others case data
     Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
 
+    // for autogenerating case number in upload others case data
+    Route::post('get-casenumber', [CaseDataController::class, 'getCaseNumber'])->name("get.casenumber");
+
     //for other case data details innerpage
     Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details")->middleware('no-cache');
     Route::get('edit-others-caseData/{id}', [CaseDataController::class, 'editotherCaseDetails'])->name("edit-others-caseData");
+    Route::put('others-caseData-update/{id}', [CaseDataController::class, 'updateotherCaseDetails'])->name("case-data-others.update");
+
+    //for casenumber auto generate
     Route::put('others-caseData-update/{id}', [CaseDataController::class, 'updateotherCaseDetails'])->name("case-data-others.update");
 
     //collection drop controller
@@ -182,6 +188,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     //notice module
 
     Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
+    Route::get('evidence-list-notice', [NoticeController::class,'evidenceListNotice'])->name('get_evidence_list_notice');
+
+
 
 });
 

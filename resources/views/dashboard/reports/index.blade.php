@@ -301,14 +301,12 @@ $(document).ready(function() {
     var tableNew = $('#example').DataTable({
         processing: true,
         serverSide: true,
-        dom: 'Blfrtip',
-        buttons: [
-            'excelHtml5',
-            'csvHtml5',
-            'print'
-        ],
-        pagingType: 'full',
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+        layout: {
+                topStart: {
+                buttons: [ 'csv', 'excel','print']
+                }
+                },
+       
         ajax: {
             url: "{{ route('get.datalist.ncrp') }}",
             data: function(d) {

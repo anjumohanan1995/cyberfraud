@@ -12,12 +12,14 @@ use App\Models\Wallet;
 use App\Models\Merchant;
 use App\Models\Insurance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\SourceType;
+
 
 
 
@@ -218,7 +220,7 @@ class CaseDataController extends Controller
         $options = $request->get('options');
         $com_status = $request->get('com_status');
 
-
+        
         // Total records.
         $totalRecordQuery = Complaint::where('deleted_at', null);
         $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
@@ -240,7 +242,7 @@ class CaseDataController extends Controller
             ->where('com_status', (int)$com_status)
             ->orderBy('_id', 'desc')
             ->orderBy($columnName, $columnSortOrder);
-
+            
             $totalRecords  = Complaint::groupBy('acknowledgement_no')
             ->where('deleted_at', null)
             ->where('com_status', (int)$com_status)
@@ -264,6 +266,7 @@ class CaseDataController extends Controller
                             ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
             $totalRecordswithFilter = $totalRecords;
             }
+           
             if ($mobile){
                 $mobile = (int)$mobile;
                 $totalRecordQuery->where('complainant_mobile', $mobile);
@@ -390,7 +393,7 @@ if ($search_by) {
         //$totalRecordswithFilter = $items->count();
 
         $records = $items->skip($start)->take($rowperpage)->get();
-
+       
         $data_arr = array();
         $i = $start;
 
@@ -548,8 +551,10 @@ if ($search_by) {
         $casenumber = $request->casenumber;
         $domain = $request->domain;
         $url = $request->url;
+        $registrar = $request->registrar;
+        $ip = $request->ip;
         //dd($casenumber);
-        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain) {
+        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
 
             $pipeline = [
                 [
@@ -604,11 +609,29 @@ if ($search_by) {
                     ]
                 ], $pipeline);
             }
+            if (isset($registrar)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'registrar' => $registrar
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($ip)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
+                        ]
+                    ]
+                ], $pipeline);
+            }
 
             return $collection->aggregate($pipeline);
         });
 
-        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain , $registrar) {
 
             $pipeline = [
                 [
@@ -641,6 +664,24 @@ if ($search_by) {
                     [
                         '$match' => [
                             'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($registrar)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'registrar' => $registrar
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($ip)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
                         ]
                     ]
                 ], $pipeline);
@@ -805,6 +846,25 @@ if ($search_by) {
         $complaint->save();
 
         return redirect()->back()->with('status', 'Profile updated successfully.');
+    }
+
+    public function getCaseNumber(Request $request){
+        
+            $sourcetype = $request->sourcetype;
+            $firstThreeCharacters = Str::substr($sourcetype, 0, 3);
+            $today = now()->format('Ymd');
+            $lastCaseNumber = ComplaintOthers::where('source_type', $request->sourcetype_id)->latest()->value('case_number'); 
+            if($lastCaseNumber == ''){
+                
+                $caseNumber = $firstThreeCharacters.'-'.$today.'-0001';
+                
+            }
+            else{
+                $lastNumberPart = (int)substr($lastCaseNumber, -4);
+                $nextNumberPart = $lastNumberPart + 1;     
+                $caseNumber = $firstThreeCharacters.'-'.$today.'-'.str_pad($nextNumberPart, 4, '0', STR_PAD_LEFT);           
+            }
+            return $caseNumber;
     }
 
 }
