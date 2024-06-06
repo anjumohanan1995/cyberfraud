@@ -367,11 +367,6 @@
                 processing: true,
                 serverSide: true,
 
-                layout: {
-                topStart: {
-                buttons: [ 'csv', 'excel']
-                }
-                },
                 "ajax": {
                     "url": "{{ route('get.datalist') }}",
                     "data": function(d) {

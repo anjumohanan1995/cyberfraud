@@ -224,7 +224,7 @@
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
-                                                                <table id="example1" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
+                                                                <table id="example1" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped" style="width:100%">
                                                                     <thead>
                                                                         <tr>
                                                                             <th>SL No</th>
@@ -341,14 +341,12 @@ $(document).ready(function() {
     var tableReturned = $('#example1').DataTable({
         processing: true,
         serverSide: true,
-        dom: 'Blfrtip',
-        buttons: [
-            'excelHtml5',
-            'csvHtml5',
-            'print'
-        ],
-        pagingType: 'full',
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+        layout: {
+                topStart: {
+                buttons: [ 'csv', 'excel','print']
+                }
+                },
+     
         ajax: {
             url: "{{ route('get.datalist.othersourcetype') }}",
             data: function(d) {

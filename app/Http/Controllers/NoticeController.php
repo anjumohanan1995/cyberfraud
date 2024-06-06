@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\SourceType;
 use App\Models\EvidenceType;
 use App\Models\Evidence;
+use Carbon\Carbon;
 
 use Illuminate\Http\Request;
 
@@ -123,9 +124,11 @@ class NoticeController extends Controller
         $totalRecords = $totalRecord->select('count(*) as allcount')->count();
         $totalRecordswithFilter = $totalRecords;
 
-        // if($from_date){
-        //     dd($from_date);
-        // }
+        if($from_date){
+            
+            
+           // dd($from_date);
+        }
         
         $data_arr = array();
         $i=$start;
