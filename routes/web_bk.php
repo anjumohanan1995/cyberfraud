@@ -7,19 +7,12 @@ use App\Http\Controllers\CaseDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardPagesController;
 use App\Http\Controllers\DropCollectionController;
-use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ModusController;
 use App\Http\Controllers\PoliceStationsController;
-use App\Http\Controllers\SourceTypeController;
-use App\Http\Controllers\ReportsController;
-use App\Http\Controllers\EvidenceTypeController;
-use App\Http\Controllers\ComplaintGraphController;
-use App\Http\Controllers\ProfessionController;
-use App\Http\Controllers\NoticeController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -79,7 +72,6 @@ Route::middleware('auth')->group(function () {
 
     //dashboard pages starts here.
     Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
-    // Route::get('filter-case-data', [DashboardPagesController::class, 'filterCaseData'])->name("filter-case-data");
 
 
     //users route starts here.
@@ -127,78 +119,10 @@ Route::middleware('auth')->group(function () {
     //case data controller starts here.
     Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
     Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
-    // Route::post('case-data/post-datalist/filter', [CaseDataController::class, 'getDatalist'])->name("post.datalist-filter");
     Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
     Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
-    Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
-    Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
 
-    //for listing casedata of cyberdomain souurcetype
-    Route::get('case-data-others', [CaseDataController::class, 'caseDataOthers'])->name("case-data-others");
-    Route::get('case-data/get-datalist-others', [CaseDataController::class, 'getDatalistOthers'])->name("get.datalist.others");
-
-    Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
-    Route::get('activateLink', [CaseDataController::class, 'activateLink']);
-    Route::get('activateLinkIndividual', [CaseDataController::class, 'activateLinkIndividual']);
-
-    //for uploading others case data
-    Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
-
-    // for autogenerating case number in upload others case data
-    Route::post('get-casenumber', [CaseDataController::class, 'getCaseNumber'])->name("get.casenumber");
-
-    //for other case data details innerpage
-    Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details")->middleware('no-cache');
-    Route::get('edit-others-caseData/{id}', [CaseDataController::class, 'editotherCaseDetails'])->name("edit-others-caseData");
-    Route::put('others-caseData-update/{id}', [CaseDataController::class, 'updateotherCaseDetails'])->name("case-data-others.update");
-
-    //for casenumber auto generate
-    Route::put('others-caseData-update/{id}', [CaseDataController::class, 'updateotherCaseDetails'])->name("case-data-others.update");
 
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
-
-
-    Route::resource('sourcetype', SourceTypeController::class);
-    Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
-
-//dashboard graph
-Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->name('complaints.chart');
-
-
-
-    Route::get('reports', [ReportsController::class, 'index'])->name("reports.index");
-    Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
-    Route::get('get-datalist-othersourcetype', [ReportsController::class, 'getDatalistOthersourcetype'])->name("get.datalist.othersourcetype");
-
-    Route::resource('evidencetype', EvidenceTypeController::class);
-    Route::get('evidencetype-list/get', [EvidenceTypeController::class, 'getevidencetype'])->name("get.evidencetype");
-
-    Route::resource('profession', ProfessionController::class);
-    Route::get('profession-list/get', [ProfessionController::class, 'getprofession'])->name("get.profession");
-
-
-//evidence
-    Route::resource('evidence', EvidenceController::class);
-    Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
-    Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
-    Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
-    Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
-
-    Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');
-    Route::get('download-fir/{ak_no}', [CaseDataController::class, 'downloadFIR'])->name('download.fir');
-    Route::post('profile-update', [CaseDataController::class, 'profileUpdate'])->name('profile.update');
-
-    //notice module
-
-    Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
-    Route::get('evidence-list-notice', [NoticeController::class,'evidenceListNotice'])->name('get_evidence_list_notice');
-
-
-
 });
-
-
-
-
-

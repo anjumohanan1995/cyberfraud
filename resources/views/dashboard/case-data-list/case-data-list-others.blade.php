@@ -62,25 +62,39 @@
 
                             <form id="complaint-form">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="from-date">Case Number</label>
                                             <input type="text" class="form-control" id="caseNumber" name="casenumber">
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="to-date">Url</label>
                                             <input type="text" class="form-control" id="url" name="url">
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="mobile">Domain</label>
                                             <input type="text" class="form-control" id="domain" name="domain">
                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="mobile">Registrar</label>
+                                            <input type="text" class="form-control" id="registrar" name="registrar">
+                                        </div>
+                                    </div>
 
+                            </div>
+                            <div class="row">
+                            <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="mobile">IP</label>
+                                            <input type="text" class="form-control" id="ip" name="ip">
+                                        </div>
+                                    </div>
                             </div>
                             <div class="row">
                                     <div class="col-md-12 text-right">
@@ -186,6 +200,8 @@ $(document).ready(function(){
         var casenumber = $('#caseNumber').val();
         var url = $('#url').val();
         var domain = $('#domain').val();
+        var registrar = $('#registrar').val();
+        var ip = $('#ip').val();
 
        
         if ($.fn.DataTable.isDataTable('#complaints')){
@@ -207,7 +223,9 @@ $(document).ready(function(){
                         return $.extend({}, d, {
                             "casenumber":casenumber,
                             "url":url,
-                            "domain":domain
+                            "domain":domain,
+                            "registrar":registrar,
+                            "ip":ip
                         });
                     }
                 },

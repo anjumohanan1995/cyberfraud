@@ -13,12 +13,14 @@ use App\Models\Merchant;
 use App\Models\Insurance;
 use App\Models\Profession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\SourceType;
+
 
 
 
@@ -124,7 +126,7 @@ class CaseDataController extends Controller
 
         // Total records with filter.
         $totalRecordswithFilterQuery = clone $totalRecordsQuery;
-        $totalRecordswithFilterQuery->where(function ($query) use ($searchValue) {
+        $totalRecordswithFilterQuery->where(function ($query) use ($searchValue){
             // Add your search conditions here.
         });
 
@@ -226,7 +228,7 @@ class CaseDataController extends Controller
         // dd($filled_by_who);
         // dd($fir_lodge);
 
-
+        
         // Total records.
         $totalRecordQuery = Complaint::where('deleted_at', null);
         $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
@@ -248,8 +250,7 @@ class CaseDataController extends Controller
             ->where('com_status', (int)$com_status)
             ->orderBy('_id', 'desc')
             ->orderBy($columnName, $columnSortOrder);
-            // dd($items);
-
+            
             $totalRecords  = Complaint::groupBy('acknowledgement_no')
             ->where('deleted_at', null)
             ->where('com_status', (int)$com_status)
@@ -257,7 +258,7 @@ class CaseDataController extends Controller
             ->orderBy($columnName, $columnSortOrder)->get()->count();
             $totalRecordswithFilter = $totalRecords;
         // Apply filter conditions
-        if ($fromDate && $toDate) {
+        if ($fromDate && $toDate){
             // Parse and format dates using Carbon
             $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
             $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
@@ -273,6 +274,7 @@ class CaseDataController extends Controller
                             ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
             $totalRecordswithFilter = $totalRecords;
             }
+           
             if ($mobile){
                 $mobile = (int)$mobile;
                 $totalRecordQuery->where('complainant_mobile', $mobile);
@@ -430,9 +432,7 @@ if ($filled_by_who) {
         //$totalRecordswithFilter = $items->count();
 
         $records = $items->skip($start)->take($rowperpage)->get();
-
-        // dd($records);
-
+       
         $data_arr = array();
         $i = $start;
 
@@ -594,8 +594,10 @@ if ($filled_by_who) {
         $casenumber = $request->casenumber;
         $domain = $request->domain;
         $url = $request->url;
+        $registrar = $request->registrar;
+        $ip = $request->ip;
         //dd($casenumber);
-        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain) {
+        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
 
             $pipeline = [
                 [
@@ -650,11 +652,29 @@ if ($filled_by_who) {
                     ]
                 ], $pipeline);
             }
+            if (isset($registrar)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'registrar' => $registrar
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($ip)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
+                        ]
+                    ]
+                ], $pipeline);
+            }
 
             return $collection->aggregate($pipeline);
         });
 
-        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain) {
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain , $registrar) {
 
             $pipeline = [
                 [
@@ -687,6 +707,24 @@ if ($filled_by_who) {
                     [
                         '$match' => [
                             'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($registrar)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'registrar' => $registrar
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($ip)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
                         ]
                     ]
                 ], $pipeline);
@@ -851,6 +889,25 @@ if ($filled_by_who) {
         $complaint->save();
 
         return redirect()->back()->with('status', 'Profile updated successfully.');
+    }
+
+    public function getCaseNumber(Request $request){
+        
+            $sourcetype = $request->sourcetype;
+            $firstThreeCharacters = Str::substr($sourcetype, 0, 3);
+            $today = now()->format('Ymd');
+            $lastCaseNumber = ComplaintOthers::where('source_type', $request->sourcetype_id)->latest()->value('case_number'); 
+            if($lastCaseNumber == ''){
+                
+                $caseNumber = $firstThreeCharacters.'-'.$today.'-0001';
+                
+            }
+            else{
+                $lastNumberPart = (int)substr($lastCaseNumber, -4);
+                $nextNumberPart = $lastNumberPart + 1;     
+                $caseNumber = $firstThreeCharacters.'-'.$today.'-'.str_pad($nextNumberPart, 4, '0', STR_PAD_LEFT);           
+            }
+            return $caseNumber;
     }
 
 }

@@ -82,7 +82,7 @@
                                                 <div class="col-md-8">
                                                     <div class="form-group">
                                                         <label for="source_type">Case Number</label>
-                                                        <input type="text" value="{{ old('case_number') }}" class="form-control" name="case_number">
+                                                        <input type="text" id="case_number" readonly  class="form-control" name="case_number">
                                                         @error('case_number')
                                                         <div class="text-danger">{{ $message }}</div>
                                                         @enderror
@@ -140,19 +140,44 @@
         <!-- /row -->
     </div>
 
-{{-- <script>
+<script>
 $(document).ready(function(){
-    $('#sourcetype').on('change', function() {
-    var sourcetype = $(this).find('option:selected').text();
-    if(sourcetype == 'Cyber Domain'){
-        $('#sourcetypetext').val('Cyber Domain');
-       $('#cyberdomaindisplay').show();
+
+    function getCaseNumber(){
+    var source_type = $('#sourcetype').val();
+    if(source_type !== ''){
+
+        var sourcetype = $("#sourcetype option:selected").text();
+        if(sourcetype !==''){
+           $.ajax({
+                        url: '{{ route('get.casenumber') }}',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        type: 'POST',
+                        data: {
+                            sourcetype:sourcetype,sourcetype_id:source_type
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            $("#case_number").val(response);
+
+                        },
+                        error: function(xhr, status, error) {
+                            $editable.text(oldData);
+                            alert(response.message);
+                        }
+                    });
+        }
+    }  
     }
-    else{
-        $('#cyberdomaindisplay').hide();
-    }
+    getCaseNumber();
+
+    $("#sourcetype").on('change',function(){
+        getCaseNumber();
+    })
+
 });
-});
-</script> --}}
+</script>
 
 @endsection

@@ -368,17 +368,11 @@
         });
     </script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function(){
             var table = $('#example').DataTable({
                 processing: true,
                 serverSide: true,
 
-                buttons: [
-                    'copyHtml5',
-                    'excelHtml5',
-                    'csvHtml5',
-                    'pdfHtml5'
-                ],
                 "ajax": {
                     "url": "{{ route('get.datalist') }}",
                     "data": function(d) {

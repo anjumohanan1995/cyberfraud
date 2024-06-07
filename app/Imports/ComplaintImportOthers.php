@@ -58,8 +58,9 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                 'registrar'=> $row[4],
                 'registry_details'=> $row[5],
                 'remarks'=> $row[6],
-                'ticket_number'=> $row[6],
-                'evidence_type' => $row[7],
+                'ticket_number'=> $row[7],
+                'evidence_type' => $row[8],
+                'source' => $row[9],
             ];
         });
 
@@ -82,6 +83,7 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
             $complaint->remarks = $collect['remarks'];
             $complaint->ticket_number = $collect['ticket_number'];
             $complaint->evidence_type = $collect['evidence_type'];
+            $complaint->source = $collect['source'];
             $complaint->filename = $this->filename;                 
             $complaint->save();
               
