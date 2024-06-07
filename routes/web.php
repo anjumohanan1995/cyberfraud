@@ -18,6 +18,7 @@ use App\Http\Controllers\SourceTypeController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\EvidenceTypeController;
 use App\Http\Controllers\ComplaintGraphController;
+use App\Http\Controllers\ProfessionController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -165,6 +166,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     Route::resource('evidencetype', EvidenceTypeController::class);
     Route::get('evidencetype-list/get', [EvidenceTypeController::class, 'getevidencetype'])->name("get.evidencetype");
+
+    Route::resource('profession', ProfessionController::class);
+    Route::get('profession-list/get', [ProfessionController::class, 'getprofession'])->name("get.profession");
 
 
 //evidence

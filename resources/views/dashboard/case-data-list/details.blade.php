@@ -191,10 +191,24 @@
                                                     <input type="number" min="1" class="form-control" name="age"
                                                         value="{{ @$additional->age }}">
                                                 </div>
-                                                <div class="form-group">
+                                                <div class="form-group" hidden>
                                                     <label for="profession">Profession</label>
                                                     <input type="text" class="form-control" name="profession"
                                                         value="{{ @$additional->profession }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="Profession">Profession:</label>
+                                                    <select class="form-control" id="Profession" name="Profession">
+                                                        <option value="">--select--</option>
+                                                        @foreach($professions as $Profession)
+                                                            <option value="{{ $Profession->id }}" {{ (isset($additional->profession) && $additional->profession == $Profession->id) ? 'selected' : '' }}>
+                                                                {{ $Profession->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('Profession')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
                                                 <input type="hidden" name="acknowledgement_no"
                                                     value="{{ @$complaint->acknowledgement_no }}">

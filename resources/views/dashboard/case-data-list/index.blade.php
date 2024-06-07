@@ -174,7 +174,7 @@
                                         <div class="form-group">
                                             <label for="search-by">Search by:</label>
                                             <select class="form-control" id="search-by" name="search-by" onchange="showTextBox()">
-                                                <option value="">--Select--</option>
+                                                <option>--Select--</option>
                                                 <option value="account_id">Account ID/Account Number/UPI ID</option>
                                                 <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
                                             </select>
@@ -190,6 +190,22 @@
                                         <div class="form-group">
                                             <label for="transaction-id">Enter Transaction ID/UTR/RRN Number:</label>
                                             <input type="text" class="form-control" id="transaction-id" name="transaction-id">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="sub-category">Sub category:</label>
+                                            <select class="form-control" id="sub-category" name="sub-category">
+                                                <option value="">--Select--</option>
+                                                <option value="#">Aadhar Enabled Payment System (AEPS)</option>
+                                                <option value="#">Business Email Compromise/Email Takeover</option>
+                                                <option value="#">Debit/Credit Card Fraud/Sim Swap Fraud</option>
+                                                <option value="#">Demat/Depository Fraud</option>
+                                                <option value="#">E-Wallet Related Fraud</option>
+                                                <option value="#">Fraud Call/Vishing</option>
+                                                <option value="#">Internet Banking Related Fraud</option>
+                                                <option value="#">UPI Related Frauds</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -211,16 +227,6 @@
                                             <label for="acknowledgement_no">Acknowledgement No: </label>
                                             <input type="text" class="form-control" id="acknowledgement_no"
                                                 name="acknowledgement_no">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3" hidden>
-                                        <div class="form-group">
-                                            <label for="sub-category">Sub category:</label>
-                                            <select class="form-control" id="sub-category" name="sub-category">
-                                                <option value="">--Select--</option>
-                                                <option value="#">Yes</option>
-                                                <option value="#">No</option>
-                                            </select>
                                         </div>
                                     </div>
 
@@ -508,7 +514,9 @@
         } else {
             document.getElementById("account-id-input").style.display = "none";
             document.getElementById("transaction-id-input").style.display = "none";
+            document.getElementById("account-id").value = "";
+            document.getElementById("transaction-id").value = "";
         }
     }
-    </script>
+</script>
 @endsection

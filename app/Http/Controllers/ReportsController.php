@@ -9,6 +9,7 @@ use App\Models\Complaint;
 use App\Models\BankCasedata;
 use App\Models\ComplaintOthers;
 use App\Models\EvidenceType;
+use App\Models\Evidence;
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Crypt;
@@ -49,6 +50,9 @@ class ReportsController extends Controller
         $current_date = $request->get('current_date');
         // dd($current_date);
         $bank_action_status = $request->get('bank_action_status');
+        $evidence_type_ncrp = $request->get('evidence_type_ncrp');
+        $search_value_ncrp = $request->get('search_value_ncrp');
+        // dd($search_value_ncrp);
         $normalizedBankActionStatus = strtolower(trim($bank_action_status));
         $normalizedBankActionStatus = preg_replace('/\s+/', '', $normalizedBankActionStatus);
 
@@ -137,9 +141,31 @@ if ($normalizedBankActionStatus) {
     $totalRecordswithFilter = $totalRecords;
 }
 
-// dd($acknowledgementNos);
+if ($evidence_type_ncrp && $search_value_ncrp){
+    $filtered_ack_nos = Evidence::where('evidence_type_id', $evidence_type_ncrp)
+        ->where('url', $search_value_ncrp)
+        ->pluck('ack_no');
 
+        // dd($filtered_ack_nos );
 
+    // Initialize total records count
+    $totalRecordswithFilter = 0;
+
+    // Loop through each acknowledgment number
+    foreach ($filtered_ack_nos as $ackNumber) {
+        // Apply the filter to the total record query
+        $totalRecordQuery->whereIn('acknowledgement_no', [(int)$ackNumber]);
+
+        // Apply the same filter to the items query
+        $items->whereIn('acknowledgement_no', [(int)$ackNumber]);
+
+        // Calculate the total records count with the applied filters
+        $totalRecords = Complaint::whereIn('acknowledgement_no', [(int)$ackNumber])->count();
+
+        // Increment total records count
+        $totalRecordswithFilter += $totalRecords;
+    }
+}
 
 
         // Apply search filter
@@ -164,6 +190,8 @@ if ($normalizedBankActionStatus) {
         }
 
         $records = $items->skip($start)->take($rowperpage)->get();
+
+        // dd($records);
 
         $data_arr = [];
         $acknowledgementNumbers = [];
@@ -313,7 +341,9 @@ if ($normalizedBankActionStatus) {
         $fromDate = $request->get('from_date');
         $toDate = $request->get('to_date');
         $current_value = $request->get('current_value');
-        // dd($current_value);
+        $evidence_type_others = $request->get('evidence_type_others');
+        $search_value_others = $request->get('search_value_others');
+        // dd($search_value_others);
 
         $complaints = ComplaintOthers::raw(function ($collection) use ($start, $rowperpage, $current_value, $fromDate, $toDate) {
             $pipeline = [
@@ -369,6 +399,35 @@ if ($normalizedBankActionStatus) {
                     ]
                 ], $pipeline);
             }
+
+            // if ($evidence_type_others && $search_value_others) {
+            //     $pipeline[] = [
+            //         '$lookup' => [
+            //             'from' => 'evidences',
+            //             'localField' => 'acknowledgement_no',
+            //             'foreignField' => 'ack_no',
+            //             'as' => 'matched_evidence'
+            //         ]
+            //     ];
+
+            //     $pipeline[] = [
+            //         '$match' => [
+            //             'matched_evidence' => [
+            //                 '$elemMatch' => [
+            //                     'evidence_type_id' => $evidence_type_others,
+            //                     'url' => $search_value_others
+            //                 ]
+            //             ]
+            //         ]
+            //     ];
+            // }
+
+            // $pipeline[] = [
+            //     '$group' => [
+            //         '_id' => null,
+            //         'totalRecords' => ['$sum' => 1]
+            //     ]
+            // ];
 
             return $collection->aggregate($pipeline);
         });

@@ -119,23 +119,17 @@
 
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
-                                                                            <label for="evidence_type">Evidence Type:</label>
-                                                                            <select class="form-control" id="evidence_type" name="evidence_type">
+                                                                            <label for="evidence_type_ncrp">Evidence Type:</label>
+                                                                            <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp" onchange="showTextBox('evidence_type_ncrp')">
                                                                                 <option value="">--select--</option>
                                                                                 @foreach($evidenceTypes as $evidenceType)
                                                                                     <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
                                                                                 @endforeach
                                                                             </select>
-                                                                            @error('evidence_type')
+                                                                            <div id="searchBoxContainer_evidence_type_ncrp"></div>
+                                                                            @error('evidence_type_ncrp')
                                                                                 <div class="text-danger">{{ $message }}</div>
                                                                             @enderror
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2">
-                                                                        <div class="form-group">
-                                                                            <label for="options">urls:</label>
-                                                                            <select class="form-control" id="options"></select>
-                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -196,23 +190,17 @@
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
-                                                                            <label for="evidence_type">Evidence Type:</label>
-                                                                            <select class="form-control" id="evidence_type" name="evidence_type">
+                                                                            <label for="evidence_type_others">Evidence Type:</label>
+                                                                            <select class="form-control" id="evidence_type_others" name="evidence_type_others" onchange="showTextBox('evidence_type_others')">
                                                                                 <option value="">--select--</option>
                                                                                 @foreach($evidenceTypes as $evidenceType)
                                                                                     <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
                                                                                 @endforeach
                                                                             </select>
-                                                                            @error('evidence_type')
+                                                                            <div id="searchBoxContainer_evidence_type_others"></div>
+                                                                            @error('evidence_type_others')
                                                                                 <div class="text-danger">{{ $message }}</div>
                                                                             @enderror
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2">
-                                                                        <div class="form-group">
-                                                                            <label for="options">urls:</label>
-                                                                            <select class="form-control" id="options"></select>
-                                                                            </select>
                                                                         </div>
                                                                     </div>
 
@@ -317,6 +305,8 @@ $(document).ready(function() {
                     to_date: $('#to-date-new').val(),
                     current_date: $('#current_date').val(),
                     bank_action_status: $('#bank_action_status').val(),
+                    evidence_type_ncrp: window['evidence_type_ncrp_selectedValue'] || '',
+                    search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
                 });
             }
         },
@@ -358,6 +348,8 @@ $(document).ready(function() {
                     from_date: $('#from-date-others').val(),
                     to_date: $('#to-date-others').val(),
                     current_value: $('#current_value').val(),
+                    evidence_type_others: window['evidence_type_others_selectedValue'] || '',
+                    search_value_others: window['evidence_type_others_searchValue'] || ''
                 });
             }
         },
@@ -400,5 +392,45 @@ $(document).ready(function() {
 });
 
 </script>
+<script>
+    function showTextBox(selectId) {
+        // Get the selected option value
+        var selectedValue = document.getElementById(selectId).value;
+
+        // Hide any previously displayed search boxes
+        var allSearchBoxes = document.querySelectorAll('[id^="searchBox_"]');
+        allSearchBoxes.forEach(function(box) {
+            box.style.display = "none";
+        });
+
+        // If the selected value is empty, do not show any search box and clear the search values
+        if (selectedValue === "") {
+            window[selectId + '_searchValue'] = '';
+            window[selectId + '_selectedValue'] = '';
+            return;
+        }
+
+        // Check if a search box already exists for this dropdown
+        var existingSearchBox = document.getElementById("searchBox_" + selectId + "_" + selectedValue);
+        if (existingSearchBox) {
+            // If a search box exists, show it
+            existingSearchBox.style.display = "block";
+        } else {
+            // If a search box doesn't exist, create and append a new one
+            var searchBoxContainer = document.getElementById("searchBoxContainer_" + selectId);
+            var newSearchBox = document.createElement("div");
+            newSearchBox.id = "searchBox_" + selectId + "_" + selectedValue;
+            newSearchBox.innerHTML = '<input type="text" class="form-control" placeholder="Search..." oninput="setSearchValue(\'' + selectId + '\', \'' + selectedValue + '\', this.value)">';
+            searchBoxContainer.appendChild(newSearchBox);
+        }
+    }
+
+    function setSearchValue(selectId, selectedValue, searchValue) {
+        window[selectId + '_searchValue'] = searchValue;
+        window[selectId + '_selectedValue'] = selectedValue;
+    }
+</script>
+
+
 
 @endsection
