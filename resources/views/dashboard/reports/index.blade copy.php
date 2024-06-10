@@ -119,17 +119,23 @@
 
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
-                                                                            <label for="evidence_type_ncrp">Evidence Type:</label>
-                                                                            <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp" onchange="showTextBox('evidence_type_ncrp')">
+                                                                            <label for="evidence_type">Evidence Type:</label>
+                                                                            <select class="form-control" id="evidence_type" name="evidence_type">
                                                                                 <option value="">--select--</option>
                                                                                 @foreach($evidenceTypes as $evidenceType)
                                                                                     <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
                                                                                 @endforeach
                                                                             </select>
-                                                                            <div id="searchBoxContainer_evidence_type_ncrp"></div>
-                                                                            @error('evidence_type_ncrp')
+                                                                            @error('evidence_type')
                                                                                 <div class="text-danger">{{ $message }}</div>
                                                                             @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <div class="form-group">
+                                                                            <label for="options">urls:</label>
+                                                                            <select class="form-control" id="options"></select>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -190,17 +196,23 @@
                                                                     </div>
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
-                                                                            <label for="evidence_type_others">Evidence Type:</label>
-                                                                            <select class="form-control" id="evidence_type_others" name="evidence_type_others" onchange="showTextBox('evidence_type_others')">
+                                                                            <label for="evidence_type">Evidence Type:</label>
+                                                                            <select class="form-control" id="evidence_type" name="evidence_type">
                                                                                 <option value="">--select--</option>
                                                                                 @foreach($evidenceTypes as $evidenceType)
                                                                                     <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
                                                                                 @endforeach
                                                                             </select>
-                                                                            <div id="searchBoxContainer_evidence_type_others"></div>
-                                                                            @error('evidence_type_others')
+                                                                            @error('evidence_type')
                                                                                 <div class="text-danger">{{ $message }}</div>
                                                                             @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <div class="form-group">
+                                                                            <label for="options">urls:</label>
+                                                                            <select class="form-control" id="options"></select>
+                                                                            </select>
                                                                         </div>
                                                                     </div>
 
@@ -212,7 +224,7 @@
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
-                                                                <table id="example1" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped" style="width:100%">
+                                                                <table id="example1" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                                                     <thead>
                                                                         <tr>
                                                                             <th>SL No</th>
@@ -289,12 +301,14 @@ $(document).ready(function() {
     var tableNew = $('#example').DataTable({
         processing: true,
         serverSide: true,
-        layout: {
-                topStart: {
-                buttons: [ 'csv', 'excel','print']
-                }
-                },
-       
+        dom: 'Blfrtip',
+        buttons: [
+            'excelHtml5',
+            'csvHtml5',
+            'print'
+        ],
+        pagingType: 'full',
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
         ajax: {
             url: "{{ route('get.datalist.ncrp') }}",
             data: function(d) {
@@ -303,8 +317,6 @@ $(document).ready(function() {
                     to_date: $('#to-date-new').val(),
                     current_date: $('#current_date').val(),
                     bank_action_status: $('#bank_action_status').val(),
-                    evidence_type_ncrp: window['evidence_type_ncrp_selectedValue'] || '',
-                    search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
                 });
             }
         },
@@ -331,12 +343,14 @@ $(document).ready(function() {
     var tableReturned = $('#example1').DataTable({
         processing: true,
         serverSide: true,
-        layout: {
-                topStart: {
-                buttons: [ 'csv', 'excel','print']
-                }
-                },
-     
+        dom: 'Blfrtip',
+        buttons: [
+            'excelHtml5',
+            'csvHtml5',
+            'print'
+        ],
+        pagingType: 'full',
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
         ajax: {
             url: "{{ route('get.datalist.othersourcetype') }}",
             data: function(d) {
@@ -344,8 +358,6 @@ $(document).ready(function() {
                     from_date: $('#from-date-others').val(),
                     to_date: $('#to-date-others').val(),
                     current_value: $('#current_value').val(),
-                    evidence_type_others: window['evidence_type_others_selectedValue'] || '',
-                    search_value_others: window['evidence_type_others_searchValue'] || ''
                 });
             }
         },
@@ -388,45 +400,5 @@ $(document).ready(function() {
 });
 
 </script>
-<script>
-    function showTextBox(selectId) {
-        // Get the selected option value
-        var selectedValue = document.getElementById(selectId).value;
-
-        // Hide any previously displayed search boxes
-        var allSearchBoxes = document.querySelectorAll('[id^="searchBox_"]');
-        allSearchBoxes.forEach(function(box) {
-            box.style.display = "none";
-        });
-
-        // If the selected value is empty, do not show any search box and clear the search values
-        if (selectedValue === "") {
-            window[selectId + '_searchValue'] = '';
-            window[selectId + '_selectedValue'] = '';
-            return;
-        }
-
-        // Check if a search box already exists for this dropdown
-        var existingSearchBox = document.getElementById("searchBox_" + selectId + "_" + selectedValue);
-        if (existingSearchBox) {
-            // If a search box exists, show it
-            existingSearchBox.style.display = "block";
-        } else {
-            // If a search box doesn't exist, create and append a new one
-            var searchBoxContainer = document.getElementById("searchBoxContainer_" + selectId);
-            var newSearchBox = document.createElement("div");
-            newSearchBox.id = "searchBox_" + selectId + "_" + selectedValue;
-            newSearchBox.innerHTML = '<input type="text" class="form-control" placeholder="Search..." oninput="setSearchValue(\'' + selectId + '\', \'' + selectedValue + '\', this.value)">';
-            searchBoxContainer.appendChild(newSearchBox);
-        }
-    }
-
-    function setSearchValue(selectId, selectedValue, searchValue) {
-        window[selectId + '_searchValue'] = searchValue;
-        window[selectId + '_selectedValue'] = selectedValue;
-    }
-</script>
-
-
 
 @endsection

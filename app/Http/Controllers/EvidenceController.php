@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Evidence;
+use App\Models\EvidenceType;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
@@ -14,7 +15,15 @@ class EvidenceController extends Controller
     public function create($case_id)
     {
 
-        return view('dashboard.bank-case-data.evidence.create', compact('case_id'));
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->get();
+        // Loop through each EvidenceType and print the name field
+// foreach ($evidenceTypes as $evidenceType) {
+//     dd($evidenceType->name);
+// }
+
+        return view('dashboard.bank-case-data.evidence.create', compact('case_id','evidenceTypes'));
     }
 
 
@@ -31,6 +40,7 @@ class EvidenceController extends Controller
             //dd($request->all());
              $validator = Validator::make($request->all(), [
         'evidence_type.*' => 'required',
+        'evidence_type_id.*' => 'required',
         'url.*' => 'required|url',
         'domain.*' => 'nullable|string',
         'registry_details.*' => 'nullable|string',
@@ -69,6 +79,7 @@ class EvidenceController extends Controller
             foreach ($request->evidence_type as $key => $type) {
                 $evidence = new Evidence();
                 $evidence->evidence_type = $type;
+                $evidence->evidence_type_id = $request->evidence_type_id[$key];
                 if($request->hasFile('pdf'))
                 {
                 $pdf = $request->file('pdf');

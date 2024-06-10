@@ -12,10 +12,10 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Source Type Management</a>
+                            <a href="#">Profession Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Source Type
+                            Profession
                         </li>
                     </ol>
                 </nav>
@@ -52,43 +52,16 @@
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    All Source Types
+                                    All Professions
                                 </h4>
-                                <div class="col-md-3"></div>
-                                <div class="col-md-2 text-center">
+                                <div class="col-md-1 col-6 text-center">
                                     <div class="task-box primary  mb-0">
-                                        <a class="text-white" href="{{ route('sourcetype.create') }}">
-                                            <p class="mb-0 tx-12 "> Source Type </p>
+                                        <a class="text-white" href="{{ route('profession.create') }}">
+                                            <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
                                     </div>
                                 </div>
-                                <div class="col-md-2 col-6 text-center">
-                                    <div class="task-box primary  mb-0">
-                                        <a class="text-white" href="{{ route('category.index') }}">
-                                            <p class="mb-0 tx-12">Category</p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                        </a>
-                                    </div>
-                                    
-                                </div>
-                                <div class="col-md-2 col-6 text-center">
-                                    <div class="task-box primary  mb-0">
-                                        <a class="text-white" href="{{ route('subcategory.index') }}">
-                                            <p class="mb-0 tx-12">SubCategory</p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                        </a>
-                                    </div>
-                                </div>
-                              
-                                    <div class="col-md-2 text-center">
-                                        <div class="task-box primary  mb-0">
-                                            <a class="text-white" href="{{ url('profession') }}">
-                                                <p class="mb-0 tx-12 "> Profession </p>
-                                                <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                            </a>
-                                        </div>
-                                    </div>
                             </div>
 
                             <div class="table-responsive mb-0">
@@ -129,7 +102,7 @@
 	        ],
              "ajax": {
 
-			       	"url": "{{ route('get.sourcetype') }}",
+			       	"url": "{{ route('get.profession') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
 
@@ -151,7 +124,7 @@
         var Id = $(this).data('id');
         if (confirm('Are you sure you want to delete this item?')) {
             $.ajax({
-                url: '/sourcetype/' + Id,
+                url: '/profession/' + Id,
                 type: 'POST', // Use POST method
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

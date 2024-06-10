@@ -1,10 +1,7 @@
 @extends('layouts.app')
-@php
-    use Illuminate\Support\Facades\Crypt as CryptFacade;
-    $id = request()->segment(count(request()->segments()));
-    $new_id = CryptFacade::decrypt($id);
-@endphp
-
+@php use Illuminate\Support\Facades\Crypt;
+           $id = request()->segment(count(request()->segments()));
+        $new_id = Crypt::decrypt($id); @endphp
 {{-- @dd($id); --}}
 @section('content')
     <!-- container -->
@@ -23,12 +20,6 @@
 </style>
 
     </style>
-    @php
-    use Illuminate\Support\Facades\Crypt;
-    $id = request()->segment(count(request()->segments()));
-    $new_id = Crypt::decrypt($id);
-@endphp
-
     <div class="container-fluid">
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
@@ -84,28 +75,53 @@
                             <div class="table-responsive mb-0">
                                 <form id="evidenceForm" action="{{ route('evidence.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
+                                    <!-- Hidden field to store acknowledgement number -->
                                     <input type="hidden" name="acknowledgement_number" value="{{ $new_id }}">
 
                                     <div id="evidence_fields">
                                         @foreach (old('evidence_type', ['']) as $index => $oldEvidenceType)
                                             <div class="evidence-fields">
-                                                <div class="form-group ev-type">
-                                                    <label for="evidence_type_{{ $index }}">Evidence type:</label>
-                                                    <select class="form-control evidence_type" name="evidence_type[]" required>
-                                                        <option value="">Select Option</option>
-                                                        @foreach($evidenceTypes as $evidenceType)
-                                                            <option value="{{ $evidenceType->name }}" {{ $oldEvidenceType == $evidenceType->name ? 'selected' : '' }} data-id="{{ $evidenceType->id }}">
-                                                                {{ $evidenceType->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <input type="hidden" name="evidence_type_id[]" class="evidence_type_id" value="">
-                                                    @error('evidence_type.' . $index)
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group ev-type">
+                                                            <label for="evidence_type_{{ $index }}">Evidence type:</label>
+                                                            <select class="form-control evidence_type" name="evidence_type[]" required>
+                                                                <option value="">Select Option</option>
+                                                                @foreach($evidenceTypes as $evidenceType)
+                                                                    <option value="{{ $evidenceType->name }}" {{ $oldEvidenceType == $evidenceType->name ? 'selected' : '' }}>
+                                                                        {{ $evidenceType->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            <a class="text-danger remove-btn" style="display: none;"><i class="fas fa-trash-alt"></i></a>
+                                                            @error('evidence_type.' . $index)
+                                                                <span class="text-danger">{{ $message }}</span>
+                                                            @enderror
+                                                        </div>
+                                                        {{-- <div class="form-group ev-type" hidden>
+                                                            <label for="evidence_type_{{ $index }}">Evidence type:</label>
+                                                            <select class="form-control evidence_type" name="evidence_type[]" required>
+                                                                <option value="">Select Option</option>
+                                                                <option value="website" {{ $oldEvidenceType == 'website' ? 'selected' : '' }}>Website</option>
+                                                                <option value="instagram" {{ $oldEvidenceType == 'instagram' ? 'selected' : '' }}>Instagram</option>
+                                                                <option value="telegram" {{ $oldEvidenceType == 'telegram' ? 'selected' : '' }}>Telegram</option>
+                                                                <option value="facebook" {{ $oldEvidenceType == 'facebook' ? 'selected' : '' }}>Facebook</option>
+                                                                <option value="linkedin" {{ $oldEvidenceType == 'linkedin' ? 'selected' : '' }}>LinkedIn</option>
+                                                                <option value="skype" {{ $oldEvidenceType == 'skype' ? 'selected' : '' }}>Skype</option>
+                                                                <option value="gmail" {{ $oldEvidenceType == 'gmail' ? 'selected' : '' }}>Gmail</option>
+                                                                <option value="youtube" {{ $oldEvidenceType == 'youtube' ? 'selected' : '' }}>Youtube</option>
+                                                                <option value="mobile numbers" {{ $oldEvidenceType == 'mobile numbers' ? 'selected' : '' }}>Mobile Numbers</option>
+                                                                <option value="olx ad" {{ $oldEvidenceType == 'olx ad' ? 'selected' : '' }}>OLX Ad</option>
+                                                                <option value="twitter" {{ $oldEvidenceType == 'twitter' ? 'selected' : '' }}>Twitter</option>
+                                                                <option value="other" {{ $oldEvidenceType == 'other' ? 'selected' : '' }}>Other</option>
+                                                            </select>
+                                                            <a class="text-danger remove-btn" style="display: none;"><i class="fas fa-trash-alt"></i></a>
+                                                            @error('evidence_type.' . $index)
+                                                                <span class="text-danger">{{ $message }}</span>
+                                                            @enderror
+                                                        </div> --}}
+                                                    </div>
                                                 </div>
-
-                                                <!-- Dynamic fields will be inserted here -->
                                                 <div class="dynamicFields">
                                                     @if ($oldEvidenceType == 'website')
                                                         <div class="row">
@@ -275,9 +291,8 @@
                                                         </div>
                                                     @endif
                                                 </div>
-
-                                                <button type="button" class="btn btn-danger remove-btn" style="display: none;">Remove</button>
                                             </div>
+
                                         @endforeach
                                     </div>
 
@@ -309,49 +324,47 @@
                 return null;
             }
         }
+    </script>
 
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Add event listener for the "Add More" button
             document.getElementById('addMore').addEventListener('click', function() {
-                var evidenceFields = document.getElementById('evidence_fields');
-                var evidenceTemplate = document.querySelector('.evidence-fields').cloneNode(true);
+    var evidenceFields = document.getElementById('evidence_fields');
+    var evidenceTemplate = document.querySelector('.evidence-fields').cloneNode(true);
 
-                // Clear previous selected values and input fields
-                var selects = evidenceTemplate.querySelectorAll('.evidence_type');
-                selects.forEach(function(select) {
-                    select.selectedIndex = 0;
-                });
+    // Clear previous selected values and input fields
+    var selects = evidenceTemplate.querySelectorAll('.evidence_type');
+    selects.forEach(function(select) {
+        select.selectedIndex = 0;
+    });
 
-                var inputs = evidenceTemplate.querySelectorAll('input, textarea');
-                inputs.forEach(function(input) {
-                    input.value = '';
-                });
+    var inputs = evidenceTemplate.querySelectorAll('input, textarea');
+    inputs.forEach(function(input) {
+        input.value = '';
+    });
 
-                var dynamicFields = evidenceTemplate.querySelector('.dynamicFields');
-                dynamicFields.innerHTML = '';
+    var dynamicFields = evidenceTemplate.querySelector('.dynamicFields');
+    dynamicFields.innerHTML = '';
 
-                // Show the remove button for the newly added field
-                var removeButton = evidenceTemplate.querySelector('.remove-btn');
-                removeButton.style.display = 'inline-block';
-                removeButton.addEventListener('click', function() {
-                    evidenceTemplate.remove();
-                });
+    // Show the remove button for the newly added field
+    var removeButton = evidenceTemplate.querySelector('.remove-btn');
+    removeButton.style.display = 'inline-block';
+    removeButton.addEventListener('click', function() {
+        evidenceTemplate.remove();
+    });
 
-                evidenceFields.appendChild(evidenceTemplate);
-            });
+    evidenceFields.appendChild(evidenceTemplate);
+});
+
 
             // Event delegation to handle change events for dynamically added select elements
             document.getElementById('evidence_fields').addEventListener('change', function(event) {
                 var target = event.target;
                 if (target && target.classList.contains('evidence_type')) {
                     var option = target.value;
+                    console.log(option);
                     var dynamicFields = target.closest('.evidence-fields').querySelector('.dynamicFields');
-                    var hiddenInput = target.closest('.evidence-fields').querySelector('.evidence_type_id');
-                    var selectedOption = target.options[target.selectedIndex];
-
-                    // Set the hidden input value based on the selected option's data-id attribute
-                    hiddenInput.value = selectedOption.getAttribute('data-id');
-
                     dynamicFields.innerHTML = ''; // Clear previous fields
 
                     if (option !== "") {
@@ -363,7 +376,7 @@
                                             <div class="form-group">
                                                 <label for="url">URL:</label>
                                                 <input type="text" name="url[]" class="form-control" placeholder="Enter URL" oninput="extractDomain(this)">
-                                            </div>
+                                                </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -407,24 +420,26 @@
                                                 <textarea name="remarks[]" cols="30" rows="5" class="form-control"></textarea>
                                             </div>
                                         </div>
+
                                         <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="category">Category:</label>
-                                                <select class="form-control category" name="category[]">
-                                                    <option value="">Select Option</option>
-                                                    <option value="phishing">Phishing</option>
-                                                    <option value="malware">Malware</option>
-                                                    <option value="fraud">Fraud</option>
-                                                    <option value="other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="ticket">Ticket No:</label>
-                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
-                                            </div>
-                                        </div>
+                                                                <div class="form-group">
+                                                                    <label for="category">Category:</label>
+                                                                    <select class="form-control category" name="category[]">
+                                                                        <option value="">Select Option</option>
+                                                                        <option value="phishing">Phishing</option>
+                                                                        <option value="malware">Malware</option>
+                                                                        <option value="fraud">Fraud</option>
+                                                                        <option value="other">Other</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket">Ticket No:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
+                                                                    </div>
+                                                            </div>
+
                                     </div>
                                 `;
                                 break;
@@ -445,7 +460,8 @@
                                             <div class="form-group">
                                                 <label for="url">URL:</label>
                                                 <input type="text" name="url[]" class="form-control" placeholder="Enter URL" >
-                                            </div>
+
+                                                </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -466,23 +482,23 @@
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="category">Category:</label>
-                                                <select class="form-control category" name="category[]">
-                                                    <option value="">Select Option</option>
-                                                    <option value="phishing">Phishing</option>
-                                                    <option value="malware">Malware</option>
-                                                    <option value="fraud">Fraud</option>
-                                                    <option value="other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="ticket">Ticket No:</label>
-                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
-                                            </div>
-                                        </div>
+                                                                <div class="form-group">
+                                                                    <label for="category">Category:</label>
+                                                                    <select class="form-control category" name="category[]">
+                                                                        <option value="">Select Option</option>
+                                                                        <option value="phishing">Phishing</option>
+                                                                        <option value="malware">Malware</option>
+                                                                        <option value="fraud">Fraud</option>
+                                                                        <option value="other">Other</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket">Ticket No:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
+                                                                    </div>
+                                                            </div>
                                     </div>
                                 `;
                                 break;
@@ -492,5 +508,4 @@
             });
         });
     </script>
-
 @endsection

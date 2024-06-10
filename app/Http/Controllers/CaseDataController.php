@@ -11,6 +11,7 @@ use App\Models\Fir;
 use App\Models\Wallet;
 use App\Models\Merchant;
 use App\Models\Insurance;
+use App\Models\Profession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -518,8 +519,12 @@ if ($filled_by_who) {
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
+
+        $professions = Profession::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->get();
        // dd($id);
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional'));
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions'));
     }
 
 
