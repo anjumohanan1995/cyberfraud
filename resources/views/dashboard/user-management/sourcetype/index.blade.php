@@ -74,7 +74,7 @@
                                 </div>
                                 <div class="col-md-2 col-6 text-center">
                                     <div class="task-box primary  mb-0">
-                                        <a class="text-white" href="{{ route('subcategory.index') }}">
+                                        <a class="text-white" href="{{ route('subcategory.create') }}">
                                             <p class="mb-0 tx-12">SubCategory</p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
