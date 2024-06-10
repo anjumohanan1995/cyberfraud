@@ -19,6 +19,8 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\EvidenceTypeController;
 use App\Http\Controllers\ComplaintGraphController;
 use App\Http\Controllers\NoticeController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SubCategoryController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -190,6 +192,16 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
     Route::get('evidence-list-notice', [NoticeController::class,'evidenceListNotice'])->name('get_evidence_list_notice');
 
+    // category module
+    Route::resource('category', CategoryController::class);
+    Route::get('get-categories', [CategoryController::class,'getCategories'])->name('get.categories');
+    Route::post('add-category', [CategoryController::class,'addCategory'])->name('add.category');
+
+    //Sub CAtegory module
+
+    Route::resource('subcategory', SubCategoryController::class);
+    Route::get('get-subcategories', [SubCategoryController::class,'getSubCategories'])->name('get.subcategories');
+    Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory');
 
 
 });

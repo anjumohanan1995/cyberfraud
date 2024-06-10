@@ -218,11 +218,14 @@
                     </li>
 
                 </ul>
+                
+            </li>
+            <li>
                 <a class="side-menu__item" href="{{ url('reports') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Reports</span>
                 </a>
-            </li>
+                </li>
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('evidencetype') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
