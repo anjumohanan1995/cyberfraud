@@ -96,11 +96,12 @@
                                     <label for="password">Password</label>
                                     <input id="password" name="password" class="form-control"
                                         placeholder="Enter your password" type="password">
+                                        <div class="password" style="color:red;font-size:smaller" ></div>
                                     @error('password')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <button class="btn btn-main-primary btn-block">Sign In</button>
+                                <button onclick="validateForm()" class="btn btn-main-primary btn-block">Sign In</button>
                             </form>
 
 
@@ -115,6 +116,34 @@
         </div>
     </div>
 
+<script>
+
+function checkPassword(password){
+           
+        var specialCharPattern = /[@#$%]/;
+        var uppercasePattern = /[A-Z]/;
+        var numberPattern = /[0-9]/;
+
+        return specialCharPattern.test(password) && 
+                uppercasePattern.test(password) && 
+                numberPattern.test(password);
+
+}
+
+function validateForm() {
+
+    var password = document.getElementById("password").value;
+
+    if (!checkPassword(password)) {
+        var passwordError = document.querySelector(".password");
+        passwordError.innerHTML = "Password is invalid";
+        return false; 
+    }
+ 
+    return true;
+}
+
+</script>
 </body>
 
 </html>
