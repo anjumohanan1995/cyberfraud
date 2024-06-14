@@ -82,21 +82,19 @@
 
                             <h4><br>Please sign in to continue</h4>
 
-                            <form action="{{ route('login') }}" method="POST">
+                            <form action="{{ route('login') }}" method="POST" onsubmit="return validateForm()">
                                 @csrf
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    <input id="email" name="email" class="form-control"
-                                        placeholder="Enter your email" type="email">
+                                    <input id="email" name="email" class="form-control" placeholder="Enter your email" type="email">
                                     @error('email')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input id="password" name="password" class="form-control"
-                                        placeholder="Enter your password" type="password">
-                                        <div class="password" style="color:red;font-size:smaller" ></div>
+                                    <input id="password" name="password" class="form-control" placeholder="Enter your password" type="password">
+                                    <span class="text-danger password"></span> <!-- Error message for password -->
                                     @error('password')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -116,34 +114,37 @@
         </div>
     </div>
 
-<script>
 
-function checkPassword(password){
-           
-        var specialCharPattern = /[@#$%]/;
+</body>
+
+
+<script>
+    function checkPassword(password) {
+        // Regular expressions for special characters, uppercase letters, lowercase letters, and numbers
+        var specialCharPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
         var uppercasePattern = /[A-Z]/;
+        var lowercasePattern = /[a-z]/;
         var numberPattern = /[0-9]/;
 
-        return specialCharPattern.test(password) && 
-                uppercasePattern.test(password) && 
-                numberPattern.test(password);
-
-}
-
-function validateForm() {
-
-    var password = document.getElementById("password").value;
-
-    if (!checkPassword(password)) {
-        var passwordError = document.querySelector(".password");
-        passwordError.innerHTML = "Password is invalid";
-        return false; 
+        // Check if the password meets all criteria
+        return specialCharPattern.test(password) &&
+            uppercasePattern.test(password) &&
+            lowercasePattern.test(password) &&
+            numberPattern.test(password);
     }
- 
-    return true;
-}
 
+    function validateForm() {
+        var password = document.getElementById("password").value;
+
+        if (!checkPassword(password)) {
+            var passwordError = document.querySelector(".password");
+            passwordError.innerHTML = "Password must contain:<br>- At least one special character<br>- One uppercase letter<br>- One lowercase letter<br>- One number.";
+            return false;
+        }
+
+        return true;
+    }
 </script>
-</body>
+
 
 </html>

@@ -78,47 +78,47 @@ class EvidenceController extends Controller
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
-            //dd($request);
+            // dd($request);
             foreach ($request->evidence_type as $key => $type) {
                 $evidence = new Evidence();
                 $evidence->evidence_type = $type;
                 $evidence->evidence_type_id = $request->evidence_type_id[$key];
-                if($request->hasFile('pdf'))
-                {
-                $pdf = $request->file('pdf');
-                foreach($pdf as $pd){
-                    foreach ($request->pdf as $keyss => $pdfs) {
-                        $pdfName = $pdfs->getClientOriginalName();
-                        $pdfCollection[$keyss] = $pdfs->storeAs('public/pdf', $pdfName);
-                    }
-                }
-                }
-            if (!empty($pdfCollection)) {
-                $pdfPathsString = implode(',', $pdfCollection);
-            }
 
-            if($request->hasFile('screenshots'))
-                {
-                $screenshots = $request->file('screenshots');
-                foreach($screenshots as $screenshot){
-                    foreach ($request->screenshots as $keys => $screensho) {
-                        $screenshotName = $screensho->getClientOriginalName();
-                        $screenshotCollection[$keys] = $screensho->storeAs('public/pdf', $screenshotName);
-                    }
-                  //  echo "Upload Successfully";
+                // Initialize collections for each evidence type
+                $pdfCollection = [];
+                $screenshotCollection = [];
 
+                // Handle PDF files
+                if ($request->hasFile('pdf')) {
+                    $pdfCollection = [];
+                    foreach ($request->file('pdf') as $pdf) {
+                        $pdfName = uniqid() . '.' . $pdf->getClientOriginalExtension(); // Generate unique name
+                        $pdfCollection[] = $pdf->storeAs('public/pdf', $pdfName);
+                    }
+                    $pdfPathsString = implode(',', $pdfCollection);
+                    $evidence->pdf = $pdfPathsString;
                 }
+
+                // Handle Screenshots
+
+                if ($request->hasFile('screenshots')) {
+                    $screenshotCollection = [];
+                    foreach ($request->file('screenshots') as $screenshot) {
+                        $screenshotName = uniqid() . '.' . $screenshot->getClientOriginalExtension(); // Generate unique name
+                        $screenshotCollection[] = $screenshot->storeAs('public/screenshots', $screenshotName);
+                    }
+                    $screenshotPathsString = implode(',', $screenshotCollection);
+                    $evidence->screenshots = $screenshotPathsString;
                 }
-            if (!empty($screenshotCollection)) {
-                $screenshotPathsString = implode(',', $screenshotCollection);
-            }
-                $evidence->pdf = $pdfPathsString;;
-                $evidence->screenshots = $screenshotPathsString;
+
+
+                // Assign other data
                 $evidence->ack_no = $ack_no;
                 $evidence->ticket = $request->ticket[$key];
                 $evidence->category = $request->category[$key];
                 switch ($type) {
                     case 'website':
+                        // dd($evidence);
                         $evidence->url = $request->url[$key];
                         $evidence->domain = $request->domain[$key];
                         $evidence->registry_details = $request->registry_details[$key];
@@ -129,10 +129,14 @@ class EvidenceController extends Controller
                         $evidence->url = $request->url[$key];
                         break;
                 }
-
                 $evidence->remarks = $request->remarks[$key];
-                //dd($evidence);
+                // dd($evidence);
+
+                // Save evidence
                 $evidence->save();
+
+
+
             }
             return redirect()->route('evidence.index', ['acknowledgement_no' => $new_id])->with('success', 'Evidence added successfully!');
         } catch (\Exception $e) {

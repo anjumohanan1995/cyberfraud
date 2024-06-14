@@ -191,22 +191,22 @@
                                                     <input type="number" min="1" class="form-control" name="age"
                                                         value="{{ @$additional->age }}">
                                                 </div>
-                                                <div class="form-group" hidden>
+                                                {{-- <div class="form-group" hidden>
                                                     <label for="profession">Profession</label>
                                                     <input type="text" class="form-control" name="profession"
                                                         value="{{ @$additional->profession }}">
-                                                </div>
+                                                </div> --}}
                                                 <div class="form-group">
-                                                    <label for="Profession">Profession:</label>
-                                                    <select class="form-control" id="Profession" name="Profession">
+                                                    <label for="profession">Profession:</label>
+                                                    <select class="form-control" id="profession" name="profession">
                                                         <option value="">--select--</option>
-                                                        @foreach($professions as $Profession)
-                                                            <option value="{{ $Profession->id }}" {{ (isset($additional->profession) && $additional->profession == $Profession->id) ? 'selected' : '' }}>
-                                                                {{ $Profession->name }}
+                                                        @foreach($professions as $profession)
+                                                            <option value="{{ $profession->id }}" {{ (isset($additional->profession) && $additional->profession == $profession->id) ? 'selected' : '' }}>
+                                                                {{ $profession->name }}
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    @error('Profession')
+                                                    @error('profession')
                                                         <div class="text-danger">{{ $message }}</div>
                                                     @enderror
                                                 </div>

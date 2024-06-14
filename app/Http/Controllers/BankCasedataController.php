@@ -52,6 +52,9 @@ class BankCasedataController extends Controller
 
                     // Redirect back with validation errors and input data
                     return redirect()->back()->withErrors($errors)->withInput();
+                } else {
+                    // Handle other exceptions
+                    return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                 }
             }
         } else {

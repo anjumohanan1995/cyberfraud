@@ -96,7 +96,7 @@
                                                 <label for="source_type">Upload Excel:</label>
                                                 <input type="file" name="file" id="file" name="file">
                                                 @error('file')
-                                                    <div class="text-danger">{{ $message }}</div>
+                                                <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
 

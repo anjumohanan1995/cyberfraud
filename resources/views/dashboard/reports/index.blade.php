@@ -12,6 +12,36 @@
         border-bottom: 3px solid #3858f9;
         color: #3858f9; /* Optional: Change color when active */
     }
+
+/* Style DataTables buttons */
+.dt-buttons {
+    padding-left: 250px; /* Adjust padding */
+    padding-bottom: 10px;
+    margin-top:10px;
+    border-radius: 5px;
+}
+
+/* Style individual buttons */
+.dt-button {
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+    border-radius: 3px;
+    padding: 3px 8px; /* Adjust padding */
+    font-size: 5px; /* Adjust font size */
+}
+
+/* Style when button is hovered */
+.dt-button:hover {
+    background-color: #e0e0e0;
+}
+
+/* Style when button is active */
+.dt-button.active {
+    background-color: #ccc;
+}
+
 </style>
 <link rel="stylesheet" href="path_to_bootstrap_css">
 <link rel="stylesheet" href="path_to_font_awesome">
@@ -136,6 +166,10 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
+                                                                        <!-- CSV Download Button -->
+                                                                        <a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>
+                                                                        <!-- Excel Download Button -->
+                                                                        <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
                                                                     </div>
                                                                 </div>
                                                             </form>
@@ -155,6 +189,8 @@
                                                                             <th>Current Status</th>
                                                                             <th>Date of Action</th>
                                                                             <th>Action Taken By</th>
+                                                                            <th>Evidence Type</th>
+                                                                            <th>Url</th>
                                                                             <th>Action</th>
                                                                         </tr>
                                                                     </thead>
@@ -193,8 +229,8 @@
                                                                             <label for="evidence_type_others">Evidence Type:</label>
                                                                             <select class="form-control" id="evidence_type_others" name="evidence_type_others" onchange="showTextBox('evidence_type_others')">
                                                                                 <option value="">--select--</option>
-                                                                                @foreach($evidenceTypes as $evidenceType)
-                                                                                    <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
+                                                                                @foreach($lowercaseEvidences as $evidenceType)
+                                                                                    <option value="{{ $evidenceType }}">{{ $evidenceType }}</option>
                                                                                 @endforeach
                                                                             </select>
                                                                             <div id="searchBoxContainer_evidence_type_others"></div>
@@ -208,6 +244,10 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
+                                                                        <!-- CSV Download Button -->
+                                                                        <a href="#" class="btn btn-success" id="csvDownloadothers">Download CSV</a>
+                                                                        <!-- Excel Download Button -->
+                                                                        <a href="#" class="btn btn-info" id="excelDownloadothers">Download Excel</a>
                                                                     </div>
                                                                 </div>
                                                             </form>
@@ -218,6 +258,7 @@
                                                                             <th>SL No</th>
                                                                             <th>Source type</th>
                                                                             <th>Case Number</th>
+                                                                            <th>Evidence Type</th>
                                                                             <th>URL</th>
                                                                             <th>Domain</th>
                                                                             <th>IP</th>
@@ -284,113 +325,135 @@
     </script>
 
 <script>
-$(document).ready(function() {
-    // Initialize DataTable for #example
-    var tableNew = $('#example').DataTable({
-        processing: true,
-        serverSide: true,
-        layout: {
-                topStart: {
-                buttons: [ 'csv', 'excel','print']
+    $(document).ready(function() {
+        // Initialize DataTable for #example
+        var tableNew = $('#example').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('get.datalist.ncrp') }}",
+                data: function(d) {
+                    return $.extend({}, d, {
+                        format: 'ncrp', // Add format parameter
+                        from_date: $('#from-date-new').val(),
+                        to_date: $('#to-date-new').val(),
+                        current_date: $('#current_date').val(),
+                        bank_action_status: $('#bank_action_status').val(),
+                        evidence_type_ncrp: $('#evidence_type_ncrp').val(),
+                        search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
+                    });
                 }
-                },
-       
-        ajax: {
-            url: "{{ route('get.datalist.ncrp') }}",
-            data: function(d) {
-                return $.extend({}, d, {
-                    from_date: $('#from-date-new').val(),
-                    to_date: $('#to-date-new').val(),
-                    current_date: $('#current_date').val(),
-                    bank_action_status: $('#bank_action_status').val(),
-                    evidence_type_ncrp: window['evidence_type_ncrp_selectedValue'] || '',
-                    search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
-                });
-            }
-        },
-        columns: [
-            { data: 'id' },
-            { data: 'acknowledgement_no' },
-            { data: 'district' },
-            { data: 'complainant_name' },
-            { data: 'transaction_id' },
-            { data: 'bank_name' },
-            { data: 'account_id' },
-            { data: 'amount' },
-            { data: 'entry_date' },
-            { data: 'current_status' },
-            { data: 'date_of_action' },
-            { data: 'action_taken_by_name' },
-            { data: 'edit' }
-        ],
-        order: [0, 'desc'],
-        ordering: true
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'acknowledgement_no' },
+                { data: 'district' },
+                { data: 'complainant_name' },
+                { data: 'transaction_id' },
+                { data: 'bank_name' },
+                { data: 'account_id' },
+                { data: 'amount' },
+                { data: 'entry_date' },
+                { data: 'current_status' },
+                { data: 'date_of_action' },
+                { data: 'action_taken_by_name' },
+                { data: 'evidence_type' },
+                { data: 'url' },
+                { data: 'edit' }
+            ],
+            order: [0, 'desc'],
+            ordering: true
+        });
+
+ // Click event handler for Download buttons
+ $('#csvDownload, #excelDownload').on('click', function(e) {
+        e.preventDefault();
+        var format = $(this).attr('id') === 'csvDownload' ? 'csv' : 'excel'; // Determine format based on button clicked
+        var url = "{{ route('get.datalist.ncrp') }}" + '?format=' + format + '&' + $.param({
+            from_date: $('#from-date-new').val(),
+            to_date: $('#to-date-new').val(),
+            current_date: $('#current_date').val(),
+            bank_action_status: $('#bank_action_status').val(),
+            evidence_type_ncrp: $('#evidence_type_ncrp').val(),
+            search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
+        });
+        window.location.href = url;
     });
 
-    // Initialize DataTable for #example1
-    var tableReturned = $('#example1').DataTable({
-        processing: true,
-        serverSide: true,
-        layout: {
-                topStart: {
-                buttons: [ 'csv', 'excel','print']
+        // Initialize DataTable for #example1
+        var tableReturned = $('#example1').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('get.datalist.othersourcetype') }}",
+                data: function(d) {
+                    return $.extend({}, d, {
+                        format: 'others', // Add format parameter
+                        from_date: $('#from-date-others').val(),
+                        to_date: $('#to-date-others').val(),
+                        current_value: $('#current_value').val(),
+                        evidence_type_others: $('#evidence_type_others').val(),
+                        search_value_others: window['evidence_type_others_searchValue'] || ''
+                    });
                 }
-                },
-     
-        ajax: {
-            url: "{{ route('get.datalist.othersourcetype') }}",
-            data: function(d) {
-                return $.extend({}, d, {
-                    from_date: $('#from-date-others').val(),
-                    to_date: $('#to-date-others').val(),
-                    current_value: $('#current_value').val(),
-                    evidence_type_others: window['evidence_type_others_selectedValue'] || '',
-                    search_value_others: window['evidence_type_others_searchValue'] || ''
-                });
-            }
-        },
-        columns: [
-            { data: 'id' },
-            { data: 'source_type' },
-            { data: 'case_number' },
-            { data: 'url' },
-            { data: 'domain' },
-            { data: 'ip' },
-            { data: 'registrar' },
-            { data: 'remarks' }
-        ],
-        order: [0, 'desc'],
-        ordering: true
-    });
+            },
+            columns: [
+                { data: 'id' },
+                { data: 'source_type' },
+                { data: 'case_number' },
+                { data: 'evidence_type' },
+                { data: 'url' },
+                { data: 'domain' },
+                { data: 'ip' },
+                { data: 'registrar' },
+                { data: 'remarks' }
+            ],
+            order: [0, 'desc'],
+            ordering: true
+        });
 
-    // Form submission handler for #complaint-form-ncrp
-    $('#complaint-form-ncrp').on('submit', function(e) {
+         // Click event handler for Download buttons
+ $('#csvDownloadothers, #excelDownloadothers').on('click', function(e) {
         e.preventDefault();
-        tableNew.ajax.reload();
+        var format = $(this).attr('id') === 'csvDownloadothers' ? 'csv' : 'excel'; // Determine format based on button clicked
+        var url = "{{ route('get.datalist.othersourcetype') }}" + '?format=' + format + '&' + $.param({
+            from_date: $('#from-date-others').val(),
+            to_date: $('#to-date-others').val(),
+            current_value: $('#current_value').val(),
+            evidence_type_others: $('#evidence_type_others').val(),
+            search_value_others: window['evidence_type_others_searchValue'] || ''
+        });
+        window.location.href = url;
     });
 
-    // Form submission handler for #complaint-form-others
-    $('#complaint-form-others').on('submit', function(e) {
-        e.preventDefault();
-        tableReturned.ajax.reload();
+        // Form submission handler for #complaint-form-ncrp
+        $('#complaint-form-ncrp').on('submit', function(e) {
+            e.preventDefault();
+            tableNew.ajax.reload();
+        });
+
+        // Form submission handler for #complaint-form-others
+        $('#complaint-form-others').on('submit', function(e) {
+            e.preventDefault();
+            tableReturned.ajax.reload();
+        });
+
+        // Tab navigation handler
+        $('.tabs-menu1 ul li a').on('click', function(e) {
+            e.preventDefault();
+            $('.tabs-menu1 ul li a').removeClass('active');
+            $(this).addClass('active');
+
+            // Show the corresponding tab content
+            $('.tab-pane').removeClass('active');
+            $($(this).attr('data-bs-target')).addClass('active');
+        });
     });
+    </script>
 
-    // Tab navigation handler
-    $('.tabs-menu1 ul li a').on('click', function(e) {
-        e.preventDefault();
-        $('.tabs-menu1 ul li a').removeClass('active');
-        $(this).addClass('active');
-
-        // Show the corresponding tab content
-        $('.tab-pane').removeClass('active');
-        $($(this).attr('data-bs-target')).addClass('active');
-    });
-});
-
-</script>
 <script>
     function showTextBox(selectId) {
-        // Get the selected option value
+
         var selectedValue = document.getElementById(selectId).value;
 
         // Hide any previously displayed search boxes

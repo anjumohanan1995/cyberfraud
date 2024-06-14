@@ -5,6 +5,8 @@ use App\Models\SourceType;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Excel;
+use App\Imports\RegistrarImport;
 
 class SourceTypeController extends Controller
 {
@@ -188,6 +190,53 @@ class SourceTypeController extends Controller
 
             return response()->json($response);
     }
+
+    public function uploadRegistrar(){
+        return view("import_registrar");
+    }
+
+    public function registrarStore(Request $request)
+    {
+        // dd($request->registrar_number);
+        $file = $request->file('registrar_file');
+        // dd($file);
+        $request->validate([
+            'registrar_number' => 'required|unique:registrar_data',
+            'registrar_file' => 'required|mimes:xls,xlsx,csv'
+        ]);
+
+
+
+        if ($file) {
+            try {
+                // Import data from the file
+                Excel::import(new RegistrarImport($request->registrar_number), $file);
+
+                // Provide feedback to the user
+                return redirect()->back()->with('success', 'Form submitted successfully!');
+            } catch (\Exception $e) {
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    // Retrieve the validation errors
+                    $errors = $e->validator->getMessageBag()->all();
+
+                    // Redirect back with validation errors and input data
+                    return redirect()->back()->withErrors($validator)->withInput();
+                } else {
+                    // Handle other exceptions
+                    return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
+                }
+
+                // return response()->json([
+                //     'error' => 'An error occurred during import',
+                //     'message' => $e->getMessage()
+                // ], 500);
+            }
+        } else {
+            // No file uploaded
+            return response()->json(['error' => 'No file uploaded'], 400);
+        }
+    }
+
 
 
 }

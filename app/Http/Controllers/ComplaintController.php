@@ -28,7 +28,7 @@ class ComplaintController extends Controller
         $source_type = $request->input('source_type');
         if($source_type){
             if($source_type !== 'NCRP'){
-                   
+
                 $request->validate([
                     'case_number' => 'required',
                     'letter' =>      'required|mimes:pdf',
@@ -76,6 +76,9 @@ class ComplaintController extends Controller
 
                             // Redirect back with validation errors and input data
                             return redirect()->back()->withErrors($errors)->withInput();
+                        } else {
+                            // Handle other exceptions
+                            return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                         }
 
                         // return response()->json([
@@ -93,7 +96,7 @@ class ComplaintController extends Controller
 
 
 
-    
+
 }
 
 }

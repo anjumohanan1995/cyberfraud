@@ -78,7 +78,6 @@ Route::post('password-update', [LogoutController::class, 'passwordUpdate'])->nam
 Route::middleware('auth')->group(function () {
 
 
-
     //dashboard pages starts here.
     Route::get('/dashboard', [DashboardPagesController::class, 'dashboard'])->name("dashboard");
     // Route::get('filter-case-data', [DashboardPagesController::class, 'filterCaseData'])->name("filter-case-data");
@@ -167,6 +166,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('sourcetype', SourceTypeController::class);
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
+    Route::get('upload-registrar', [SourceTypeController::class, 'uploadRegistrar'])->name("upload-registrar");
+    Route::post('registrarStore', [SourceTypeController::class, 'registrarStore'])->name("registrar.store");
 
 //dashboard graph
 Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->name('complaints.chart');
@@ -174,6 +175,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
     Route::get('reports', [ReportsController::class, 'index'])->name("reports.index");
+    // Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-othersourcetype', [ReportsController::class, 'getDatalistOthersourcetype'])->name("get.datalist.othersourcetype");
 
@@ -220,6 +222,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 });
+
+
+
 
 
 
