@@ -20,6 +20,10 @@
         margin-left: 10px;
         cursor: pointer;
     }
+
+    .left-margin {
+    margin-left: 100px; /* Adjust the value as needed */
+}
 </style>
 
     </style>
@@ -89,6 +93,8 @@
                                     <div id="evidence_fields">
                                         @foreach (old('evidence_type', ['']) as $index => $oldEvidenceType)
                                             <div class="evidence-fields">
+                                                <div class="row">
+                                                    <div class="col-md-6">
                                                 <div class="form-group ev-type">
                                                     <label for="evidence_type_{{ $index }}">Evidence type:</label>
                                                     <select class="form-control evidence_type" name="evidence_type[]" required>
@@ -103,6 +109,8 @@
                                                     @error('evidence_type.' . $index)
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
+                                                </div>
+                                            </div>
                                                 </div>
 
                                                 <!-- Dynamic fields will be inserted here -->
@@ -272,11 +280,13 @@
                                                                     @enderror
                                                                 </div>
                                                             </div>
+
                                                         </div>
                                                     @endif
                                                 </div>
-
-                                                <button type="button" class="btn btn-danger remove-btn" style="display: none;">Remove</button>
+                                                <div>
+                                                    <button type="button" class="btn btn-danger btn-sm remove-btn left-margin" style="display: none;">Remove</button><br>
+                                                </div><br>
                                             </div>
                                         @endforeach
                                     </div>
@@ -293,6 +303,11 @@
         </div>
         <!-- /row -->
     </div>
+    <style>
+        .hid-field{
+            display: none;
+        }
+    </style>
     <script>
         function extractDomain(input) {
             var url = input.value;
@@ -357,11 +372,12 @@
                     if (option !== "") {
                         switch (option) {
                             case 'website':
+                            var index = dynamicFields.querySelectorAll('.row').length + 1;
                                 dynamicFields.innerHTML = `
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="url">URL:</label>
+                                                <label for="url_${index}">URL:</label>
                                                 <input type="text" name="url[]" class="form-control" placeholder="Enter URL" oninput="extractDomain(this)">
                                             </div>
                                         </div>
@@ -428,22 +444,24 @@
                                     </div>
                                 `;
                                 break;
-                            case 'instagram':
-                            case 'telegram':
-                            case 'facebook':
-                            case 'linkedin':
-                            case 'skype':
-                            case 'gmail':
-                            case 'youtube':
-                            case 'mobile numbers':
-                            case 'olx ad':
-                            case 'twitter':
-                            case 'other':
+                            // case 'instagram':
+                            // case 'telegram':
+                            // case 'facebook':
+                            // case 'linkedin':
+                            // case 'skype':
+                            // case 'gmail':
+                            // case 'youtube':
+                            // case 'mobile numbers':
+                            // case 'olx ad':
+                            // case 'twitter':
+                            // case 'other':
+                            default:
+                            var index = dynamicFields.querySelectorAll('.row').length + 1;
                                 dynamicFields.innerHTML = `
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="url">URL:</label>
+                                                <label for="url_${index}">URL:</label>
                                                 <input type="text" name="url[]" class="form-control" placeholder="Enter URL" >
                                             </div>
                                         </div>
@@ -458,6 +476,24 @@
                                                 <label for="screenshots">Screenshots:</label>
                                                 <input type="file" name="screenshots[]" class="form-control" multiple>
                                             </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                        <input type="text" name="domain[]" class="form-control" value="" placeholder="Enter Domain" hidden>
+
+       </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                        <input type="text" name="registry_details[]" class="form-control" value="" placeholder="Enter Registry Details" hidden> </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                       <input type="text" name="ip[]" class="form-control" value="" placeholder="Enter IP" hidden> </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                        <input type="text" name="registrar[]" class="form-control" value="" placeholder="Enter Registrar" hidden></div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">

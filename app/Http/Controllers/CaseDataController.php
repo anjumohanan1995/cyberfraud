@@ -195,23 +195,20 @@ class CaseDataController extends Controller
         return response()->json($response);
     }
 
-
     public function getDatalist(Request $request)
     {
-      //  Complaint::query()->update(['com_status' => 1]);
+        // Initialize variables
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page.
-
+        $rowperpage = $request->get("length");
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
-
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index.
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
-        $searchValue = $search_arr['value']; // Search value.
+        $columnIndex = $columnIndex_arr[0]['column'];
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
         $fromDate = $request->get('from_date');
         $toDate = $request->get('to_date');
         $mobile = $request->get('mobile');
@@ -220,221 +217,127 @@ class CaseDataController extends Controller
         $search_by = $request->get('search_by');
         $options = $request->get('options');
         $com_status = $request->get('com_status');
+        // dd($com_status);
         $fir_lodge = $request->get('fir_lodge');
         $filled_by_who = $request->get('filled_by_who');
         $transaction_id = $request->get('transaction_id');
         $account_id = $request->get('account_id');
-        // dd($transaction_id);
-        // dd($filled_by_who);
-        // dd($fir_lodge);
 
-        
-        // Total records.
-        $totalRecordQuery = Complaint::where('deleted_at', null);
-        $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
-
-        //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
-        $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
-
-        $totalRecordswithFilte = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc');
-        //$totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
-        $totalRecordswithFilter = Complaint::groupBy('acknowledgement_no')->get()->count();
-
-        //Fetch records.
-        if ($com_status === '' || $com_status === null) {
-            $com_status = "1";
+        // Filter conditions
+        if ($com_status == "1"){
+            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1);
         }
-         //dd($com_status);
-            $items = Complaint::groupBy('acknowledgement_no')
-            ->where('deleted_at', null)
-            ->where('com_status', (int)$com_status)
-            ->orderBy('_id', 'desc')
-            ->orderBy($columnName, $columnSortOrder);
-            
-            $totalRecords  = Complaint::groupBy('acknowledgement_no')
-            ->where('deleted_at', null)
-            ->where('com_status', (int)$com_status)
-            ->orderBy('created_at', 'desc')
-            ->orderBy($columnName, $columnSortOrder)->get()->count();
-            $totalRecordswithFilter = $totalRecords;
-        // Apply filter conditions
-        if ($fromDate && $toDate){
-            // Parse and format dates using Carbon
-            $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
-            $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
+        elseif ($com_status == "0"){
+            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0);
 
-            // Convert Carbon objects to UTCDateTime
-            $fromUTC = new UTCDateTime($from->getTimestamp() * 1000);
-            $toUTC = new UTCDateTime($to->getTimestamp() * 1000);
+        }else{
+            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
+        }
 
-            // Filter records based on the formatted dates
-            $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
-            $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
-            $totalRecords = Complaint::groupBy('acknowledgement_no')
-                            ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
-            $totalRecordswithFilter = $totalRecords;
-            }
-           
-            if ($mobile){
-                $mobile = (int)$mobile;
-                $totalRecordQuery->where('complainant_mobile', $mobile);
+        // if (!empty($com_status)) {
+        //     $query->where('com_status', (int)$com_status);
+        // }
 
-                $items->where('complainant_mobile', $mobile);
-                $totalRecords = Complaint::groupBy('acknowledgement_no')
-                            ->where('complainant_mobile', $mobile)->where('com_status',(int)$com_status)->get()->count();
-                $totalRecordswithFilter = $totalRecords;
-            }
+        if ($fromDate && $toDate) {
+            $query->whereBetween('entry_date', [Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay()]);
+        }
 
-            if ($transaction_id){
-                $transaction_id = (int)$transaction_id;
-                // dd($transaction_id);
-                $totalRecordQuery->where('transaction_id', $transaction_id);
-                $items->where('transaction_id', $transaction_id);
+        if (!empty($mobile)) {
+            $query->where('complainant_mobile', (int)$mobile);
+        }
 
-                $totalRecords = Complaint::groupBy('acknowledgement_no')
-                ->where('transaction_id', $transaction_id)->where('com_status',(int)$com_status)->get()->count();
-                // dd($totalRecords);
-                $totalRecordswithFilter = $totalRecords;
-            }
-            // dd($items);
+        if (!empty($transaction_id)) {
+            $query->where('transaction_id', (int)$transaction_id);
+        }
 
-            if ($account_id){
-                $account_id = (int)$account_id;
-                // dd($transaction_id);
-                $totalRecordQuery->where('account_id ', $account_id);
-                $items->where('account_id', $account_id);
-                // dd($items);
-                $totalRecords = Complaint::groupBy('acknowledgement_no')
-                ->where('account_id', $account_id)->where('com_status',(int)$com_status)->get()->count();
-                // dd($totalRecords);
-                $totalRecordswithFilter = $totalRecords;
-            }
+        if (!empty($account_id)) {
+            $query->where('account_id', (int)$account_id);
+        }
 
-            if ($options && $options!='null') {
-                $totalRecordQuery->where('bank_name', $options);
-                $items->where('bank_name', $options);
-                $totalRecords = Complaint::groupBy('acknowledgement_no')
-                ->where('bank_name', $options)->where('com_status',(int)$com_status)->get()->count();
-                //dd($totalRecords);
-                $totalRecordswithFilter = $totalRecords;
-            }
-            if ($acknowledgement_no){
-                $acknowledgement_no = (int)$acknowledgement_no;
-                $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
-                $items->where('acknowledgement_no', $acknowledgement_no);
-                $totalRecords = Complaint::groupBy('acknowledgement_no')
-                ->where('acknowledgement_no', $acknowledgement_no)->where('com_status',(int)$com_status)->get()->count();
-                $totalRecordswithFilter = $totalRecords;
-            }
+        if (!empty($options) && $options != 'null') {
+            $query->where('bank_name', $options);
+        }
 
-            if ($fir_lodge == "1") {
-                // Retrieve acknowledgement numbers where fir_doc is not null
-                $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
+        if (!empty($acknowledgement_no)) {
+            $query->where('acknowledgement_no', (int)$acknowledgement_no);
+        }
 
-                // Initialize total records count
-                $totalRecordswithFilter = 0;
+        if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
+            $query->where('entry_date', '>=', Carbon::now()->subDay()->startOfDay()->timestamp * 1000)
+                  ->where('entry_date', '<=', Carbon::now()->endOfDay()->timestamp * 1000)
+                  ->whereBetween('acknowledgement_no', [$filled_by === 'citizen' ? 21500000000000 : 31500000000000, $filled_by === 'citizen' ? 21599999999999 : 31599999999999]);
+        }
 
-                // Loop through each acknowledgement number
-                foreach ($ackNumbers as $ackNumber) {
-                    // Apply the filter to the total record query
-                    $totalRecordQuery->where('acknowledgement_no', (int)$ackNumber)
-                                     ->where('com_status', (int)$com_status);
+        if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
+            $query->whereBetween('acknowledgement_no', [$filled_by_who === 'citizen' ? 21500000000000 : 31500000000000, $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999]);
+        }
 
-                    // Apply the same filter to the items query
-                    $items->orWhere(function ($query) use ($ackNumber, $com_status) {
-                        $query->where('acknowledgement_no', (int)$ackNumber)
-                              ->where('com_status', (int)$com_status);
-                    });
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+                  ->orWhere('district', 'like', '%' . $searchValue . '%')
+                  ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+                  ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+                  ->orWhere('police_station', 'like', '%' . $searchValue . '%');
+            });
+        }
 
-                    // Calculate the total records count with the applied filters
-                    $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', (int)$ackNumber)
-                                             ->where('com_status', (int)$com_status)
-                                             ->count();
+// Check if FIR Lodge filter is enabled
+if ($fir_lodge == "1") {
+    // Retrieve acknowledgment numbers where fir_doc is not null
+    $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
+    // Initialize an empty array to store all acknowledgment numbers
+    $ackNumbersToFilter = [];
 
-                    // Increment total records count
-                    $totalRecordswithFilter = $totalRecords;
-                }
-            }
+    // Loop through each acknowledgment number
+    foreach ($ackNumbers as $ackNumber) {
+        // Count the occurrences of the acknowledgment number in the Complaint table
+        $acknumbers = Complaint::where('acknowledgement_no', (int)$ackNumber)->pluck('acknowledgement_no');
 
-if ($filled_by){
-    switch ($filled_by){
-        case 'citizen':
-            // Filter citizen filled entries within 24 hours
-            $startOfDay = Carbon::now()->subDay()->startOfDay();
-            $endOfDay = Carbon::now()->endOfDay();
-            $items->where('entry_date', '>=', new UTCDateTime($startOfDay->timestamp * 1000))
-                ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
-            // Filter citizen filled entries
-            $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
-            $totalRecords = Complaint::groupBy('acknowledgement_no')
-            ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->where('com_status',(int)$com_status)->get()->count();
-                $totalRecordswithFilter = $totalRecords;
-            break;
-        case 'cyber':
-            // Filter cyber filled entries within 24 hours
-            $startOfDay = Carbon::now()->subDay()->startOfDay();
-            $endOfDay = Carbon::now()->endOfDay();
-            $items->where('entry_date', '>=', new UTCDateTime($startOfDay->timestamp * 1000))
-                ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
-            // Filter cyber filled entries
-            $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
-            $totalRecords = Complaint::groupBy('acknowledgement_no')
-            ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->where('com_status',(int)$com_status)->get()->count();
-                $totalRecordswithFilter = $totalRecords;
-            break;
-        default:
-            // Do nothing for 'All' option
-            break;
+        // Merge acknowledgment numbers into the array
+        $ackNumbersToFilter = array_merge($ackNumbersToFilter, $acknumbers->toArray());
     }
+    // dd($ackNumbersToFilter);
+
+    // Apply the FIR Lodge filter to the main query
+    $query->whereIn('acknowledgement_no', $ackNumbersToFilter);
 }
 
-if ($filled_by_who) {
-    switch ($filled_by_who) {
-        case 'citizen':
-            // Filter citizen filled entries
-            $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
-            $totalRecords = Complaint::groupBy('acknowledgement_no')
-                ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->where('com_status', (int)$com_status)->get()->count();
-            $totalRecordswithFilter = $totalRecords;
-            break;
-        case 'cyber':
-            // Filter cyber filled entries
-            $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
-            $totalRecords = Complaint::groupBy('acknowledgement_no')
-                ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->where('com_status', (int)$com_status)->get()->count();
-            $totalRecordswithFilter = $totalRecords;
-            break;
-        default:
-            // Do nothing for 'All' option
-            break;
+// Check if FIR Lodge filter is enabled
+if ($fir_lodge == "0") {
+    // Retrieve acknowledgment numbers where fir_doc is not null
+    $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
+
+    // Initialize an empty array to store all acknowledgment numbers
+    $ackNumbersToFilter = [];
+
+    // Loop through each acknowledgment number
+    foreach ($ackNumbers as $ackNumber) {
+        // Add acknowledgment number to the array
+        $ackNumbersToFilter[] = (int)$ackNumber;
     }
+
+    // Apply the FIR Lodge filter to the main query
+    $query->whereNotIn('acknowledgement_no', $ackNumbersToFilter);
 }
 
-        if($searchValue){
-            $items = Complaint::groupBy('acknowledgement_no')
-            ->where('acknowledgement_no', 'like', '%' .$searchValue . '%')
-            ->orWhere('district', 'like', '%' . $searchValue . '%')
-            ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
-            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
-            ->orWhere('police_station', 'like', '%' . $searchValue . '%')
-            ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
-            ->where('deleted_at', null)
-            ->orderBy('_id', 'desc')
-            ->orderBy($columnName, $columnSortOrder);
 
-            $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
+        // Total records count
+        $totalRecords = $query->get()->count();
+        // dd($totalRecords);
 
-            $totalRecordswithFilter = $totalRecords;
-        }
-        //$totalRecords = $totalRecordQuery->count();
+        // Fetch records
+        $records = $query->orderBy('created_at', 'desc')
+                         ->orderBy($columnName, $columnSortOrder)
+                         ->skip($start)
+                         ->take($rowperpage)
+                         ->get();
 
-        // Total records count after filtering
-        //$totalRecordswithFilter = $items->count();
 
-        $records = $items->skip($start)->take($rowperpage)->get();
-       
         $data_arr = array();
         $i = $start;
+
+        // $totalRecordswithFilter =  $totalRecords;
 
         foreach ($records as $record){
             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
@@ -501,12 +404,336 @@ if ($filled_by_who) {
         $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "iTotalDisplayRecords" => $totalRecords,
             "aaData" => $data_arr
         );
 
         return response()->json($response);
     }
+
+
+//     public function getDatalist(Request $request)
+//     {
+//       //  Complaint::query()->update(['com_status' => 1]);
+//         $draw = $request->get('draw');
+//         $start = $request->get("start");
+//         $rowperpage = $request->get("length"); // Rows display per page.
+
+//         $columnIndex_arr = $request->get('order');
+//         $columnName_arr = $request->get('columns');
+//         $order_arr = $request->get('order');
+//         $search_arr = $request->get('search');
+
+//         $columnIndex = $columnIndex_arr[0]['column']; // Column index.
+//         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
+//         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
+//         $searchValue = $search_arr['value']; // Search value.
+//         $fromDate = $request->get('from_date');
+//         $toDate = $request->get('to_date');
+//         $mobile = $request->get('mobile');
+//         $acknowledgement_no= $request->get('acknowledgement_no');
+//         $filled_by = $request->get('filled_by');
+//         $search_by = $request->get('search_by');
+//         $options = $request->get('options');
+//         $com_status = $request->get('com_status');
+//         $fir_lodge = $request->get('fir_lodge');
+//         $filled_by_who = $request->get('filled_by_who');
+//         $transaction_id = $request->get('transaction_id');
+//         $account_id = $request->get('account_id');
+//         // dd($transaction_id);
+//         // dd($filled_by_who);
+//         // dd($fir_lodge);
+
+
+//         // Total records.
+//         $totalRecordQuery = Complaint::where('deleted_at', null);
+//         $totalRecord = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+
+//         //$totalRecords = $totalRecord->select('count(*) as allcount')->count();
+//         $totalRecords = Complaint::groupBy('acknowledgement_no')->get()->count();
+
+//         $totalRecordswithFilte = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('created_at', 'desc');
+//         //$totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+//         $totalRecordswithFilter = Complaint::groupBy('acknowledgement_no')->get()->count();
+
+//         //Fetch records.
+//         if ($com_status === '' || $com_status === null) {
+//             $com_status = "1";
+//         }
+//          //dd($com_status);
+//             $items = Complaint::groupBy('acknowledgement_no')
+//             ->where('deleted_at', null)
+//             ->where('com_status', (int)$com_status)
+//             ->orderBy('_id', 'desc')
+//             ->orderBy($columnName, $columnSortOrder);
+
+//             $totalRecords  = Complaint::groupBy('acknowledgement_no')
+//             ->where('deleted_at', null)
+//             ->where('com_status', (int)$com_status)
+//             ->orderBy('created_at', 'desc')
+//             ->orderBy($columnName, $columnSortOrder)->get()->count();
+//             $totalRecordswithFilter = $totalRecords;
+//         // Apply filter conditions
+//         if ($fromDate && $toDate){
+//             // Parse and format dates using Carbon
+//             $totalRecordswithFilter = 0;
+//             $from = Carbon::createFromFormat('Y-m-d H:i:s', $fromDate . ' 00:00:00')->startOfDay();
+//             $to = Carbon::createFromFormat('Y-m-d H:i:s', $toDate . ' 23:59:59')->endOfDay();
+
+//             // Convert Carbon objects to UTCDateTime
+//             $fromUTC = new UTCDateTime($from->getTimestamp() * 1000);
+//             $toUTC = new UTCDateTime($to->getTimestamp() * 1000);
+
+//             // Filter records based on the formatted dates
+//             $totalRecordQuery->whereBetween('entry_date', [$fromUTC, $toUTC]);
+//             $items->whereBetween('entry_date', [$fromUTC, $toUTC]);
+//             $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                             ->whereBetween('entry_date', [$fromUTC, $toUTC])->get()->count();
+//             $totalRecordswithFilter = $totalRecords;
+//             }
+
+//             if ($mobile){
+//                 $totalRecordswithFilter = 0;
+//                 $mobile = (int)$mobile;
+//                 $totalRecordQuery->where('complainant_mobile', $mobile);
+
+//                 $items->where('complainant_mobile', $mobile);
+//                 $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                             ->where('complainant_mobile', $mobile)->where('com_status',(int)$com_status)->get()->count();
+//                 $totalRecordswithFilter = $totalRecords;
+//             }
+
+//             if ($transaction_id){
+//                 $totalRecordswithFilter = 0;
+//                 $transaction_id = (int)$transaction_id;
+//                 // dd($transaction_id);
+//                 $totalRecordQuery->where('transaction_id', $transaction_id);
+//                 $items->where('transaction_id', $transaction_id);
+
+//                 $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                 ->where('transaction_id', $transaction_id)->where('com_status',(int)$com_status)->get()->count();
+//                 // dd($totalRecords);
+//                 $totalRecordswithFilter = $totalRecords;
+//             }
+//             // dd($items);
+
+//             if ($account_id){
+//                 $totalRecordswithFilter = 0;
+//                 $account_id = (int)$account_id;
+//                 // dd($transaction_id);
+//                 $totalRecordQuery->where('account_id ', $account_id);
+//                 $items->where('account_id', $account_id);
+//                 // dd($items);
+//                 $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                 ->where('account_id', $account_id)->where('com_status',(int)$com_status)->get()->count();
+//                 // dd($totalRecords);
+//                 $totalRecordswithFilter = $totalRecords;
+//             }
+
+//             if ($options && $options!='null') {
+//                 $totalRecordswithFilter = 0;
+//                 $totalRecordQuery->where('bank_name', $options);
+//                 $items->where('bank_name', $options);
+//                 $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                 ->where('bank_name', $options)->where('com_status',(int)$com_status)->get()->count();
+//                 //dd($totalRecords);
+//                 $totalRecordswithFilter = $totalRecords;
+//             }
+//             if ($acknowledgement_no){
+//                 $totalRecordswithFilter = 0;
+//                 $acknowledgement_no = (int)$acknowledgement_no;
+//                 $totalRecordQuery->where('acknowledgement_no', $acknowledgement_no);
+//                 $items->where('acknowledgement_no', $acknowledgement_no);
+//                 $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                 ->where('acknowledgement_no', $acknowledgement_no)->where('com_status',(int)$com_status)->get()->count();
+//                 $totalRecordswithFilter = $totalRecords;
+//             }
+
+//             if ($fir_lodge == "1") {
+//                 // Retrieve acknowledgement numbers where fir_doc is not null
+//                 $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
+
+//                 // Initialize total records count
+//                 $totalRecordswithFilter = 0;
+
+//                 // Loop through each acknowledgement number
+//                 foreach ($ackNumbers as $ackNumber) {
+//                     // Apply the filter to the total record query
+//                     $totalRecordQuery->where('acknowledgement_no', (int)$ackNumber)
+//                                      ->where('com_status', (int)$com_status);
+
+//                     // Apply the same filter to the items query
+//                     $items->orWhere(function ($query) use ($ackNumber, $com_status) {
+//                         $query->where('acknowledgement_no', (int)$ackNumber)
+//                               ->where('com_status', (int)$com_status);
+//                     });
+
+//                     // Calculate the total records count with the applied filters
+//                     $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', (int)$ackNumber)
+//                                              ->where('com_status', (int)$com_status)
+//                                              ->count();
+
+//                     // Increment total records count
+//                     $totalRecordswithFilter = $totalRecords;
+//                 }
+//             }
+
+// if ($filled_by){
+//     switch ($filled_by){
+//         case 'citizen':
+//             $totalRecordswithFilter = 0;
+//             // Filter citizen filled entries within 24 hours
+//             $startOfDay = Carbon::now()->subDay()->startOfDay();
+//             $endOfDay = Carbon::now()->endOfDay();
+//             $items->where('entry_date', '>=', new UTCDateTime($startOfDay->timestamp * 1000))
+//                 ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
+//             // Filter citizen filled entries
+//             $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
+//             $totalRecords = Complaint::groupBy('acknowledgement_no')
+//             ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->where('com_status',(int)$com_status)->get()->count();
+//                 $totalRecordswithFilter = $totalRecords;
+//             break;
+//         case 'cyber':
+//             $totalRecordswithFilter = 0;
+//             // Filter cyber filled entries within 24 hours
+//             $startOfDay = Carbon::now()->subDay()->startOfDay();
+//             $endOfDay = Carbon::now()->endOfDay();
+//             $items->where('entry_date', '>=', new UTCDateTime($startOfDay->timestamp * 1000))
+//                 ->where('entry_date', '<=', new UTCDateTime($endOfDay->timestamp * 1000));
+//             // Filter cyber filled entries
+//             $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
+//             $totalRecords = Complaint::groupBy('acknowledgement_no')
+//             ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->where('com_status',(int)$com_status)->get()->count();
+//                 $totalRecordswithFilter = $totalRecords;
+//             break;
+//         default:
+//             // Do nothing for 'All' option
+//             break;
+//     }
+// }
+
+// if ($filled_by_who) {
+//     switch ($filled_by_who) {
+//         case 'citizen':
+//             $totalRecordswithFilter = 0;
+//             // Filter citizen filled entries
+//             $items->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999);
+//             $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                 ->where('acknowledgement_no', '>=', 21500000000000)->where('acknowledgement_no', '<=', 21599999999999)->where('com_status', (int)$com_status)->get()->count();
+//             $totalRecordswithFilter = $totalRecords;
+//             break;
+//         case 'cyber':
+//             $totalRecordswithFilter = 0;
+//             // Filter cyber filled entries
+//             $items->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999);
+//             $totalRecords = Complaint::groupBy('acknowledgement_no')
+//                 ->where('acknowledgement_no', '>=', 31500000000000)->where('acknowledgement_no', '<=', 31599999999999)->where('com_status', (int)$com_status)->get()->count();
+//             $totalRecordswithFilter = $totalRecords;
+//             break;
+//         default:
+//             // Do nothing for 'All' option
+//             break;
+//     }
+// }
+
+//         if($searchValue){
+//             $items = Complaint::groupBy('acknowledgement_no')
+//             ->where('acknowledgement_no', 'like', '%' .$searchValue . '%')
+//             ->orWhere('district', 'like', '%' . $searchValue . '%')
+//             ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+//             ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+//             ->orWhere('police_station', 'like', '%' . $searchValue . '%')
+//             ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
+//             ->where('deleted_at', null)
+//             ->orderBy('_id', 'desc')
+//             ->orderBy($columnName, $columnSortOrder);
+
+//             $totalRecords = Complaint::groupBy('acknowledgement_no')->where('acknowledgement_no', 'like', '%' . $searchValue . '%')->orWhere('district', 'like', '%' . $searchValue . '%')->orWhere('complainant_name', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->orWhere('police_station', 'like', '%' . $searchValue . '%')->orWhere('bank_name', 'like', '%' . $searchValue . '%')->where('deleted_at', null)->get()->count();
+
+//             $totalRecordswithFilter = $totalRecords;
+//         }
+//         //$totalRecords = $totalRecordQuery->count();
+
+//         // Total records count after filtering
+//         //$totalRecordswithFilter = $items->count();
+//         $totalRecords = $totalRecordQuery->count();
+//         $records = $items->skip($start)->take($rowperpage)->get();
+//         $totalRecordswithFilter = $totalRecords;
+
+//         $data_arr = array();
+//         $i = $start;
+
+//         foreach ($records as $record){
+//             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
+//             $i++;
+//             $id = $record->id;
+//             $source_type = $record->source_type;
+//             $acknowledgement_no = $record->acknowledgement_no;
+
+//             $transaction_id="";$amount="";$bank_name="";
+//             foreach($com as $com){
+//                 $transaction_id .= $com->transaction_id."<br>";
+//                 $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
+//                 $bank_name .= $com->bank_name."<br>";
+//                 $complainant_name = $com->complainant_name;
+//                 $complainant_mobile = $com->complainant_mobile;
+
+//                 $district = $com->district;
+//                 $police_station = $com->police_station;
+//                 $account_id = $com->account_id;
+//                 $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
+//                 $current_status = $com->current_status;
+//                 $date_of_action = $com->date_of_action;
+//                 $action_taken_by_name = $com->action_taken_by_name;
+//                 $action_taken_by_designation = $com->action_taken_by_designation;
+//                 $action_taken_by_mobile = $com->action_taken_by_mobile;
+//                 $action_taken_by_email = $com->action_taken_by_email;
+//                 $action_taken_by_bank = $com->action_taken_by_bank;
+//             }
+//             // $ack_no ='<form action="' . route('case-data.view') . '" method="POST">' .
+//             // '<input type="hidden" name="_token" value="' . csrf_token() . '">' . // Add CSRF token
+//             // '<input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '">' . // Hidden field for the acknowledgment number
+//             // '<button class="btn btn-outline-success" type="submit">' . $acknowledgement_no . '</button>' . // Submit button with the acknowledgment number as text
+//             // '</form>';
+//             $id = Crypt::encrypt($acknowledgement_no);
+//             $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
+//            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
+//             // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
+//             $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+//             <input
+//                 data-id="' . $acknowledgement_no . '"
+//                 onchange="confirmActivation(this)"
+//                 class="form-check-input"
+//                 type="checkbox"
+//                 id="SwitchCheckSizesm' . $com->id . '"
+//                 ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
+//          </div>';
+//             $data_arr[] = array(
+//                 "id" => $i,
+//                 "acknowledgement_no" => $ack_no,
+//                 "district" => $district."<br>".$police_station,
+//                 "complainant_name" => $complainant_name."<br>".$complainant_mobile,
+//                 "transaction_id" => $transaction_id,
+//                 "bank_name" => $bank_name,
+//                 "account_id" => $account_id,
+//                 "amount" => $amount,
+//                 "entry_date" => $entry_date,
+//                 "current_status" => $current_status,
+//                 "date_of_action" => $date_of_action,
+//                 "action_taken_by_name" => $action_taken_by_name,
+//                 "edit" => $edit
+//             );
+//         }
+
+//         $response = array(
+//             "draw" => intval($draw),
+//             "iTotalRecords" => $totalRecords,
+//             "iTotalDisplayRecords" => $totalRecordswithFilter,
+//             "aaData" => $data_arr
+//         );
+
+//         return response()->json($response);
+//     }
 
     public function detailsView(){
         return view('dashboard.case-data-list.index');
@@ -876,6 +1103,7 @@ if ($filled_by_who) {
 
     public function profileUpdate(Request $request)
     {
+        // dd($request);
 
         $complaint = ComplaintAdditionalData::where('ack_no',$request->acknowledgement_no)->first();
         if($complaint == ''){
@@ -892,20 +1120,20 @@ if ($filled_by_who) {
     }
 
     public function getCaseNumber(Request $request){
-        
+
             $sourcetype = $request->sourcetype;
             $firstThreeCharacters = Str::substr($sourcetype, 0, 3);
             $today = now()->format('Ymd');
-            $lastCaseNumber = ComplaintOthers::where('source_type', $request->sourcetype_id)->latest()->value('case_number'); 
+            $lastCaseNumber = ComplaintOthers::where('source_type', $request->sourcetype_id)->latest()->value('case_number');
             if($lastCaseNumber == ''){
-                
+
                 $caseNumber = $firstThreeCharacters.'-'.$today.'-0001';
-                
+
             }
             else{
                 $lastNumberPart = (int)substr($lastCaseNumber, -4);
-                $nextNumberPart = $lastNumberPart + 1;     
-                $caseNumber = $firstThreeCharacters.'-'.$today.'-'.str_pad($nextNumberPart, 4, '0', STR_PAD_LEFT);           
+                $nextNumberPart = $lastNumberPart + 1;
+                $caseNumber = $firstThreeCharacters.'-'.$today.'-'.str_pad($nextNumberPart, 4, '0', STR_PAD_LEFT);
             }
             return $caseNumber;
     }

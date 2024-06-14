@@ -9,13 +9,14 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
 
-
     public function login(Request $request)
     {
         // Validate the form data
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => ['required', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+
+
         ]);
 
         // Attempt to authenticate the user

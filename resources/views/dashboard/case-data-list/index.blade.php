@@ -122,11 +122,11 @@
                                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <label for="filled_by_who">Filled by:</label>
+                                            <label for="filled_by_who">Complaint Reported:</label>
                                             <select class="form-control" id="filled_by_who" name="filled_by_who">
                                                 <option value="">All</option>
-                                                <option value="citizen">Citizen</option>
-                                                <option value="cyber">Cyber</option>
+                                                <option value="citizen">Through Helpline(1930)</option>
+                                                <option value="cyber">Cyber Crime Portal</option>
                                             </select>
                                         </div>
                                     </div>
@@ -151,22 +151,14 @@
                                         <div class="form-group">
                                             <label for="com_status">Status </label>
                                             <select class="form-control" id="com_status">
+                                                <option value="empty">--Select--</option>
                                                 <option value="1">Active</option>
                                                 <option value="0">Inactive</option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-2">
-                                        <div class="form-group">
-                                            <label for="complaint-reported">Complaint Reported:</label>
-                                            <select class="form-control" id="complaint-reported" name="complaint-reported">
-                                                <option value="">All</option>
-                                                <option value="#">Through Helpline(1930)</option>
-                                                <option value="#">Cyber Crime Portal</option>
-                                            </select>
-                                        </div>
-                                    </div>
+
 
                                 </div>
                                 <div class="row">
@@ -175,7 +167,8 @@
                                             <label for="search-by">Search by:</label>
                                             <select class="form-control" id="search-by" name="search-by" onchange="showTextBox()">
                                                 <option>--Select--</option>
-                                                <option value="account_id">Account ID/Account Number/UPI ID</option>
+                                                <option value="account_id">Account ID/Account Number</option>
+                                                <option value="account_id">UPI ID</option>
                                                 <option value="transaction_id">Transaction ID/UTR/RRN Number</option>
                                             </select>
                                         </div>

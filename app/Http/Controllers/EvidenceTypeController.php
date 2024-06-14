@@ -48,7 +48,7 @@ class EvidenceTypeController extends Controller
         }
 
         EvidenceType::create([
-            'name' => @$request->name? $request->name:'',
+            'name' => isset($request->name) ? strtolower($request->name) : '',
             'status' => $request->input('status'),
 
         ]);
