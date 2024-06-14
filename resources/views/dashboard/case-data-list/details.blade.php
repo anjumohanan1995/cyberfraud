@@ -252,6 +252,31 @@
 
 
                             <br>
+                            <table class="table table-bordered" style="width:auto">
+                                <thead>
+                                    <tr>
+                                        <th>Layer</th>
+                                        <th>Pending Banks</th>
+                                        <th>Transaction ID</th>
+                                    </tr>
+                                @foreach ($finalData_pending_banks as $item)    
+                                <tr>
+                                    <td>{{ $item['layer'] }}</td>
+                                    <td>
+                                    @foreach ($item['pending_banks'] as $bank)
+                                        {{ $bank['pending_banks'] }} <br>
+                                    @endforeach
+                                    </td>
+                                    <td>
+                                         @foreach ($item['pending_banks'] as $trns)
+                                        {{ $bank['transaction_id'] }} <br>
+                                    @endforeach
+                                    </td>
+                                </tr>
+                                @endforeach
+                                </thead>
+                            </table>
+                            
                             Total Fraudulent Amount reported by Complainant : <span
                                 style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
                             <br><br>

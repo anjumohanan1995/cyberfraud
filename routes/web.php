@@ -146,6 +146,10 @@ Route::middleware('auth')->group(function () {
     //for uploading others case data
     Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
 
+    //for creating and download excel tmplate of other case data upload
+
+    Route::get('template', [CaseDataController::class, 'createDownloadTemplate'])->name("create-download-template");
+
     // for autogenerating case number in upload others case data
     Route::post('get-casenumber', [CaseDataController::class, 'getCaseNumber'])->name("get.casenumber");
 
@@ -190,6 +194,13 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');
     Route::get('download-fir/{ak_no}', [CaseDataController::class, 'downloadFIR'])->name('download.fir');
     Route::post('profile-update', [CaseDataController::class, 'profileUpdate'])->name('profile.update');
+
+    //evidence management
+
+    Route::get('evidence.management', [EvidenceController::class, 'evidenceManagement'])->name('evidence.management');
+    Route::get('evidence.ncrp', [EvidenceController::class, 'evidenceNcrp'])->name('get.evidence.ncrp');
+    Route::get('evidence.others', [EvidenceController::class, 'evidenceOthers'])->name('get.evidence.others');
+
 
     //notice module
 

@@ -8,6 +8,9 @@ use App\Models\EvidenceType;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\ComplaintOthers;
+use MongoDB\BSON\UTCDateTime;
+use DateTime;
 
 class EvidenceController extends Controller
 {
@@ -173,6 +176,424 @@ class EvidenceController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'An unexpected error occurred. Please try again later.');
         }
+    }
+
+    public function evidenceManagement(){
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->get();
+
+   
+       
+        return view('evidence-management.list',compact('evidenceTypes'));
+    }
+
+    public function evidenceNcrp(Request $request){
+
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); 
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+        $columnIndex = $columnIndex_arr[0]['column']; 
+        $columnName = $columnName_arr[$columnIndex]['data']; 
+        $columnSortOrder = $order_arr[0]['dir']; 
+        $searchValue = $search_arr['value']; 
+        $ack_no="";
+        $acknowledgement_no = $request->acknowledgement_no;
+        $url = $request->url;
+        $domain = $request->domain;
+        $evidence_type = $request->evidence_type;
+        $evidence_type_text = $request->evidence_type_text;
+
+        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$domain ,$evidence_type , $evidence_type_text){
+
+            $pipeline = [
+                
+                [
+                    '$group' => [
+                        '_id' => '$ack_no',
+                        'evidence_type' => ['$push' => '$evidence_type'],
+                        'url' => ['$push' => '$url'],
+                        'domain' => ['$push' => '$domain'],
+                        'registry_details' => ['$push' => '$registry_details'],
+                        'ip' => ['$push' => '$ip'],
+                        'registrar' => ['$push' => '$registrar'],
+                        
+                    ]
+                ],
+                [
+                    '$sort' => [
+                        '_id' => 1,
+                ]
+                ],
+                [
+                    '$skip' => (int)$start
+                ],
+                [
+                    '$limit' => (int)$rowperpage
+                ],
+                
+            ];
+
+            if (isset($acknowledgement_no)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ack_no' => $acknowledgement_no
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($evidence_type)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'evidence_type' => $evidence_type_text
+                        ]
+                    ]
+                ], $pipeline);
+            }
+                  
+            return $collection->aggregate($pipeline);
+        });
+        
+        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ) {
+
+            $pipeline = [
+                [
+                    '$group' => [
+                        '_id' => '$ack_no'
+                    ]
+                ]
+            ];
+
+            if (isset($acknowledgement_no)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ack_no' => $acknowledgement_no
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($evidence_type)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'evidence_type' => $evidence_type_text
+                        ]
+                    ]
+                ], $pipeline);
+            }
+
+
+            return $collection->aggregate($pipeline);
+        });
+
+        $totalRecords = count($distinctEvidences);
+        $data_arr = array();
+        $i = $start;
+
+
+        $totalRecordswithFilter =  $totalRecords;
+      
+        foreach($evidences as $record){
+
+            $i++;
+            $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";
+
+            $acknowledgement_no = $record->_id;
+
+            foreach ($record->url as $item) {
+                $url .= $item."<br>";
+            }
+            foreach ($record->evidence_type as $item) {
+             $evidence_type .= $item."<br>";
+            }
+            foreach ($record->domain as $item) {
+                $domain .= $item."<br>";
+            }
+            foreach ($record->ip as $item) {
+                $ip .= $item."<br>";
+            }
+            foreach ($record->registrar as $item) {
+                $registrar .= $item."<br>";
+            }
+            foreach ($record->registry_details as $item) {
+                $registry_details .= $item."<br>";
+            }
+
+            $data_arr[] = array(
+                    "id" => $i,
+                    "acknowledgement_no" => $acknowledgement_no,
+                    "evidence_type" => $evidence_type,
+                    "url" => $url,
+                    "domain" => $domain,
+                    "ip" => $ip,
+                    "registrar"=>$registrar,
+                    "registry_details" => $registry_details,
+                    "edit" => '',
+                    );
+
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        return response()->json($response);
+
+    }
+
+    public function evidenceOthers(Request $request){
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); 
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+        $columnIndex = $columnIndex_arr[0]['column']; 
+        $columnName = $columnName_arr[$columnIndex]['data']; 
+        $columnSortOrder = $order_arr[0]['dir']; 
+        $searchValue = $search_arr['value']; 
+        $ack_no="";
+        $case_number = $request->case_number;
+        $url = $request->url;
+        $domain = $request->domain;
+        $evidence_type = $request->evidence_type;
+        $evidence_type_text = $request->evidence_type_text;
+        $from_date = $request->from_date;
+        $to_date = $request->to_date;
+
+        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain, $evidence_type, $evidence_type_text, $from_date, $to_date) {
+
+            $pipeline = [
+                [
+                    '$group' => [
+                        '_id' => '$case_number',
+                        'evidence_type' => ['$push' => '$evidence_type'],
+                        'url' => ['$push' => '$url'],
+                        'domain' => ['$push' => '$domain'],
+                        'registry_details' => ['$push' => '$registry_details'],
+                        'ip' => ['$push' => '$ip'],
+                        'registrar' => ['$push' => '$registrar'],
+                    ]
+                ],
+                [
+                    '$sort' => [
+                        '_id' => 1,
+                    ]
+                ],
+                [
+                    '$skip' => (int)$start
+                ],
+                [
+                    '$limit' => (int)$rowperpage
+                ],
+            ];
+          
+        
+            if (isset($case_number)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'case_number' => $case_number
+                        ]
+                    ]
+                ], $pipeline);
+                
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+                
+            }
+            if (isset($evidence_type)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                        'evidence_type' => $evidence_type
+                        ]
+                    ]
+                ], $pipeline);
+               
+            }
+            if ($from_date && $to_date){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'created_at' => ['$gte' => new UTCDateTime(strtotime($from_date) * 1000), '$lte' => new UTCDateTime(strtotime($to_date) * 1000)]
+                        ]
+                    ]
+                ], $pipeline);
+            }
+        
+            return $collection->aggregate($pipeline);
+        });
+        
+        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$evidence_type , $evidence_type_text ) {
+
+            $pipeline = [
+                [
+                    '$group' => [
+                        '_id' => '$case_number'
+                    ]
+                ]
+            ];
+
+            if (isset($case_number)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'case_number' => $case_number
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($url)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'url' => $url
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($domain)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'domain' => $domain
+                        ]
+                    ]
+                ], $pipeline);
+            }
+            if (isset($evidence_type)){
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'evidence_type' => $evidence_type_text
+                        ]
+                    ]
+                ], $pipeline);
+            }
+
+
+            return $collection->aggregate($pipeline);
+        });
+       
+        $totalRecords = count($distinctEvidences); 
+        $data_arr = array();
+        $i = $start;
+
+
+        $totalRecordswithFilter =  $totalRecords;
+      
+        foreach($evidences as $record){
+
+            $i++;
+            $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";
+
+            $case_number = $record->_id;
+
+            foreach ($record->url as $item) {
+                $url .= $item."<br>";
+            }
+            foreach ($record->evidence_type as $item) {
+             $evidence_type .= $item."<br>";
+            }
+            foreach ($record->domain as $item) {
+                $domain .= $item."<br>";
+            }
+            foreach ($record->ip as $item) {
+                $ip .= $item."<br>";
+            }
+            foreach ($record->registrar as $item) {
+                $registrar .= $item."<br>";
+            }
+            foreach ($record->registry_details as $item) {
+                $registry_details .= $item."<br>";
+            }
+
+            $data_arr[] = array(
+                    "id" => $i,
+                    "case_number" => $case_number,
+                    "evidence_type" => $evidence_type,
+                    "url" => $url,
+                    "domain" => $domain,
+                    "ip" => $ip,
+                    "registrar"=>$registrar,
+                    "registry_details" => $registry_details,
+                    "edit" => '<button type="button" class="btn btn-primary btn-small">Mail</button>',
+                    );
+
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        return response()->json($response);
     }
 
 

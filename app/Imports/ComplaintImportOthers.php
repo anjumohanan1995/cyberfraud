@@ -7,11 +7,12 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Illuminate\Support\Facades\Validator;
-use App\Hospital;
 use App\Models\ComplaintOthers;
-use Auth;
+use App\Models\EvidenceType;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
 
-class ComplaintImportOthers implements ToCollection, WithStartRow
+class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValidation
 {
     /**
      * @param Collection $collection
@@ -30,67 +31,49 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
      */
     public function startRow(): int
     {
-        return 2;
+        return 1;
     }
     /**
      * @param array $row
      *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function collection(Collection $collection)
+    public function collection(Collection $rows)
     {
-        // dd($collection);
-        /*dd($collection);
-         return new Patient([
-            'name'     => @$collection[0],
-            'age'    => @$collection[1],
-            'user_id' =>Auth::user()->id
-
-
-        ]);*/
-
-        $collection->transform(function ($row){
-            
-            return [
-                'url'        => $row[1],
-                'domain'     => $row[2],
-                'ip'=> $row[3],
-                'registrar'=> $row[4],
-                'registry_details'=> $row[5],
-                'remarks'=> $row[6],
-                'ticket_number'=> $row[7],
-                'evidence_type' => $row[8],
-                'source' => $row[9],
-            ];
-        });
-
-        $validate = Validator::make($collection->toArray(),[
-            '*.url' => 'required|max:150',
+       foreach($rows as $row){
+        $data = [
+                'case_number' => $this->caseNumber,
+                'source_type' => $this->source_type,
+                'file_name'   => $this->filename,
+                'url'        => $row['url'],
+                'domain'     => $row['domain'],
+                'ip'=> $row['ip'],
+                'registrar'=> $row['registrar'],
+                'registry_details'=> $row['registry_details'],
+                'remarks'=> $row['remarks'],
+                'ticket_number'=> $row['ticket_number'],
+                'evidence_type' => $row['evidence_type'],
+                'source' => $row['source']
+        ];
+        ComplaintOthers::create($data);
+       }
+ 
+    }
+        
+    public function rules(): array
+    {
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+        
+        $uniqueItems = array_unique($evidenceTypes);
+        
+        return[
+            'url' => 'required',
+            'domain' => 'required',
+            'evidence_type' => 'required|in:' . implode(',', $uniqueItems),
            
-        ])->validate();
-
-
-        foreach ($collection as $collect) {
-
-            $complaint = new ComplaintOthers();
-            $complaint->source_type = $this->source_type;
-            $complaint->case_number = $this->caseNumber;
-            $complaint->url = preg_replace('/\s+/', '', $collect['url']);
-            $complaint->domain = $collect['domain'];
-            $complaint->registry_details = $collect['registry_details'];
-            $complaint->ip = $collect['ip'];
-            $complaint->registrar = $collect['registrar'];
-            $complaint->remarks = $collect['remarks'];
-            $complaint->ticket_number = $collect['ticket_number'];
-            $complaint->evidence_type = $collect['evidence_type'];
-            $complaint->source = $collect['source'];
-            $complaint->filename = $this->filename;                 
-            $complaint->save();
-              
-
-
-
-
-        }
+        ];
     }
 }

@@ -22,7 +22,7 @@
     }
 </style>
 
-    </style>
+   
     @php
     use Illuminate\Support\Facades\Crypt;
     $id = request()->segment(count(request()->segments()));
