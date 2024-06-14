@@ -54,16 +54,33 @@
                                 <h4 class="card-title mg-b-10">
                                     All Source Types
                                 </h4>
-
-                                    <div class="col-md-5"></div>
-                                    <div class="col-md-2 text-center">
-                                        <div class="task-box primary  mb-0">
-                                            <a class="text-white" href="{{ route('sourcetype.create') }}">
-                                                <p class="mb-0 tx-12 "> Source Type </p>
-                                                <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                            </a>
-                                        </div>
+                                <div class="col-md-3"></div>
+                                <div class="col-md-2 text-center">
+                                    <div class="task-box primary  mb-0">
+                                        <a class="text-white" href="{{ route('sourcetype.create') }}">
+                                            <p class="mb-0 tx-12 "> Source Type </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
                                     </div>
+                                </div>
+                                <div class="col-md-2 col-6 text-center">
+                                    <div class="task-box primary  mb-0">
+                                        <a class="text-white" href="{{ route('category.index') }}">
+                                            <p class="mb-0 tx-12">Category</p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-2 col-6 text-center">
+                                    <div class="task-box primary  mb-0">
+                                        <a class="text-white" href="{{ route('subcategory.create') }}">
+                                            <p class="mb-0 tx-12">SubCategory</p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
+
                                     <div class="col-md-2 text-center">
                                         <div class="task-box primary  mb-0">
                                             <a class="text-white" href="{{ url('profession') }}">

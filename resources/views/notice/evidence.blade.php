@@ -212,6 +212,45 @@ $(document).ready(function() {
         }
     })
 
+   function display_notice_list(){
+        var from_date = $("#from_date").val();
+        var to_date = $("#to_date").val();
+        var ackno = $("#acknowledgement_number").val();
+                  
+        if ($.fn.DataTable.isDataTable('#notice')){
+          $('#notice').DataTable().destroy();
+        }
+        var tableNew = $('#notice').DataTable({
+        processing: true,
+        serverSide: true,
+       
+        ajax:{
+        url: "{{ route('get_evidence_list_notice') }}",
+        data: function(d) {
+        return $.extend({}, d, {
+            from_date: from_date,
+            to_date: to_date,
+            ackno: ackno,
+         });
+        }
+        },
+        columns: [
+        { data: 'id' },
+        { data: 'acknowledgement_no' },
+        { data: 'evidence_type' },
+        { data: 'url' },
+        { data: 'domain' },
+        { data: 'ip' },
+        { data: 'edit' }
+        ],
+        order: [0, 'desc'],
+        ordering: true
+        });
+        
+   } 
+
+   display_notice_list();
+
 })
 
 </script>
