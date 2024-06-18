@@ -62,7 +62,7 @@ class ReportsController extends Controller
         $bank_action_status = $request->get('bank_action_status');
         $evidence_type_ncrp = $request->get('evidence_type_ncrp');
         $search_value_ncrp = $request->get('search_value_ncrp');
-        // dd($search_value_ncrp);
+        // dd($evidence_type_ncrp);
         $normalizedBankActionStatus = strtolower(trim($bank_action_status));
         $normalizedBankActionStatus = preg_replace('/\s+/', '', $normalizedBankActionStatus);
 
@@ -108,6 +108,7 @@ if ($evidence_type_ncrp || $search_value_ncrp) {
         $filteredAckNos = Evidence::where('evidence_type_id', $evidence_type_ncrp)
                                   ->where('url', 'like', '%' . $search_value_ncrp . '%')
                                   ->pluck('ack_no');
+                                //   dd($filteredAckNos);
     } elseif ($evidence_type_ncrp) {
         // If only evidence type is provided
         $filteredAckNos = Evidence::where('evidence_type_id', $evidence_type_ncrp)
@@ -119,20 +120,19 @@ if ($evidence_type_ncrp || $search_value_ncrp) {
     }
 
     // Total records count with filter
-    $totalRecordswithFilter = 0;
+    // $totalRecords = 0;
+    // $q = " ";
 
     if ($filteredAckNos->isNotEmpty()) {
-        // Loop through each acknowledgment number
-        foreach ($filteredAckNos as $ackNumber) {
-            // Apply the filter to the query
-            $query->whereIn('acknowledgement_no', [(int)$ackNumber]);
 
-            // Calculate the total records count with the applied filter
-            $totalRecords = Complaint::whereIn('acknowledgement_no', [(int)$ackNumber])->count();
+            // Extract acknowledgment numbers from collection
+    $ackNumbers = $filteredAckNos->map(function ($ackNumber) {
+        return (int) $ackNumber;
+    })->toArray();
+    // dd($ackNumbers);
 
-            // Increment total records count
-            $totalRecordswithFilter += $totalRecords; // Use += to accumulate the count
-        }
+    $query->whereIn('acknowledgement_no', $ackNumbers);
+
     } else {
         // If no acknowledgment numbers are found, apply an empty filter to return no results
         $query->whereIn('acknowledgement_no', []);
