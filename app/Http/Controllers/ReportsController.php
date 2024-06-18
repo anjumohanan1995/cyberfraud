@@ -361,7 +361,7 @@ if ($format === 'ncrp') {
     $csvOutput = $csv->toString();
     return response($csvOutput, 200, [
         'Content-Type' => 'text/csv',
-        'Content-Disposition' => 'attachment; filename="data.csv"',
+        'Content-Disposition' => 'attachment; filename="Ncrp case data.csv"',
     ]);
 } elseif ($format === 'excel') {
     if (empty($data_arr_print)) {
@@ -383,7 +383,7 @@ if ($format === 'ncrp') {
     }, $data_arr_print);
 
     // Generate and return Excel file with specified headings
-    return Excel::download(new \App\Exports\ComplaintExport($data_arr_print, $headings), 'data.xlsx');
+    return Excel::download(new \App\Exports\ComplaintExport($data_arr_print, $headings), 'Ncrp case data.xlsx');
 } else {
     return response()->json(['error' => 'Invalid format'], 400);
 }
@@ -1112,7 +1112,7 @@ if ($format === 'others') {
     $csvOutput = $csv->toString();
     return response($csvOutput, 200, [
         'Content-Type' => 'text/csv',
-        'Content-Disposition' => 'attachment; filename="data.csv"',
+        'Content-Disposition' => 'attachment; filename="Other case data.csv"',
     ]);
 } elseif ($format === 'excel') {
     if (empty($data_arr_print)) {
@@ -1127,7 +1127,7 @@ if ($format === 'others') {
     ];
 
     // Generate and return Excel file with specified headings
-    return Excel::download(new \App\Exports\ComplaintExport($data_arr_print, $headings), 'data.xlsx');
+    return Excel::download(new \App\Exports\ComplaintExport($data_arr_print, $headings), 'Other case data.xlsx');
 } else {
     return response()->json(['error' => 'Invalid format'], 400);
 }
