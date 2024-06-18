@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\DB;
 use MongoDB\Client;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\SourceType;
+use Excel;
+use App\Models\EvidenceType;
+use App\exports\SampleExport;
 
 
 
@@ -738,22 +741,91 @@ if ($fir_lodge == "0") {
     public function detailsView(){
         return view('dashboard.case-data-list.index');
     }
+   
     public function caseDataView(Request $request,$id){
         $id = Crypt::decrypt($id);
 
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
-        $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
+        $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->orderBy('Layer','asc')->get();
         $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
 
+       // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
+        $layers = BankCasedata::where('acknowledgement_no',(int)$id)->groupBy('Layer')->pluck('Layer');
+        $pending_banks_array = [];
+        for($i=1;$i<=count($layers);$i++){
+           
+            $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
+
+            $transaction_numbers_right_side="";$transaction_numbers_left_side="";$transaction_numbers_left_side_array="";
+            $transaction_numbers_left_side_array_final="";
+
+            $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)
+                                                            ->where('action_taken_by_bank','Money Transfer to')->get();
+            
+            ++$i;
+
+            $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
+
+            $transaction_numbers_left_side_array = explode(" ",$transaction_numbers_left_side);
+            $mergedArray = [];
+
+            foreach ($transaction_numbers_left_side_array as $item) {
+         
+                $values = explode(',', trim($item, '[]'));
+                $values = array_map('trim', $values);
+                $mergedArray = array_merge($mergedArray, $values);
+            }
+
+            $transaction_numbers_left_side_array_final = array_map(function($item) {
+                return intval(trim($item, '"'));
+            }, $mergedArray);
+
+            foreach ($transaction_numbers_right_side as $tn) {
+                if($tn->transaction_id_sec){
+                    if (!(in_array($tn->transaction_id_sec, $transaction_numbers_left_side_array_final))) {
+                        $j=$i-1;
+                        $pending_banks_array[] = array(
+                            "layer"=>$j,
+                            "pending_banks" => $tn->bank,
+                            "transaction_id" => $tn->transaction_id_sec
+                        );             
+                     }
+                     
+                }
+                
+
+             } 
+             --$i;
+        }
+
+    $groupedData = [];
+    foreach ($pending_banks_array as $item) {
+    $layer = $item['layer'];
+    $pendingBank = $item['pending_banks'];
+    $transactionId = $item['transaction_id'];
+
+    if (!isset($groupedData[$layer])) {
+        $groupedData[$layer] = [];
+    }
+
+    $groupedData[$layer][] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId];
+    }
+
+    $uniqueLayers = array_keys($groupedData);
+
+    $finalData_pending_banks = [];
+    foreach ($uniqueLayers as $layer) {
+    $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
+    }
+   
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')
         ->get();
-       // dd($id);
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions'));
+        
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions','finalData_pending_banks'));
     }
-
 
     public function editdataList(Request $request){
         $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
@@ -1137,5 +1209,28 @@ if ($fir_lodge == "0") {
             }
             return $caseNumber;
     }
+
+    public function createDownloadTemplate(){
+        
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+    
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+        
+        $additionalRowsData = [
+            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Ticket Number','Evidence Type','Source' ],
+            ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','Instagram','Public'],
+            ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','Website','Public'],
+            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebok','Open'],
+         
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+    } 
 
 }

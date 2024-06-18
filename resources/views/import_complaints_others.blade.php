@@ -43,9 +43,11 @@
                                         </button>
                                     </div>
                                 @endif
-                                @if (session('error'))
+                                @if ($errors->any())
                                     <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-                                        {{ session('error') }}
+                                       @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                        @endforeach
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -107,13 +109,10 @@
                                                         <label for="place">File:</label>
                                                         <input type="file" id="place" name="complaint_file" class="form-control">
 
-                                                        @error('complaint_file')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                        @enderror
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2 justify-content-center align-self-center">
-                                                    <a href="{{ asset('case_others_template/template.xlsx')  }}" download="case_data_others_template.xlsx" ><button type="button" class="btn btn-primary btn-sm">Template <br>
+                                                    <a href="{{ route('create-download-template')  }}"><button type="button" class="btn btn-primary btn-sm">Template <br>
                                                     <i class="fa fa-download"></i></button>
                                                     </a>
                                                 </div>

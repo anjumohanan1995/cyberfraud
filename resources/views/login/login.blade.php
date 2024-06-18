@@ -99,7 +99,7 @@
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <button class="btn btn-main-primary btn-block">Sign In</button>
+                                <button onclick="validateForm()" class="btn btn-main-primary btn-block">Sign In</button>
                             </form>
 
 
@@ -113,6 +113,7 @@
             </div>
         </div>
     </div>
+
 
 </body>
 
