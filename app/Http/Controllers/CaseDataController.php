@@ -782,7 +782,7 @@ if ($fir_lodge == "0") {
                 return intval(trim($item, '"'));
             }, $mergedArray);
 
-            foreach ($transaction_numbers_right_side as $tn) {
+            foreach ($transaction_numbers_right_side as $tn){
                 if($tn->transaction_id_sec){
                     if (!(in_array($tn->transaction_id_sec, $transaction_numbers_left_side_array_final))) {
                         $j=$i-1;
@@ -793,6 +793,7 @@ if ($fir_lodge == "0") {
                         );             
                      }
                      
+                     
                 }
                 
 
@@ -801,6 +802,7 @@ if ($fir_lodge == "0") {
         }
 
     $groupedData = [];
+  
     foreach ($pending_banks_array as $item) {
     $layer = $item['layer'];
     $pendingBank = $item['pending_banks'];
@@ -819,6 +821,7 @@ if ($fir_lodge == "0") {
     foreach ($uniqueLayers as $layer) {
     $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
     }
+   // dd($finalData_pending_banks);
    
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')

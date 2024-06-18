@@ -23,6 +23,15 @@
         .table thead th {
             background-color: #f2f2f2;
         }
+        .tdblack{
+            color:black !important;
+        }
+        .tdgreen{
+            color:green !important;
+        }
+        .tdred{
+             color:red !important;
+        }
     </style>
     <!-- container -->
     <div class="container-fluid">
@@ -254,26 +263,39 @@
                             <br>
                             <table class="table table-bordered" style="width:auto">
                                 <thead>
-                                    <tr>
-                                        <th>Layer</th>
-                                        <th>Pending Banks</th>
-                                        <th>Transaction ID</th>
+                                    <tr >
+                                        <th class="tdblack">Layer</th>
+                                        <th class="tdblack">Pending Banks</th>
+                                        <th class="tdblack">Transaction ID</th>
                                     </tr>
-                                @foreach ($finalData_pending_banks as $item)    
+                                @if($finalData_pending_banks)
+                                    @foreach ($finalData_pending_banks as $item)    
                                 <tr>
-                                    <td>{{ $item['layer'] }}</td>
-                                    <td>
+                                    <td class="tdred">{{ $item['layer'] }}</td>
+                                    <td class="tdred">
                                     @foreach ($item['pending_banks'] as $bank)
                                         {{ $bank['pending_banks'] }} <br>
                                     @endforeach
                                     </td>
-                                    <td>
+                                    <td class="tdred">
                                          @foreach ($item['pending_banks'] as $trns)
-                                        {{ $bank['transaction_id'] }} <br>
+                                        {{ $trns['transaction_id'] }} <br>
                                     @endforeach
                                     </td>
                                 </tr>
                                 @endforeach
+                           
+                                @else
+
+                                <tr>
+                                    <td colspan="3" class="tdgreen">No pending banks found </td>
+                                </tr>
+
+                                @endif
+
+                                <tr>
+                                </tr>
+                                
                                 </thead>
                             </table>
                             
