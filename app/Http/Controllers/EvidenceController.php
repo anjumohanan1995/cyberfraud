@@ -82,35 +82,41 @@ class EvidenceController extends Controller
             foreach ($request->evidence_type as $key => $type) {
                 $evidence = new Evidence();
                 $evidence->evidence_type = $type;
+                // dd($request->evidence_type_id[$key]);
                 $evidence->evidence_type_id = $request->evidence_type_id[$key];
 
-                // Initialize collections for each evidence type
-                $pdfCollection = [];
-                $screenshotCollection = [];
 
-                // Handle PDF files
-                if ($request->hasFile('pdf')) {
-                    $pdfCollection = [];
-                    foreach ($request->file('pdf') as $pdf) {
-                        $pdfName = uniqid() . '.' . $pdf->getClientOriginalExtension(); // Generate unique name
-                        $pdfCollection[] = $pdf->storeAs('public/pdf', $pdfName);
-                    }
-                    $pdfPathsString = implode(',', $pdfCollection);
-                    $evidence->pdf = $pdfPathsString;
+                if ($request->hasFile('pdf') && $request->file('pdf')[$key]->isValid()) {
+                    $pdfFile = $request->file('pdf')[$key];
+
+                    // Generate a unique file name
+                    $uniqueFileName = uniqid() . '_' . $pdfFile->getClientOriginalName();
+
+                    // Store the file with the unique name
+                    $filePath = $pdfFile->storeAs('public/pdf', $uniqueFileName);
+
+                    // Uncomment this line if you need to debug the file path
+                    // dd($filePath);
+
+                    $evidence->pdf = $filePath;
+                    // dd($evidence);
                 }
 
-                // Handle Screenshots
+                if ($request->hasFile('screenshots') && $request->file('screenshots')[$key]->isValid()) {
+                    $screenshotFile = $request->file('screenshots')[$key];
 
-                if ($request->hasFile('screenshots')) {
-                    $screenshotCollection = [];
-                    foreach ($request->file('screenshots') as $screenshot) {
-                        $screenshotName = uniqid() . '.' . $screenshot->getClientOriginalExtension(); // Generate unique name
-                        $screenshotCollection[] = $screenshot->storeAs('public/screenshots', $screenshotName);
-                    }
-                    $screenshotPathsString = implode(',', $screenshotCollection);
-                    $evidence->screenshots = $screenshotPathsString;
+                    // Generate a unique file name
+                    $uniqueFileName = uniqid() . '_' . $screenshotFile->getClientOriginalName();
+
+                    // Store the file with the unique name
+                    $filePath = $screenshotFile->storeAs('public/screenshots', $uniqueFileName);
+
+                    // Uncomment this line if you need to debug the file path
+                    // dd($filePath);
+
+                    $evidence->screenshots = $filePath;
+                    // dd($evidence);
                 }
-
 
                 // Assign other data
                 $evidence->ack_no = $ack_no;

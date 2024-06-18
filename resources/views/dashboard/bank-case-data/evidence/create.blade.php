@@ -285,7 +285,9 @@
                                                     @endif
                                                 </div>
                                                 <div>
-                                                    <button type="button" class="btn btn-danger btn-sm remove-btn left-margin" style="display: none;">Remove</button><br>
+                                                    <button type="button" class="btn btn-danger btn-sm remove-btn left-margin" style="display: none;">
+                                                        <i class="fas fa-trash-alt"></i> <!-- Font Awesome delete icon -->
+                                                    </button><br>
                                                 </div><br>
                                             </div>
                                         @endforeach
