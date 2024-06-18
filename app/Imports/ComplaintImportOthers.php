@@ -53,7 +53,8 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
                 'remarks'=> $row['remarks'],
                 'ticket_number'=> $row['ticket_number'],
                 'evidence_type' => $row['evidence_type'],
-                'source' => $row['source']
+                'source' => $row['source'],
+                'status' => 1
         ];
         ComplaintOthers::create($data);
        }

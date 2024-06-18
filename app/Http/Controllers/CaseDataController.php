@@ -872,6 +872,20 @@ if ($fir_lodge == "0") {
         return response()->json(['status'=>'Status changed successfully.']);
     }
 
+    public function activateLinkIndividualOthers(Request $request)
+    {
+
+        //$id = Crypt::decrypt($request->com_id);
+        $case_id =$request->case_id;
+        $status = (int) $request->status;
+
+        ComplaintOthers::where('_id', $case_id)
+                 ->update(['status' => $status]);
+
+
+        return response()->json(['status'=>'Status changed successfully.']);
+    }
+
     public function caseDataOthers(){
        return view('dashboard.case-data-list.case-data-list-others');
     }

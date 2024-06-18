@@ -142,6 +142,8 @@ Route::middleware('auth')->group(function () {
     Route::get('activateLink', [CaseDataController::class, 'activateLink']);
     Route::get('activateLinkIndividual', [CaseDataController::class, 'activateLinkIndividual']);
 
+    Route::get('activateLinkIndividualOthers', [CaseDataController::class, 'activateLinkIndividualOthers'])->name('activateLinkIndividualOthers');
+
     //for uploading others case data
     Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
 

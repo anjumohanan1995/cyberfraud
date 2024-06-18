@@ -591,7 +591,7 @@ class EvidenceController extends Controller
                     "ip" => $ip,
                     "registrar"=>$registrar,
                     "registry_details" => $registry_details,
-                    "edit" => '<button type="button" class="btn btn-primary btn-small">Mail</button>',
+                    "edit" => '',
                     );
 
         }
