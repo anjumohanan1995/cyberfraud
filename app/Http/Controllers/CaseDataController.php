@@ -950,6 +950,18 @@ if ($fir_lodge == "0") {
                     ]
                 ], $pipeline);
             }
+
+            if ($utcStartDate && $utcEndDate) {
+                $pipeline = array_merge([
+                    ['$match' => [
+                        'createdAt' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                        ]
+                    ]]
+                ], $pipeline);
+            }
+            
             if (isset($url)){
                 $pipeline = array_merge([
                     [
