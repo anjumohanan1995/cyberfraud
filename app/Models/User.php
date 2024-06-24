@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
-use Spatie\Permission\Traits\HasRoles;
+// use Spatie\Permission\Traits\HasRoles;
 
 class User extends Eloquent implements AuthenticatableContract
 {
-    use HasApiTokens, HasFactory, Notifiable, Authenticatable, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, Authenticatable;
 
     protected $connection = 'mongodb';
 

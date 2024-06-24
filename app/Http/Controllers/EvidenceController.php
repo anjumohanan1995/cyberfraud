@@ -195,8 +195,8 @@ class EvidenceController extends Controller
         ->whereNull('deleted_at')
         ->get();
 
-   
-       
+
+
         return view('evidence-management.list',compact('evidenceTypes'));
     }
 
@@ -204,15 +204,15 @@ class EvidenceController extends Controller
 
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); 
+        $rowperpage = $request->get("length");
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
-        $columnIndex = $columnIndex_arr[0]['column']; 
-        $columnName = $columnName_arr[$columnIndex]['data']; 
-        $columnSortOrder = $order_arr[0]['dir']; 
-        $searchValue = $search_arr['value']; 
+        $columnIndex = $columnIndex_arr[0]['column'];
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
         $ack_no="";
         $acknowledgement_no = $request->acknowledgement_no;
         $url = $request->url;
@@ -232,13 +232,13 @@ class EvidenceController extends Controller
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
                 $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-    
+
                 $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
                 $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
             }
 
             $pipeline = [
-                
+
                 [
                     '$group' => [
                         '_id' => '$ack_no',
@@ -248,7 +248,7 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
-                        
+
                     ]
                 ],
                 [
@@ -262,7 +262,7 @@ class EvidenceController extends Controller
                 [
                     '$limit' => (int)$rowperpage
                 ],
-                
+
             ];
 
             if (isset($acknowledgement_no)){
@@ -311,16 +311,16 @@ class EvidenceController extends Controller
                     ]]
                 ], $pipeline);
             }
-                  
+
             return $collection->aggregate($pipeline);
         });
-        
+
         $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ,$from_date , $to_date) {
 
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
                 $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-    
+
                 $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
                 $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
             }
@@ -380,7 +380,7 @@ class EvidenceController extends Controller
                     ]]
                 ], $pipeline);
             }
-            
+
             return $collection->aggregate($pipeline);
         });
 
@@ -390,7 +390,7 @@ class EvidenceController extends Controller
 
 
         $totalRecordswithFilter =  $totalRecords;
-      
+
         foreach($evidences as $record){
 
             $i++;
@@ -445,15 +445,15 @@ class EvidenceController extends Controller
     public function evidenceOthers(Request $request){
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); 
+        $rowperpage = $request->get("length");
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
-        $columnIndex = $columnIndex_arr[0]['column']; 
-        $columnName = $columnName_arr[$columnIndex]['data']; 
-        $columnSortOrder = $order_arr[0]['dir']; 
-        $searchValue = $search_arr['value']; 
+        $columnIndex = $columnIndex_arr[0]['column'];
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
         $ack_no="";
         $case_number = $request->case_number;
         $url = $request->url;
@@ -467,14 +467,14 @@ class EvidenceController extends Controller
             $from_date = Carbon::today('Asia/Kolkata')->toDateString();
             $to_date = $from_date;
         }
-      
+
         $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain, $evidence_type, $evidence_type_text, $from_date, $to_date) {
 
 
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
                 $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-    
+
                 $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
                 $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
             }
@@ -503,8 +503,8 @@ class EvidenceController extends Controller
                     '$limit' => (int)$rowperpage
                 ],
             ];
-          
-        
+
+
             if (isset($case_number)) {
                 $pipeline = array_merge([
                     [
@@ -513,7 +513,7 @@ class EvidenceController extends Controller
                         ]
                     ]
                 ], $pipeline);
-                
+
             }
             if (isset($url)){
                 $pipeline = array_merge([
@@ -532,7 +532,7 @@ class EvidenceController extends Controller
                         ]
                     ]
                 ], $pipeline);
-                
+
             }
             if (isset($evidence_type)) {
                 $pipeline = array_merge([
@@ -542,7 +542,7 @@ class EvidenceController extends Controller
                         ]
                     ]
                 ], $pipeline);
-               
+
             }
             if ($from_date && $to_date){
                 $pipeline = array_merge([
@@ -554,16 +554,16 @@ class EvidenceController extends Controller
                     ]]
                 ], $pipeline);
             }
-        
+
             return $collection->aggregate($pipeline);
         });
-        
+
         $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$evidence_type , $evidence_type_text , $from_date , $to_date ) {
-            
+
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
                 $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-    
+
                 $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
                 $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
             }
@@ -626,14 +626,14 @@ class EvidenceController extends Controller
 
             return $collection->aggregate($pipeline);
         });
-       
-        $totalRecords = count($distinctEvidences); 
+
+        $totalRecords = count($distinctEvidences);
         $data_arr = array();
         $i = $start;
 
 
         $totalRecordswithFilter =  $totalRecords;
-      
+
         foreach($evidences as $record){
 
             $i++;

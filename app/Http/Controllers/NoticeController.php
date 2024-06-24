@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\SourceType;
 use App\Models\EvidenceType;
 use App\Models\Evidence;
+
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
@@ -21,7 +22,7 @@ class NoticeController extends Controller
     public function index()
     {
         //
-        
+
     }
 
     /**
@@ -98,11 +99,11 @@ class NoticeController extends Controller
     }
 
     public function evidenceListNotice(Request $request){
-        
-       
+
+
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); 
+        $rowperpage = $request->get("length");
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
@@ -111,8 +112,8 @@ class NoticeController extends Controller
 
         $columnIndex = $columnIndex_arr[0]['column'];
         $columnName = $columnName_arr[$columnIndex]['data'];
-        $columnSortOrder = $order_arr[0]['dir']; 
-        $searchValue = $search_arr['value']; 
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
 
         $from_date="";$to_date="";
         $from_date = $request->from_date;
@@ -135,13 +136,13 @@ class NoticeController extends Controller
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
                 $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-    
+
                 $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
                 $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
             }
 
             $pipeline = [
-                
+
                 [
                     '$group' => [
                         '_id' => '$ack_no',
@@ -149,7 +150,7 @@ class NoticeController extends Controller
                         'url' => ['$push' => '$url'],
                         'domain' => ['$push' => '$domain'],
                         'ip' => ['$push' => '$ip'],
-                                               
+
                     ]
                 ],
                 [
@@ -163,7 +164,7 @@ class NoticeController extends Controller
                 [
                     '$limit' => (int)$rowperpage
                 ],
-                
+
             ];
 
             if (isset($acknowledgement_no)){
@@ -175,8 +176,8 @@ class NoticeController extends Controller
                     ]
                 ], $pipeline);
             }
-           
-            
+
+
 
             if (isset($source_type)){
                 $pipeline = array_merge([
@@ -197,7 +198,7 @@ class NoticeController extends Controller
                     ]]
                 ], $pipeline);
             }
-                  
+
             return $collection->aggregate($pipeline);
         });
         $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no , $source_type ,$from_date , $to_date) {
@@ -205,7 +206,7 @@ class NoticeController extends Controller
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
                 $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-    
+
                 $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
                 $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
             }
@@ -236,8 +237,8 @@ class NoticeController extends Controller
                     ]
                 ], $pipeline);
             }
-          
-           
+
+
 
             if ($from_date && $to_date){
                 $pipeline = array_merge([
@@ -249,7 +250,7 @@ class NoticeController extends Controller
                     ]]
                 ], $pipeline);
             }
-            
+
             return $collection->aggregate($pipeline);
         });
 
@@ -259,7 +260,7 @@ class NoticeController extends Controller
 
 
         $totalRecordswithFilter =  $totalRecords;
-      
+
         foreach($evidences as $record){
 
             $i++;
@@ -301,6 +302,10 @@ class NoticeController extends Controller
         );
 
         return response()->json($response);
-        
+
     }
+
+
+
+
 }
