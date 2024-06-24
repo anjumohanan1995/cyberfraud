@@ -214,16 +214,23 @@
                         <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Bank</a>
                     </li>
                     <li>
-                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Mule Account</a>
+                        {{-- <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Mule Account</a> --}}
+                        <a class="slide-item" href="#">Against Mule Account</a>
                     </li>
 
                 </ul>
-                
+
             </li>
              <li class="slide">
                 <a class="side-menu__item" href="{{ url('evidence.management') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Evidence Management</span>
+                </a>
+            </li>
+            <li class="slide">
+                <a class="side-menu__item" href="{{ url('muleaccount') }}">
+                    <i class="side-menu__icon fe fe-database"> </i>
+                    <span class="side-menu__label">Mule Account</span>
                 </a>
             </li>
            <li class="slide">

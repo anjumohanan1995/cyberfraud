@@ -69,10 +69,25 @@ class BankImports implements ToCollection, WithStartRow
             '*.transaction_id_or_utr_no' => 'required',
         ])->validate();
 
+        // foreach ($collection as $collect) {
+        //     BankCasedata::create($collect);
+        // }
+
         foreach ($collection as $collect) {
+            // Trim and apply case insensitivity to 'account_no_2' field
+            if (isset($collect['account_no_2'])) {
+                $collect['account_no_2'] = trim(strtolower($collect['account_no_2']));
+            }
+
+            // Trim and apply case insensitivity to 'action_taken_by_bank' field
+            if (isset($collect['action_taken_by_bank'])) {
+                $collect['action_taken_by_bank'] = trim(strtolower($collect['action_taken_by_bank']));
+            }
+
+            // Create BankCasedata object
             BankCasedata::create($collect);
         }
-              
+
         // foreach ($collection as $collect) {
 
         //     // Check if there's an existing record with matching acknowledgement_no and transaction_id_or_utr_no.

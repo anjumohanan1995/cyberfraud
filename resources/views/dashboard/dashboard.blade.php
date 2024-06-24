@@ -104,7 +104,7 @@
 
                                     </div>
                                     <div class="project-content">
-                                        <h6>Total Cases</h6>
+                                        <h6>Total NCRP Cases</h6>
                                         <ul>
                                             <li>
                                                 <strong>Total Number Of Cases:</strong>
@@ -122,7 +122,7 @@
                     </a>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                    {{-- <a href="{{url('filter-case-data')}}"> --}}
+                    <a href="{{url('case-data-others')}}">
                     <div class="card overflow-hidden project-card">
                         <div class="card-body">
                             <div class="d-flex">
@@ -147,11 +147,11 @@
 
                                 </div>
                                 <div class="project-content">
-                                    <h6>New Cases</h6>
+                                    <h6>Total Other Cases</h6>
                                     <ul>
                                         <li>
-                                            <strong>Number Of New Cases:</strong>
-                                            <span>{{ $newComplaints }}</span>
+                                            <strong>Number Of Other Cases:</strong>
+                                            <span>{{ $totalOtherComplaints }}</span>
                                         </li>
                                         <li hidden>
                                             <strong>Completed</strong>
@@ -162,9 +162,10 @@
                             </div>
                         </div>
                     </div>
-                    {{-- </a> --}}
+                    </a>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                    <a href="{{url('muleaccount')}}">
                     <div class="card overflow-hidden project-card">
                         <div class="card-body">
                             <div class="d-flex">
@@ -186,7 +187,7 @@
                                     <ul>
                                         <li>
                                             <strong>Mule Account Count:</strong>
-                                            <span>5</span>
+                                            <span>{{ $muleAccountCount }}</span>
                                         </li>
                                         <li hidden>
                                             <strong>Paid</strong>
@@ -197,6 +198,7 @@
                             </div>
                         </div>
                     </div>
+                    </a>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                     <div class="card overflow-hidden project-card">
@@ -234,7 +236,7 @@
                                     <ul>
                                         <li>
                                             <strong>Total Amount Retrived:</strong>
-                                            <span>$15,425</span>
+                                            <span>0</span>
                                         </li>
                                         <li hidden>
                                             <strong>Expensive</strong>

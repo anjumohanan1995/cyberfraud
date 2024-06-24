@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\SourceType;
 use App\Models\EvidenceType;
 use App\Models\Evidence;
+
 use Carbon\Carbon;
 
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class NoticeController extends Controller
     public function index()
     {
         //
-        
+
     }
 
     /**
@@ -95,11 +96,11 @@ class NoticeController extends Controller
     }
 
     public function evidenceListNotice(Request $request){
-        
-       
+
+
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); 
+        $rowperpage = $request->get("length");
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
@@ -108,8 +109,8 @@ class NoticeController extends Controller
 
         $columnIndex = $columnIndex_arr[0]['column'];
         $columnName = $columnName_arr[$columnIndex]['data'];
-        $columnSortOrder = $order_arr[0]['dir']; 
-        $searchValue = $search_arr['value']; 
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
 
         $from_date="";$to_date="";
         $from_date = $request->from_date;
@@ -125,11 +126,11 @@ class NoticeController extends Controller
         $totalRecordswithFilter = $totalRecords;
 
         if($from_date){
-            
-            
+
+
            // dd($from_date);
         }
-        
+
         $data_arr = array();
         $i=$start;
 
@@ -153,7 +154,7 @@ class NoticeController extends Controller
                 "edit" => $edit
             );
         }
-        
+
         $response = array(
         "draw" => intval($draw),
         "iTotalRecords" => $totalRecords,
@@ -162,6 +163,10 @@ class NoticeController extends Controller
         );
 
         return response()->json($response);
-        
+
     }
+
+
+
+
 }

@@ -20,6 +20,7 @@ use App\Http\Controllers\EvidenceTypeController;
 use App\Http\Controllers\ComplaintGraphController;
 use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\NoticeController;
+use App\Http\Controllers\MuleAccountController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Models\BankCasedata;
@@ -207,7 +208,12 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     //notice module
 
     Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
+
     Route::get('evidence-list-notice', [NoticeController::class,'evidenceListNotice'])->name('get_evidence_list_notice');
+
+    //mule account
+    Route::get('muleaccount', [MuleAccountController::class,'Muleaccount'])->name('muleaccount');
+    Route::get('muleaccount-list', [MuleAccountController::class,'muleaccountList'])->name('get_muleaccount_list');
 
     // category module
     Route::resource('category', CategoryController::class);
