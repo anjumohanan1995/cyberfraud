@@ -587,7 +587,7 @@
             });
 
         });
-    
+
     function showTextBox() {
         var selectedValue = document.getElementById("search-by").value;
         if (selectedValue === "account_id") {

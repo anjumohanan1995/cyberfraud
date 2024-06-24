@@ -116,7 +116,7 @@
                                             <th>IP</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
-
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -128,7 +128,33 @@
                 </div>
             </div>
             <!-- /row -->
-
+            <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="statusModalLabel">Update Case Status</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" data-id="" id="complaint-id">
+                            <div class="form-group">
+                                <label for="complaint-status">Status:</label>
+                                <select id="complaint-status" class="form-control">
+                                    <option value="Started">Started</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="submitStatus()">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
         <!-- /row -->
@@ -182,6 +208,9 @@
                     },
                     {
                         data: 'remarks'
+                    },
+                    {
+                        data: 'action'
                     }
 
                 ],
@@ -190,9 +219,69 @@
             });
 
         });
-</script>
 
-<script>
+// self Assign code start
+
+
+        function upStatus(caseNo) {
+           // alert($(ackno).data('id'));
+            $('#complaint-id').val($(caseNo).data('id'));
+            $('#statusModal').modal('show');
+        }
+
+        function submitStatus() {
+            var caseNo = $('#complaint-id').val();
+            var status = $('#complaint-status').val();
+
+            $.ajax({
+                url: '/update-complaint-status-others',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                data: JSON.stringify({
+                    caseNo: caseNo,
+                    status: status
+                }),
+                success: function(response) {
+                    alert(response.message);
+                    $('#complaints').DataTable().ajax.reload();
+                    $('#statusModal').modal('hide');
+
+                },
+                error: function(xhr) {
+                    alert("Error: " + xhr.responseJSON.message);
+                }
+            });
+        }
+        function selfAssign(caseNo) {
+            //  alert("dsf");
+            var user_id = '{{ Auth::user()->id }}';
+            var case_id = $(caseNo).data('id');
+           //alert(case_id);
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: 'assignedToOthers',
+                data: {
+                    'userid': user_id,
+                    'caseNo': case_id
+                },
+                success: function(data) {
+                    //console.log(data.status)
+                    //toastr.success(data.status, 'Success!');
+                $('#example').DataTable().ajax.reload();
+                }
+            });
+        }
+
+// self Assign code end
+
+
+
+
+
 $(document).ready(function(){
 
     $("#filter").click(function(){

@@ -201,6 +201,7 @@ class CaseDataController extends Controller
 
     public function getDatalist(Request $request)
     {
+
         // Initialize variables
         $draw = $request->get('draw');
         $start = $request->get("start");
@@ -237,6 +238,8 @@ class CaseDataController extends Controller
         }else{
             $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
         }
+
+
 
         // if (!empty($com_status)) {
         //     $query->where('com_status', (int)$com_status);
@@ -388,21 +391,22 @@ if ($fir_lodge == "0") {
                 id="SwitchCheckSizesm' . $com->id . '"
                 ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
          </div>';
+         //dd($com);
          $CUser =Auth::user()->id;
          if(($com->assigned_to == $CUser) && ($com->case_status != null)) {
-            $edit.='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            $edit.='<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                 <div><p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
             <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
 </div>
             </div>';
          }elseif($com->assigned_to == $CUser){
-            $edit.='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            $edit.='<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
 
                 <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
 
                 </div>';
          } elseif($com->assigned_to == null) {
-            $edit.= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            $edit.= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                 <form action="" method="GET">
                 <button data-id="' . $acknowledgement_no . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
                 </form>
@@ -443,32 +447,85 @@ if ($fir_lodge == "0") {
 
         return response()->json($response);
     }
-    public function updateStatus(Request $request)
-    {
-        $request->validate([
-            'ackno' => 'required', // Validate that ackno exists in the complaints table
-            'status' => 'required', // Validate the status
+
+    public function updateStatusOthers(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'caseNo' => 'required', // Validate that caseNo exists in the complaints table
+        'status' => 'required', // Validate the status
+    ]);
+
+    $caseNo = $request->caseNo;
+    $status = $request->status;
+
+    // Log the incoming request data
+    Log::info('Received update status request', ['caseNo' => $caseNo, 'status' => $status]);
+
+    try {
+        // Update all complaints with the matching case_number
+        $affected = ComplaintOthers::where('case_number', $caseNo)
+            ->update(['case_status' => $status]);
+
+        if ($affected > 0) {
+            Log::info('Complaints status updated successfully', ['caseNo' => $caseNo, 'status' => $status]);
+            return response()->json(['message' => 'Case statuses updated successfully']);
+        } else {
+            Log::warning('No complaints found for caseNo', ['caseNo' => $caseNo]);
+            return response()->json(['message' => 'No complaints found for caseNo'], 404);
+        }
+    } catch (\Exception $e) {
+        // Log any exceptions that occur
+        Log::error('An error occurred while updating complaint statuses', [
+            'caseNo' => $caseNo,
+            'status' => $status,
+            'error' => $e->getMessage()
         ]);
 
-        $ackno = (int) $request->ackno;
-        $status = $request->status;
-
-        // Log the incoming request data
-        Log::info('Received update status request', ['ackno' => $ackno, 'status' => $status]);
-
-        // Check if the complaint exists
-        $complaint = Complaint::where('acknowledgement_no', $ackno)->first();
-
-        if ($complaint) {
-            // Update the status
-            $complaint->update(['case_status' => $status]);
-            Log::info('Complaint status updated successfully', ['ackno' => $ackno, 'status' => $status]);
-            return response()->json(['message' => 'Case status updated successfully']);
-        } else {
-            Log::warning('Complaint not found', ['ackno' => $ackno]);
-            return response()->json(['message' => 'Complaint not found'], 404);
-        }
+        return response()->json(['message' => 'An error occurred while updating the statuses'], 500);
     }
+}
+
+    public function updateStatus(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'ackno' => 'required|integer', // Validate that ackno exists and is an integer
+        'status' => 'required|string', // Validate the status and ensure it is a string
+    ]);
+
+    $ackno = (int) $request->ackno;
+    $status = $request->status;
+
+    // Log the incoming request data
+    Log::info('Received update status request', ['ackno' => $ackno, 'status' => $status]);
+
+    try {
+        // Update all complaints with the matching acknowledgement_no
+        $affected = Complaint::where('acknowledgement_no', $ackno)
+            ->update(['case_status' => $status]);
+
+        if ($affected > 0) {
+            Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);
+            return response()->json(['message' => 'Case statuses updated successfully']);
+        } else {
+            Log::warning('No complaints found for ackno', ['ackno' => $ackno]);
+            return response()->json(['message' => 'No complaints found for ackno'], 404);
+        }
+    } catch (\Exception $e) {
+        // Log any exceptions that occur
+        Log::error('An error occurred while updating complaint statuses', [
+            'ackno' => $ackno,
+            'status' => $status,
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json(['message' => 'An error occurred while updating the statuses'], 500);
+    }
+}
+
+
+
 
 //     public function getDatalist(Request $request)
 //     {
@@ -963,6 +1020,21 @@ if ($fir_lodge == "0") {
 
         return response()->json(['status'=>'Self Assigned.']);
     }
+
+    public function AssignedToOthers(Request $request)
+    {
+//dd($request->all());
+        $UserId = $request->userid;
+        $caseNo = $request->caseNo;
+
+        ComplaintOthers::where('case_number', $caseNo)
+                 ->update(['assigned_to' => $UserId]);
+
+
+        return response()->json(['status'=>'Self Assigned.']);
+    }
+
+
     public function activateLinkIndividual(Request $request)
     {
 
@@ -1017,6 +1089,7 @@ if ($fir_lodge == "0") {
         $url = $request->url;
         $registrar = $request->registrar;
         $ip = $request->ip;
+
         //dd($casenumber);
         $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
 
@@ -1031,6 +1104,8 @@ if ($fir_lodge == "0") {
                         'ip' => ['$addToSet' => '$ip'],
                         'registrar' => ['$addToSet' => '$registrar'],
                         'remarks' => ['$addToSet' => '$remarks'],
+                        'assigned_to' => ['$first' => '$assigned_to'], // Include the assigned_to field
+                        'case_status' => ['$first' => '$case_status'],
                     ]
                 ],
                 [
@@ -1165,7 +1240,7 @@ if ($fir_lodge == "0") {
 
         $totalRecordswithFilter =  $totalRecords;
         foreach($complaints as $record){
-
+//dd($record);
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
 
@@ -1193,6 +1268,41 @@ if ($fir_lodge == "0") {
             foreach ($record->remarks as $item) {
                 $remarks .= $item."<br>";
             }
+$caseNo = $record->_id;
+//dd($caseNo);
+            $CUser =Auth::user()->id;
+        //dd($record);
+            if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
+               $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                   <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
+               <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+   </div>
+               </div>';
+            }elseif($record->assigned_to == $CUser){
+
+               $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+
+                   <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+
+                   </div>';
+            } elseif($record->assigned_to == null) {
+                //dd($casenumber);
+               $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                   <form action="" method="GET">
+                   <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                   </form>
+                   </div>';
+            } else {
+               $user = User::find($record->assigned_to);
+              // dd($user);
+               if($user != null){
+
+               $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+               <p class="text-success">Assigned To: '. $user->name.'</p>
+               </div>';
+           }
+            }
+
 
             $data_arr[] = array(
                     "id" => $i,
@@ -1203,6 +1313,7 @@ if ($fir_lodge == "0") {
                     "ip" => $ip,
                     "registrar"=>$registrar,
                     "remarks" => $remarks,
+                    "action" => $edit
                     );
 
         }

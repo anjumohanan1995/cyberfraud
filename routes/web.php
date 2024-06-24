@@ -142,6 +142,8 @@ Route::middleware('auth')->group(function () {
     Route::get('activateLink', [CaseDataController::class, 'activateLink']);
     Route::GET('assignedTo', [CaseDataController::class, 'AssignedTo']);
     Route::post('/update-complaint-status', [CaseDataController::class, 'updateStatus']);
+    Route::GET('assignedToOthers', [CaseDataController::class, 'AssignedToOthers']);
+    Route::post('/update-complaint-status-others', [CaseDataController::class, 'updateStatusOthers']);
     Route::get('activateLinkIndividual', [CaseDataController::class, 'activateLinkIndividual']);
 
     Route::get('activateLinkIndividualOthers', [CaseDataController::class, 'activateLinkIndividualOthers'])->name('activateLinkIndividualOthers');
