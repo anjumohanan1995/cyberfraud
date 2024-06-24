@@ -76,7 +76,7 @@ class BankImports implements ToCollection, WithStartRow
         foreach ($collection as $collect) {
             // Trim and apply case insensitivity to 'account_no_2' field
             if (isset($collect['account_no_2'])) {
-                $collect['account_no_2'] = trim(strtolower($collect['account_no_2']));
+                $collect['account_no_2'] = trim($collect['account_no_2']);
             }
 
             // Trim and apply case insensitivity to 'action_taken_by_bank' field

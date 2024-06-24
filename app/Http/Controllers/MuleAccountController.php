@@ -73,7 +73,7 @@ $filteredAccounts = $groupedQuery->get();
 
 // Modify account_no_2 field to remove [ Reported x times ]
 $filteredAccounts->transform(function ($item) {
-    $item->account_no_2 = preg_replace('/\[ reported \d+ times \]/', '', $item->account_no_2);
+    $item->account_no_2 = preg_replace('/\[ Reported \d+ times \]/', '', $item->account_no_2);
     return $item;
 });
 
@@ -83,7 +83,7 @@ $filteredAccounts->transform(function ($item) {
     foreach ($filteredAccounts as $record) {
         $data_arr[] = [
             'id' => ++$i,
-            'account_no_2' => strtoupper($record->account_no_2),
+            'account_no_2' => $record->account_no_2,
             'Layer' => $record->Layer,
         ];
     }
