@@ -23,8 +23,9 @@ use App\Models\SourceType;
 use Excel;
 use App\Models\EvidenceType;
 use App\exports\SampleExport;
-
-
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -387,6 +388,35 @@ if ($fir_lodge == "0") {
                 id="SwitchCheckSizesm' . $com->id . '"
                 ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
          </div>';
+         $CUser =Auth::user()->id;
+         if(($com->assigned_to == $CUser) && ($com->case_status != null)) {
+            $edit.='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                <div><p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
+            <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
+</div>
+            </div>';
+         }elseif($com->assigned_to == $CUser){
+            $edit.='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+
+                <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
+
+                </div>';
+         } elseif($com->assigned_to == null) {
+            $edit.= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                <form action="" method="GET">
+                <button data-id="' . $acknowledgement_no . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                </form>
+                </div>';
+         } else {
+            $user = User::find($com->assigned_to);
+           // dd($user);
+            if($user != null){
+            $edit.= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            <p class="text-success">Assigned To: '. $user->name.'</p>
+            </div>';
+        }
+         }
+
             $data_arr[] = array(
                 "id" => $i,
                 "acknowledgement_no" => $ack_no,
@@ -413,7 +443,32 @@ if ($fir_lodge == "0") {
 
         return response()->json($response);
     }
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'ackno' => 'required', // Validate that ackno exists in the complaints table
+            'status' => 'required', // Validate the status
+        ]);
 
+        $ackno = (int) $request->ackno;
+        $status = $request->status;
+
+        // Log the incoming request data
+        Log::info('Received update status request', ['ackno' => $ackno, 'status' => $status]);
+
+        // Check if the complaint exists
+        $complaint = Complaint::where('acknowledgement_no', $ackno)->first();
+
+        if ($complaint) {
+            // Update the status
+            $complaint->update(['case_status' => $status]);
+            Log::info('Complaint status updated successfully', ['ackno' => $ackno, 'status' => $status]);
+            return response()->json(['message' => 'Case status updated successfully']);
+        } else {
+            Log::warning('Complaint not found', ['ackno' => $ackno]);
+            return response()->json(['message' => 'Complaint not found'], 404);
+        }
+    }
 
 //     public function getDatalist(Request $request)
 //     {
@@ -741,7 +796,7 @@ if ($fir_lodge == "0") {
     public function detailsView(){
         return view('dashboard.case-data-list.index');
     }
-   
+
     public function caseDataView(Request $request,$id){
         $id = Crypt::decrypt($id);
 
@@ -755,7 +810,7 @@ if ($fir_lodge == "0") {
         $layers = BankCasedata::where('acknowledgement_no',(int)$id)->groupBy('Layer')->pluck('Layer');
         $pending_banks_array = [];
         for($i=1;$i<=count($layers);$i++){
-           
+
             $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
 
             $transaction_numbers_right_side="";$transaction_numbers_left_side="";$transaction_numbers_left_side_array="";
@@ -763,7 +818,7 @@ if ($fir_lodge == "0") {
 
             $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)
                                                             ->where('action_taken_by_bank','Money Transfer to')->get();
-            
+
             ++$i;
 
             $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
@@ -772,7 +827,7 @@ if ($fir_lodge == "0") {
             $mergedArray = [];
 
             foreach ($transaction_numbers_left_side_array as $item) {
-         
+
                 $values = explode(',', trim($item, '[]'));
                 $values = array_map('trim', $values);
                 $mergedArray = array_merge($mergedArray, $values);
@@ -790,19 +845,19 @@ if ($fir_lodge == "0") {
                             "layer"=>$j,
                             "pending_banks" => $tn->bank,
                             "transaction_id" => $tn->transaction_id_sec
-                        );             
+                        );
                      }
-                     
-                     
-                }
-                
 
-             } 
+
+                }
+
+
+             }
              --$i;
         }
 
     $groupedData = [];
-  
+
     foreach ($pending_banks_array as $item) {
     $layer = $item['layer'];
     $pendingBank = $item['pending_banks'];
@@ -822,11 +877,11 @@ if ($fir_lodge == "0") {
     $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
     }
    // dd($finalData_pending_banks);
-   
+
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')
         ->get();
-        
+
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions','finalData_pending_banks'));
     }
 
@@ -857,6 +912,18 @@ if ($fir_lodge == "0") {
 
 
         return response()->json(['status'=>'Status changed successfully.']);
+    }
+    public function AssignedTo(Request $request)
+    {
+//dd($request->all());
+        $UserId = $request->userid;
+        $ackno = (int) $request->acknowledgement_no;
+
+        Complaint::where('acknowledgement_no', $ackno)
+                 ->update(['assigned_to' => $UserId]);
+
+
+        return response()->json(['status'=>'Self Assigned.']);
     }
     public function activateLinkIndividual(Request $request)
     {
@@ -961,7 +1028,7 @@ if ($fir_lodge == "0") {
                     ]]
                 ], $pipeline);
             }
-            
+
             if (isset($url)){
                 $pipeline = array_merge([
                     [
@@ -1240,26 +1307,26 @@ if ($fir_lodge == "0") {
     }
 
     public function createDownloadTemplate(){
-        
+
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
         ->whereNull('deleted_at')
         ->pluck('name')
         ->toArray();
-    
+
         $uniqueItems = array_unique($evidenceTypes);
         $commaSeparatedString = implode(',', $uniqueItems);
 
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
-        
+
         $additionalRowsData = [
             ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Ticket Number','Evidence Type','Source' ],
             ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','Instagram','Public'],
             ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','Website','Public'],
             ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebok','Open'],
-         
+
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
-    } 
+    }
 
 }

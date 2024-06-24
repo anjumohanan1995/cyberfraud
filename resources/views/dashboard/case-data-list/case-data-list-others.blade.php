@@ -57,7 +57,7 @@
                                 <h4 class="card-title mg-b-10">
                                     All Case Data
                                 </h4>
-                           
+
                             </div>
 
                             <form id="complaint-form">
@@ -102,7 +102,7 @@
                                     </div>
                                 </div>
                             </form>
-                            
+
                             <div class="table-responsive mb-0">
                                 <table id="complaints"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
@@ -116,7 +116,7 @@
                                             <th>IP</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -183,7 +183,7 @@
                     {
                         data: 'remarks'
                     }
-                    
+
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
@@ -191,10 +191,10 @@
 
         });
 </script>
- 
+
 <script>
 $(document).ready(function(){
-    
+
     $("#filter").click(function(){
 
         var casenumber = $('#caseNumber').val();
@@ -203,14 +203,14 @@ $(document).ready(function(){
         var registrar = $('#registrar').val();
         var ip = $('#ip').val();
 
-       
+
         if ($.fn.DataTable.isDataTable('#complaints')){
           $('#complaints').DataTable().destroy();
         }
           var table = $('#complaints').DataTable({
                 processing: true,
                 serverSide: true,
-                
+
                 buttons: [
                     'copyHtml5',
                     'excelHtml5',
@@ -256,14 +256,14 @@ $(document).ready(function(){
                     {
                         data: 'remarks'
                     }
-                    
+
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
             });
-            
-        
-       
+
+
+
 
     })
 })
