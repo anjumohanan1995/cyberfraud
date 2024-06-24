@@ -177,6 +177,9 @@ $(document).ready(function() {
         var from_date = $("#from_date").val();
         var to_date = $("#to_date").val();
         var ackno = $("#acknowledgement_number").val();
+        var source_type = $("#source_type").val();
+        var evidence_type = $("#evidence_type").val();
+
 
         if((from_date!=='') || (ackno!=='')){
             
@@ -194,6 +197,8 @@ $(document).ready(function() {
             from_date: from_date,
             to_date: to_date,
             ackno: ackno,
+            source_type:source_type,
+            evidence_type:evidence_type,
          });
         }
         },
@@ -216,6 +221,9 @@ $(document).ready(function() {
         var from_date = $("#from_date").val();
         var to_date = $("#to_date").val();
         var ackno = $("#acknowledgement_number").val();
+        var source_type = $("#source_type").val();
+        var evidence_type = $("#evidence_type").val();
+     
                   
         if ($.fn.DataTable.isDataTable('#notice')){
           $('#notice').DataTable().destroy();

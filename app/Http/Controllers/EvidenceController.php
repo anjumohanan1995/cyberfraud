@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\ComplaintOthers;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
+use MongoDB;
+use Carbon\Carbon;
 
 class EvidenceController extends Controller
 {
@@ -217,8 +219,23 @@ class EvidenceController extends Controller
         $domain = $request->domain;
         $evidence_type = $request->evidence_type;
         $evidence_type_text = $request->evidence_type_text;
+        $from_date = $request->from_date;
+        $to_date = $request->to_date;
+        $current_date = $request->current_date;
+        if($current_date){
+            $from_date = Carbon::today('Asia/Kolkata')->toDateString();
+            $to_date = $from_date;
+        }
 
-        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$domain ,$evidence_type , $evidence_type_text){
+        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$domain ,$evidence_type , $evidence_type_text, $from_date , $to_date){
+
+            if ($from_date && $to_date) {
+                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
+                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
+
+                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
+                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
+            }
 
             $pipeline = [
 
@@ -284,11 +301,29 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
+            if ($from_date && $to_date){
+                $pipeline = array_merge([
+                    ['$match' => [
+                        'created_at' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                        ]
+                    ]]
+                ], $pipeline);
+            }
 
             return $collection->aggregate($pipeline);
         });
 
-        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ) {
+        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ,$from_date , $to_date) {
+
+            if ($from_date && $to_date) {
+                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
+                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
+
+                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
+                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
+            }
 
             $pipeline = [
                 [
@@ -335,6 +370,16 @@ class EvidenceController extends Controller
                 ], $pipeline);
             }
 
+            if ($from_date && $to_date){
+                $pipeline = array_merge([
+                    ['$match' => [
+                        'created_at' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                        ]
+                    ]]
+                ], $pipeline);
+            }
 
             return $collection->aggregate($pipeline);
         });
@@ -417,8 +462,22 @@ class EvidenceController extends Controller
         $evidence_type_text = $request->evidence_type_text;
         $from_date = $request->from_date;
         $to_date = $request->to_date;
+        $current_date = $request->current_date;
+        if($current_date){
+            $from_date = Carbon::today('Asia/Kolkata')->toDateString();
+            $to_date = $from_date;
+        }
 
         $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain, $evidence_type, $evidence_type_text, $from_date, $to_date) {
+
+
+            if ($from_date && $to_date) {
+                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
+                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
+
+                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
+                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
+            }
 
             $pipeline = [
                 [
@@ -487,18 +546,27 @@ class EvidenceController extends Controller
             }
             if ($from_date && $to_date){
                 $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'created_at' => ['$gte' => new UTCDateTime(strtotime($from_date) * 1000), '$lte' => new UTCDateTime(strtotime($to_date) * 1000)]
+                    ['$match' => [
+                        'created_at' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
                         ]
-                    ]
+                    ]]
                 ], $pipeline);
             }
 
             return $collection->aggregate($pipeline);
         });
 
-        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$evidence_type , $evidence_type_text ) {
+        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$evidence_type , $evidence_type_text , $from_date , $to_date ) {
+
+            if ($from_date && $to_date) {
+                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
+                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
+
+                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
+                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
+            }
 
             $pipeline = [
                 [
@@ -542,6 +610,16 @@ class EvidenceController extends Controller
                             'evidence_type' => $evidence_type_text
                         ]
                     ]
+                ], $pipeline);
+            }
+            if ($from_date && $to_date){
+                $pipeline = array_merge([
+                    ['$match' => [
+                        'created_at' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                        ]
+                    ]]
                 ], $pipeline);
             }
 
@@ -591,7 +669,7 @@ class EvidenceController extends Controller
                     "ip" => $ip,
                     "registrar"=>$registrar,
                     "registry_details" => $registry_details,
-                    "edit" => '<button type="button" class="btn btn-primary btn-small">Mail</button>',
+                    "edit" => '',
                     );
 
         }

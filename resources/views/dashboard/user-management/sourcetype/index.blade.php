@@ -54,7 +54,7 @@
                                 <h4 class="card-title mg-b-10">
                                     All Source Types
                                 </h4>
-                                <div class="col-md-3"></div>
+                                <div class="col-md-1"></div>
                                 <div class="col-md-2 text-center">
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('sourcetype.create') }}">

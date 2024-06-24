@@ -141,7 +141,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
     Route::get('activateLink', [CaseDataController::class, 'activateLink']);
+    Route::GET('assignedTo', [CaseDataController::class, 'AssignedTo']);
+    Route::post('/update-complaint-status', [CaseDataController::class, 'updateStatus']);
     Route::get('activateLinkIndividual', [CaseDataController::class, 'activateLinkIndividual']);
+
+    Route::get('activateLinkIndividualOthers', [CaseDataController::class, 'activateLinkIndividualOthers'])->name('activateLinkIndividualOthers');
 
     //for uploading others case data
     Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");

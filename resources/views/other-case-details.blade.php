@@ -84,7 +84,7 @@
                                         <td> {{ $case->registrar }}  </td>
                                         <td> {{ $case->remarks }}  </td>
                                         <td> <a class="btn btn-success" href="{{ route('edit-others-caseData',$case->_id) }}"><i class="fa fa-edit"></i></a> </td>
-                                        <td> <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr"> <input data-id="31505240010711" onchange="confirmActivation(this)" class="form-check-input" type="checkbox" checked="" title="Deactivate">  </div> </td>
+                                        <td> <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr"> <input data-id="{{ $case->id }}"  onchange="confirmActivation(this)" class="form-check-input"  {{ $case->status == 1 ? 'checked' : '' }} title="{{ $case->status == 1 ? 'Deactivate' : 'Activate' }}" type="checkbox" > </div> </td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -103,5 +103,44 @@
         <!-- /row -->
     </div>
 
+<script>
 
+ 
+        function confirmActivation(identifier) {
+            var isChecked = $(identifier).prop('checked');
+            var confirmationMessage = isChecked ? "Do you want to activate this?" :
+                "Do you want to deactivate this?";
+
+            if (confirm(confirmationMessage)) {
+                activateLink(identifier);
+            } else {
+                // Revert the checkbox state if the user cancels the action
+                $(identifier).prop('checked', !isChecked);
+            }
+        }
+
+        function activateLink(identifier) {
+            
+            var status = $(identifier).prop('checked') == true ? 1 : 0;
+            var case_id = $(identifier).data('id');
+          
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: '/activateLinkIndividualOthers',
+                data: {
+                    'status': status,
+                    'case_id': case_id
+                },
+                success: function(data) {
+                    console.log(data.status)
+                    toastr.success(data.status, 'Success!');
+
+                },
+
+            });
+
+        }
+
+</script>
 @endsection

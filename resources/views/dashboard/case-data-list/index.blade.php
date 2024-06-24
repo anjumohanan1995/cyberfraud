@@ -264,9 +264,59 @@
 
         </div>
         <!-- /row -->
+        <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="statusModalLabel">Update Case Status</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" data-id="" id="complaint-id">
+                        <div class="form-group">
+                            <label for="complaint-status">Status:</label>
+                            <select id="complaint-status" class="form-control">
+                                <option value="Started">Started</option>
+                                <option value="Ongoing">Ongoing</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="submitStatus()">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
+    <style>
+        .popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #ccc;
+            padding: 20px;
+            background: #fff;
+            z-index: 1000;
+        }
 
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
     <script src="{{ asset('js/toastr.js') }}"></script>
 
     @if (session('status'))
@@ -287,7 +337,58 @@
                 $(identifier).prop('checked', !isChecked);
             }
         }
+        function upStatus(ackno) {
+           // alert($(ackno).data('id'));
+            $('#complaint-id').val($(ackno).data('id'));
+            $('#statusModal').modal('show');
+        }
 
+        function submitStatus() {
+            var ackno = $('#complaint-id').val();
+            var status = $('#complaint-status').val();
+
+            $.ajax({
+                url: '/update-complaint-status',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                data: JSON.stringify({
+                    ackno: ackno,
+                    status: status
+                }),
+                success: function(response) {
+                    alert(response.message);
+                    $('#example').DataTable().ajax.reload();
+                    $('#statusModal').modal('hide');
+
+                },
+                error: function(xhr) {
+                    alert("Error: " + xhr.responseJSON.message);
+                }
+            });
+        }
+        function selfAssign(ackno) {
+            //  alert("dsf");
+            var user_id = '{{ Auth::user()->id }}';
+            var ack_id = $(ackno).data('id');
+           // alert(ack_id);
+            $.ajax({
+                type: "GET",
+                dataType: "json",
+                url: 'assignedTo',
+                data: {
+                    'userid': user_id,
+                    'acknowledgement_no': ack_id
+                },
+                success: function(data) {
+                    //console.log(data.status)
+                    //toastr.success(data.status, 'Success!');
+                $('#example').DataTable().ajax.reload();
+                }
+            });
+        }
         function activateLink(identifier) {
             //  alert("dsf");
             var status = $(identifier).prop('checked') == true ? 1 : 0;
@@ -359,8 +460,7 @@
             }
             // Add similar logic for other types if needed
         });
-    </script>
-    <script>
+
         $(document).ready(function(){
             var table = $('#example').DataTable({
                 processing: true,
@@ -487,9 +587,7 @@
             });
 
         });
-    </script>
-
-<script>
+    
     function showTextBox() {
         var selectedValue = document.getElementById("search-by").value;
         if (selectedValue === "account_id") {
