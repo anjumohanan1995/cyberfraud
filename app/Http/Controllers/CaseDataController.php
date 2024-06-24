@@ -803,7 +803,32 @@ if ($fir_lodge == "0") {
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
-        $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->orderBy('Layer','asc')->get();
+        $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
+        $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
+
+        $transaction_based_array_final = [];
+        for($i=0;$i<count($layer_one_transactions);$i++){
+
+            $layer = $i+1;
+            $transaction_based_array_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('transaction_id_sec',$layer_one_transactions[$i]->transaction_id_sec)->get();
+
+            $transaction_based_array_final = $transaction_based_array_layer1->toArray();
+           //dd($transaction_based_array_final) ;
+            if($transaction_based_array_final)
+            {
+                $this->checkifempty($layer,$transaction_based_array_final,(int)$id);
+
+            }
+            else{
+                $transaction_based_array_final = array_merge($transaction_based_array_layer1 , $transaction_based_array_final);
+            }
+
+
+
+
+        }
+       //dd($transaction_based_array_final);
+
         $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
 
        // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
@@ -833,18 +858,22 @@ if ($fir_lodge == "0") {
                 $mergedArray = array_merge($mergedArray, $values);
             }
 
-            $transaction_numbers_left_side_array_final = array_map(function($item) {
-                return intval(trim($item, '"'));
-            }, $mergedArray);
+            $transaction_numbers_left_side_array_final = [];
+
+            foreach ($mergedArray as $value) {
+                $cleanedValue = trim($value, '"');
+                $transaction_numbers_left_side_array_final[] = $cleanedValue;
+            }
 
             foreach ($transaction_numbers_right_side as $tn){
                 if($tn->transaction_id_sec){
-                    if (!(in_array($tn->transaction_id_sec, $transaction_numbers_left_side_array_final))) {
+                    if (!in_array($tn->transaction_id_sec, $transaction_numbers_left_side_array_final)) {
                         $j=$i-1;
                         $pending_banks_array[] = array(
                             "layer"=>$j,
                             "pending_banks" => $tn->bank,
-                            "transaction_id" => $tn->transaction_id_sec
+                            "transaction_id" => $tn->transaction_id_sec,
+                            "transaction_amount" => $tn->transaction_amount
                         );
                      }
 
@@ -862,20 +891,22 @@ if ($fir_lodge == "0") {
     $layer = $item['layer'];
     $pendingBank = $item['pending_banks'];
     $transactionId = $item['transaction_id'];
+    $transactionAmount = $item['transaction_amount'];
 
-    if (!isset($groupedData[$layer])) {
-        $groupedData[$layer] = [];
+    if (!isset($finalData_pending_banks)) {
+        $finalData_pending_banks = [];
     }
 
-    $groupedData[$layer][] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId];
+    $finalData_pending_banks[] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId , 'transaction_amount'=> $transactionAmount];
     }
 
-    $uniqueLayers = array_keys($groupedData);
+    // $uniqueLayers = array_keys($groupedData);
 
-    $finalData_pending_banks = [];
-    foreach ($uniqueLayers as $layer) {
-    $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
-    }
+    // $finalData_pending_banks = [];
+    // foreach ($uniqueLayers as $layer) {
+    // $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
+    // }
+
    // dd($finalData_pending_banks);
 
         $professions = Profession::where('status', 'active')
@@ -884,7 +915,14 @@ if ($fir_lodge == "0") {
 
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions','finalData_pending_banks'));
     }
+    public function checkifempty($layer,$transaction_based_array_final,$id){
+        $layer= $layer+1;
+        foreach($transaction_based_array_final as $tbaf){
+            $transaction_based_array = BankCasedata::where('acknowledgement_no',(int)$id)->where('transaction_id_or_utr_no','like','%'.$tbaf['transaction_id_sec'])->where('')->get();
+            dd($transaction_based_array);
+        }
 
+    }
     public function editdataList(Request $request){
         $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
                                 ->where('transaction_id',(int)$request->transaction)
@@ -1015,17 +1053,6 @@ if ($fir_lodge == "0") {
                             'case_number' => $casenumber
                         ]
                     ]
-                ], $pipeline);
-            }
-
-            if ($utcStartDate && $utcEndDate) {
-                $pipeline = array_merge([
-                    ['$match' => [
-                        'createdAt' => [
-                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
-                        ]
-                    ]]
                 ], $pipeline);
             }
 
