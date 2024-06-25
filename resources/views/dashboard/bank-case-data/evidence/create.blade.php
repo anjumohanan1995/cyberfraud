@@ -25,8 +25,17 @@
     margin-left: 100px; /* Adjust the value as needed */
 }
 </style>
+<!-- Include Selectize CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.13.3/css/selectize.default.min.css">
 
-   
+<!-- Include jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Include Selectize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.13.3/js/standalone/selectize.min.js"></script>
+
+
+
     @php
     use Illuminate\Support\Facades\Crypt;
     $id = request()->segment(count(request()->segments()));
@@ -166,7 +175,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="pdf_{{ $index }}">Document:</label>
+                                                                    <label for="pdf_{{ $index }}">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
                                                                     <input type="file" name="pdf[]" class="form-control" multiple>
                                                                     @error('pdf.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -176,7 +185,7 @@
 
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="screenshots_{{ $index }}">Screenshots:</label>
+                                                                    <label for="screenshots_{{ $index }}">Screenshots: <span style="color: red;">(JPEG, BMP, or PNG files are allowed-less than 2MB in size.)</span></label>
                                                                     <input type="file" name="screenshots[]" class="form-control" multiple>
                                                                     @error('screenshots.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -209,14 +218,152 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="ticket_{{ $index }}">Ticket No:</label>
-                                                                    <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Ticket No" >
+                                                                    <label for="ticket_{{ $index }}">Content Removal:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Content Removal" >
                                                                     @error('ticket.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
                                                                     @enderror
                                                                 </div>
                                                             </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket_{{ $index }}">Data disclosure:</label>
+                                                                    <input type="text" name="data_disclosure[]" class="form-control" value="{{ old('data_disclosure.' . $index) }}" placeholder="Enter Data disclosure" >
+                                                                    @error('data_disclosure.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket_{{ $index }}">Preservation:</label>
+                                                                    <input type="text" name="preservation[]" class="form-control" value="{{ old('preservation.' . $index) }}" placeholder="Enter preservation" >
+                                                                    @error('preservation.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
                                                         </div>
+                                                    {{-- @elseif ($oldEvidenceType == 'mobile')
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="mobile_{{ $index }}">Mobile:</label>
+                                                                <input type="text" name="mobile[]" class="form-control" value="{{ old('mobile.' . $index) }}" placeholder="Enter mobile" oninput="extractDomain(this)">
+                                                                @if ($errors->has('mobile.' . $index))
+                                                                    <span class="text-danger">{{ $errors->first('mobile.' . $index) }}</span>
+                                                                @endif
+
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="country_code_{{ $index }}">Country code:</label>
+                                                                <input type="text" name="country_code[]" class="form-control" value="{{ old('country_code.' . $index) }}" placeholder="Enter Domain">
+                                                                @error('country_code.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="registry_details_{{ $index }}">Registry Details:</label>
+                                                                <input type="text" name="registry_details[]" class="form-control" value="{{ old('registry_details.' . $index) }}" placeholder="Enter Registry Details">
+                                                                @error('registry_details.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="ip_{{ $index }}">IP:</label>
+                                                                <input type="text" name="ip[]" class="form-control" value="{{ old('ip.' . $index) }}" placeholder="Enter IP" >
+                                                                @error('ip.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="registrar_{{ $index }}">Registrar:</label>
+                                                                <input type="text" name="registrar[]" class="form-control" value="{{ old('registrar.' . $index) }}" placeholder="Enter Registrar" >
+                                                                @error('registrar.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="pdf_{{ $index }}">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
+                                                                <input type="file" name="pdf[]" class="form-control" multiple>
+                                                                @error('pdf.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="screenshots_{{ $index }}">Screenshots: <span style="color: red;">(JPEG, BMP, or PNG files are allowed-less than 2MB in size.)</span></label>
+                                                                <input type="file" name="screenshots[]" class="form-control" multiple>
+                                                                @error('screenshots.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="remarks_{{ $index }}">Remarks:</label>
+                                                                <textarea name="remarks[]" cols="30" rows="5" class="form-control">{{ old('remarks.' . $index) }}</textarea>
+                                                                @error('remarks.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="category_{{ $index }}">Category:</label>
+                                                                <select class="form-control category" name="category[]">
+                                                                    <option value="">Select Option</option>
+                                                                    <option value="phishing" {{ $oldEvidenceType == 'phishing' ? 'selected' : '' }}>Phishing</option>
+                                                                    <option value="malware" {{ $oldEvidenceType == 'malware' ? 'selected' : '' }}>Malware</option>
+                                                                    <option value="fraud" {{ $oldEvidenceType == 'fraud' ? 'selected' : '' }}>Fraud</option>
+                                                                    <option value="other" {{ $oldEvidenceType == 'other' ? 'selected' : '' }}>Other</option>
+                                                                </select>
+                                                                @error('category.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="ticket_{{ $index }}">Content Removal:</label>
+                                                                <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Content Removal" >
+                                                                @error('ticket.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="ticket_{{ $index }}">Data disclosure:</label>
+                                                                <input type="text" name="data_disclosure[]" class="form-control" value="{{ old('data_disclosure.' . $index) }}" placeholder="Enter Data disclosure" >
+                                                                @error('data_disclosure.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="ticket_{{ $index }}">Preservation:</label>
+                                                                <input type="text" name="preservation[]" class="form-control" value="{{ old('preservation.' . $index) }}" placeholder="Enter preservation" >
+                                                                @error('preservation.' . $index)
+                                                                    <span class="text-danger">{{ $message }}</span>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                    </div> --}}
                                                     @elseif (in_array($oldEvidenceType, ['instagram', 'telegram', 'facebook', 'linkedin', 'skype', 'gmail', 'youtube', 'mobile numbers', 'olx ad', 'twitter', 'other']))
                                                         <div class="row">
                                                             <div class="col-md-6">
@@ -231,7 +378,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="pdf_{{ $index }}">Document:</label>
+                                                                    <label for="pdf_{{ $index }}">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
                                                                     <input type="file" name="pdf[]" class="form-control" multiple>
                                                                     @error('pdf.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -240,7 +387,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="screenshots_{{ $index }}">Screenshots:</label>
+                                                                    <label for="screenshots_{{ $index }}">Screenshots: <span style="color: red;">(JPEG, BMP, or PNG files are allowed-less than 2MB in size.)</span></label>
                                                                     <input type="file" name="screenshots[]" class="form-control" multiple>
                                                                     @error('screenshots.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
@@ -273,9 +420,27 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="ticket_{{ $index }}">Ticket No:</label>
-                                                                    <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Ticket No" >
+                                                                    <label for="ticket_{{ $index }}">Content Removal:</label>
+                                                                    <input type="text" name="ticket[]" class="form-control" value="{{ old('ticket.' . $index) }}" placeholder="Enter Content Removal" >
                                                                     @error('ticket.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket_{{ $index }}">Data disclosure:</label>
+                                                                    <input type="text" name="data_disclosure[]" class="form-control" value="{{ old('data_disclosure.' . $index) }}" placeholder="Enter Data disclosure" >
+                                                                    @error('data_disclosure.' . $index)
+                                                                        <span class="text-danger">{{ $message }}</span>
+                                                                    @enderror
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="ticket_{{ $index }}">Preservation:</label>
+                                                                    <input type="text" name="preservation[]" class="form-control" value="{{ old('preservation.' . $index) }}" placeholder="Enter preservation" >
+                                                                    @error('preservation.' . $index)
                                                                         <span class="text-danger">{{ $message }}</span>
                                                                     @enderror
                                                                 </div>
@@ -409,13 +574,13 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="pdf">Document:</label>
+                                                <label for="pdf">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
                                                 <input type="file" name="pdf[]" class="form-control" multiple>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="screenshots">Screenshots:</label>
+                                                <label for="screenshots">Screenshots: <span style="color: red;">(JPEG, BMP, or PNG files are allowed-less than 2MB in size.)</span></label>
                                                 <input type="file" name="screenshots[]" class="form-control" multiple>
                                             </div>
                                         </div>
@@ -439,43 +604,72 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="ticket">Ticket No:</label>
-                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
+                                                <label for="ticket">Content Removal Ticket:</label>
+                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Content Removal Ticket" >
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Data Disclosure Ticket:</label>
+                                                <input type="text" name="data_disclosure[]" class="form-control" placeholder="Enter Data Disclosure Ticket" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Preservation Ticket:</label>
+                                                <input type="text" name="preservation[]" class="form-control" placeholder="Enter Preservation Ticket" >
+                                            </div>
+                                        </div>
+                                                                                                             <div class="form-group">
+                                        <input type="text" name="mobile[]" class="form-control" value="" placeholder="Enter mobile" hidden>
+
+       </div>
+                                                                            <div class="form-group">
+                                        <input type="text" name="country_code[]" class="form-control" value="" placeholder="Enter country code" hidden>
+
+       </div>
                                     </div>
                                 `;
                                 break;
-                            // case 'instagram':
-                            // case 'telegram':
-                            // case 'facebook':
-                            // case 'linkedin':
-                            // case 'skype':
-                            // case 'gmail':
-                            // case 'youtube':
-                            // case 'mobile numbers':
-                            // case 'olx ad':
-                            // case 'twitter':
-                            // case 'other':
-                            default:
-                            var index = dynamicFields.querySelectorAll('.row').length + 1;
+                                case 'mobile':
+                                var index = dynamicFields.querySelectorAll('.row').length + 1;
                                 dynamicFields.innerHTML = `
                                     <div class="row">
+                                          <div class="col-md-6">
+                                              <div class="form-group">
+                                                  <label for="country_code">Country:</label>
+                                                  <select name="country_code[]" id="country_code" class="form-control">
+                                                      <option value="">Select Country</option>
+                                                      @foreach($countries as $country)
+                                                          <option value="{{ $country->international_dialing }}">{{ $country->country }} ({{ $country->international_dialing }})</option>
+                                                      @endforeach
+                                                  </select>
+                                              </div>
+                                          </div>
+
+
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="url_${index}">URL:</label>
-                                                <input type="text" name="url[]" class="form-control" placeholder="Enter URL" >
+                                                <label for="mobile">Mobile:</label>
+                                                <input type="tel" name="mobile[]" id="mobileInput" class="form-control" placeholder="Enter Mobile">
+
                                             </div>
-                                        </div>
+                                         </div>
+                                         <div class="form-group">
+                                        <input type="text" name="url[]" class="form-control" value="" placeholder="Enter url" hidden>
+
+                                          </div>
+
+
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="pdf">Document:</label>
+                                                <label for="pdf">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
                                                 <input type="file" name="pdf[]" class="form-control" multiple>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="screenshots">Screenshots:</label>
+                                                <label for="screenshots">Screenshots: <span style="color: red;">(JPEG, BMP, or PNG files are allowed-less than 2MB in size.)</span></label>
                                                 <input type="file" name="screenshots[]" class="form-control" multiple>
                                             </div>
                                         </div>
@@ -517,10 +711,122 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="ticket">Ticket No:</label>
-                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Ticket No" >
+                                                <label for="ticket">Content Removal Ticket:</label>
+                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Content Removal Ticket" >
                                             </div>
                                         </div>
+                                                  <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Data Disclosure Ticket:</label>
+                                                <input type="text" name="data_disclosure[]" class="form-control" placeholder="Enter Data Disclosure Ticket" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Preservation Ticket:</label>
+                                                <input type="text" name="preservation[]" class="form-control" placeholder="Enter Preservation Ticket" >
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                break;
+
+                            // case 'instagram':
+                            // case 'telegram':
+                            // case 'facebook':
+                            // case 'linkedin':
+                            // case 'skype':
+                            // case 'gmail':
+                            // case 'youtube':
+                            // case 'mobile numbers':
+                            // case 'olx ad':
+                            // case 'twitter':
+                            // case 'other':
+                            default:
+                            var index = dynamicFields.querySelectorAll('.row').length + 1;
+                                dynamicFields.innerHTML = `
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="url_${index}">URL:</label>
+                                                <input type="text" name="url[]" class="form-control" placeholder="Enter URL" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="pdf">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
+                                                <input type="file" name="pdf[]" class="form-control" multiple>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="screenshots">Screenshots: <span style="color: red;">(JPEG, BMP, or PNG files are allowed-less than 2MB in size.)</span></label>
+                                                <input type="file" name="screenshots[]" class="form-control" multiple>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                        <input type="text" name="domain[]" class="form-control" value="" placeholder="Enter Domain" hidden>
+
+       </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                        <input type="text" name="registry_details[]" class="form-control" value="" placeholder="Enter Registry Details" hidden> </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                       <input type="text" name="ip[]" class="form-control" value="" placeholder="Enter IP" hidden> </div>
+                                        </div>
+                                        <div class="col-md-6 hid-field">
+                                            <div class="form-group">
+                                        <input type="text" name="registrar[]" class="form-control" value="" placeholder="Enter Registrar" hidden></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="remarks">Remarks:</label>
+                                                <textarea name="remarks[]" cols="30" rows="5" class="form-control"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="category">Category:</label>
+                                                <select class="form-control category" name="category[]">
+                                                    <option value="">Select Option</option>
+                                                    <option value="phishing">Phishing</option>
+                                                    <option value="malware">Malware</option>
+                                                    <option value="fraud">Fraud</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Content Removal Ticket:</label>
+                                                <input type="text" name="ticket[]" class="form-control" placeholder="Enter Content Removal Ticket" >
+                                            </div>
+                                        </div>
+                                                  <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Data Disclosure Ticket:</label>
+                                                <input type="text" name="data_disclosure[]" class="form-control" placeholder="Enter Data Disclosure Ticket" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="ticket">Preservation Ticket:</label>
+                                                <input type="text" name="preservation[]" class="form-control" placeholder="Enter Preservation Ticket" >
+                                            </div>
+                                        </div>
+                                                                                                                                        <div class="form-group">
+                                        <input type="text" name="mobile[]" class="form-control" value="" placeholder="Enter mobile" hidden>
+
+       </div>
+                                                                            <div class="form-group">
+                                        <input type="text" name="country_code[]" class="form-control" value="" placeholder="Enter country code" hidden>
+
+       </div>
+                                    </div>
                                     </div>
                                 `;
                                 break;
@@ -530,5 +836,15 @@
             });
         });
     </script>
+    <!-- Initialize Select2 -->
+    <script>
+        $(document).ready(function() {
+            $('#country_code').select2({
+                placeholder: "Search for a country",
+                allowClear: true // Optional: Add a clear button
+            });
+        });
+    </script>
+
 
 @endsection

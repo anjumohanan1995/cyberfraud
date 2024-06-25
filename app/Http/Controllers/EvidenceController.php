@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ComplaintOthers;
+use App\Models\CountryCode;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use MongoDB;
@@ -23,12 +24,19 @@ class EvidenceController extends Controller
         $evidenceTypes = EvidenceType::where('status', 'active')
         ->whereNull('deleted_at')
         ->get();
+        $countries = CountryCode::all();
+
+        // foreach ($countries as $country) {
+        //     // Access the 'country' field of each CountryCode object
+        //     dd($country->country);
+        // }
+// dd($countries);
         // Loop through each EvidenceType and print the name field
 // foreach ($evidenceTypes as $evidenceType) {
 //     dd($evidenceType->name);
 // }
 
-        return view('dashboard.bank-case-data.evidence.create', compact('case_id','evidenceTypes'));
+        return view('dashboard.bank-case-data.evidence.create', compact('case_id','evidenceTypes','countries'));
     }
 
 
@@ -36,6 +44,7 @@ class EvidenceController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request);
         try {
             // Retrieve ACKNOWLEDGEMENT_NO from the URL
             $ack_no = $request->acknowledgement_number;
@@ -43,40 +52,48 @@ class EvidenceController extends Controller
             $pdfPathsString = '';
             $screenshotPathsString = '';
             //dd($request->all());
-             $validator = Validator::make($request->all(), [
-        'evidence_type.*' => 'required',
-        'evidence_type_id.*' => 'required',
-        'url.*' => 'required|url',
-        'domain.*' => 'nullable|string',
-        'registry_details.*' => 'nullable|string',
-        'ip.*' => 'nullable|ip',
-        'registrar.*' => 'nullable|string',
-        'pdf.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:2048',
-        'screenshots.*' => 'nullable|file|mimes:jpeg,bmp,png|max:2048',
-        'remarks.*' => 'nullable|string',
-        'ticket.*' => 'nullable|string',
-        'category.*' => 'nullable|string',
-    ],[
-        'evidence_type.*.required' => 'The evidence type field is required.',
-        'url.*.required' => 'The URL field is required.',
-        'url.*.url' => 'The URL must be a valid URL format.',
-        'domain.*.nullable' => 'The domain field is optional.',
-        'registry_details.*.nullable' => 'The registry details field is optional.',
-        'ip.*.ip' => 'The IP address must be a valid IP format',
-        'ip.*.nullable' => 'The IP address field is optional..',
-        'registrar.*.nullable' => 'The registrar field is optional.',
-        'pdf.*.nullable' => 'The Document field is optional.',
-        'pdf.*.file' => 'The Document must be a file.',
-        'pdf.*.mimes' => 'The Document must be a file of type: pdf, doc, docx, xls, xlsx, ppt, pptx.',
-        'pdf.*.max' => 'The Document may not be greater than 2MB.',
-        'screenshots.*.nullable' => 'The Screenshots field is optional.',
-        'screenshots.*.file' => 'The screenshots must be a file.',
-        'screenshots.*.mimes' => 'The screenshots must be a file of type: jpeg, bmp, png.',
-        'screenshots.*.max' => 'The screenshots may not be greater than 2MB.',
-        'remarks.*.nullable' => 'The remarks field is optional.',
-        'ticket.*.nullable' => 'The ticket field is optional.',
-        'category.*.nullable' => 'The category field is optional.',
-    ]);
+            $validator = Validator::make($request->all(), [
+                'evidence_type.*' => 'required',
+                'evidence_type_id.*' => 'required',
+                'url.*' => 'nullable|url',
+                'domain.*' => 'nullable|string',
+                'registry_details.*' => 'nullable|string',
+                'ip.*' => 'nullable|ip',
+                'registrar.*' => 'nullable|string',
+                'pdf.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:2048',
+                'screenshots.*' => 'nullable|file|mimes:jpeg,bmp,png|max:2048',
+                'remarks.*' => 'nullable|string',
+                'ticket.*' => 'nullable|string',
+                'data_disclosure.*' => 'nullable|string',
+                'preservation.*' => 'nullable|string',
+                'category.*' => 'nullable|string|in:phishing,malware,fraud,other',
+                'mobile.*' => 'required_with:country_code.*', // Requires 'country_code' when 'mobile' is present
+                'country_code.*' => 'required_with:mobile.*', // Requires 'mobile' when 'country_code' is present
+            ], [
+                'evidence_type.*.required' => 'The evidence type field is required.',
+                'evidence_type_id.*.required' => 'The evidence type ID field is required.',
+                'url.*.url' => 'The URL must be a valid URL format.',
+                'domain.*.string' => 'The domain must be a string.',
+                'registry_details.*.string' => 'The registry details must be a string.',
+                'ip.*.ip' => 'The IP address must be a valid IP format.',
+                'registrar.*.string' => 'The registrar must be a string.',
+                'pdf.*.file' => 'The document must be a file.',
+                'pdf.*.mimes' => 'The document must be a file of type: pdf, doc, docx, xls, xlsx, ppt, pptx.',
+                'pdf.*.max' => 'The document may not be greater than 2MB.',
+                'screenshots.*.file' => 'The screenshots must be a file.',
+                'screenshots.*.mimes' => 'The screenshots must be a file of type: jpeg, bmp, png.',
+                'screenshots.*.max' => 'The screenshots may not be greater than 2MB.',
+                'remarks.*.string' => 'The remarks must be a string.',
+                'ticket.*.string' => 'The ticket must be a string.',
+                'data_disclosure.*.string' => 'The data disclosure must be a string.',
+                'preservation.*.string' => 'The preservation must be a string.',
+                'category.*.string' => 'The category must be a string.',
+                'category.*.in' => 'The selected category is invalid.',
+                'mobile.*.required_with' => 'The mobile field is required when country code is present.',
+                'country_code.*.required_with' => 'The country code field is required when mobile is present.',
+            ]);
+
+
             if ($validator->fails()) {
                 return redirect()->back()->withErrors($validator)->withInput();
             }
@@ -123,7 +140,10 @@ class EvidenceController extends Controller
                 // Assign other data
                 $evidence->ack_no = $ack_no;
                 $evidence->ticket = $request->ticket[$key];
+                $evidence->data_disclosure = $request->data_disclosure[$key];
+                $evidence->preservation = $request->preservation[$key];
                 $evidence->category = $request->category[$key];
+                $evidence->remarks = $request->remarks[$key];
                 switch ($type) {
                     case 'website':
                         // dd($evidence);
@@ -133,11 +153,15 @@ class EvidenceController extends Controller
                         $evidence->ip = $request->ip[$key];
                         $evidence->registrar = $request->registrar[$key];
                         break;
+                        case 'mobile':
+                            $evidence->mobile = $request->mobile[$key];
+                            $evidence->country_code = $request->country_code[$key];
+                            break;
                     default:
                         $evidence->url = $request->url[$key];
                         break;
                 }
-                $evidence->remarks = $request->remarks[$key];
+
                 // dd($evidence);
 
                 // Save evidence

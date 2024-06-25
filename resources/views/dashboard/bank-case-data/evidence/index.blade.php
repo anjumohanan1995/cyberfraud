@@ -76,9 +76,11 @@
                                         <div class="col-md-6 mb-3">
                                             <div class="card">
                                                 <div class="card-body">
-
-
-                                                    <a href="{{ $evidence->url }}" target="_blank" rel="noopener noreferrer"><h6 class="card-title">URL : {{ $evidence->url }}</h6></a>
+                                                @if ($type == 'mobile')
+                                                    <a href="tel:{{ $evidence->mobile }}" target="_blank" rel="noopener noreferrer"><h6 class="card-title">Mobile: {{ $evidence->mobile }}</h6></a>
+                                                @else
+                                                    <a href="{{ $evidence->url }}" target="_blank" rel="noopener noreferrer"><h6 class="card-title">URL: {{ $evidence->url }}</h6></a>
+                                                @endif
 
 <div class="text-right">
     <form action="{{ route('evidence.destroy', $evidence->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this evidence?');">
@@ -90,13 +92,16 @@
     </form>
 </div>
 
-
+                                                    @if($evidence->mobile)<p class="card-text">Mobile: {{ $evidence->mobile }}</p>@endif
+                                                    @if($evidence->country_code)<p class="card-text">Country code: {{ $evidence->country_code }}</p>@endif
                                                     @if($evidence->domain)<p class="card-text">Domain: {{ $evidence->domain }}</p>@endif
                                                     @if($evidence->registry_details)<p class="card-text">Registry Details: {{ $evidence->registry_details }}</p>@endif
                                                     @if($evidence->ip)<p class="card-text">IP Address: {{ $evidence->ip }}</p>@endif
                                                     @if($evidence->registrar)<p class="card-text">Registrar: {{ $evidence->registrar }}</p>@endif
                                                     @if($evidence->category)<p class="card-text">Category: {{ $evidence->category }}</p>@endif
-                                                    @if($evidence->ticket)<p class="card-text">Ticket: {{ $evidence->ticket }}</p>@endif
+                                                    @if($evidence->ticket)<p class="card-text">Content Removal: {{ $evidence->ticket }}</p>@endif
+                                                    @if($evidence->data_disclosure)<p class="card-text">Data Disclosure: {{ $evidence->data_disclosure }}</p>@endif
+                                                    @if($evidence->preservation)<p class="card-text">Preservation: {{ $evidence->preservation }}</p>@endif
 
                                                     {{-- Explode PDFs --}}
                                                     @if($evidence->pdf)

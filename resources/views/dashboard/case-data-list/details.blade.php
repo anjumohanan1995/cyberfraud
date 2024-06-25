@@ -261,7 +261,9 @@
 
 
                             <br>
-                            <table class="table table-bordered" style="width:auto">
+
+
+                            {{-- <table class="table table-bordered" style="width:auto">
                                 <thead>
                                     <tr >
                                         <th class="tdblack">Layer</th>
@@ -269,7 +271,7 @@
                                         <th class="tdblack">Transaction ID</th>
                                     </tr>
                                 @if($finalData_pending_banks)
-                                    @foreach ($finalData_pending_banks as $item)    
+                                    @foreach ($finalData_pending_banks as $item)
                                 <tr>
                                     <td class="tdred">{{ $item['layer'] }}</td>
                                     <td class="tdred">
@@ -284,7 +286,7 @@
                                     </td>
                                 </tr>
                                 @endforeach
-                           
+
                                 @else
 
                                 <tr>
@@ -295,10 +297,10 @@
 
                                 <tr>
                                 </tr>
-                                
+
                                 </thead>
-                            </table>
-                            
+                            </table> --}}
+
                             Total Fraudulent Amount reported by Complainant : <span
                                 style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
                             <br><br>
