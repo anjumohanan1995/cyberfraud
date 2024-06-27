@@ -32,6 +32,10 @@
         .tdred{
              color:red !important;
         }
+        .table-wrapper {
+        max-height: 200px !important; 
+        overflow-y: auto !important;
+        }
     </style>
     <!-- container -->
     <div class="container-fluid">
@@ -260,54 +264,15 @@
                             </div>
 
 
+                           
                             <br>
-
-
-                            {{-- <table class="table table-bordered" style="width:auto">
-                                <thead>
-                                    <tr >
-                                        <th class="tdblack">Layer</th>
-                                        <th class="tdblack">Pending Banks</th>
-                                        <th class="tdblack">Transaction ID</th>
-                                    </tr>
-                                @if($finalData_pending_banks)
-                                    @foreach ($finalData_pending_banks as $item)
-                                <tr>
-                                    <td class="tdred">{{ $item['layer'] }}</td>
-                                    <td class="tdred">
-                                    @foreach ($item['pending_banks'] as $bank)
-                                        {{ $bank['pending_banks'] }} <br>
-                                    @endforeach
-                                    </td>
-                                    <td class="tdred">
-                                         @foreach ($item['pending_banks'] as $trns)
-                                        {{ $trns['transaction_id'] }} <br>
-                                    @endforeach
-                                    </td>
-                                </tr>
-                                @endforeach
-
-                                @else
-
-                                <tr>
-                                    <td colspan="3" class="tdgreen">No pending banks found </td>
-                                </tr>
-
-                                @endif
-
-                                <tr>
-                                </tr>
-
-                                </thead>
-                            </table> --}}
-
-                            Total Fraudulent Amount reported by Complainant : <span
-                                style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
-                            <br><br>
-                            Debited Transaction Details
-
+                            
+                            <br>
                             <table class="table table-bordered">
                                 <thead>
+                                <tr >
+                                <th colspan="7" ><b>Debited Transaction Details</b></th>
+                                </tr>
                                     <tr>
                                         <th>Transaction ID / UTR Number</th>
                                         <th>Account Number</th>
@@ -339,11 +304,54 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <br>
+                            
+                            
+                            Total Fraudulent Amount reported by Complainant : <span
+                                style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
+                            <br>
                         </div>
+                         <table class="table table-bordered table-wrapper" style="width:auto">
+                                <thead>
+                                <tr>
+                                <th colspan="4" class="tdblack"><b>Pending Banks Details</b></th>
+                                </tr>
+                                    <tr >
+                                        
+                                        <th >Pending Banks</th>
+                                        <th >Transaction ID</th>
+                                        <th >Transaction Amount</th>
+                                    </tr>
+                                @if($finalData_pending_banks)
+                                    @foreach ($finalData_pending_banks as $item)    
+                                <tr>
+                                    <td class="tdred">{{ $item['pending_banks'] }}</td>
+                                    <td class="tdred">
+                                    {{ $item['transaction_id'] }}
+                                    </td>
+                                    <td class="tdred">
+                                        {{ $item['transaction_amount'] }}
+                                    </td>
+                                </tr>
+                                @endforeach
+                           
+                                @else
 
+                                <tr>
+                                    <td colspan="3" class="tdgreen">No pending banks found </td>
+                                </tr>
 
-                    </div>
+                                @endif
 
+                                <tr>
+                                </tr>
+                                
+                                </thead>
+                            </table>
+
+                        </div>
+                     
+                   
 
                     <div class="card overflow-hidden review-project">
 
@@ -352,7 +360,9 @@
                             Action Taken By Bank
                             <br>
                             <div style="overflow-x: auto;">
-                                @if ($bank_datas->isEmpty())
+                           
+
+                                @if (empty($final_array))
                                     <div class="d-flex justify-content-center align-items-center">
                                         <div class="alert alert-info col-6 text-center mt-3 mb-3">
                                             No Data available yet!
@@ -360,7 +370,7 @@
 
                                     </div>
                                 @else
-                                    <table class="table table-bordered">
+                                    <table class="table table-bordered ">
                                         <thead>
                                             <tr>
                                                 <th>Account No./(Wallet/PG/PA) Id<br>
@@ -387,30 +397,30 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($bank_datas as $bank_data)
+                                            @foreach ($final_array as $bank_data)
                                                 <tr>
-                                                    <td>{{ @$bank_data->account_no_1 }}<br><br>
-                                                        {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
-                                                        Layer : {{ @$bank_data->Layer }}</td>
-                                                    <td>{{ @$bank_data->action_taken_by_bank }}<br><br>
-                                                        Txn Date: {{ @$bank_data->transaction_date }}</td>
-                                                    <td>{{ @$bank_data->bank }}</td>
-                                                    <td>A/C No : {{ @$bank_data->account_no_2 }}<br>
-                                                        ifsc Code : {{ @$bank_data->ifsc_code }}</td>
+                                                    <td>{{ @$bank_data['account_no_1'] }}<br><br>
+                                                        {{ @$bank_data['transaction_id_or_utr_no'] }}<br><br>
+                                                        Layer : {{ @$bank_data['Layer'] }}</td>
+                                                    <td>{{ @$bank_data['action_taken_by_bank'] }}<br><br>
+                                                        Txn Date: {{ @$bank_data['transaction_date'] }}</td>
+                                                    <td>{{ @$bank_data['bank'] }}</td>
+                                                    <td>A/C No : {{ @$bank_data['account_no_2'] }}<br>
+                                                        ifsc Code : {{ @$bank_data['ifsc_code'] }}</td>
                                                     <td>
                                                         Transaction ID /UTR Number :
-                                                        {{ @$bank_data->transaction_id_or_utr_no }}<br><br>
-                                                        Transaction Amount : {{ @$bank_data->transaction_amount }}</td>
-                                                    <td>{{ @$bank_data->branch_location }}<br><br>
-                                                        {{ @$bank_data->branch_manager_details }} </td>
-                                                    <td>{{ @$bank_data->reference_no }}<br><br>
-                                                        {{ @$bank_data->remarks }}</td>
+                                                        {{ @$bank_data['transaction_id_sec'] }}<br><br>
+                                                        Transaction Amount : {{ @$bank_data['transaction_amount'] }}</td>
+                                                    <td>{{ @$bank_data['branch_location'] }}<br><br>
+                                                        {{ @$bank_data['branch_manager_details'] }} </td>
+                                                    <td>{{ @$bank_data['reference_no'] }}<br><br>
+                                                        {{ @$bank_data['remarks'] }}</td>
                                                     <td></td>
                                                     <td><i class="side-menu__icon fe fe-user"> </i> :
-                                                        {{ @$bank_data->action_taken_name }}<br>
+                                                        {{ @$bank_data['action_taken_name'] }}<br>
                                                         <i class="side-menu__icon fe fe-mail"> </i>
-                                                        {{ @$bank_data->action_taken_email }}
-                                                        {{ @$bank_data->date_of_action }}
+                                                        {{ @$bank_data['action_taken_email'] }}
+                                                        {{ @$bank_data['date_of_action'] }}
                                                     </td>
                                                 </tr>
                                             @endforeach
