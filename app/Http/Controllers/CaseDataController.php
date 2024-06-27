@@ -619,7 +619,7 @@ if ($fir_lodge == "0") {
         }
 
      $groupedData = [];
-  
+     $finalData_pending_banks=[];
     foreach ($pending_banks_array as $item) {
     $pendingBank = $item['pending_banks'];
     $transactionId = $item['transaction_id'];
