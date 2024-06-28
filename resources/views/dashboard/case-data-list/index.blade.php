@@ -359,11 +359,21 @@
                     status: status
                 }),
                 success: function(response) {
-                    alert(response.message);
-                    $('#example').DataTable().ajax.reload();
-                    $('#statusModal').modal('hide');
+    //alert(response.message);
 
-                },
+    // Get the current page number
+    var table = $('#example').DataTable();
+    var currentPage = table.page();
+
+    // Reload the table data
+    table.ajax.reload(function() {
+        // Set the page to the previously saved page number
+        table.page(currentPage).draw(false);
+    });
+
+    // Hide the modal
+    $('#statusModal').modal('hide');
+},
                 error: function(xhr) {
                     alert("Error: " + xhr.responseJSON.message);
                 }
@@ -382,11 +392,22 @@
                     'userid': user_id,
                     'acknowledgement_no': ack_id
                 },
-                success: function(data) {
-                    //console.log(data.status)
-                    //toastr.success(data.status, 'Success!');
-                $('#example').DataTable().ajax.reload();
-                }
+                success: function(response) {
+   // alert(response.message);
+
+    // Get the current page number
+    var table = $('#example').DataTable();
+    var currentPage = table.page();
+
+    // Reload the table data
+    table.ajax.reload(function() {
+        // Set the page to the previously saved page number
+        table.page(currentPage).draw(false);
+    });
+
+    // Hide the modal
+    $('#statusModal').modal('hide');
+}
             });
         }
         function activateLink(identifier) {

@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Log;
 
 
 
+
 class CaseDataController extends Controller
 {
     public function index()
@@ -201,7 +202,6 @@ class CaseDataController extends Controller
 
     public function getDatalist(Request $request)
     {
-
         // Initialize variables
         $draw = $request->get('draw');
         $start = $request->get("start");
@@ -238,8 +238,6 @@ class CaseDataController extends Controller
         }else{
             $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
         }
-
-
 
         // if (!empty($com_status)) {
         //     $query->where('com_status', (int)$com_status);
@@ -421,6 +419,7 @@ if ($fir_lodge == "0") {
         }
          }
 
+
             $data_arr[] = array(
                 "id" => $i,
                 "acknowledgement_no" => $ack_no,
@@ -447,7 +446,6 @@ if ($fir_lodge == "0") {
 
         return response()->json($response);
     }
-
     public function updateStatusOthers(Request $request)
 {
     // Validate the incoming request
@@ -525,9 +523,6 @@ if ($fir_lodge == "0") {
 }
 
 
-
-
-
     public function detailsView(){
         return view('dashboard.case-data-list.index');
     }
@@ -541,29 +536,30 @@ if ($fir_lodge == "0") {
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
 
-        $transaction_based_array_final = [];
+        $transaction_based_array_final = [];$final_array=[];
         for($i=0;$i<count($layer_one_transactions);$i++){
-
-            $layer = $i+1;
-            $transaction_based_array_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('transaction_id_sec',$layer_one_transactions[$i]->transaction_id_sec)->get();
-
-            $transaction_based_array_final = $transaction_based_array_layer1->toArray();
-           //dd($transaction_based_array_final) ;
-            if($transaction_based_array_final)
-            {
-                $this->checkifempty($layer,$transaction_based_array_final,(int)$id);
-
-            }
-            else{
-                $transaction_based_array_final = array_merge($transaction_based_array_layer1 , $transaction_based_array_final);
-            }
+            // dd($layer_one_transactions[$i]);
+             $layer = 1;
+             $transaction_id_sec = $layer_one_transactions[$i]->transaction_id_sec;
+             $first_row = BankCaseData::where('acknowledgement_no', $id)
+             ->where('transaction_id_sec', $transaction_id_sec)
+             ->get()
+             ->toArray();
 
 
+             $processed_ids = [];
+
+             if($first_row){
+
+                $transaction_baed_array =  $this->checkifempty($layer,$first_row,$id,$processed_ids);
+
+             }
+
+                  $final_array = array_merge($final_array,$transaction_baed_array);
 
 
-        }
-       //dd($transaction_based_array_final);
-
+         }
+        //dd($final_array);
         $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
 
        // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
@@ -579,11 +575,13 @@ if ($fir_lodge == "0") {
             $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)
                                                             ->where('action_taken_by_bank','Money Transfer to')->get();
 
+
             ++$i;
 
             $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
 
             $transaction_numbers_left_side_array = explode(" ",$transaction_numbers_left_side);
+
             $mergedArray = [];
 
             foreach ($transaction_numbers_left_side_array as $item) {
@@ -605,11 +603,11 @@ if ($fir_lodge == "0") {
                     if (!in_array($tn->transaction_id_sec, $transaction_numbers_left_side_array_final)) {
                         $j=$i-1;
                         $pending_banks_array[] = array(
-                            "layer"=>$j,
                             "pending_banks" => $tn->bank,
                             "transaction_id" => $tn->transaction_id_sec,
                             "transaction_amount" => $tn->transaction_amount
                         );
+
                      }
 
 
@@ -620,10 +618,9 @@ if ($fir_lodge == "0") {
              --$i;
         }
 
-    $groupedData = [];
-
+     $groupedData = [];
+     $finalData_pending_banks=[];
     foreach ($pending_banks_array as $item) {
-    $layer = $item['layer'];
     $pendingBank = $item['pending_banks'];
     $transactionId = $item['transaction_id'];
     $transactionAmount = $item['transaction_amount'];
@@ -642,7 +639,6 @@ if ($fir_lodge == "0") {
     // $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
     // }
 
-   // dd($finalData_pending_banks);
 
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')
@@ -650,14 +646,49 @@ if ($fir_lodge == "0") {
 
         return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions'));
     }
-    public function checkifempty($layer,$transaction_based_array_final,$id){
-        $layer= $layer+1;
-        foreach($transaction_based_array_final as $tbaf){
-            $transaction_based_array = BankCasedata::where('acknowledgement_no',(int)$id)->where('transaction_id_or_utr_no','like','%'.$tbaf['transaction_id_sec'])->where('')->get();
-            dd($transaction_based_array);
+
+    public function checkifempty($layer, $first_rows, $id, &$processed_ids = [])
+    {
+        $layer++;
+
+        $main_array = [];
+
+
+        foreach ($first_rows as $first_row) {
+
+
+            if($first_row['transaction_id_sec']!=null){
+                if (in_array($first_row['transaction_id_sec'], $processed_ids)) {
+                    continue; // Skip processing if already processed
+                }
+            }
+
+            // Add current transaction_id_sec to processed list
+            $processed_ids[] = $first_row['transaction_id_sec'];
+            //dd($processed_ids);
+
+            // Add current first row to main array
+            $main_array[] = $first_row;
+
+            $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
+
+            if (!empty($next_layer_rows)) {
+
+                if ($first_row['transaction_id_sec'] === null) {
+                    continue;
+                }
+
+                $nested_results = $this->checkifempty($layer, $next_layer_rows, $id, $processed_ids);
+
+                $main_array = array_merge($main_array, $nested_results);
+
+            }
         }
 
+        return $main_array;
     }
+
+
     public function editdataList(Request $request){
         $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
                                 ->where('transaction_id',(int)$request->transaction)
@@ -711,7 +742,6 @@ if ($fir_lodge == "0") {
 
         return response()->json(['status'=>'Self Assigned.']);
     }
-
 
     public function activateLinkIndividual(Request $request)
     {
@@ -767,7 +797,6 @@ if ($fir_lodge == "0") {
         $url = $request->url;
         $registrar = $request->registrar;
         $ip = $request->ip;
-
         //dd($casenumber);
         $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
 
@@ -918,7 +947,7 @@ if ($fir_lodge == "0") {
 
         $totalRecordswithFilter =  $totalRecords;
         foreach($complaints as $record){
-//dd($record);
+
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
 
@@ -946,40 +975,41 @@ if ($fir_lodge == "0") {
             foreach ($record->remarks as $item) {
                 $remarks .= $item."<br>";
             }
-$caseNo = $record->_id;
-//dd($caseNo);
-            $CUser =Auth::user()->id;
-        //dd($record);
-            if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
-               $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                   <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
-               <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
-   </div>
-               </div>';
-            }elseif($record->assigned_to == $CUser){
+            $caseNo = $record->_id;
+            //dd($caseNo);
+                        $CUser =Auth::user()->id;
+                    //dd($record);
+                        if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
+                           $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                               <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
+                           <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+               </div>
+                           </div>';
+                        }elseif($record->assigned_to == $CUser){
 
-               $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                           $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
 
-                   <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                               <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
 
-                   </div>';
-            } elseif($record->assigned_to == null) {
-                //dd($casenumber);
-               $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                   <form action="" method="GET">
-                   <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
-                   </form>
-                   </div>';
-            } else {
-               $user = User::find($record->assigned_to);
-              // dd($user);
-               if($user != null){
+                               </div>';
+                        } elseif($record->assigned_to == null) {
+                            //dd($casenumber);
+                           $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                               <form action="" method="GET">
+                               <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                               </form>
+                               </div>';
+                        } else {
+                           $user = User::find($record->assigned_to);
+                          // dd($user);
+                           if($user != null){
 
-               $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-               <p class="text-success">Assigned To: '. $user->name.'</p>
-               </div>';
-           }
-            }
+                           $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                           <p class="text-success">Assigned To: '. $user->name.'</p>
+                           </div>';
+                       }
+                        }
+
 
 
             $data_arr[] = array(
