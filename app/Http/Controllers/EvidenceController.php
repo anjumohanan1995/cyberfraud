@@ -242,7 +242,10 @@ class EvidenceController extends Controller
         $url = $request->url;
         $domain = $request->domain;
         $evidence_type = $request->evidence_type;
+        $evidence_name = $request->evidence_name;
+        // dd($evidence_name);
         $evidence_type_text = $request->evidence_type_text;
+        // dd($evidence_type_text);
         $from_date = $request->from_date;
         $to_date = $request->to_date;
         $current_date = $request->current_date;
@@ -266,6 +269,7 @@ class EvidenceController extends Controller
                 [
                     '$group' => [
                         '_id' => '$ack_no',
+                        'mongo_id' => ['$first' => '$_id'],
                         'evidence_type' => ['$push' => '$evidence_type'],
                         'url' => ['$push' => '$url'],
                         'domain' => ['$push' => '$domain'],
@@ -298,14 +302,16 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
-            if (isset($url)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'url' => $url
+            if (isset($url)) {
+                $matchStage = [
+                    '$match' => [
+                        '$or' => [
+                            ['url' => $url],
+                            ['mobile' => $url]
                         ]
                     ]
-                ], $pipeline);
+                ];
+                $pipeline = array_merge([$matchStage], $pipeline);
             }
             if (isset($domain)){
                 $pipeline = array_merge([
@@ -353,6 +359,7 @@ class EvidenceController extends Controller
                 [
                     '$group' => [
                         '_id' => '$ack_no'
+
                     ]
                 ]
             ];
@@ -366,14 +373,16 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
-            if (isset($url)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'url' => $url
+            if (isset($url)) {
+                $matchStage = [
+                    '$match' => [
+                        '$or' => [
+                            ['url' => $url],
+                            ['mobile' => $url]
                         ]
                     ]
-                ], $pipeline);
+                ];
+                $pipeline = array_merge([$matchStage], $pipeline);
             }
             if (isset($domain)){
                 $pipeline = array_merge([
@@ -415,16 +424,28 @@ class EvidenceController extends Controller
 
         $totalRecordswithFilter =  $totalRecords;
 
+
         foreach($evidences as $record){
 
             $i++;
-            $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";
+            $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";$mobile="";
 
             $acknowledgement_no = $record->_id;
 
             foreach ($record->url as $item) {
                 $url .= $item."<br>";
             }
+
+            // $getEvidence = Evidence::get(['evidence_type', 'url', 'mobile']);
+            // // Iterate over the collection to access each record
+            // foreach ($getEvidence as $getevidence) {
+            //     if (isset($getevidence->mobile)) {
+            //         $mobile .= $getevidence->mobile."<br>";
+            //     }
+            // }
+
+
+
             foreach ($record->evidence_type as $item) {
              $evidence_type .= $item."<br>";
             }
@@ -446,11 +467,23 @@ class EvidenceController extends Controller
                     "acknowledgement_no" => $acknowledgement_no,
                     "evidence_type" => $evidence_type,
                     "url" => $url,
+                    "mobile" => $mobile,
                     "domain" => $domain,
                     "ip" => $ip,
                     "registrar"=>$registrar,
                     "registry_details" => $registry_details,
-                    "edit" => '',
+                    "edit" => '
+                         <div class="dropdown">
+                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton_'.$i.'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                 Mail Merge Option
+                             </button>
+                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton_'.$i.'">
+                                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->mongo_id, 'option' => '91crpc_79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
+                                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->mongo_id, 'option' => '91crpc', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC </a>
+                                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->mongo_id, 'option' => '79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 79(3)(b) of IT Act</a>
+                             </div>
+                         </div>
+                     ',
                     );
 
         }
@@ -484,6 +517,7 @@ class EvidenceController extends Controller
         $domain = $request->domain;
         $evidence_type = $request->evidence_type;
         $evidence_type_text = $request->evidence_type_text;
+        // dd($evidence_type_text);
         $from_date = $request->from_date;
         $to_date = $request->to_date;
         $current_date = $request->current_date;

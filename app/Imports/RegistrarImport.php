@@ -20,30 +20,40 @@ class RegistrarImport implements ToCollection, WithHeadingRow, WithValidation
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
-            // dd("hello");
-            $data = [
-                'registrar_number' => $this->registrarNumber,
-                'name' => $row['name'],
-                'address' => $row['address'],
-                'contact_number' => $row['contact_number'],
-                'date_of_registration' => $row['date_of_registration'],
-                'expiry_date' => $row['expiry_date'],
-                'web_url' => $row['web_url'],
-                'ip_address' => $row['ip_address'],
-                'email' => $row['email']
-            ];
+        $importedRegistrarNumbers = [];
 
-            Registrar::create($data);
+        foreach ($rows as $row) {
+            // Check if registrar number is already imported
+            if (!in_array($this->registrarNumber, $importedRegistrarNumbers)) {
+                $importedRegistrarNumbers[] = $this->registrarNumber;
+
+                // Process emails
+                $emailString = $row['email_id'];
+                $emails = explode(' ', $emailString);
+                $emails = array_filter($emails); // Remove empty email entries
+
+                // Create new Registrar entry
+                Registrar::create([
+                    'registrar_number' => $this->registrarNumber,
+                    'registrar' => $row['registrar'],
+                    'contact_information' => $row['contact_information'],
+                    'email_id' => $emails, // Store emails as an array
+                    'portal_link' => $row['portal_link']
+                ]);
+            }
         }
     }
+
 
     public function rules(): array
     {
         // Define validation rules for the imported data
         return [
-            // You can define your validation rules here if needed
-            // Example: 'name' => 'required|string|max:255'
+                // Example validation rules (modify as per your requirements)
+                // 'registrar' => 'required|string|max:255',
+                // 'contact_information' => 'required|string|max:255',
+                // 'email_id' => 'nullable|email',
+                // 'portal_link' => 'nullable|url',
         ];
     }
 }

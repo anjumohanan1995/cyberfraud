@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+
+@if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 <style>
     .tabs-menu1 ul li a {
         padding: 10px 20px 11px 20px;
@@ -13,6 +19,7 @@
         color: #3858f9; /* Optional: Change color when active */
     }
 </style>
+
 <link rel="stylesheet" href="path_to_bootstrap_css">
 <link rel="stylesheet" href="path_to_font_awesome">
 
@@ -99,7 +106,7 @@
                                                                             </select>
                                                                         </div>
                                                                     </div>
-                                                                   
+
 
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
@@ -116,7 +123,7 @@
                                                                             @enderror
                                                                         </div>
                                                                     </div>
-                                                                   
+
                                                                 </div>
                                                                 <div class="row">
                                                                      <div class="col-md-3">
@@ -146,6 +153,7 @@
                                                                             <th>Acknowledgement No</th>
                                                                             <th>Evidence Type</th>
                                                                             <th>URL</th>
+                                                                            <th>Mobile</th>
                                                                             <th>Domain</th>
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
@@ -183,7 +191,7 @@
                                                                             </select>
                                                                         </div>
                                                                     </div>
-                                                                   
+
 
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
@@ -200,7 +208,7 @@
                                                                             @enderror
                                                                         </div>
                                                                     </div>
-                                                                   
+
                                                                 </div>
                                                                 <div class="row">
                                                                      <div class="col-md-3">
@@ -265,6 +273,11 @@
 
     <script src="{{ asset('js/toastr.js') }}"></script>
 
+
+<!-- Include Bootstrap JavaScript -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
     @if (session('status'))
     <script>
         toastr.success('{{ session('status') }}', 'Success!')
@@ -301,8 +314,8 @@ $(document).ready(function() {
     var tableNew = $('#ncrp').DataTable({
         processing: true,
         serverSide: true,
-       
-       
+
+
         ajax: {
             url: "{{ route('get.evidence.ncrp') }}",
             data: function(d) {
@@ -315,7 +328,7 @@ $(document).ready(function() {
                     domain: $('#domain').val(),
                     evidence_type: $("#evidence_type_ncrp").val(),
                     evidence_type_text: $("#evidence_type_ncrp option:selected").text(),
-             
+
                 });
             }
         },
@@ -324,6 +337,7 @@ $(document).ready(function() {
             { data: 'acknowledgement_no' },
             { data: 'evidence_type' },
             { data: 'url' },
+            { data: 'mobile' },
             { data: 'domain' },
             { data: 'ip' },
             { data: 'registrar' },
@@ -338,7 +352,7 @@ $(document).ready(function() {
     var tableReturned = $('#others').DataTable({
         processing: true,
         serverSide: true,
-            
+
         ajax: {
             url: "{{ route('get.evidence.others') }}",
             data: function(d) {
@@ -391,11 +405,14 @@ $(document).ready(function() {
         $('.tab-pane').removeClass('active');
         $($(this).attr('data-bs-target')).addClass('active');
     });
+
+            // Dropdown toggle handler
+            $(document).on('click', '.dropdown-toggle', function() {
+            $(this).next('.dropdown-menu').toggle();
+        });
 });
 
 </script>
-
-
 
 
 @endsection
