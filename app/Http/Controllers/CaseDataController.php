@@ -419,7 +419,7 @@ if ($fir_lodge == "0") {
         }
          }
 
-         
+
             $data_arr[] = array(
                 "id" => $i,
                 "acknowledgement_no" => $ack_no,
@@ -526,7 +526,7 @@ if ($fir_lodge == "0") {
     public function detailsView(){
         return view('dashboard.case-data-list.index');
     }
-   
+
     public function caseDataView(Request $request,$id){
         $id = Crypt::decrypt($id);
 
@@ -535,7 +535,7 @@ if ($fir_lodge == "0") {
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
-        
+
         $transaction_based_array_final = [];$final_array=[];
         for($i=0;$i<count($layer_one_transactions);$i++){
             // dd($layer_one_transactions[$i]);
@@ -545,28 +545,28 @@ if ($fir_lodge == "0") {
              ->where('transaction_id_sec', $transaction_id_sec)
              ->get()
              ->toArray();
-             
- 
+
+
              $processed_ids = [];
              $transaction_baed_array = [];
              if($first_row){
- 
+
                 $transaction_baed_array =  $this->checkifempty($layer,$first_row,$id,$processed_ids);
-                 
+
              }
-                
+
                   $final_array = array_merge($final_array,$transaction_baed_array);
-             
-                                 
+
+
          }
         //dd($final_array);
         $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
-        
+
        // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
         $layers = BankCasedata::where('acknowledgement_no',(int)$id)->groupBy('Layer')->pluck('Layer');
         $pending_banks_array = [];
         for($i=1;$i<=count($layers);$i++){
-           
+
             $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
 
             $transaction_numbers_right_side="";$transaction_numbers_left_side="";$transaction_numbers_left_side_array="";
@@ -575,24 +575,24 @@ if ($fir_lodge == "0") {
             $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)
                                                             ->where('action_taken_by_bank','money transfer to')->get();
 
-            
+
             ++$i;
 
             $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
 
             $transaction_numbers_left_side_array = explode(" ",$transaction_numbers_left_side);
-            
+
             $mergedArray = [];
 
             foreach ($transaction_numbers_left_side_array as $item) {
-         
+
                 $values = explode(',', trim($item, '[]'));
                 $values = array_map('trim', $values);
                 $mergedArray = array_merge($mergedArray, $values);
             }
-               
+
             $transaction_numbers_left_side_array_final = [];
-          
+
             foreach ($mergedArray as $value) {
                 $cleanedValue = trim($value, '"');
                 $transaction_numbers_left_side_array_final[] = $cleanedValue;
@@ -606,15 +606,15 @@ if ($fir_lodge == "0") {
                             "pending_banks" => $tn->bank,
                             "transaction_id" => $tn->transaction_id_sec,
                             "transaction_amount" => $tn->transaction_amount
-                        ); 
-                               
-                     }
-                                        
-                     
-                }
-                
+                        );
 
-             } 
+                     }
+
+
+                }
+
+
+             }
              --$i;
         }
 
@@ -637,26 +637,26 @@ if ($fir_lodge == "0") {
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')
         ->get();
-      
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks'));
+
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions'));
     }
 
     public function checkifempty($layer, $first_rows, $id, &$processed_ids = [])
     {
-        $layer++; 
+        $layer++;
 
         $main_array = [];
 
-        
+
         foreach ($first_rows as $first_row) {
 
-            
+
             if($first_row['transaction_id_sec']!=null){
                 if (in_array($first_row['transaction_id_sec'], $processed_ids)) {
                     continue; // Skip processing if already processed
                 }
             }
-                      
+
             // Add current transaction_id_sec to processed list
             $processed_ids[] = $first_row['transaction_id_sec'];
             //dd($processed_ids);
@@ -665,17 +665,17 @@ if ($fir_lodge == "0") {
             $main_array[] = $first_row;
 
             $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
-            
+
             if (!empty($next_layer_rows)) {
-            
+
                 if ($first_row['transaction_id_sec'] === null) {
-                    continue; 
+                    continue;
                 }
-               
+
                 $nested_results = $this->checkifempty($layer, $next_layer_rows, $id, $processed_ids);
-                
+
                 $main_array = array_merge($main_array, $nested_results);
-              
+
             }
         }
 
@@ -898,7 +898,7 @@ if ($fir_lodge == "0") {
                     ]
                 ], $pipeline);
             }
-            
+
             if (isset($url)){
                 $pipeline = array_merge([
                     [
@@ -1047,11 +1047,11 @@ if ($fir_lodge == "0") {
                </div>
                            </div>';
                         }elseif($record->assigned_to == $CUser){
-            
+
                            $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-            
+
                                <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
-            
+
                                </div>';
                         } elseif($record->assigned_to == null) {
                             //dd($casenumber);
@@ -1064,13 +1064,13 @@ if ($fir_lodge == "0") {
                            $user = User::find($record->assigned_to);
                           // dd($user);
                            if($user != null){
-            
+
                            $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                            <p class="text-success">Assigned To: '. $user->name.'</p>
                            </div>';
                        }
                         }
-            
+
 
 
             $data_arr[] = array(
@@ -1214,26 +1214,26 @@ if ($fir_lodge == "0") {
     }
 
     public function createDownloadTemplate(){
-        
+
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
         ->whereNull('deleted_at')
         ->pluck('name')
         ->toArray();
-    
+
         $uniqueItems = array_unique($evidenceTypes);
         $commaSeparatedString = implode(',', $uniqueItems);
 
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
-        
+
         $additionalRowsData = [
             ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Ticket Number','Evidence Type','Source' ],
             ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','Instagram','Public'],
             ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','Website','Public'],
             ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebok','Open'],
-         
+
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
-    } 
+    }
 
 }

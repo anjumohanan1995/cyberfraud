@@ -23,6 +23,7 @@ use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\MuleAccountController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\MailController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -231,6 +232,12 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::resource('subcategory', SubCategoryController::class);
     Route::get('get-subcategories', [SubCategoryController::class,'getSubCategories'])->name('get.subcategories');
     Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory');
+
+    // Mail Merge
+    Route::get('/get-mailmerge-preview/{id}/{option}/{evidence_name}', [MailController::class, 'mailMergePreview'])->name('get-mailmerge-preview');
+
+    Route::post('/send-email', [MailController::class, 'sendEmail'])->name('send-email');
+
 
 
 });
