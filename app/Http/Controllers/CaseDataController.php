@@ -638,7 +638,7 @@ if ($fir_lodge == "0") {
         ->whereNull('deleted_at')
         ->get();
 
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','bank_datas','sum_amount','additional','professions'));
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks'));
     }
 
     public function checkifempty($layer, $first_rows, $id, &$processed_ids = [])
