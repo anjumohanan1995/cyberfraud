@@ -65,29 +65,26 @@ class BankImports implements ToCollection, WithStartRow
         });
 
         $validate = Validator::make($collection->toArray(), [
-            '*.acknowledgement_no' => 'required|max:150',
-            '*.transaction_id_or_utr_no' => 'required',
+            '*.acknowledgement_no' => 'required',
+            
         ])->validate();
 
-        // foreach ($collection as $collect) {
-        //     BankCasedata::create($collect);
-        // }
+        foreach ($collection as $collect){
+       
+            $collect['transaction_id_or_utr_no'] = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
+            $collect['transaction_id_sec'] = $this->convertAcknoToString($collect['transaction_id_sec']);
+      
 
-        foreach ($collection as $collect) {
-            // Trim and apply case insensitivity to 'account_no_2' field
-            if (isset($collect['account_no_2'])) {
-                $collect['account_no_2'] = trim($collect['account_no_2']);
-            }
-
-            // Trim and apply case insensitivity to 'action_taken_by_bank' field
-            if (isset($collect['action_taken_by_bank'])) {
-                $collect['action_taken_by_bank'] = trim(strtolower($collect['action_taken_by_bank']));
-            }
-
-            // Create BankCasedata object
-            BankCasedata::create($collect);
+        if (isset($collect['account_no_2'])) {
+            $collect['account_no_2'] = trim($collect['account_no_2']);
         }
 
+        // Trim and apply case insensitivity to 'action_taken_by_bank' field
+        if (isset($collect['action_taken_by_bank'])) {
+            $collect['action_taken_by_bank'] = trim(strtolower($collect['action_taken_by_bank']));
+        }
+        BankCasedata::create($collect);
+       
         // foreach ($collection as $collect) {
 
         //     // Check if there's an existing record with matching acknowledgement_no and transaction_id_or_utr_no.
@@ -128,5 +125,12 @@ class BankImports implements ToCollection, WithStartRow
         //         BankCasedata::create($collect);
         //     }
         // }
+    }
+}
+
+    protected function convertAcknoToString($acknowledgement_no)
+    {
+       
+        return is_numeric($acknowledgement_no) ? (string) $acknowledgement_no : $acknowledgement_no;
     }
 }

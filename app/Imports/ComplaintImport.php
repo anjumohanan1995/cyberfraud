@@ -7,15 +7,30 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Concerns\Importable; 
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+
 use App\Hospital;
 use Auth;
 
-class ComplaintImport implements ToCollection, WithStartRow
+class ComplaintImport implements ToCollection, WithStartRow , WithChunkReading, WithBatchInserts
 {
     /**
      * @param Collection $collection
      */
     protected $source_type;
+
+    use Importable;
+    public function chunkSize(): int
+    {
+        return 500; // Adjust chunk size as needed
+    }
+
+    public function batchSize(): int
+    {
+        return 500; // Adjust batch size for database inserts
+    }
 
     public function __construct($source_type)
     {
@@ -84,7 +99,7 @@ class ComplaintImport implements ToCollection, WithStartRow
             $complaint->police_station = $collect['police_station'];
             $complaint->complainant_name = $collect['complainant_name'];
             $complaint->complainant_mobile = $collect['complainant_mobile'];
-            $complaint->transaction_id = $collect['transaction_id'];
+            $complaint->transaction_id = $this->convertAcknoToString($collect['transaction_id']);
             $complaint->bank_name = $collect['bank_name'];
             $complaint->account_id = $collect['account_id'];
             $complaint->amount = $collect['amount'];
@@ -114,5 +129,11 @@ class ComplaintImport implements ToCollection, WithStartRow
 
 
         }
+    }
+
+    protected function convertAcknoToString($transaction_id)
+    {
+       
+        return is_numeric($transaction_id) ? (string) $transaction_id : $transaction_id;
     }
 }

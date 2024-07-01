@@ -271,9 +271,10 @@
                             <table class="table table-bordered">
                                 <thead>
                                 <tr >
-                                <th colspan="7" ><b>Debited Transaction Details</b></th>
+                                <th colspan="8" ><b>Debited Transaction Details</b></th>
                                 </tr>
                                     <tr>
+                                    <th>Sl.no</th>
                                         <th>Transaction ID / UTR Number</th>
                                         <th>Account Number</th>
                                         <th>Transaction Date</th>
@@ -286,6 +287,7 @@
                                 <tbody>
                                     @foreach ($complaints as $complnt)
                                         <tr>
+                                         <td> {{ $loop->iteration }} </td>
                                             <td>{{ @$complnt->transaction_id }}</td>
                                             <td>{{ @$complnt->account_id }}</td>
                                             <td>{{ @$complnt->entry_date }}</td>
@@ -294,10 +296,10 @@
                                             <td>{{ @$complnt->current_status }}</td>
                                             <td>
                                                 <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center"
-                                                    dir="ltr"> <input data-id="{{ $complnt->id }}"
+                                                    dir="ltr"> <input data-id="{{ $complnt->_id }}" data-transaction="{{ @$complnt->transaction_id }}" data-ackno="{{ $complnt->acknowledgement_no }}"
                                                         onchange="confirmActivation(this)" class="form-check-input"
                                                         type="checkbox" id="SwitchCheckSizesm{{ $complnt->id }}"
-                                                        {{ $complnt->com_status == 1 ? 'checked' : '' }}>
+                                                        {{ $complnt->com_status == 1 ? 'checked' : 0 }}>
                                                 </div>
                                             </td>
                                         </tr>
@@ -317,7 +319,7 @@
                                 <th colspan="4" class="tdblack"><b>Pending Banks Details</b></th>
                                 </tr>
                                     <tr >
-                                        
+                                    <th>Sl.no</th>                                     
                                         <th >Pending Banks</th>
                                         <th >Transaction ID</th>
                                         <th >Transaction Amount</th>
@@ -325,6 +327,7 @@
                                 @if($finalData_pending_banks)
                                     @foreach ($finalData_pending_banks as $item)    
                                 <tr>
+                                <td class="tdred"> {{ $loop->iteration }} </td>
                                     <td class="tdred">{{ $item['pending_banks'] }}</td>
                                     <td class="tdred">
                                     {{ $item['transaction_id'] }}
@@ -470,22 +473,34 @@
             }
         }
 
-        function activateLink(identifier) {
-            //  alert("dsf");
-            var status = $(identifier).prop('checked') == true ? 1 : 0;
-            var com_id = $(identifier).data('id');
-            // alert(com_id);
+        function activateLink(identifier){
+            // alert("dsf");
+            var status = $(identifier).prop('checked') == true ? 1 : 0; 
+            var com_id = $(identifier).data('id'); 
+            var transaction_id_sec = $(identifier).data('transaction'); 
+            var ackno = $(identifier).data('ackno'); 
+         
             $.ajax({
                 type: "GET",
                 dataType: "json",
                 url: '/activateLinkIndividual',
                 data: {
                     'status': status,
-                    'com_id': com_id
+                    'com_id': com_id,
+                    'transaction_id_sec': transaction_id_sec,
+                    'ackno':ackno
                 },
                 success: function(data) {
                     console.log(data.status)
-                    toastr.success(data.status, 'Success!');
+                    if(data.success){
+                    window.location.reload();
+                    toastr.success(' status successfully updated!');
+                    }
+                    else{
+                        
+                        toastr.error(' updation error!');
+                    }
+                    
 
                 },
 

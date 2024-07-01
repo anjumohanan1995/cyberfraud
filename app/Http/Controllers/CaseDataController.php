@@ -548,7 +548,7 @@ if ($fir_lodge == "0") {
              
  
              $processed_ids = [];
-            
+             $transaction_baed_array = [];
              if($first_row){
  
                 $transaction_baed_array =  $this->checkifempty($layer,$first_row,$id,$processed_ids);
@@ -573,7 +573,7 @@ if ($fir_lodge == "0") {
             $transaction_numbers_left_side_array_final="";
 
             $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)
-                                                            ->where('action_taken_by_bank','Money Transfer to')->get();
+                                                            ->where('action_taken_by_bank','money transfer to')->get();
 
             
             ++$i;
@@ -632,12 +632,6 @@ if ($fir_lodge == "0") {
     $finalData_pending_banks[] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId , 'transaction_amount'=> $transactionAmount];
     }
 
-    // $uniqueLayers = array_keys($groupedData);
-
-    // $finalData_pending_banks = [];
-    // foreach ($uniqueLayers as $layer) {
-    // $finalData_pending_banks[] = ['layer' => $layer, 'pending_banks' => $groupedData[$layer]];
-    // }
  
    
         $professions = Profession::where('status', 'active')
@@ -688,7 +682,51 @@ if ($fir_lodge == "0") {
         return $main_array;
     }
 
+    public function change_status_layerwise($layer, $first_rows, $id, &$processed_ids = [] ,$status ) 
+    {
+        $layer++; 
 
+        $main_array = [];
+
+        
+        foreach ($first_rows as $first_row) {
+
+            
+            if($first_row['transaction_id_sec']!=null){
+                if (in_array($first_row['transaction_id_sec'], $processed_ids)) {
+                    continue; // Skip processing if already processed
+                }
+            }
+                      
+            // Add current transaction_id_sec to processed list
+            $processed_ids[] = $first_row['transaction_id_sec'];
+            //dd($processed_ids);
+
+            // Add current first row to main array
+            $main_array[] = $first_row;
+
+            $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
+
+           $res =  BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->update([
+                'com_status' => $status,
+            ]);
+            dd($res);
+            if (!empty($next_layer_rows)){
+            
+                if ($first_row['transaction_id_sec'] === null) {
+                    continue; 
+                }
+                
+                
+                $nested_results = $this->change_status_layerwise($layer, $next_layer_rows, $id, $processed_ids , $status);
+                
+                $main_array = array_merge($main_array, $nested_results);
+              
+            }
+        }
+
+        return true;
+    }
     public function editdataList(Request $request){
         $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
                                 ->where('transaction_id',(int)$request->transaction)
@@ -742,21 +780,44 @@ if ($fir_lodge == "0") {
 
         return response()->json(['status'=>'Self Assigned.']);
     }
-
     public function activateLinkIndividual(Request $request)
     {
-
-        //$id = Crypt::decrypt($request->com_id);
+       
+      //  $id = Crypt::decrypt($request->com_id); 
         $com_id =$request->com_id;
-        $status = (int) $request->status;
-
-        Complaint::where('_id', $com_id)
+        $transaction_id_sec = $request->transaction_id_sec;
+        $status = (int) $request->status; 
+        $ackid = (int)$request->ackno;
+        
+        $res = Complaint::where('_id', $com_id)
                  ->update(['com_status' => $status]);
 
+        $layer = 1;
+        $transaction_id_sec = $transaction_id_sec; 
+        $first_row = BankCaseData::where('acknowledgement_no', $ackid)
+        ->where('transaction_id_sec', $transaction_id_sec)
+        ->get()
+        ->toArray();
+      
+        $processed_ids = [];
+        $transaction_baed_array = [];
+        // if($first_row){
+        
+        // $res_bank_case_data =  $this->change_status_layerwise($layer,$first_row,$ackid,$processed_ids,$status);
+        
+        // }
+        return response()->json(['success'=>true]);
+    
+        // if($res && $res_bank_case_data){
+        //     return response()->json(['success'=>true]);
+        // }
+        // else{
+        //     return response()->json(['success'=>false]);
+        // }
 
-        return response()->json(['status'=>'Status changed successfully.']);
+        
     }
-
+    
     public function activateLinkIndividualOthers(Request $request)
     {
 
