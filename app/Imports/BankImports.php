@@ -30,9 +30,13 @@ class BankImports implements ToCollection, WithStartRow
      *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
+    public function chunkSize(): int
+    {
+        return 1000; // Number of rows to import per chunk
+    }
     public function collection(Collection $collection)
     {
-
+       
         $collection->transform(function ($values) {
 
 
@@ -61,6 +65,7 @@ class BankImports implements ToCollection, WithStartRow
                 'action_taken_email' => $values[22],
                 'branch_location' => $values[23],
                 'branch_manager_details' => $values[24],
+                'com_status'=>1,
             ];
         });
 

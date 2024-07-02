@@ -308,10 +308,34 @@
                             </table>
                             <br>
                             
-                            
-                            Total Fraudulent Amount reported by Complainant : <span
-                                style="color: red;">₹{{ number_format($sum_amount, 2) }}</span>
-                            <br>
+                            <table>
+                            <tbody>
+                            <tr>
+                                <td>Total Fraudulent Amount reported by Complainant : </td>
+                                <td><span
+                                style="color: red;">₹{{ number_format($sum_amount, 2) }}</span></td>
+                                
+                            {{-- </tr>
+                             <tr>
+                                <td>Total amount hold</td>
+                                <td><span
+                                style="color: red;">₹{{ number_format($hold_amount, 2) }}</span></td>
+                                
+                            </tr> --}}
+                             {{-- <tr>
+                                <td>Total amount lost</td>
+                                <td><span
+                                style="color: red;">₹{{ number_format($lost_amount, 2) }}</span></td>
+                                
+                            </tr>  --}}
+                            <tr>
+                                <td>Pending amount : </td>
+                                <td><span
+                                style="color: red;">₹{{ number_format($pending_amount, 2) }}</span></td>
+                                
+                            </tr>
+                           </tbody>
+                           </table>
                         </div>
                          <table class="table table-bordered table-wrapper" style="width:auto">
                                 <thead>

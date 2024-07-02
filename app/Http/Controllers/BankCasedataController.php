@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\BankImport;
 use App\Imports\BankImports;
 use Exception;
+use App\Jobs\BankImportJob;
 
 class BankCasedataController extends Controller
 {
@@ -41,6 +42,8 @@ class BankCasedataController extends Controller
 
                 // Import data from the file.
                 Excel::import(new BankImports, $file);
+               // BankImportJob::dispatch($file);
+               
 
                 // Provide feedback to the user.
                 return redirect()->back()->with('success', 'File imported successfully!');

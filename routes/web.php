@@ -239,7 +239,6 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('/send-email', [MailController::class, 'sendEmail'])->name('send-email');
 
 
-
 });
 
 

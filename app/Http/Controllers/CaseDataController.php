@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Log;
 
 
 
+
 class CaseDataController extends Controller
 {
     public function index()
@@ -529,12 +530,20 @@ if ($fir_lodge == "0") {
 
     public function caseDataView(Request $request,$id){
         $id = Crypt::decrypt($id);
-
+        $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
         $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
+        $hold_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
+        ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
+        //dd($hold_amount );
+        $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
+                                    ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
+                                    ->sum('transaction_amount');
+        $pending_amount = $sum_amount - $hold_amount - $lost_amount;
+        
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
-        $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
+        $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();
 
         $transaction_based_array_final = [];$final_array=[];
         for($i=0;$i<count($layer_one_transactions);$i++){
@@ -567,18 +576,18 @@ if ($fir_lodge == "0") {
         $pending_banks_array = [];
         for($i=1;$i<=count($layers);$i++){
 
-            $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
+            // $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->where('com_status',1)->pluck('transaction_id_or_utr_no');
 
             $transaction_numbers_right_side="";$transaction_numbers_left_side="";$transaction_numbers_left_side_array="";
             $transaction_numbers_left_side_array_final="";
 
-            $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)
+            $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->where('com_status',1)
                                                             ->where('action_taken_by_bank','money transfer to')->get();
-
 
             ++$i;
 
             $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
+             //dd($transaction_numbers_left_side);
 
             $transaction_numbers_left_side_array = explode(" ",$transaction_numbers_left_side);
 
@@ -638,7 +647,7 @@ if ($fir_lodge == "0") {
         ->whereNull('deleted_at')
         ->get();
 
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks'));
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks','hold_amount','lost_amount','pending_amount'));
     }
 
     public function checkifempty($layer, $first_rows, $id, &$processed_ids = [])
@@ -687,30 +696,24 @@ if ($fir_lodge == "0") {
         $layer++; 
 
         $main_array = [];
-
         
         foreach ($first_rows as $first_row) {
-
-            
-            if($first_row['transaction_id_sec']!=null){
+           // dd($first_row['transaction_id_sec']);
+        if($first_row['transaction_id_sec']!=null){
                 if (in_array($first_row['transaction_id_sec'], $processed_ids)) {
-                    continue; // Skip processing if already processed
+                    continue;
                 }
             }
-                      
-            // Add current transaction_id_sec to processed list
-            $processed_ids[] = $first_row['transaction_id_sec'];
-            //dd($processed_ids);
-
-            // Add current first row to main array
-            $main_array[] = $first_row;
-
-            $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
-
-           $res =  BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->update([
+            $res =  BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer-1)->where('transaction_id_sec',$first_row['transaction_id_sec'])->update([
                 'com_status' => $status,
             ]);
-            dd($res);
+          
+            $processed_ids[] = $first_row['transaction_id_sec'];
+          // dd($first_row['transaction_id_sec']);
+            $main_array[] = $first_row;
+            
+            $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
+
             if (!empty($next_layer_rows)){
             
                 if ($first_row['transaction_id_sec'] === null) {
@@ -725,7 +728,7 @@ if ($fir_lodge == "0") {
             }
         }
 
-        return true;
+        return $main_array;
     }
     public function editdataList(Request $request){
         $complaint = Complaint::where('acknowledgement_no',(int)$request->ackno)
@@ -794,6 +797,7 @@ if ($fir_lodge == "0") {
 
         $layer = 1;
         $transaction_id_sec = $transaction_id_sec; 
+        
         $first_row = BankCaseData::where('acknowledgement_no', $ackid)
         ->where('transaction_id_sec', $transaction_id_sec)
         ->get()
@@ -801,19 +805,23 @@ if ($fir_lodge == "0") {
       
         $processed_ids = [];
         $transaction_baed_array = [];
-        // if($first_row){
         
-        // $res_bank_case_data =  $this->change_status_layerwise($layer,$first_row,$ackid,$processed_ids,$status);
+        if($first_row){
+            // $res =  BankCasedata::where('acknowledgement_no',$ackid)->where('Layer',$layer)->where('transaction_id_sec',$first_row[0]['transaction_id_sec'])->update([
+            //     'com_status' => $status,
+            // ]);
         
-        // }
-        return response()->json(['success'=>true]);
+        $res_bank_case_data =  $this->change_status_layerwise($layer,$first_row,$ackid,$processed_ids,$status);
+        
+        }
+        //return response()->json(['success'=>true]);
     
-        // if($res && $res_bank_case_data){
-        //     return response()->json(['success'=>true]);
-        // }
-        // else{
-        //     return response()->json(['success'=>false]);
-        // }
+        if($res_bank_case_data){
+            return response()->json(['success'=>true]);
+        }
+        else{
+            return response()->json(['success'=>false]);
+        }
 
         
     }
@@ -1235,5 +1243,6 @@ if ($fir_lodge == "0") {
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
     }
+
 
 }
