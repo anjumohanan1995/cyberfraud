@@ -188,10 +188,12 @@
                                                                             <th>Entry Date</th>
                                                                             <th>Current Status</th>
                                                                             <th>Date of Action</th>
-                                                                            <th>Action Taken By</th>
+                                                                            <th>Action Taken By Bank</th>
+                                                                            <th>Action Taken By Name</th>
                                                                             <th>Evidence Type</th>
                                                                             <th>Url</th>
-                                                                            <th>Action</th>
+                                                                            {{-- <th>Bank Action</th> --}}
+                                                                            {{-- <th>Action</th> --}}
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -356,10 +358,11 @@
                 { data: 'entry_date' },
                 { data: 'current_status' },
                 { data: 'date_of_action' },
+                { data: 'action_taken_by_bank' },
                 { data: 'action_taken_by_name' },
                 { data: 'evidence_type' },
                 { data: 'url' },
-                { data: 'edit' }
+                // { data: '' }
             ],
             order: [0, 'desc'],
             ordering: true

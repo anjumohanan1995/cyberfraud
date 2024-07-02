@@ -64,10 +64,11 @@ class ReportsController extends Controller
         $search_value_ncrp = $request->get('search_value_ncrp');
         // dd($evidence_type_ncrp);
         $normalizedBankActionStatus = strtolower(trim($bank_action_status));
+
         $normalizedBankActionStatus = preg_replace('/\s+/', '', $normalizedBankActionStatus);
-
+        // dd($normalizedBankActionStatus);
         $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
-
+// dd($query);
         if ($fromDate && $toDate) {
             $query->whereBetween('entry_date', [Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay()]);
         }
@@ -199,7 +200,8 @@ if (!empty($searchValue)) {
                 // Total records count
                 $totalRecords = $query->get()->count();
                 // dd($totalRecords);
-
+                // $records_action = $query->get();
+                // dd($records_action);
                 // Fetch records
                 $records = $query->orderBy('created_at', 'desc')
                                  ->orderBy('acknowledgement_no', 'asc')
@@ -207,13 +209,18 @@ if (!empty($searchValue)) {
                                  ->take($rowperpage)
                                  ->get();
 
+
+
         if ($format === 'ncrp') {
 
         $data_arr = array();
         $i = $start;
-
+        $action_taken_by_bank = "";
         foreach ($records as $record){
+            // echo($record->acknowledgement_no);
             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
+            $action = BankCasedata::where('acknowledgement_no', $record->acknowledgement_no)->get();
+            // dd($action);
             $evidences = Evidence::where('ack_no', (string)$record->acknowledgement_no)->take(10)->get(['evidence_type', 'url','mobile']);
 
             $i++;
@@ -239,8 +246,15 @@ if (!empty($searchValue)) {
                 $action_taken_by_designation = $com->action_taken_by_designation;
                 $action_taken_by_mobile = $com->action_taken_by_mobile;
                 $action_taken_by_email = $com->action_taken_by_email;
-                $action_taken_by_bank = $com->action_taken_by_bank;
             }
+
+// // Process BankCasedata (assuming potentially multiple records)
+// $action_taken_by_bank = "";
+// print_r($action);
+// foreach ($action as $act) {
+//     $action_taken_by_bank .= $act["action_taken_by_bank"] . "<br>"; // Assuming $act is an array
+//     // dd($action_taken_by_bank);
+// }
 
             foreach ($evidences as $evidence) {
                 $evidence_type .= $evidence->evidence_type."<br>";// Ensure the correct property name
@@ -250,6 +264,72 @@ if (!empty($searchValue)) {
                     $url .= $evidence->mobile."<br>";
                 }
 
+            }
+
+            $countMoneyTransferTo = 0;
+            $countCashWithdrawal = 0;
+            $countTransactionPutOnHold = 0;
+            $countOther = 0;
+            $countwithdrawalThroughAtm  = 0;
+            $countWithdrawalThroughPos = 0;
+            $countWrongTransaction = 0;
+            $countClosedComplaint = 0;
+            $countOldTransaction = 0;
+            $action_taken_by_bank = "";
+
+            foreach ($action as $bankData) {
+                // Check if $normalizedBankActionStatus matches specific conditions
+                if ($normalizedBankActionStatus == "moneytransferto" && $bankData->action_taken_by_bank == "money transfer to") {
+                    if ($countMoneyTransferTo < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countMoneyTransferTo++;
+                    }
+                } elseif ($normalizedBankActionStatus == "cashwithdrawalthroughcheque" && $bankData->action_taken_by_bank == "cash withdrawal through cheque") {
+                    if ($countCashWithdrawal < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countCashWithdrawal++;
+                    }
+                } elseif ($normalizedBankActionStatus == "transactionputonhold" && $bankData->action_taken_by_bank == "transaction put on hold") {
+                    if ($countTransactionPutOnHold < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countTransactionPutOnHold++;
+                    }
+                } elseif ($normalizedBankActionStatus == "other" && $bankData->action_taken_by_bank == "other") {
+                    if ($countOther < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countOther++;
+                    }
+                } elseif ($normalizedBankActionStatus == "withdrawalthroughatm" && $bankData->action_taken_by_bank == "withdrawal through atm") {
+                    if ($countwithdrawalThroughAtm < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countwithdrawalThroughAtm++;
+                    }
+                } elseif ($normalizedBankActionStatus == "withdrawalthroughpos" && $bankData->action_taken_by_bank == "withdrawal through pos") {
+                    if ($countWithdrawalThroughPos < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countWithdrawalThroughPos++;
+                    }
+                } elseif ($normalizedBankActionStatus == "wrongtransaction" && $bankData->action_taken_by_bank == "wrong transaction") {
+                    if ($countWrongTransaction < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countWrongTransaction++;
+                    }
+                } elseif ($normalizedBankActionStatus == "closedcomplaint" && $bankData->action_taken_by_bank == "closed complaint") {
+                    if ($countClosedComplaint < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countClosedComplaint++;
+                    }
+                } elseif ($normalizedBankActionStatus == "oldtransaction" && $bankData->action_taken_by_bank == "old transaction") {
+                    if ($countOldTransaction < 10) {
+                        $action_taken_by_bank .= $bankData->action_taken_by_bank . "<br>"; // Concatenate action_taken_by_bank values
+                        $countOldTransaction++;
+                    }
+                }
+
+                // Break the loop if both conditions have reached 10 entries
+                if ($countMoneyTransferTo >= 10 && $countCashWithdrawal >= 10 && $countTransactionPutOnHold >= 10 && $countOther >= 10 && $countwithdrawalThroughAtm >= 10 && $countWithdrawalThroughPos >= 10 && $countWrongTransaction >= 10 && $countClosedComplaint >= 10 && $countOldTransaction  >= 10) {
+                    break;
+                }
             }
             // dd($url);
             // $ack_no ='<form action="' . route('case-data.view') . '" method="POST">' .
@@ -282,12 +362,16 @@ if (!empty($searchValue)) {
                 "entry_date" => $entry_date,
                 "current_status" => $current_status,
                 "date_of_action" => $date_of_action,
-                "action_taken_by_name" => $action_taken_by_name,
+                'action_taken_by_bank' => $action_taken_by_bank,
+                'action_taken_by_name' => $action_taken_by_name,
                 "evidence_type" => $evidence_type,
                 "url" => $url,
-                "edit" => $edit
+
+
+                // "edit" => $edit
             );
         }
+        // dd();
     }
 
     if ($format === 'csv' || $format === 'excel') {
@@ -310,9 +394,10 @@ if (!empty($searchValue)) {
 
                 // Fetch evidence for the current acknowledgment number
                 $evidence = Evidence::where('ack_no', (string)$record->acknowledgement_no)->get(['evidence_type', 'url', 'mobile']);
+                $action = BankCasedata::where('acknowledgement_no', $record->acknowledgement_no)->get();
                 // dd($evidence);
 
-                $complaints = Complaint::where('acknowledgement_no', $record->acknowledgement_no)->take(10)->get();
+                $complaints = Complaint::where('acknowledgement_no', $record->acknowledgement_no)->get();
 
                 $source_type = $record->source_type;
                 $acknowledgement_no = $record->acknowledgement_no;
@@ -351,6 +436,72 @@ if (!empty($searchValue)) {
                         $evidenceType .= $item->evidence_type . ', ';
                     }
 
+                    $countMoneyTransferTo = 0;
+                    $countCashWithdrawal = 0;
+                    $countTransactionPutOnHold = 0;
+                    $countOther = 0;
+                    $countwithdrawalThroughAtm  = 0;
+                    $countWithdrawalThroughPos = 0;
+                    $countWrongTransaction = 0;
+                    $countClosedComplaint = 0;
+                    $countOldTransaction = 0;
+                    $action_taken_by_bank = "";
+
+                    foreach ($action as $bankData) {
+                        // Check if $normalizedBankActionStatus matches specific conditions
+                        if ($normalizedBankActionStatus == "moneytransferto" && $bankData->action_taken_by_bank == "money transfer to") {
+                            if ($countMoneyTransferTo < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countMoneyTransferTo++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "cashwithdrawalthroughcheque" && $bankData->action_taken_by_bank == "cash withdrawal through cheque") {
+                            if ($countCashWithdrawal < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countCashWithdrawal++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "transactionputonhold" && $bankData->action_taken_by_bank == "transaction put on hold") {
+                            if ($countTransactionPutOnHold < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countTransactionPutOnHold++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "other" && $bankData->action_taken_by_bank == "other") {
+                            if ($countOther < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countOther++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "withdrawalthroughatm" && $bankData->action_taken_by_bank == "withdrawal through atm") {
+                            if ($countwithdrawalThroughAtm < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countwithdrawalThroughAtm++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "withdrawalthroughpos" && $bankData->action_taken_by_bank == "withdrawal through pos") {
+                            if ($countWithdrawalThroughPos <1 ) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countWithdrawalThroughPos++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "wrongtransaction" && $bankData->action_taken_by_bank == "wrong transaction") {
+                            if ($countWrongTransaction < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countWrongTransaction++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "closedcomplaint" && $bankData->action_taken_by_bank == "closed complaint") {
+                            if ($countClosedComplaint < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countClosedComplaint++;
+                            }
+                        } elseif ($normalizedBankActionStatus == "oldtransaction" && $bankData->action_taken_by_bank == "old transaction") {
+                            if ($countOldTransaction < 1) {
+                                $action_taken_by_bank .= $bankData->action_taken_by_bank; // Concatenate action_taken_by_bank values
+                                $countOldTransaction++;
+                            }
+                        }
+
+                        // Break the loop if both conditions have reached 10 entries
+                        if ($countMoneyTransferTo >= 1 && $countCashWithdrawal >= 1 && $countTransactionPutOnHold >= 1 && $countOther >= 1 && $countwithdrawalThroughAtm >= 1 && $countWithdrawalThroughPos >= 1 && $countWrongTransaction >= 1 && $countClosedComplaint >= 1 && $countOldTransaction  >= 1) {
+                            break;
+                        }
+                    }
+
                     // Trim trailing comma and space
                     $evidenceType = rtrim($evidenceType, ', ');
                     $url = rtrim($url, ', ');
@@ -370,6 +521,7 @@ if (!empty($searchValue)) {
                         "entry_date" => $entry_date, // Add the appropriate value or leave blank as needed
                         "current_status" => $current_status, // Add the appropriate value or leave blank as needed
                         "date_of_action" => $date_of_action, // Add the appropriate value or leave blank as needed
+                        'action_taken_by_bank' => $action_taken_by_bank,
                         "action_taken_by_name" => $action_taken_by_name, // Add the appropriate value or leave blank as needed
                         "evidence_type" => $evidenceType, // Evidence type for the current complaint
                         "url" => $url, // URL for the evidence associated with the current complaint
@@ -402,7 +554,7 @@ if ($format === 'ncrp') {
     $csv->insertOne([
          "Sl.no", "Acknowledgement No", "District", "Police Station", "Complainant Name",
         "Complainant Mobile", "Transaction ID", "Bank Name", "Account ID", "Amount",
-        "Entry Date", "Current Status", "Date of Action", "Action Taken By Name","evidence_type","url"
+        "Entry Date", "Current Status", "Date of Action", "Action Taken By Bank", "Action Taken By Name","evidence_type","url"
     ]);
 
     foreach ($data_arr_print as $row) {
@@ -410,7 +562,7 @@ if ($format === 'ncrp') {
             $row["Sl.no"], $row["acknowledgement_no"], $row["district"], $row["police_station"],
             $row["complainant_name"], $row["complainant_mobile"], $row["transaction_id"], $row["bank_name"],
             $row["account_id"], strip_tags($row["amount"]), $row["entry_date"], $row["current_status"],
-            $row["date_of_action"], $row["action_taken_by_name"], $row["evidence_type"], $row["url"]
+            $row["date_of_action"],$row["action_taken_by_bank"], $row["action_taken_by_name"], $row["evidence_type"], $row["url"]
         ]);
     }
 
@@ -429,7 +581,7 @@ if ($format === 'ncrp') {
     $headings = [
         "Sl.no","Acknowledgement No", "District", "Police Station", "Complainant Name",
         "Complainant Mobile", "Transaction ID", "Bank Name", "Account ID", "Amount",
-        "Entry Date", "Current Status", "Date of Action", "Action Taken By Name","evidence_type","url"
+        "Entry Date", "Current Status", "Date of Action","Action Taken By Bank", "Action Taken By Name","evidence_type","url"
     ];
 
     // Remove 'id' field from data_arr_print
