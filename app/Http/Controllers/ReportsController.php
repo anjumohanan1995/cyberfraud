@@ -68,7 +68,6 @@ class ReportsController extends Controller
         $normalizedBankActionStatus = preg_replace('/\s+/', '', $normalizedBankActionStatus);
         // dd($normalizedBankActionStatus);
         $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
-        echo("hi");
 // dd($query);
         if ($fromDate && $toDate) {
             $query->whereBetween('entry_date', [Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay()]);
