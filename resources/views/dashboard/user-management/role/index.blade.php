@@ -1,5 +1,23 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasAddRolePermission = in_array('Add Role', $sub_permissions) || $user->role == 'Super Admin';
+                $hasEditRolePermission = in_array('Edit Role', $sub_permissions) || $user->role == 'Super Admin';
+                $hasDeleteRolePermission = in_array('Delete Role', $sub_permissions) || $user->role == 'Super Admin';
+                $hasShowPermissionsPermission = in_array('Show Permissions', $sub_permissions) || $user->role == 'Super Admin';
 
+                } else{
+                    $hasAddRolePermission = $hasEditRolePermission = $hasDeleteRolePermission = $hasShowPermissionsPermission = false;
+                }
+
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -44,7 +62,7 @@
                                     </div>
                                 @endif
                                 <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
-                                       
+
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -55,12 +73,14 @@
                                     All Roles
                                 </h4>
                                 <div class="col-md-1 col-6 text-center">
+                                    @if($hasAddRolePermission)
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('roles.create') }}">
                                             <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -71,8 +91,9 @@
                                         <tr>
                                             <th>SL No</th>
                                             <th>NAME</th>
-                                         
-                                            <th>ACTION</th>
+                                            @if ($hasShowPermissionsPermission || $hasEditRolePermission || $hasDeleteRolePermission)
+                                                <th>ACTION</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,7 +126,7 @@
 			       	"url": "{{ route('get.roles') }}",
 			       	"data": function ( d ) {
 			        	return $.extend( {}, d, {
-				           
+
 			          	});
        				}
        			},
@@ -113,7 +134,9 @@
             columns: [
                 { data: 'id' },
                 { data: 'name' },
+                @if ($hasShowPermissionsPermission || $hasEditRolePermission || $hasDeleteRolePermission)
                 { data: 'edit' }
+                @endif
 			],
             "order": [0, 'desc'],
             'ordering': true
@@ -136,9 +159,9 @@
                     // Handle success response
                     // Reload the page
                     $('.alert-success-one').html(response.success +'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +'<span aria-hidden="true">&times;</span>' +'</button>').show();
-                   
+
       	            //table.draw();
-                   
+
                     location.reload();
                 },
                 error: function(xhr, status, error) {

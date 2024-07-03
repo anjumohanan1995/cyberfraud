@@ -1,4 +1,20 @@
 @extends('layouts.app')
+@php
+    use App\Models\RolePermission;
+    use Illuminate\Support\Facades\Auth;
+    $user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasAddSubPermissionPermission = in_array('Add Sub Permission', $sub_permissions) || $user->role == 'Super Admin';
+                $hasDeleteSubPermissionPermission = in_array('Delete Sub Permission', $sub_permissions) || $user->role == 'Super Admin';
+                } else{
+                    $hasAddSubPermissionPermission = $hasDeleteSubPermissionPermission = false;
+                }
+
+@endphp
 
 @section('content')
     <!-- container -->
@@ -43,12 +59,15 @@
                                         </button>
                                     </div>
                                 @endif
-                                <h4 class="card-title mg-b-10">
+                                @if ($hasAddSubPermissionPermission)
+<h4 class="card-title mg-b-10">
                                     Add Sub Permission Here!
                                 </h4>
+                                @endif
+
 
                             </div>
-
+                            @if ($hasAddSubPermissionPermission)
                             <div class="table-responsive mb-0">
                                 <form action="{{ route('subpermissions.store') }}" method="POST">
                                     @csrf
@@ -65,20 +84,24 @@
                                 </form>
 
                             </div>
-
+@endif
 
                             <h3>Existing Subpermissions</h3>
                             <table class="table"  class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                 <thead>
                                     <tr>
                                         <th>Subpermission Name</th>
-                                          <th>Action</th>
+                                         @if ($hasDeleteSubPermissionPermission)
+<th>Action</th>
+                                         @endif
                                     </tr>
                                 </thead>
                                 <tbody>
-                                   @foreach($subpermissions as $detail )
+                                    @if (!empty($subpermissions))
+@foreach($subpermissions as $detail )
                                     <tr>
                                         <td>{{ $detail }}</td>
+                                        @if ($hasDeleteSubPermissionPermission)
                                          <td>
                                             <!-- Add a delete button with a form -->
                                             <form action="{{ route('subpermissions.destroy',$detail) }}" method="POST">
@@ -87,8 +110,11 @@
                                                 <button type="submit" class="btn btn-danger">Delete</button>
                                             </form>
                                         </td>
+                                        @endif
                                     </tr>
                                     @endforeach
+                                    @endif
+
                                 </tbody>
                             </table>
                         </div>

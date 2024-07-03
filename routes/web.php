@@ -126,6 +126,9 @@ Route::middleware('auth')->group(function () {
     Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
     Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
 
+    Route::get('/no-permission', function () {
+        return view('no-permission');
+    });
 
     //case data controller starts here.
     Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
@@ -240,7 +243,6 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     Route::get('/update-reported-status/{ack_no}', [EvidenceController::class, 'updateReportedStatus']);
     Route::get('/update-reported-statusother/{case_no}', [EvidenceController::class, 'updateReportedStatusOther']);
-
 
 
 });
