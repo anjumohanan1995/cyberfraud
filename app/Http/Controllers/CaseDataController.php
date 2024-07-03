@@ -26,7 +26,7 @@ use App\exports\SampleExport;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\RolePermission;
 
 
 
@@ -187,6 +187,7 @@ class CaseDataController extends Controller
                 'action_taken_email' => $record->action_taken_email,
                 'branch_location' => $record->branch_location,
                 'branch_manager_details' => $record->branch_manager_details,
+
                 "edit" => '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $record->acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $record->account_no_2 . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>'
             ];
         }
@@ -340,6 +341,20 @@ if ($fir_lodge == "0") {
                          ->get();
 
 
+
+                         $user = Auth::user();
+                                     $role = $user->role;
+                                     $permission = RolePermission::where('role', $role)->first();
+                                     $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+                                     $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+                                     if ($sub_permissions || $user->role == 'Super Admin') {
+                                         $hasShowSelfAssignPermission = in_array('Self Assign', $sub_permissions);
+                                         $hasShowActivatePermission = in_array('Activate / Deactivate', $sub_permissions);
+                                     } else{
+                                             $hasShowSelfAssignPermission = $hasShowActivatePermission = false;
+                                         }
+
+
         $data_arr = array();
         $i = $start;
 
@@ -381,6 +396,7 @@ if ($fir_lodge == "0") {
             $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
             // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
+            if ($hasShowActivatePermission) {
             $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
             <input
                 data-id="' . $acknowledgement_no . '"
@@ -390,8 +406,10 @@ if ($fir_lodge == "0") {
                 id="SwitchCheckSizesm' . $com->id . '"
                 ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
          </div>';
+            }
          //dd($com);
          $CUser =Auth::user()->id;
+            if($hasShowSelfAssignPermission) {
          if(($com->assigned_to == $CUser) && ($com->case_status != null)) {
             $edit.='<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                 <div><p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
@@ -419,7 +437,7 @@ if ($fir_lodge == "0") {
             </div>';
         }
          }
-
+        }
 
             $data_arr[] = array(
                 "id" => $i,
@@ -541,7 +559,7 @@ if ($fir_lodge == "0") {
                                     ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
                                     ->sum('transaction_amount');
         $pending_amount = $sum_amount - $hold_amount - $lost_amount;
-        
+
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();
 
@@ -641,8 +659,8 @@ if ($fir_lodge == "0") {
     $finalData_pending_banks[] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId , 'transaction_amount'=> $transactionAmount];
     }
 
- 
-   
+
+
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')
         ->get();
@@ -691,12 +709,12 @@ if ($fir_lodge == "0") {
         return $main_array;
     }
 
-    public function change_status_layerwise($layer, $first_rows, $id, &$processed_ids = [] ,$status ) 
+    public function change_status_layerwise($layer, $first_rows, $id, &$processed_ids = [] ,$status )
     {
-        $layer++; 
+        $layer++;
 
         $main_array = [];
-        
+
         foreach ($first_rows as $first_row) {
            // dd($first_row['transaction_id_sec']);
         if($first_row['transaction_id_sec']!=null){
@@ -707,24 +725,24 @@ if ($fir_lodge == "0") {
             $res =  BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer-1)->where('transaction_id_sec',$first_row['transaction_id_sec'])->update([
                 'com_status' => $status,
             ]);
-          
+
             $processed_ids[] = $first_row['transaction_id_sec'];
           // dd($first_row['transaction_id_sec']);
             $main_array[] = $first_row;
-            
+
             $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
 
             if (!empty($next_layer_rows)){
-            
+
                 if ($first_row['transaction_id_sec'] === null) {
-                    continue; 
+                    continue;
                 }
-                
-                
+
+
                 $nested_results = $this->change_status_layerwise($layer, $next_layer_rows, $id, $processed_ids , $status);
-                
+
                 $main_array = array_merge($main_array, $nested_results);
-              
+
             }
         }
 
@@ -785,37 +803,37 @@ if ($fir_lodge == "0") {
     }
     public function activateLinkIndividual(Request $request)
     {
-       
-      //  $id = Crypt::decrypt($request->com_id); 
+
+      //  $id = Crypt::decrypt($request->com_id);
         $com_id =$request->com_id;
         $transaction_id_sec = $request->transaction_id_sec;
-        $status = (int) $request->status; 
+        $status = (int) $request->status;
         $ackid = (int)$request->ackno;
-        
+
         $res = Complaint::where('_id', $com_id)
                  ->update(['com_status' => $status]);
 
         $layer = 1;
-        $transaction_id_sec = $transaction_id_sec; 
-        
+        $transaction_id_sec = $transaction_id_sec;
+
         $first_row = BankCaseData::where('acknowledgement_no', $ackid)
         ->where('transaction_id_sec', $transaction_id_sec)
         ->get()
         ->toArray();
-      
+
         $processed_ids = [];
         $transaction_baed_array = [];
-        
+
         if($first_row){
             // $res =  BankCasedata::where('acknowledgement_no',$ackid)->where('Layer',$layer)->where('transaction_id_sec',$first_row[0]['transaction_id_sec'])->update([
             //     'com_status' => $status,
             // ]);
-        
+
         $res_bank_case_data =  $this->change_status_layerwise($layer,$first_row,$ackid,$processed_ids,$status);
-        
+
         }
         //return response()->json(['success'=>true]);
-    
+
         if($res_bank_case_data){
             return response()->json(['success'=>true]);
         }
@@ -823,9 +841,9 @@ if ($fir_lodge == "0") {
             return response()->json(['success'=>false]);
         }
 
-        
+
     }
-    
+
     public function activateLinkIndividualOthers(Request $request)
     {
 

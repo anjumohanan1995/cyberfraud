@@ -1,5 +1,19 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasUploadPrimaryPermission = in_array('Upload Primary Data', $sub_permissions) || $user->role == 'Super Admin';
+                } else{
+                    $hasUploadPrimaryPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -63,6 +77,9 @@
                                     </div>
                                 @endif
                             </div>
+                            @if ($hasUploadPrimaryPermission)
+
+
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Complaints!
@@ -76,11 +93,11 @@
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
-                                            
+
                                             <input type="hidden" id="sourcetype" value="NCRP" name="source_type">
-                                               
+
                                             {{-- <input type="hidden" name="sourcetypetext" id="sourcetypetext"> --}}
-                                           
+
                                             <div class="form-group">
                                                 <label for="place">File:</label>
                                                 <input type="file" id="place" name="complaint_file" class="form-control">
@@ -95,6 +112,7 @@
                                 </form>
 
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>

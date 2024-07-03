@@ -1,5 +1,19 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions) || $user->role == 'Super Admin';
+                } else{
+                    $hasUploadBankActionPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -55,8 +69,8 @@
                                 @endif
                             </div>
 
-
-                            <div class=" m-4 d-flex justify-content-between">
+@if ($hasUploadBankActionPermission)
+<div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Bank data!
                                 </h4>
@@ -108,6 +122,8 @@
                                 </form>
 
                             </div>
+@endif
+
                         </div>
                     </div>
                 </div>
