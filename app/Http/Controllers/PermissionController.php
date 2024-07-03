@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Permission;
 use Illuminate\Http\Request;
-
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
 class PermissionController extends Controller
 {
     /**
@@ -162,7 +163,19 @@ class PermissionController extends Controller
            // Fetch records
            $items = Permission::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
            $records = $items->skip($start)->take($rowperpage)->get();
+           $user = Auth::user();
+           $role = $user->role;
+           $permission = RolePermission::where('role', $role)->first();
+           $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+           $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+           if ($sub_permissions || $user->role == 'Super Admin') {
+            $hasEditPermissionPermission = in_array('Edit Permission', $sub_permissions) || $user->role == 'Super Admin';
+               $hasDeletePermissionPermission = in_array('Delete Permission', $sub_permissions) || $user->role == 'Super Admin';
+               $hasShowSubpermissionsPermission = in_array('Show Subpermissions', $sub_permissions) || $user->role == 'Super Admin';
 
+               } else{
+                   $hasEditRolePermission = $hasDeleteRolePermission = $hasShowPermissionsPermission = false;
+               }
            $data_arr = array();
            $i=$start;
 
@@ -170,8 +183,19 @@ class PermissionController extends Controller
                $i++;
                $id = $record->id;
                $name = $record->name;
+               $edit = '';
+               if ($hasEditPermissionPermission || $user->role == 'Super Admin') {
+                    $edit .= '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+               }
 
-               $edit = '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
+               if ($hasDeletePermissionPermission || $user->role == 'Super Admin') {
+                    $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;';
+               }
+
+               if ($hasShowSubpermissionsPermission || $user->role == 'Super Admin') {
+                    $edit .= '<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
+               }
+               //$edit = '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
 
                $data_arr[] = array(
                    "id" => $i,

@@ -8,7 +8,7 @@ use App\Models\RolePermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Auth;
 
 class RoleController extends Controller
 {
@@ -29,7 +29,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        
+
         return view("dashboard.user-management.role.create");
     }
 
@@ -41,14 +41,14 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        
+
 
         $validate = Validator::make($request->all(),
         [
           'name' => 'required',
-          
 
-      
+
+
         ]);
         if ($validate->fails()) {
             //dd($validate);
@@ -57,12 +57,12 @@ class RoleController extends Controller
 
         Role::create([
             'name' => @$request->name? $request->name:'',
-       
+
         ]);
 
         return redirect()->route('roles.index')->with('success','Role Added successfully.');
 
-   
+
     }
 
     /**
@@ -86,7 +86,7 @@ class RoleController extends Controller
     {
         $data = Role::findOrFail($id);
 
-     
+
         return view('dashboard.user-management.role.edit', ['data' => $data,]);
     }
 
@@ -110,7 +110,7 @@ class RoleController extends Controller
 
         // Update the role with the data from the request
         $data->name = $request->name;
-      
+
         // Update other attributes as needed
         // Save the updated role
         $data->save();
@@ -138,7 +138,7 @@ class RoleController extends Controller
 
     public function getRoles(Request $request)
     {
-        
+
         ## Read value
         $draw = $request->get('draw');
         $start = $request->get("start");
@@ -165,7 +165,19 @@ class RoleController extends Controller
             // Fetch records
             $items = Role::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
             $records = $items->skip($start)->take($rowperpage)->get();
-    
+            $user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasEditRolePermission = in_array('Edit Role', $sub_permissions) || $user->role == 'Super Admin';
+                $hasDeleteRolePermission = in_array('Delete Role', $sub_permissions) || $user->role == 'Super Admin';
+                $hasShowPermissionsPermission = in_array('Show Permissions', $sub_permissions) || $user->role == 'Super Admin';
+
+                } else{
+                    $hasEditRolePermission = $hasDeleteRolePermission = $hasShowPermissionsPermission = false;
+                }
             $data_arr = array();
             $i=$start;
 
@@ -173,8 +185,21 @@ class RoleController extends Controller
                 $i++;
                 $id = $record->id;
                 $name = $record->name;
-                
-                $edit = '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button><a href="' . url('roles/'.$name.'/editPermission') . '"><button class="btn-btn-primary">Permission</button></a>';
+//dd($user->role);
+                $edit = '';
+                // only show links to edit and delete if they have permission. if they ave both permission it should show both edit and delete
+                if($hasEditRolePermission || $user->role == 'Super Admin'){
+                    $edit .= '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+                }
+                if($hasDeleteRolePermission || $user->role == 'Super Admin'){
+                    $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                }
+                if ($hasShowPermissionsPermission || $user->role == 'Super Admin') {
+                    $edit .= '<a href="' . url('roles/'.$name.'/editPermission') . '"><button class="btn btn-primary">Permission</button></a>';
+                }
+
+
+                //$edit = '<a  href="' . url('roles/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button><a href="' . url('roles/'.$name.'/editPermission') . '"><button class="btn btn-primary">Permission</button></a>';
 
                 $data_arr[] = array(
                     "id" => $i,
@@ -183,7 +208,7 @@ class RoleController extends Controller
                     "edit" => $edit
                 );
             }
-            
+
             $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
@@ -198,7 +223,7 @@ class RoleController extends Controller
     {
         $role_name = $id;
         $totalRecord = Permission::where('deleted_at',null)->get();
-        $role = \Auth::user()->role;
+        $role = Auth::user()->role;
         $checked = RolePermission::where('role',$role_name)->first();
         return view('dashboard.user-management.role.editpermission',compact('totalRecord','role_name','checked'));
 
@@ -235,7 +260,7 @@ class RoleController extends Controller
              return redirect()->route('roles.index')
 
                     ->with('success','Permission added successfully');
-          
+
 
         }
         else{
@@ -244,7 +269,7 @@ class RoleController extends Controller
                 'permission' => $data['permission'],
                 'sub_permissions' =>$sub
             ]);
-       
+
             return redirect()->route('roles.index')
 
             ->with('success','Permission added successfully');
@@ -252,5 +277,5 @@ class RoleController extends Controller
     }
 
 
-    
+
 }

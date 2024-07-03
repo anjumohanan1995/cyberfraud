@@ -1,5 +1,23 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasAddPermissionPermission = in_array('Add Permission', $sub_permissions) || $user->role == 'Super Admin';
+                $hasEditPermissionPermission = in_array('Edit Permission', $sub_permissions) || $user->role == 'Super Admin';
+                $hasDeletePermissionPermission = in_array('Delete Permission', $sub_permissions) || $user->role == 'Super Admin';
+                $hasShowSubpermissionsPermission = in_array('Show Subpermission', $sub_permissions) || $user->role == 'Super Admin';
 
+                } else{
+                    $hasAddPermissionPermission = $hasEditPermissionPermission = $hasDeletePermissionPermission = $hasShowSubpermissionsPermission = false;
+                }
+
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -49,12 +67,14 @@
                                     All Permissions
                                 </h4>
                                 <div class="col-md-1 col-6 text-center">
+                                    @if ($hasAddPermissionPermission)
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('permissions.create') }}">
                                             <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -67,7 +87,9 @@
                                         <tr>
                                             <th>SL No</th>
                                             <th>Permission</th>
+                                            @if ($hasShowSubpermissionsPermission || $hasEditPermissionPermission || $hasDeletePermissionPermission)
                                             <th>ACTION</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -110,7 +132,9 @@
             columns: [
                 { data: 'id' },
                 { data: 'name' },
+                @if ($hasShowSubpermissionsPermission || $hasEditPermissionPermission || $hasDeletePermissionPermission)
                 { data: 'edit' }
+                @endif
 			],
             "order": [0, 'desc'],
             'ordering': true
