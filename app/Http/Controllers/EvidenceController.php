@@ -269,8 +269,14 @@ class EvidenceController extends Controller
                 [
                     '$group' => [
                         '_id' => '$ack_no',
-                        'mongo_id' => ['$first' => '$_id'],
-                        'evidence_type' => ['$push' => '$evidence_type'],
+                        'evidence_type_ids' => [
+                            '$push' => [
+                                'evidence_type' => '$evidence_type',
+                                'evidence_type_id' => '$evidence_type_id'
+                            ]
+                        ],
+                        'reported_status' => ['$first' => '$reported_status'],
+                        // 'evidence_type' => ['$push' => '$evidence_type'],
                         'url' => ['$push' => '$url'],
                         'domain' => ['$push' => '$domain'],
                         'registry_details' => ['$push' => '$registry_details'],
@@ -431,6 +437,7 @@ class EvidenceController extends Controller
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";$mobile="";
 
             $acknowledgement_no = $record->_id;
+            $website_id = '';
 
             foreach ($record->url as $item) {
                 $url .= $item."<br>";
@@ -446,8 +453,11 @@ class EvidenceController extends Controller
 
 
 
-            foreach ($record->evidence_type as $item) {
-             $evidence_type .= $item."<br>";
+            foreach ($record->evidence_type_ids as $item) {
+                $evidence_type .= $item['evidence_type'] . "<br>";
+                if ($item['evidence_type'] == "website") {
+                    $website_id = $item['evidence_type_id'];
+                }
             }
             foreach ($record->domain as $item) {
                 $domain .= $item."<br>";
@@ -461,30 +471,60 @@ class EvidenceController extends Controller
             foreach ($record->registry_details as $item) {
                 $registry_details .= $item."<br>";
             }
+            // dd($record->evidence_type_id);
 
-            $data_arr[] = array(
-                    "id" => $i,
-                    "acknowledgement_no" => $acknowledgement_no,
-                    "evidence_type" => $evidence_type,
-                    "url" => $url,
-                    "mobile" => $mobile,
-                    "domain" => $domain,
-                    "ip" => $ip,
-                    "registrar"=>$registrar,
-                    "registry_details" => $registry_details,
-                    "edit" => '
-                         <div class="dropdown">
-                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton_'.$i.'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                 Mail Merge Option
-                             </button>
-                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton_'.$i.'">
-                                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->mongo_id, 'option' => '91crpc_79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
-                                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->mongo_id, 'option' => '91crpc', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC </a>
-                                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->mongo_id, 'option' => '79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 79(3)(b) of IT Act</a>
-                             </div>
-                         </div>
-                     ',
-                    );
+           // Make sure evidence_type_text is defined if used
+
+        //    dd($record->_id);
+        $status = '';
+
+        if ($record->reported_status == 1) {
+            $switchStatus = 'checked';
+        } else {
+            $switchStatus = '';
+        }
+
+        $status .= '
+        <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            <input
+                type="checkbox"
+                id="statusSwitch' . $record->_id . '"
+                class="form-check-input status-switch"
+                data-record-id="' . $record->_id . '"
+                ' . $switchStatus . '
+                onchange="toggleReportStatus(this)">
+        </div>';
+
+        $editButton = '';
+        if ($website_id) {
+            $editButton = '
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton_' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Mail Merge Option
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton_' . $i . '">
+                    <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $website_id, 'option' => '91crpc_79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
+                    <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $website_id, 'option' => '91crpc', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC</a>
+                    <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $website_id, 'option' => '79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 79(3)(b) of IT Act</a>
+                </div>
+            </div>';
+        }
+
+
+    $data_arr[] = array(
+        "id" => $i,
+        "acknowledgement_no" => $acknowledgement_no,
+        "evidence_type" => $evidence_type,
+        "url" => $url,
+        "mobile" => $mobile,
+        "domain" => $domain,
+        "ip" => $ip,
+        "registrar" => $registrar,
+        "registry_details" => $registry_details,
+        "edit" => $editButton,
+        "status" => $status,
+    );
+
 
         }
 
@@ -497,6 +537,26 @@ class EvidenceController extends Controller
 
         return response()->json($response);
 
+    }
+
+    public function updateReportedStatus($ack_no)
+    {
+        // Update all documents with the given ack_no
+        $evidences = Evidence::where('ack_no', $ack_no)->get();
+
+        if ($evidences->isEmpty()) {
+            return redirect()->back()->with('error', 'No documents found for the given ack_no');
+        }
+
+        foreach ($evidences as $evidence) {
+            // Toggle reported_status
+            $newReportedStatus = $evidence->reported_status == 0 ? 1 : 0;
+            $evidence->reported_status = $newReportedStatus;
+            $evidence->save();
+        }
+
+        // Respond with a success message
+        return redirect()->back()->with('success', 'Status updated successfully for ' . $evidences->count() . ' documents');
     }
 
     public function evidenceOthers(Request $request){
@@ -718,6 +778,25 @@ class EvidenceController extends Controller
                 $registry_details .= $item."<br>";
             }
 
+            $status = '';
+
+            if ($record->reported_status == 1) {
+                $switchStatus = 'checked';
+            } else {
+                $switchStatus = '';
+            }
+
+            $status .= '
+            <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                <input
+                    type="checkbox"
+                    id="statusSwitch' . $record->_id . '"
+                    class="form-check-input status-switch"
+                    data-record-id="' . $record->_id . '"
+                    ' . $switchStatus . '
+                    onchange="toggleReportStatusOther(this)">
+            </div>';
+
             $data_arr[] = array(
                     "id" => $i,
                     "case_number" => $case_number,
@@ -728,6 +807,7 @@ class EvidenceController extends Controller
                     "registrar"=>$registrar,
                     "registry_details" => $registry_details,
                     "edit" => '',
+                    "status" => $status,
                     );
 
         }
@@ -740,6 +820,27 @@ class EvidenceController extends Controller
         );
 
         return response()->json($response);
+    }
+
+    public function updateReportedStatusOther($case_no)
+    {
+        // dd($case_no);
+        // Update all documents with the given ack_no
+        $complaintother = ComplaintOthers::where('case_number', $case_no)->get();
+
+        if ($complaintother->isEmpty()) {
+            return redirect()->back()->with('error', 'No documents found for the given ack_no');
+        }
+
+        foreach ($complaintother as $complaint) {
+            // Toggle reported_status
+            $newReportedStatus = $complaint->reported_status == 0 ? 1 : 0;
+            $complaint->reported_status = $newReportedStatus;
+            $complaint->save();
+        }
+
+        // Respond with a success message
+        return redirect()->back()->with('success', 'Status updated successfully for ' . $complaintother->count() . ' documents');
     }
 
 

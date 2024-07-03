@@ -7,17 +7,18 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\Evidence;
 use App\Models\Registrar;
+use App\Models\EvidenceType;
 
 class MailController extends Controller
 {
-    public function mailMergePreview($id, $option, $evidence_name)
+    public function mailMergePreview($id, $option)
     {
-        // dd($evidence_name);
+        // dd($id);
     // Check if $evidence_name is 'website', otherwise show an error
-    if ($evidence_name !== 'website') {
-        return redirect()->back()->with('error', 'Please select evidence type "website" or the selected evidence type is not "website".');
-    }
-        $evidence = Evidence::find($id);
+    // if ($evidence_name !== 'website') {
+    //     return redirect()->back()->with('error', 'Please select evidence type "website" or the selected evidence type is not "website".');
+    // }
+    $evidence = Evidence::where('evidence_type_id', $id)->first();
         if (!$evidence) {
             abort(404, 'Evidence not found'); // Handle the case where evidence with $id is not found
         }
@@ -126,7 +127,7 @@ class MailController extends Controller
     public function sendEmail(Request $request)
     {
         $mongo_id = $request->input('mongo_id');
-        $evidence = Evidence::find($mongo_id);
+        $evidence = Evidence::where('evidence_type_id', $mongo_id)->first();
         $registrarName = $evidence->registrar;
         // dd($registrarName);
         $documents = Registrar::where('registrar', $registrarName)->get();
@@ -167,6 +168,9 @@ class MailController extends Controller
             continue;
         }
     }
-    return redirect()->back()->with('success', 'Emails sent successfully!');
+    $evidenceTypes = EvidenceType::where('status', 'active')
+    ->whereNull('deleted_at')
+    ->get();
+    return view('evidence-management.list',compact('evidenceTypes'))->withErrors(['message' => 'Emails sent successfully!']);
     }
 }

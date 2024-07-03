@@ -234,9 +234,12 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory');
 
     // Mail Merge
-    Route::get('/get-mailmerge-preview/{id}/{option}/{evidence_name}', [MailController::class, 'mailMergePreview'])->name('get-mailmerge-preview');
+    Route::get('/get-mailmerge-preview/{id}/{option}', [MailController::class, 'mailMergePreview'])->name('get-mailmerge-preview');
 
     Route::post('/send-email', [MailController::class, 'sendEmail'])->name('send-email');
+
+    Route::get('/update-reported-status/{ack_no}', [EvidenceController::class, 'updateReportedStatus']);
+    Route::get('/update-reported-statusother/{case_no}', [EvidenceController::class, 'updateReportedStatusOther']);
 
 
 
