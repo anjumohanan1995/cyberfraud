@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
 class UsersController extends Controller
 {
     /**
@@ -173,6 +174,18 @@ class UsersController extends Controller
             $items = User::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
             $records = $items->skip($start)->take($rowperpage)->get();
 
+            $user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
+                $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+                } else{
+                    $hasEditUserPermission = false;
+                    $hasDeleteUserPermission = false;
+                }
             $data_arr = array();
             $i=$start;
 
@@ -182,7 +195,14 @@ class UsersController extends Controller
                 $name = $record->name;
                 $email =  $record->email;
                 $role  =  $record->role;
-                $edit = '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                $edit = '';
+                // only show links to edit and delete if they have permission. if they ave both permission it should show both edit and delete
+                if($hasEditUserPermission || $user->role == 'Super Admin'){
+                    $edit .= '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+                }elseif($hasDeleteUserPermission || $user->role == 'Super Admin'){
+                    $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                }
+                //$edit = '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
 
                 $data_arr[] = array(
                     "id" => $i,
