@@ -42,9 +42,8 @@ class BankCasedataController extends Controller
 
                 // Import data from the file.
                 Excel::import(new BankImports, $file);
-               // BankImportJob::dispatch($file);
-               
-
+                //BankImportJob::dispatch($file)->onQueue('default');
+           
                 // Provide feedback to the user.
                 return redirect()->back()->with('success', 'File imported successfully!');
             } catch (\Exception $e) {

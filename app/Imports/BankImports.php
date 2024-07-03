@@ -69,7 +69,7 @@ class BankImports implements ToCollection, WithStartRow
             ];
         });
 
-        $validate = Validator::make($collection->toArray(), [
+        $validate = Validator::make($collection->toArray(),[
             '*.acknowledgement_no' => 'required',
             
         ])->validate();
