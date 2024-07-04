@@ -56,6 +56,14 @@ class PermissionSeeder extends Seeder
                     '1' => 'Show Detail Page',
                     '2' => 'Self Assign',
                     '3' => 'Activate / Deactivate',
+                    '4' => 'Show Transaction Type Filter',
+                    '5' => 'Show Bank/Wallet/Merchant/Insurance Filter',
+                    '6' => 'Show Filled by(within 24 hrs) Filter',
+                    '7' => 'Show Complaint Reported Filter',
+                    '8' => 'Show FIR Lodge Filter',
+                    '9' => 'Show Status Filter',
+                    '10' => 'Show Search by Filter',
+                    '11' => 'Show Sub category Filter'
                 ]),
             ],
             [

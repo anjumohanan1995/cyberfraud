@@ -2,11 +2,12 @@
 
 @section('content')
 
-@if(session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
+@if ($errors->any())
+    <div class="alert alert-success">
+        {{ $errors->first('message') }}
     </div>
 @endif
+
 <style>
     .tabs-menu1 ul li a {
         padding: 10px 20px 11px 20px;
@@ -197,7 +198,8 @@
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
                                                                             <th>Registry Details</th>
-                                                                            <th>Action</th>
+                                                                            <th>Mail</th>
+                                                                            <th>Status</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -282,7 +284,8 @@
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
                                                                             <th>Registry Details</th>
-                                                                            <th>Action</th>
+                                                                            <th>Mail</th>
+                                                                            <th>Status</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -404,7 +407,8 @@ $(document).ready(function() {
             { data: 'ip' },
             { data: 'registrar' },
             { data: 'registry_details' },
-            { data: 'edit' }
+            { data: 'edit'},
+            { data: 'status'}
         ],
         order: [0, 'desc'],
         ordering: true
@@ -439,7 +443,8 @@ $(document).ready(function() {
             { data: 'ip' },
             { data: 'registrar' },
             { data: 'registry_details' },
-            { data: 'edit' }
+            { data: 'edit' },
+            { data: 'status'}
         ],
         order: [0, 'desc'],
         ordering: true
@@ -474,6 +479,54 @@ $(document).ready(function() {
         });
 });
 
+</script>
+
+<script>
+    function toggleReportStatus(element) {
+        var recordId = element.getAttribute('data-record-id');
+        var isChecked = element.checked;
+
+        // Perform AJAX call to update reported status
+        fetch('/update-reported-status/' + recordId)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update UI or notify user based on response
+            console.log('Status updated successfully');
+        })
+        .catch(error => {
+            console.error('Error updating status:', error);
+            // Handle error or show user an error message
+        });
+    }
+</script>
+
+<script>
+    function toggleReportStatusOther(element) {
+        var recordId = element.getAttribute('data-record-id');
+        var isChecked = element.checked;
+
+        // Perform AJAX call to update reported status
+        fetch('/update-reported-statusother/' + recordId)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update UI or notify user based on response
+            console.log('Status updated successfully');
+        })
+        .catch(error => {
+            console.error('Error updating status:', error);
+            // Handle error or show user an error message
+        });
+    }
 </script>
 
 
