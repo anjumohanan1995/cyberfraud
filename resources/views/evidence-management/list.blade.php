@@ -19,6 +19,41 @@
         border-bottom: 3px solid #3858f9;
         color: #3858f9; /* Optional: Change color when active */
     }
+/* Spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button with spinner */
+.status_recheck {
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0; /* Adjust background color of the button */
+    padding: 10px 20px; /* Adjust padding for button size */
+    border: 1px solid #ccc; /* Button border */
+    color: #333; /* Button text color */
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.status_recheck .spinner {
+    position: absolute;
+    top: 30%; /* Position at the center vertically */
+    left: 40%; /* Position at the center horizontally */
+    transform: translate(-50%, -50%); /* Center the spinner precisely */
+    border: 3px solid rgba(0, 0, 0, 0.1); /* Adjust spinner border */
+    border-top-color: #007bff; /* Blue spinner color */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: none; /* Initially hidden */
+}
+
+.status_recheck.loading .spinner {
+    display: block; /* Show spinner when button is loading */
+}
+ 
 </style>
 
 <link rel="stylesheet" href="path_to_bootstrap_css">
@@ -147,7 +182,11 @@
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
+                                                            
                                                                 <table id="ncrp" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
+
+                                                                <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="ncrp" title="NCRP Recheck"> Recheck </button>
+
                                                                     <thead>
                                                                         <tr>
                                                                             <th>SL No</th>
@@ -234,6 +273,7 @@
                                                             </form>
                                                             <div class="table-responsive">
                                                                 <table id="others" style="width:100%" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
+                                                                 <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="others" title="Others Recheck"> Recheck </button>
                                                                     <thead>
                                                                         <tr>
                                                                             <th>SL No</th>
@@ -268,6 +308,28 @@
         </div>
         <!-- /row -->
     </div>
+
+
+<div class="modal fade" id="showUrlStatus" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">URL Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="url-display">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="path_to_bootstrap_js"></script>
@@ -467,5 +529,78 @@ $(document).ready(function() {
     }
 </script>
 
+
+<script>
+
+$(document).ready(function() {
+    $('.status_recheck').click(function(){
+
+     var type = $(this).data('type');
+
+     var $button = $(this);
+     var buttonText = $button.text().trim();
+     $button.prop('disabled', true);
+     $button.addClass('loading');
+     var spinner = $('<div class="spinner"></div>');
+     $button.append(spinner);
+    
+    $.ajax({
+    url: "{{ route('url_status_recheck') }}",
+    data:{type:type},
+    success: function(response){
+
+    $button.removeClass('loading');
+    $button.prop('disabled', false); // Re-enable button
+    spinner.remove(); // Remove spinner element
+
+    console.log(response);
+            if(response.success){
+            
+            toastr.success(' url status updated!');
+            }
+            else{
+                
+                toastr.error(' updation error!');
+            }
+    }
+    });
+    })
+
+  $(document).on('click', '.check-status', function(e) {
+
+       e.preventDefault();
+       var url = $(this).data('url');
+       var type = $(this).data('type');
+      
+       $.ajax({
+        url:"{{ route('get_url_status') }}",
+        data:{
+            url:url,
+            type:type
+        },
+        success:function(response){
+           
+            console.log(response.statuscode);
+             var statuscode = response.statuscode !== null ? response.statuscode : 'Not updated.Recheck';
+             var statustext = response.statustext !== null ? response.statustext : 'Not updated.Recheck';
+             var htm = 'URL - ' +response.url + '<br> Status Code - '+statuscode+ '<br> Status - '+statustext+'';
+         
+             $('.url-display').html(htm);
+             $('#showUrlStatus').modal('show');
+        },
+        error: function(xhr, status, error) {
+            // Handle AJAX errors here
+            console.error(xhr);
+            var errorMessage = "Error fetching URL status.Recheck";
+            $('.url-display').html(errorMessage);
+            $('#showUrlStatus').modal('show');
+        }
+       })
+       
+       
+     })
+})
+
+</script>
 
 @endsection

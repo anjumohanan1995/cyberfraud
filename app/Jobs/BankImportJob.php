@@ -26,7 +26,7 @@ class BankImportJob implements ShouldQueue
         //
        
         $this->file = $file;
-        //dd($this->file);
+       // dd($this->file);
     }
 
     /**
@@ -35,8 +35,17 @@ class BankImportJob implements ShouldQueue
      * @return void
      */
     public function handle()
-    {   
-        dd("yeysye");
-        //Excel::import(new BankImports, $this->file);
+    {  
+        \Log::info('Attempting to process job.');
+
+    try {
+        // Your job logic here
+        Excel::import(new BankImports, $this->file);
+
+        \Log::info('Job processed successfully.');
+    } catch (\Exception $e) {
+        \Log::error('Error processing job: ' . $e->getMessage());
+        // Handle or rethrow the exception as needed
+    }
     }
 }

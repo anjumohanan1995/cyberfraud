@@ -248,6 +248,12 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     Route::post('/send-email', [MailController::class, 'sendEmail'])->name('send-email');
 
+    // url status recheck in evidence management
+
+    Route::get('/status-recheck',[EvidenceController::class, 'statusRecheck'])->name('url_status_recheck');
+    Route::get('/url-status',[EvidenceController::class, 'urlStatus'])->name('get_url_status');
+
+    
     Route::get('/update-reported-status/{ack_no}', [EvidenceController::class, 'updateReportedStatus']);
     Route::get('/update-reported-statusother/{case_no}', [EvidenceController::class, 'updateReportedStatusOther']);
 
