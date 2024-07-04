@@ -33,10 +33,48 @@
     {{-- Container with styling --}}
     <div class="container">
 
-        {{-- Display dynamic data --}}
-        <p><strong>Sub:</strong> {{ $sub }}</p>
-        <p><strong>Salutation:</strong> {{ $salutation }}</p>
-        <p>{!! nl2br(e($compiledContent)) !!}</p>
+        <div class="mb-3">
+            <p><strong>Sub:</strong><span style="color: blue;">{{ $sub }}</span></p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>Salutation:</strong><span style="color: green;">Team Register name</span></p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>Content:</strong></p>
+            <p>
+                A complaint in NO: <span style="font-weight: bold;">{{ $number }}</span> is reported at National Cyber Crime Reporting Portal (NCRP) for financial fraud in which an Unlawful Website with the URL
+                <a href="{{ $url }}" target="_blank" style="color: red;">{{ $url }}</a> is involved and it is found that the website is hosted in your registry for propagating cyber fraud. Hence it is directed to provide the details of the below mentioned website by return.
+            </p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>Alleged Website Details:</strong></p>
+            <p>
+                <a href="{{ $url }}" target="_blank" style="color: red;">{{ $url }}</a><br>
+                Domain Name: <span style="color: purple;">{{ $domain_name }}</span><br>
+                Registry Domain ID: <span style="color: orange;">{{ $domain_id }}</span>
+            </p>
+        </div>
+
+        <div class="mb-3">
+            <p><strong>Details Required:</strong></p>
+            <ol>
+                <li>Registration details including:
+                    <ul>
+                        <li>Email ID</li>
+                        <li>Mobile phone numbers</li>
+                        <li>IP address with Date and Time</li>
+                        <li>Mode of payment details for registration</li>
+                    </ul>
+                </li>
+                <li>Any other Sub domains with the above registration email id or mobile number.</li>
+                <li>Registration Details as mentioned in (1) for domain identified under (2)</li>
+            </ol>
+        </div>
+
+        <p>Urgent action and confirmation is solicited by return.</p>
     </div>
 </body>
 </html>
