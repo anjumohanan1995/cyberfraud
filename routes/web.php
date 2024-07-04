@@ -237,7 +237,14 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory');
 
     // Mail Merge
-    Route::get('/get-mailmerge-preview/{id}/{option}', [MailController::class, 'mailMergePreview'])->name('get-mailmerge-preview');
+    Route::get('/get-mailmerge-list/{id}/{ack_no}', [MailController::class, 'mailMergeList'])->name('get-mailmerge-list');
+    Route::get('get-mailmergelist-ncrp', [MailController::class, 'getMailmergeListNcrp'])->name("get.mailmergelist.ncrp");
+    Route::get('/get-mailmerge-preview', [MailController::class, 'mailMergePreview'])->name('get-mailmerge-preview');
+
+    Route::get('/get-mailmerge-listother/{evidence_type}/{case_no}', [MailController::class, 'mailMergeListOther'])->name('get-mailmerge-listother');
+    Route::get('get-mailmergelist-other', [MailController::class, 'getMailmergeListOther'])->name("get.mailmergelist.other");
+    // Route::get('/get-mailmerge-previewOther/{evidence_type}/{option}/{case_no}', [MailController::class, 'mailMergePreviewOther'])->name('get-mailmerge-previewOther');
+
 
     Route::post('/send-email', [MailController::class, 'sendEmail'])->name('send-email');
 

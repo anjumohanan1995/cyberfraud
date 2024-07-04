@@ -8,17 +8,211 @@ use Illuminate\Http\Request;
 use App\Models\Evidence;
 use App\Models\Registrar;
 use App\Models\EvidenceType;
+use App\Models\ComplaintOthers;
 
 class MailController extends Controller
 {
-    public function mailMergePreview($id, $option)
+
+    public function mailMergeList($id, $ack_no)
     {
-        // dd($id);
+        return view('mailmerge.mailmergeList.mailmergelist', compact('id', 'ack_no'));
+    }
+
+
+
+    public function getMailmergeListNcrp(Request $request)
+    {
+        $acknowledgement_no = $request->ack_no;
+        $evidence_type_id = $request->website_id;
+        // dd($acknowledgement_no);
+
+        // Initialize DataTable variables
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows per page
+        $searchValue = $request->get('search')['value']; // Search value
+
+        // Build the query
+        $query = Evidence::where('evidence_type_id', $evidence_type_id)
+                         ->where('ack_no', $acknowledgement_no);
+                        //  dd($query);
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query = $query->where(function($q) use ($searchValue) {
+                $q->where('url', 'like', '%'.$searchValue.'%')
+                  ->orWhere('domain', 'like', '%'.$searchValue.'%')
+                  ->orWhere('ip', 'like', '%'.$searchValue.'%')
+                  ->orWhere('registrar', 'like', '%'.$searchValue.'%')
+                  ->orWhere('registry_details', 'like', '%'.$searchValue.'%')
+                  ->orWhere('mobile', 'like', '%'.$searchValue.'%');
+            });
+        }
+
+        // Total records count
+        $totalRecords = $query->count();
+
+        // Get paginated data
+        $records = $query->skip($start)->take($rowperpage)->get();
+        // dd($records);
+
+        // Format data for DataTable
+        $data_arr = [];
+        $i = $start;
+
+        foreach ($records as $record) {
+            $i++;
+            $editButton = '<div class="dropdown" hidden>
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Edit Options
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '91crpc_79itact', 'ack_no' => $record->ack_no]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
+                <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '91crpc', 'ack_no' => $record->ack_no]) . '">Notice U/s 91 CrPC</a>
+                <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '79itact', 'ack_no' => $record->ack_no]) . '">Notice U/s 79(3)(b) of IT Act</a>
+            </div>
+        </div>';
+
+            $data_arr[] = [
+                "id" => $i,
+                "acknowledgement_no" => $record->ack_no,
+                "evidence_type" => $record->evidence_type,
+                "url" => $record->url,
+                "mobile" => $record->mobile,
+                "domain" => $record->domain,
+                "ip" => $record->ip,
+                "registrar" => $record->registrar,
+                "registry_details" => $record->registry_details,
+                "edit" => $editButton,
+            ];
+        }
+
+        // Prepare response for DataTable
+        $response = [
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecords,
+            "aaData" => $data_arr
+        ];
+
+        return response()->json($response);
+    }
+
+
+    public function mailMergeListOther($evidence_type, $case_no)
+    {
+        return view('mailmerge.mailmergeList.mailmergelistOther', compact('evidence_type', 'case_no'));
+    }
+
+    public function getMailmergeListOther(Request $request)
+    {
+        $evidence_type = $request->evidence_type;
+        $case_no = $request->case_no;
+        // dd($case_no);
+
+                // dd($acknowledgement_no);
+
+        // Initialize DataTable variables
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows per page
+        $searchValue = $request->get('search')['value']; // Search value
+
+        // Build the query
+        $query = ComplaintOthers::where('case_number', $case_no)
+                         ->where('evidence_type', $evidence_type);
+                        //  dd($query);
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query = $query->where(function($q) use ($searchValue) {
+                $q->where('url', 'like', '%'.$searchValue.'%')
+                  ->orWhere('domain', 'like', '%'.$searchValue.'%')
+                  ->orWhere('ip', 'like', '%'.$searchValue.'%')
+                  ->orWhere('registrar', 'like', '%'.$searchValue.'%')
+                  ->orWhere('registry_details', 'like', '%'.$searchValue.'%')
+                  ->orWhere('mobile', 'like', '%'.$searchValue.'%');
+            });
+        }
+
+        // Total records count
+        $totalRecords = $query->count();
+
+        // Get paginated data
+        $records = $query->skip($start)->take($rowperpage)->get();
+        // dd($records);
+
+        // Format data for DataTable
+        $data_arr = [];
+        $i = $start;
+
+        foreach ($records as $record) {
+            $i++;
+            $editButton = '<div class="dropdown" hidden>
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Edit Options
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '91crpc_79itact', 'case_no' => $record->case_number]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
+                <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '91crpc', 'case_no' => $record->case_number]) . '">Notice U/s 91 CrPC</a>
+                <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '79itact', 'case_no' => $record->case_number]) . '">Notice U/s 79(3)(b) of IT Act</a>
+            </div>
+        </div>';
+
+            $data_arr[] = [
+
+                "id" => $i,
+                "case_number" => $record->case_no,
+                "evidence_type" => $record->evidence_type,
+                "url" => $record->url,
+                "domain" => $record->domain,
+                "ip" => $record->ip,
+                "registrar" => $record->registrar,
+                "registry_details" => $record->registry_details,
+                "edit" => $editButton,
+            ];
+        }
+
+        // Prepare response for DataTable
+        $response = [
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecords,
+            "aaData" => $data_arr
+        ];
+
+        return response()->json($response);
+
+
+    }
+
+
+
+
+
+
+
+
+    public function mailMergePreview(Request $request)
+    {
+
+        $evidence_type = $request->evidence_type;
+        $case_no = $request->case_no;
+        $acknowledgement_no = $request->ack_no;
+        $evidence_type_id = $request->id;
+        $option = $request->option;
+        dd($option);
+
+        // if ($evidence_type && $case_no){
+        //     $data = ComplaintOthers::
+        // }
+// dd($id);
     // Check if $evidence_name is 'website', otherwise show an error
     // if ($evidence_name !== 'website') {
     //     return redirect()->back()->with('error', 'Please select evidence type "website" or the selected evidence type is not "website".');
-    // }
-    $evidence = Evidence::where('evidence_type_id', $id)->first();
+
+        $evidence = Evidence::where('evidence_type_id', $id)->where('ack_no', $ack_no)->get();
+dd($evidence);
         if (!$evidence) {
             abort(404, 'Evidence not found'); // Handle the case where evidence with $id is not found
         }
@@ -123,6 +317,13 @@ class MailController extends Controller
             return view('mailmerge.defaultPreview', compact('sub', 'salutation', 'compiledContent'));
         }
     }
+
+
+    // public function mailMergePreviewOther($evidence_type, $option, $case_no)
+    // {
+    //     dd($evidence_type);
+
+    // }
 
     public function sendEmail(Request $request)
     {

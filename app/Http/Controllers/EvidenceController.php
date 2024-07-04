@@ -498,15 +498,8 @@ class EvidenceController extends Controller
         $editButton = '';
         if ($website_id) {
             $editButton = '
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton_' . $i . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Mail Merge Option
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton_' . $i . '">
-                    <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $website_id, 'option' => '91crpc_79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
-                    <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $website_id, 'option' => '91crpc', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 91 CrPC</a>
-                    <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $website_id, 'option' => '79itact', 'evidence_name' => $evidence_type_text]) . '">Notice U/s 79(3)(b) of IT Act</a>
-                </div>
+            <div>
+                <a class="btn btn-primary" href="' . route('get-mailmerge-list', ['id' => $website_id,'ack_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
             </div>';
         }
 
@@ -758,12 +751,17 @@ class EvidenceController extends Controller
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";
 
             $case_number = $record->_id;
+            $website_name = '';
 
             foreach ($record->url as $item) {
                 $url .= $item."<br>";
             }
             foreach ($record->evidence_type as $item) {
-             $evidence_type .= $item."<br>";
+                $evidence_type .= $item . "<br>";
+                if ($item == "website") {
+                    $website_name = "website";
+                    // dd($website_name);
+                }
             }
             foreach ($record->domain as $item) {
                 $domain .= $item."<br>";
@@ -797,6 +795,14 @@ class EvidenceController extends Controller
                     onchange="toggleReportStatusOther(this)">
             </div>';
 
+            $editButton = '';
+            if ($website_name) {
+                // dd($website_name);
+                $editButton = '
+                <div>
+                    <a class="btn btn-primary" href="' . route('get-mailmerge-listother', ['evidence_type' => $website_name,'case_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
+                </div>';
+            }
             $data_arr[] = array(
                     "id" => $i,
                     "case_number" => $case_number,
@@ -806,7 +812,7 @@ class EvidenceController extends Controller
                     "ip" => $ip,
                     "registrar"=>$registrar,
                     "registry_details" => $registry_details,
-                    "edit" => '',
+                    "edit" => $editButton,
                     "status" => $status,
                     );
 
