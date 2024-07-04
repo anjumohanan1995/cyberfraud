@@ -540,7 +540,7 @@
                 "order": [0, 'desc'],
                 'ordering': true
             });
-            $('#example').on('click', '.editable', function() {
+           /* $('#example').on('click', '.editable', function() {
                 var $editable = $(this);
                 var oldValue = $editable.text();
                 var ackno = $editable.data('ackno');
@@ -578,6 +578,7 @@
                 });
 
             })
+            */
 
             // Form submission event handler
             $('#complaint-form').submit(function(event) {

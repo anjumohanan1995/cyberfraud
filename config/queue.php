@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'mongodb'),
+    'default' => env('QUEUE_CONNECTION', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
             'driver' => 'sync',
         ],
 
-        'mongodb' => [
+        'database' => [
             'driver' => 'mongodb',
             'connection' => 'mongodb',
             'table' => 'jobs',
@@ -88,7 +88,7 @@ return [
 
     'failed' => [
     'driver' => 'mongodb',
-    'database' => 'mongodb',
+    'database' => env('DB_DATABASE', 'cyber'),
     'collection' => 'failed_jobs',
 ],
 

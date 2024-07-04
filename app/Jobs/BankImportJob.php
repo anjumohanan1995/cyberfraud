@@ -35,13 +35,17 @@ class BankImportJob implements ShouldQueue
      * @return void
      */
     public function handle()
-    {   
-      
-        try {
-            Excel::import(new BankImports, $this->file);
-        } catch (\Exception $e) {
-            \Log::error('Error processing job: ' . $e->getMessage());
-            // Handle or rethrow the exception as needed
-        }
+    {  
+        \Log::info('Attempting to process job.');
+
+    try {
+        // Your job logic here
+        Excel::import(new BankImports, $this->file);
+
+        \Log::info('Job processed successfully.');
+    } catch (\Exception $e) {
+        \Log::error('Error processing job: ' . $e->getMessage());
+        // Handle or rethrow the exception as needed
+    }
     }
 }

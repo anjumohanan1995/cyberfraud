@@ -5,6 +5,7 @@ namespace App\Imports;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Illuminate\Support\Facades\Validator;
 use App\Hospital;
 use App\Models\BankCasedata;
@@ -12,7 +13,7 @@ use App\Models\OldBankCaseData;
 use App\Models\OldCaseData;
 use Auth;
 
-class BankImports implements ToCollection, WithStartRow
+class BankImports implements ToCollection, WithStartRow, WithChunkReading
 {
     /**
      * @param Collection $collection

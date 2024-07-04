@@ -14,6 +14,7 @@ use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use MongoDB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class EvidenceController extends Controller
 {
@@ -433,7 +434,7 @@ class EvidenceController extends Controller
             $acknowledgement_no = $record->_id;
 
             foreach ($record->url as $item) {
-                $url .= $item."<br>";
+                $url .= '<a href="#" data-url="' . $item . '" data-type="ncrp" class="check-status">'.$item."</a><br>";
             }
 
             // $getEvidence = Evidence::get(['evidence_type', 'url', 'mobile']);
@@ -700,7 +701,7 @@ class EvidenceController extends Controller
             $case_number = $record->_id;
 
             foreach ($record->url as $item) {
-                $url .= $item."<br>";
+                $url .= '<a href="#" data-url="' . $item . '" data-type="others" class="check-status">'.$item."</a><br>";
             }
             foreach ($record->evidence_type as $item) {
              $evidence_type .= $item."<br>";
@@ -740,6 +741,131 @@ class EvidenceController extends Controller
         );
 
         return response()->json($response);
+    }
+
+    public function statusRecheck(Request $request){
+        if($request->type=='ncrp'){
+            $urls = Evidence::pluck('url');
+        }
+        else{
+            $urls = ComplaintOthers::pluck('url');
+        }
+        
+        if($urls){
+            if($request->type=='ncrp'){
+                foreach($urls as $url){
+               
+                    $headers = @get_headers($url);
+    
+                   // dd($headers);
+                    if($headers === false){
+                        $status_code = 400;
+                        $status_text = 'Bad Request';
+    
+                    }
+                    else{
+                        $statusLine = $headers[0];
+                        preg_match('/\d{3}/', $statusLine, $matches);
+                        $status_code = isset($matches[0]) ? $matches[0] : null;
+                        $parts = explode(' ', $statusLine, 3);
+                        if (count($parts) >= 2) {
+                            $status_text = $parts[2];
+                            
+                        } else {
+                            $status_text = "Failed to determine status text.";
+                            
+                        }
+    
+                    }
+                 
+                        Evidence::where('url', $url)
+                        ->update(['url_status' => $status_code,
+                                  'url_status_text'=> $status_text 
+                       ]); 
+                    
+                   
+                                  
+                }
+            }
+            else{
+                
+                foreach($urls as $url){
+
+                    if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+                        // Handle invalid URL
+                        $status_code = 400;
+                        $status_text = 'Bad Request';
+                        continue;
+                    }
+
+                    $context = stream_context_create([
+                        'http' => [
+                            'timeout' => 10, 
+                        ],
+                    ]);
+                    //$headers = @get_headers($url);
+                    $headers = @get_headers($url, 0, $context);
+                                     
+                    if($headers === false){
+                        $status_code = 400;
+                        $status_text = 'Bad Request';
+    
+                    }
+                    else{
+                       
+                        $statusLine = $headers[0];
+                        preg_match('/\d{3}/', $statusLine, $matches);
+                        $status_code = isset($matches[0]) ? $matches[0] : null;  
+                        $parts = explode(' ', $statusLine, 3);
+                        if (count($parts) >= 2) {
+                            $status_text = $parts[2];
+                            
+                        } else {
+                            $status_text = "Failed to determine status text.";
+                            
+                        }
+                        
+                    }
+                    
+                        ComplaintOthers::where('url', $url)
+                        ->update(['url_status' => $status_code,
+                                  'url_status_text'=> $status_text 
+                       ]); 
+                    
+                   
+                                  
+                }
+            }
+            
+            return response()->json(['success'=>true]);
+        }
+        else{
+            return response()->json(['success'=>false]);
+        }    
+        
+    }
+
+    public function urlStatus(Request $request){
+
+        $type = $request->type;
+        if($type=='ncrp'){
+            $status = Evidence::where('url', $request->url)->first();
+        }
+        else{
+            $status = ComplaintOthers::where('url', $request->url)->first();
+        }
+       
+        if($status){
+            $responseData = [
+                'statuscode' => $status->url_status,
+                'statustext' => $status->url_status_text,
+                'url' => $status->url
+            ];
+            return response()->json($responseData);
+        }
+        else{
+            return response()->json(['error' => 'Status not found for the given URL.'], 404);
+        }
     }
 
 
