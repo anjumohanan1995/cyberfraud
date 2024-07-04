@@ -224,7 +224,7 @@
                         </ul>
                     </li>
         @endif
-        @if ($hasOtherCasePermission)
+        @if ($hasUploadOtherPermission)
             <li class="slide">
                 <a class="side-menu__item"  href="{{ route('upload-others-caseData') }}">
                     <i class="side-menu__icon fe fe-box"> </i>

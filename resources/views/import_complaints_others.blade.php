@@ -1,4 +1,19 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasUploadOtherPermission = in_array('Upload Other Case Data Management', $sub_permissions) || $user->role == 'Super Admin';
+                } else{
+                    $hasUploadOtherPermission = false;
+                }
+
+@endphp
 
 @section('content')
     <!-- container -->
@@ -54,7 +69,8 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class=" m-4 d-flex justify-content-between">
+                            @if ($hasUploadOtherPermission)
+<div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Complaints!
                                 </h4>
@@ -127,6 +143,8 @@
                                     </div>
                                     </div>
                                 </form>
+                            @endif
+
 
                         </div>
                     </div>
@@ -168,7 +186,7 @@ $(document).ready(function(){
                         }
                     });
         }
-    }  
+    }
     }
     getCaseNumber();
 

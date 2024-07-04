@@ -1,5 +1,28 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasShowTTypePermission = in_array('Show Transaction Type Filter', $sub_permissions);
+                $hasShowBankPermission = in_array('Show Bank/Wallet/Merchant/Insurance Filter', $sub_permissions);
+                $hasShowFilledByPermission = in_array('Show Filled by(within 24 hrs) Filter', $sub_permissions);
+                $hasShowComplaintRepoPermission = in_array('Show Complaint Reported Filter', $sub_permissions);
+                $hasShowFIRLodgePermission = in_array('Show FIR Lodge Filter', $sub_permissions);
+                $hasShowStatusPermission = in_array('Show Status Filter', $sub_permissions);
+                $hasShowSearchByPermission = in_array('Show Search by Filter', $sub_permissions);
+                $hasShowSubCategoryPermission = in_array('Show Sub category Filter', $sub_permissions);
+                $hasShowSelfAssignPermission = in_array('Self Assign', $sub_permissions);
+                $hasShowActivatePermission = in_array('Activate / Deactivate', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -86,7 +109,8 @@
                                             <input type="text" class="form-control" id="mobile" name="mobile">
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    @if ($hasShowTTypePermission)
+<div class="col-md-2">
                                         <div class="form-group">
                                             <label for="type">Transaction Type:</label><br>
                                             <select class="form-control" id="type">
@@ -100,6 +124,8 @@
 
                                         </div>
                                     </div>
+                                    @endif
+@if ($hasShowBankPermission)
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="options">Bank/Wallet/Merchant/Insurance:</label>
@@ -107,9 +133,10 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @endif
                                 </div>
                                 <div class="row">
-
+@if ($hasShowFilledByPermission)
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="filled-by">Filled by(within 24 hrs):</label>
@@ -120,6 +147,8 @@
                                             </select>
                                         </div>
                                     </div>
+@endif
+@if($hasShowFilledByPermission)
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="filled_by_who">Complaint Reported:</label>
@@ -130,6 +159,7 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @endif
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="acknowledgement_no">Acknowledgement No: </label>
@@ -137,6 +167,7 @@
                                                 name="acknowledgement_no">
                                         </div>
                                     </div>
+                                    @if ($hasShowFIRLodgePermission)
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="fir_lodge">FIR Lodge:</label>
@@ -147,7 +178,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    @endif
+                                    @if ($hasShowStatusPermission)
+                                        <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="com_status">Status </label>
                                             <select class="form-control" id="com_status">
@@ -157,12 +190,15 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @endif
+
 
 
 
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-2">
+                                    @if ($hasShowSearchByPermission)
+<div class="col-md-2">
                                         <div class="form-group">
                                             <label for="search-by">Search by:</label>
                                             <select class="form-control" id="search-by" name="search-by" onchange="showTextBox()">
@@ -173,6 +209,8 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @endif
+
                                     <div class="col-md-4" id="account-id-input" style="display: none;">
                                         <div class="form-group">
                                             <label for="account-id">Enter Account ID/Account Number/UPI ID:</label>
@@ -185,7 +223,8 @@
                                             <input type="text" class="form-control" id="transaction-id" name="transaction-id">
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    @if ($hasShowSubCategoryPermission)
+<div class="col-md-2">
                                         <div class="form-group">
                                             <label for="sub-category">Sub category:</label>
                                             <select class="form-control" id="sub-category" name="sub-category">
@@ -201,6 +240,8 @@
                                             </select>
                                         </div>
                                     </div>
+                                    @endif
+
                                 </div>
 
 
@@ -248,7 +289,9 @@
                                             <th>Current Status</th>
                                             <th>Date of Action</th>
                                             <th>Action Taken By</th>
-                                            <th>ACTION</th>
+                                            @if ($hasShowSelfAssignPermission || $hasShowActivatePermission)
+                                                <th>ACTION</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -532,10 +575,12 @@
                     {
                         data: 'action_taken_by_name'
                     },
-
-                    {
+                    @if ($hasShowSelfAssignPermission || $hasShowActivatePermission)
+{
                         data: 'edit'
                     }
+                    @endif
+
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
