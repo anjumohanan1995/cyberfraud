@@ -11,8 +11,10 @@ class MailMergePreview extends Mailable
     use Queueable, SerializesModels;
 
     public $sub;
-    public $salutation;
-    public $compiledContent;
+    public $number;
+    public $url;
+    public $domain_name;
+    public $domain_id;
 
     /**
      * Create a new message instance.
@@ -22,13 +24,16 @@ class MailMergePreview extends Mailable
      * @param string $compiledContent The compiled content of the email
      * @return void
      */
-    public function __construct($sub, $salutation, $compiledContent)
+    public function __construct($sub, $number, $url, $domain_name, $domain_id)
     {
         // dd($sub);
         $this->sub = $sub;
-        $this->salutation = $salutation;
-        $this->compiledContent = $compiledContent;
+        $this->number = $number;
+        $this->url = $url;
+        $this->domain_name = $domain_name;
+        $this->domain_id = $domain_id;
     }
+
 
     /**
      * Build the message.
@@ -45,8 +50,10 @@ class MailMergePreview extends Mailable
                     ->view($viewName)
                     ->with([
                         'sub' => $this->sub,
-                        'salutation' => $this->salutation,
-                        'compiledContent' => $this->compiledContent,
+                        'number' => $this->number,
+                        'url' => $this->url,
+                        'domain_name' => $this->domain_name,
+                        'domain_id' => $this->domain_id,
                     ]);
     }
 
