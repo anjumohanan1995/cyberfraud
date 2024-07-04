@@ -581,7 +581,9 @@ $(document).ready(function() {
         success:function(response){
            
             console.log(response.statuscode);
-             var htm = 'URL - ' +response.url + '<br> Status Code - '+response.statuscode+ '<br> Status - '+response.statustext+'';
+             var statuscode = response.statuscode !== null ? response.statuscode : 'Not updated.Recheck';
+             var statustext = response.statustext !== null ? response.statustext : 'Not updated.Recheck';
+             var htm = 'URL - ' +response.url + '<br> Status Code - '+statuscode+ '<br> Status - '+statustext+'';
          
              $('.url-display').html(htm);
              $('#showUrlStatus').modal('show');
