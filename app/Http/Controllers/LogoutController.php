@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
+
+
 class LogoutController extends Controller
 {
     public function logout()
@@ -48,13 +50,19 @@ class LogoutController extends Controller
             $user->reset_password_token = $token;
             $user->save();
 
-            // dd($user->name, $token);
+            //  dd($user->email, $token);
 
-            Mail::to($user->email)->send(new PasswordResetMail($user, $token));
-
-            return "Password reset link sent successfully!";
+           $mail = Mail::to($user->email)->send(new PasswordResetMail($user, $token));
+         
+            if($mail){
+                return redirect(url('/'))->with('success', 'Password reset link sent successfully!!');
+            }
+            else{
+                return redirect(url('/'))->with('error', 'User not found!!');
+            }
+            // return "Password reset link sent successfully!";
         } else {
-            return "User not found!";
+            return redirect(url('/'))->with('error', 'User not found!!');
         }
     }
 

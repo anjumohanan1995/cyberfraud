@@ -37,6 +37,8 @@
     <link href="{{ asset('css/switcher.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/demo.css') }}" rel="stylesheet" />
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <meta http-equiv="imagetoolbar" content="no">
 
     <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
@@ -52,47 +54,61 @@
     </div>
     <!-- /Loader -->
     <!-- Start Switcher -->
-
-    <div class="page">
-        <div class="my-auto page page-h">
-            <div class="main-signin-wrapper">
+    <div class="page"> <!-- main-signin-wrapper -->
+        <div class="my-auto page page-h bg_login">
+            <div class="">
                 <div class="main-card-signin d-md-flex">
-                    <div>
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
-                            </div>
-                        @endif
-
-                        @if (session('error'))
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                {{ session('error') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="p-5">
-                        <form action="{{ route('password.email') }}" method="POST">
-                            @csrf
-                            <div class="form-group">
-                                <label for="email" style="color: black;">Email Address</label><br>
-                                <input id="email" type="email" name="email" value="{{ old('email') }}"
-                                    required style="color: black;">
-                                <div><br>
-                                    <button type="submit" class="btn btn-success">Send Password Reset Link</button>
+                    <div class="p-5 w-100">
+                        <div class="main-signin-header">
+                            <img src="img/logo.png" class="" alt="" />
+                            <br> <br> <br>
+                            <div>
+                            @if (session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
                                 </div>
-                            </div>
-                        </form>
+                            @endif
+
+                            @if (session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ session('error') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            @endif
+                        </div>
+
+                            <h4><br>Please sign in to continue</h4>
+                            <form action="{{ route('password.email') }}" method="POST">
+                                @csrf
+                                <div class="form-group">
+                                    <label for="email" style="color: black;">Email Address</label><br>
+                                    <input id="email" type="email" name="email" value="{{ old('email') }}"
+                                        required style="color: black;"  class="form-control" placeholder="Enter your email">
+                                    <div><br>
+                                        <button type="submit" class="btn btn-success">Send Password Reset Link</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            
+
+                        </div>
+                        <div class="main-signin-footer mt-3 mg-t-5">
+                            <p><a href="{{url('/')}}">Back</a></p>
+                            
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

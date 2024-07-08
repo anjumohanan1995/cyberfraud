@@ -20159,9 +20159,9 @@ pre {
     }
 
     .app.sidebar-mini.sidenav-toggled .side-header {
-        position: fixed;
-        padding-left: 80px;
-        left: 0;
+        /* position: fixed; */
+        /* padding-left: 80px; */
+        /* left: 0; */
     }
 }
 
@@ -31817,14 +31817,18 @@ textarea.parsley-success:focus {
     align-items: center;
     justify-content: center;
 }
-
+.bg_login{
+    background: url(../img/bg.png) right top;
+    background-size: contain;
+}
 .main-card-signin {
     padding: 20px;
     display: flex;
     justify-content: space-between;
     background-color: #fff;
     position: relative;
-    border-radius: 8px;
+    height: 100em;
+    border-radius: 0px;
     box-shadow: 6px 11px 41px -28px #796eb1;
     -webkit-box-shadow: 6px 11px 41px -28px #796eb1;
 }
@@ -31880,7 +31884,7 @@ textarea.parsley-success:focus {
     .main-card-signin {
         border: 0;
         padding: 0;
-        max-width: 750px;
+        width: 550px;
     }
 
     .main-card-signin.construction {
