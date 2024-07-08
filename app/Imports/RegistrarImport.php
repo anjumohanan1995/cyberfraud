@@ -10,22 +10,22 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class RegistrarImport implements ToCollection, WithHeadingRow, WithValidation
 {
-    protected $registrarNumber;
+    // protected $registrarNumber;
 
-    public function __construct($registrarNumber)
+    public function __construct()
     {
         // dd($registrarNumber);
-        $this->registrarNumber = $registrarNumber;
+        // $this->registrarNumber = $registrarNumber;
     }
 
     public function collection(Collection $rows)
     {
-        $importedRegistrarNumbers = [];
-
+        // $importedRegistrarNumbers = [];
+        // dd($rows);
         foreach ($rows as $row) {
             // Check if registrar number is already imported
-            if (!in_array($this->registrarNumber, $importedRegistrarNumbers)) {
-                $importedRegistrarNumbers[] = $this->registrarNumber;
+            // if (!in_array($this->registrarNumber, $importedRegistrarNumbers)) {
+            //     $importedRegistrarNumbers[] = $this->registrarNumber;
 
                 // Process emails
                 $emailString = $row['email_id'];
@@ -34,13 +34,13 @@ class RegistrarImport implements ToCollection, WithHeadingRow, WithValidation
 
                 // Create new Registrar entry
                 Registrar::create([
-                    'registrar_number' => $this->registrarNumber,
+                    // 'registrar_number' => $this->registrarNumber,
                     'registrar' => $row['registrar'],
                     'contact_information' => $row['contact_information'],
                     'email_id' => $emails, // Store emails as an array
                     'portal_link' => $row['portal_link']
                 ]);
-            }
+            // }
         }
     }
 

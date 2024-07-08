@@ -53,7 +53,7 @@
 .status_recheck.loading .spinner {
     display: block; /* Show spinner when button is loading */
 }
- 
+
 </style>
 
 <link rel="stylesheet" href="path_to_bootstrap_css">
@@ -182,7 +182,7 @@
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
-                                                            
+
                                                                 <table id="ncrp" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
 
                                                                 <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="ncrp" title="NCRP Recheck"> Recheck </button>
@@ -324,7 +324,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                   
+
                 </div>
             </div>
         </div>
@@ -481,53 +481,76 @@ $(document).ready(function() {
 
 </script>
 
-<script>
-    function toggleReportStatus(element) {
-        var recordId = element.getAttribute('data-record-id');
-        var isChecked = element.checked;
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        // Perform AJAX call to update reported status
-        fetch('/update-reported-status/' + recordId)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+
+<script>
+    // Function to handle the onchange event of radio buttons
+    function toggleReportStatus(radio) {
+        var ackNo = radio.getAttribute('data-ack-no');
+        var statusValue = radio.value;
+
+        // Get CSRF token from meta tag
+        var csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+
+        // AJAX request to update the reported status
+        $.ajax({
+            url: '/update-reported-status/' + ackNo,
+            type: 'POST',
+            data: {
+                status: statusValue
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken // Include CSRF token in headers
+            },
+            success: function(response) {
+                // Update UI or handle success response
+                console.log('Status updated successfully.');
+            },
+            error: function(xhr, status, error) {
+                // Handle error
+                console.error('Error updating status:', error);
             }
-            return response.json();
-        })
-        .then(data => {
-            // Update UI or notify user based on response
-            console.log('Status updated successfully');
-        })
-        .catch(error => {
-            console.error('Error updating status:', error);
-            // Handle error or show user an error message
         });
     }
 </script>
 
-<script>
-    function toggleReportStatusOther(element) {
-        var recordId = element.getAttribute('data-record-id');
-        var isChecked = element.checked;
 
-        // Perform AJAX call to update reported status
-        fetch('/update-reported-statusother/' + recordId)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+
+
+
+<script>
+    // Function to handle the onchange event of radio buttons
+    function toggleReportStatusOther(radio) {
+        var caseNo = radio.getAttribute('data-case-no');
+        var statusValue = radio.value;
+
+        // Get CSRF token from meta tag
+        var csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+
+        // AJAX request to update the reported status
+        $.ajax({
+            url: '/update-reported-statusother/' + caseNo,
+            type: 'POST',
+            data: {
+                status: statusValue
+            },
+            headers: {
+                'X-CSRF-TOKEN': csrfToken // Include CSRF token in headers
+            },
+            success: function(response) {
+                // Update UI or handle success response
+                console.log('Status updated successfully.');
+            },
+            error: function(xhr, status, error) {
+                // Handle error
+                console.error('Error updating status:', error);
             }
-            return response.json();
-        })
-        .then(data => {
-            // Update UI or notify user based on response
-            console.log('Status updated successfully');
-        })
-        .catch(error => {
-            console.error('Error updating status:', error);
-            // Handle error or show user an error message
         });
     }
 </script>
+
+
 
 
 <script>
@@ -543,7 +566,7 @@ $(document).ready(function() {
      $button.addClass('loading');
      var spinner = $('<div class="spinner"></div>');
      $button.append(spinner);
-    
+
     $.ajax({
     url: "{{ route('url_status_recheck') }}",
     data:{type:type},
@@ -555,11 +578,11 @@ $(document).ready(function() {
 
     console.log(response);
             if(response.success){
-            
+
             toastr.success(' url status updated!');
             }
             else{
-                
+
                 toastr.error(' updation error!');
             }
     }
@@ -571,7 +594,7 @@ $(document).ready(function() {
        e.preventDefault();
        var url = $(this).data('url');
        var type = $(this).data('type');
-      
+
        $.ajax({
         url:"{{ route('get_url_status') }}",
         data:{
@@ -579,12 +602,12 @@ $(document).ready(function() {
             type:type
         },
         success:function(response){
-           
+
             console.log(response.statuscode);
              var statuscode = response.statuscode !== null ? response.statuscode : 'Not updated.Recheck';
              var statustext = response.statustext !== null ? response.statustext : 'Not updated.Recheck';
              var htm = 'URL - ' +response.url + '<br> Status Code - '+statuscode+ '<br> Status - '+statustext+'';
-         
+
              $('.url-display').html(htm);
              $('#showUrlStatus').modal('show');
         },
@@ -596,8 +619,8 @@ $(document).ready(function() {
             $('#showUrlStatus').modal('show');
         }
        })
-       
-       
+
+
      })
 })
 

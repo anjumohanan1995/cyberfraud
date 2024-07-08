@@ -201,7 +201,7 @@ class SourceTypeController extends Controller
         $file = $request->file('registrar_file');
         // dd($file);
         $request->validate([
-            'registrar_number' => 'required|unique:registrar_data',
+            // 'registrar_number' => 'required|unique:registrar_data',
             'registrar_file' => 'required|mimes:xls,xlsx,csv'
         ]);
 
@@ -210,7 +210,7 @@ class SourceTypeController extends Controller
         if ($file) {
             try {
                 // Import data from the file
-                Excel::import(new RegistrarImport($request->registrar_number), $file);
+                Excel::import(new RegistrarImport(), $file);
 
                 // Provide feedback to the user
                 return redirect()->back()->with('success', 'Form submitted successfully!');
