@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\BankImport;
 use App\Imports\BankImports;
 use Exception;
-use App\Jobs\BankImportJob;
+use App\Jobs\ImportBankAction;
 
 class BankCasedataController extends Controller
 {
@@ -42,7 +42,7 @@ class BankCasedataController extends Controller
 
                 // Import data from the file.
                 Excel::import(new BankImports, $file);
-               // BankImportJob::dispatch($file);
+              // ImportBankAction::dispatch($file);
             
            
                 // Provide feedback to the user.

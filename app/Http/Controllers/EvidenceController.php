@@ -859,9 +859,21 @@ class EvidenceController extends Controller
         if($urls){
             if($request->type=='ncrp'){
                 foreach($urls as $url){
+                    if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+                        // Handle invalid URL
+                        $status_code = 400;
+                        $status_text = 'Bad Request';
+                        continue;
+                    }
 
-                    $headers = @get_headers($url);
-
+                    $context = stream_context_create([
+                        'http' => [
+                            'timeout' => 10, 
+                        ],
+                    ]);
+                    //$headers = @get_headers($url);
+                    $headers = @get_headers($url, 0, $context);
+                   
                    // dd($headers);
                     if($headers === false){
                         $status_code = 400;
