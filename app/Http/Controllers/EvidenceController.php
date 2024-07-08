@@ -472,29 +472,36 @@ class EvidenceController extends Controller
             foreach ($record->registry_details as $item) {
                 $registry_details .= $item."<br>";
             }
-            // dd($record->evidence_type_id);
 
-           // Make sure evidence_type_text is defined if used
 
-        //    dd($record->_id);
         $status = '';
 
-        if ($record->reported_status == 1) {
-            $switchStatus = 'checked';
-        } else {
-            $switchStatus = '';
+        $statusOptions = [
+            ['value' => 1, 'label' => 'Reported', 'class' => 'badge-success'],
+            ['value' => 2, 'label' => 'Active', 'class' => 'badge-primary'],
+            ['value' => 0, 'label' => 'Inactive', 'class' => 'badge-secondary'],
+        ];
+
+        foreach ($statusOptions as $option) {
+            $checked = ($record->reported_status == $option['value']) ? 'checked' : '';
+            $status .= '
+            <div class="form-check form-check">
+                <input
+                    type="radio"
+                    id="statusRadio_' . $record->_id . '_' . $option['value'] . '"
+                    name="statusRadio_' . $record->_id . '"
+                    class="form-check-input status-radio"
+                    value="' . $option['value'] . '"
+                    ' . $checked . '
+                    data-ack-no="' . $record->_id . '"
+                    onchange="toggleReportStatus(this)">
+                <label class="form-check-label badge ' . $option['class'] . '" for="statusRadio_' . $record->_id . '_' . $option['value'] . '">
+                    ' . $option['label'] . '
+                </label>
+            </div>';
         }
 
-        $status .= '
-        <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-            <input
-                type="checkbox"
-                id="statusSwitch' . $record->_id . '"
-                class="form-check-input status-switch"
-                data-record-id="' . $record->_id . '"
-                ' . $switchStatus . '
-                onchange="toggleReportStatus(this)">
-        </div>';
+
 
         $editButton = '';
         if ($website_id) {
@@ -533,24 +540,26 @@ class EvidenceController extends Controller
 
     }
 
-    public function updateReportedStatus($ack_no)
+
+    public function updateReportedStatus($ack_no, Request $request)
     {
+
+        $status = $request->input('status');
         // Update all documents with the given ack_no
         $evidences = Evidence::where('ack_no', $ack_no)->get();
-
+        // dd($ack_no);
         if ($evidences->isEmpty()) {
-            return redirect()->back()->with('error', 'No documents found for the given ack_no');
+            return response()->json(['error' => 'No documents found for the given case number'], 404);
         }
 
         foreach ($evidences as $evidence) {
-            // Toggle reported_status
-            $newReportedStatus = $evidence->reported_status == 0 ? 1 : 0;
-            $evidence->reported_status = $newReportedStatus;
+            // Update reported_status based on the status parameter
+            $evidence->reported_status = $status;
             $evidence->save();
         }
 
         // Respond with a success message
-        return redirect()->back()->with('success', 'Status updated successfully for ' . $evidences->count() . ' documents');
+        return response()->json(['message' => 'Status updated successfully']);
     }
 
     public function evidenceOthers(Request $request){
@@ -595,6 +604,7 @@ class EvidenceController extends Controller
                 [
                     '$group' => [
                         '_id' => '$case_number',
+                        'reported_status' => ['$first' => '$reported_status'],
                         'evidence_type' => ['$push' => '$evidence_type'],
                         'url' => ['$push' => '$url'],
                         'domain' => ['$push' => '$domain'],
@@ -777,24 +787,33 @@ class EvidenceController extends Controller
                 $registry_details .= $item."<br>";
             }
 
+
             $status = '';
 
-            if ($record->reported_status == 1) {
-                $switchStatus = 'checked';
-            } else {
-                $switchStatus = '';
-            }
+            $statusOptions = [
+                ['value' => 1, 'label' => 'Reported', 'class' => 'badge-success'],
+                ['value' => 2, 'label' => 'Active', 'class' => 'badge-primary'],
+                ['value' => 0, 'label' => 'Inactive', 'class' => 'badge-secondary'],
+            ];
 
-            $status .= '
-            <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                <input
-                    type="checkbox"
-                    id="statusSwitch' . $record->_id . '"
-                    class="form-check-input status-switch"
-                    data-record-id="' . $record->_id . '"
-                    ' . $switchStatus . '
-                    onchange="toggleReportStatusOther(this)">
-            </div>';
+            foreach ($statusOptions as $option) {
+                $checked = ($record->reported_status == $option['value']) ? 'checked' : '';
+                $status .= '
+                <div class="form-check form-check">
+                    <input
+                        type="radio"
+                        id="statusRadio_' . $record->_id . '_' . $option['value'] . '"
+                        name="statusRadio_' . $record->_id . '"
+                        class="form-check-input status-radio"
+                        value="' . $option['value'] . '"
+                        ' . $checked . '
+                        data-case-no="' . $record->_id . '"
+                        onchange="toggleReportStatusOther(this)">
+                    <label class="form-check-label badge ' . $option['class'] . '" for="statusRadio_' . $record->_id . '_' . $option['value'] . '">
+                        ' . $option['label'] . '
+                    </label>
+                </div>';
+            }
 
             $editButton = '';
             if ($website_name) {
@@ -836,7 +855,7 @@ class EvidenceController extends Controller
         else{
             $urls = ComplaintOthers::pluck('url');
         }
-        
+
         if($urls){
             if($request->type=='ncrp'){
                 foreach($urls as $url){
@@ -859,7 +878,7 @@ class EvidenceController extends Controller
                     if($headers === false){
                         $status_code = 400;
                         $status_text = 'Bad Request';
-    
+
                     }
                     else{
                         $statusLine = $headers[0];
@@ -868,25 +887,25 @@ class EvidenceController extends Controller
                         $parts = explode(' ', $statusLine, 3);
                         if (count($parts) >= 2) {
                             $status_text = $parts[2];
-                            
+
                         } else {
                             $status_text = "Failed to determine status text.";
-                            
+
                         }
-    
+
                     }
-                 
+
                         Evidence::where('url', $url)
                         ->update(['url_status' => $status_code,
-                                  'url_status_text'=> $status_text 
-                       ]); 
-                    
-                   
-                                  
+                                  'url_status_text'=> $status_text
+                       ]);
+
+
+
                 }
             }
             else{
-                
+
                 foreach($urls as $url){
 
                     if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
@@ -898,49 +917,49 @@ class EvidenceController extends Controller
 
                     $context = stream_context_create([
                         'http' => [
-                            'timeout' => 10, 
+                            'timeout' => 10,
                         ],
                     ]);
                     //$headers = @get_headers($url);
                     $headers = @get_headers($url, 0, $context);
-                                     
+
                     if($headers === false){
                         $status_code = 400;
                         $status_text = 'Bad Request';
-    
+
                     }
                     else{
-                       
+
                         $statusLine = $headers[0];
                         preg_match('/\d{3}/', $statusLine, $matches);
-                        $status_code = isset($matches[0]) ? $matches[0] : null;  
+                        $status_code = isset($matches[0]) ? $matches[0] : null;
                         $parts = explode(' ', $statusLine, 3);
                         if (count($parts) >= 2) {
                             $status_text = $parts[2];
-                            
+
                         } else {
                             $status_text = "Failed to determine status text.";
-                            
+
                         }
-                        
+
                     }
-                    
+
                         ComplaintOthers::where('url', $url)
                         ->update(['url_status' => $status_code,
-                                  'url_status_text'=> $status_text 
-                       ]); 
-                    
-                   
-                                  
+                                  'url_status_text'=> $status_text
+                       ]);
+
+
+
                 }
             }
-            
+
             return response()->json(['success'=>true]);
         }
         else{
             return response()->json(['success'=>false]);
-        }    
-        
+        }
+
     }
 
     public function urlStatus(Request $request){
@@ -952,7 +971,7 @@ class EvidenceController extends Controller
         else{
             $status = ComplaintOthers::where('url', $request->url)->first();
         }
-       
+
         if($status){
             $responseData = [
                 'statuscode' => $status->url_status,
@@ -965,25 +984,27 @@ class EvidenceController extends Controller
             return response()->json(['error' => 'Status not found for the given URL.'], 404);
         }
     }
-    public function updateReportedStatusOther($case_no)
-    {
-        // dd($case_no);
-        // Update all documents with the given ack_no
-        $complaintother = ComplaintOthers::where('case_number', $case_no)->get();
 
-        if ($complaintother->isEmpty()) {
-            return redirect()->back()->with('error', 'No documents found for the given ack_no');
+    public function updateReportedStatusOther($caseNo, Request $request)
+    {
+        // Retrieve status value from query parameters
+        $status = $request->input('status');
+// dd($caseNo);
+        // Update all documents with the given case number
+        $complaintothers = ComplaintOthers::where('case_number', $caseNo)->get();
+
+        if ($complaintothers->isEmpty()) {
+            return response()->json(['error' => 'No documents found for the given case number'], 404);
         }
 
-        foreach ($complaintother as $complaint) {
-            // Toggle reported_status
-            $newReportedStatus = $complaint->reported_status == 0 ? 1 : 0;
-            $complaint->reported_status = $newReportedStatus;
+        foreach ($complaintothers as $complaint) {
+            // Update reported_status based on the status parameter
+            $complaint->reported_status = $status;
             $complaint->save();
         }
 
         // Respond with a success message
-        return redirect()->back()->with('success', 'Status updated successfully for ' . $complaintother->count() . ' documents');
+        return response()->json(['message' => 'Status updated successfully']);
     }
 
 

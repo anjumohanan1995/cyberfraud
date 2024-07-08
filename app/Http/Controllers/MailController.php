@@ -66,7 +66,7 @@ class MailController extends Controller
             $i++;
             $editButton = '<div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Edit Options
+                Notice Type
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '91crpc_79itact', 'ack_no' => $record->ack_no, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
@@ -153,7 +153,7 @@ class MailController extends Controller
             $i++;
             $editButton = '<div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Edit Options
+                Notice Type
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '91crpc_79itact', 'case_no' => $record->case_number, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
@@ -211,6 +211,9 @@ class MailController extends Controller
         } elseif($acknowledgement_no && $evidence_type_id){
             $ncrpData = Evidence::find(new ObjectId($document_id));
         }
+
+        // $domain_name = $otherData->domain;
+        // dd($domain_name);
         // Initialize variables
 
     if (isset($ncrpData)) {
@@ -270,6 +273,8 @@ class MailController extends Controller
                 break;
         }
     }
+
+    dd();
 
 
         // Determine the view based on $option
@@ -340,6 +345,24 @@ class MailController extends Controller
       foreach ($emails as $email) {
         // Validate email format before sending (optional but recommended)
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+            // ---------------FOR MULTIPLE MAIL INTERATION CODE---------
+
+            // // Example for 'aravind' mailer
+            // $mailerName = 'aravind';
+            // Mail::mailer($mailerName)->to($email)->send(new MailMergePreview($sub, $number, $url, $domain_name, $domain_id, $mailerName));
+
+            // // Example for 'rajmohan' mailer
+            // $mailerName = 'rajmohan';
+            // Mail::mailer($mailerName)->to($email)->send(new MailMergePreview($sub, $number, $url, $domain_name, $domain_id, $mailerName));
+
+            // // // Example for 'sreejith' mailer
+            // $mailerName = 'sreejith';
+            // Mail::mailer($mailerName)->to($email)->send(new MailMergePreview($sub, $number, $url, $domain_name, $domain_id, $mailerName));
+
+            // ---------------FOR MULTIPLE MAIL INTERATION CODE END---------
+
+
             Mail::to($email)->send(new MailMergePreview($sub, $number, $url, $domain_name, $domain_id));
         } else {
             // Handle invalid email address (log or skip)

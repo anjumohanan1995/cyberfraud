@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'whois' => [
+        'api_key' => env('WHOIS_API_KEY'),
+    ],
+
 ];

@@ -52,7 +52,7 @@
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    All Roles
+                                    Evidence Type
                                 </h4>
                                 <div class="col-md-1 col-6 text-center">
                                     <div class="task-box primary  mb-0">

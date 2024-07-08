@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
 
 class MailMergePreview extends Mailable
 {
@@ -15,16 +16,20 @@ class MailMergePreview extends Mailable
     public $url;
     public $domain_name;
     public $domain_id;
+    // public $mailerName; // Add this property to hold the mailer name
 
     /**
      * Create a new message instance.
      *
      * @param string $sub The subject of the email
-     * @param string $salutation The salutation in the email
-     * @param string $compiledContent The compiled content of the email
+     * @param string $number The number in the email
+     * @param string $url The URL in the email
+     * @param string $domain_name The domain name in the email
+     * @param string $domain_id The domain ID in the email
+    //  * @param string $mailerName The mailer name to use for 'from' address and 'from' name
      * @return void
      */
-    public function __construct($sub, $number, $url, $domain_name, $domain_id)
+    public function __construct($sub, $number, $url, $domain_name, $domain_id)  //, $mailerName
     {
         // dd($sub);
         $this->sub = $sub;
@@ -32,6 +37,7 @@ class MailMergePreview extends Mailable
         $this->url = $url;
         $this->domain_name = $domain_name;
         $this->domain_id = $domain_id;
+        // $this->mailerName = $mailerName; // Assign mailer name to the property
     }
 
 
@@ -43,6 +49,11 @@ class MailMergePreview extends Mailable
     public function build()
     {
         $viewName = $this->getViewName();
+
+
+    // Retrieve 'from' address and 'from' name from the mailer configuration based on $this->mailerName
+    // $fromAddress = config("mail.mailers.$this->mailerName.from.address");
+    // $fromName = config("mail.mailers.$this->mailerName.from.name");
         // dd($viewName);
 
         return $this->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'))
