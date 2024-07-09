@@ -6,19 +6,14 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'auth_mode' => null,
-            'from' => [
-                'address' => env('MAIL_USERNAME', 'info@example.com'),
-                'name' => env('MAIL_USERNAME', 'Example'),
-            ],
         ],
-    
 
         'aravind' => [
             'transport' => 'smtp',
@@ -66,6 +61,10 @@ return [
         ],
     ],
 
+    'from' => [
+        'address' => '', // Leave this empty since we are dynamically setting 'from' address
+        'name' => '',    // Leave this empty since we are dynamically setting 'from' name
+    ],
 
     'markdown' => [
         'theme' => 'default',

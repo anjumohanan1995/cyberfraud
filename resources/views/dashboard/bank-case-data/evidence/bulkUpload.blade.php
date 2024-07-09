@@ -71,12 +71,15 @@ $user = Auth::user();
                             <div class=" m-4 d-flex justify-content-between">
 
                                 @if ($errors->any())
-                                    <div class="alert alert-danger">
+                                   <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                         <ul>
                                             @foreach ($errors->all() as $error)
                                                 <li>{{ $error }}</li>
                                             @endforeach
                                         </ul>
+                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
                                     </div>
                                 @endif
 
@@ -98,7 +101,7 @@ $user = Auth::user();
                             </div>
 
                             <div class="table-responsive mb-0">
-                                <form id="uploadForm" action="{{ route('bank-case-data.store') }}" method="POST" onsubmit="showSpinner()"
+                                <form  action="{{ route('evidence.bulk-upload') }}" method="POST" 
                                     enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
@@ -108,12 +111,12 @@ $user = Auth::user();
                                             <div class="form-group">
                                                 <label for="source_type">Upload Excel/CSV:</label>
                                                 <input type="file" name="file" id="file" name="file">
-                                                @error('file')
+                                                {{-- @error('file')
                                                 <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                                @enderror --}}
                                             </div>
 
-
+                                            <input type="hidden" name="ackno" value="{{ $ackno }}">
 
                                         </div>
                                     </div>

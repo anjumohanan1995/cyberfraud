@@ -182,19 +182,17 @@
                                             </div>
                                         </div>
                                         {{-- for bulk upload --}}
-
-                                        <div class="col-4 px-1 mt-2">
+                                        <div class="col-4 px-1 mt-3">
                                             <div
                                                 class="task-box primary mb-0 d-flex align-items-center justify-content-center">
                                                 <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
-                                                    data-toggle="tooltip" data-placement="top" title="Bulk Upload"
+                                                    data-toggle="tooltip" data-placement="top" title="View Evidence"
                                                     href="{{ route('evidence.bulkUpload', ['acknowledgement_no' => @$id]) }}">
-                                                    <span style="font-size:14px"><i class="ti ti-upload"></i>  Bulk Upload</span>
+                                                    <i class="ti ti-upload"></i> Bulk Upload
                                                 </a>
                                             </div>
                                         </div>
-
-
+                                        
                                     </div>
                                 </div>
                             </div>

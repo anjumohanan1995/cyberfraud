@@ -15,6 +15,8 @@ use DateTime;
 use MongoDB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\EvidenceBulkImport;
 
 class EvidenceController extends Controller
 {
@@ -1007,9 +1009,25 @@ class EvidenceController extends Controller
         return response()->json(['message' => 'Status updated successfully']);
     }
 
-    public function evidenceBulkUpload(Request $request){
+    public function evidenceBulkUpload(Request $request, $ackno){
+       
+        return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
+    }
+
+    public function evidenceBulkUploadFile(Request $request){
+
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls,ods' 
+        ]);
+
+        if ($request->hasFile('file')){
+            $file = $request->file('file');
+            Excel::import(new EvidenceBulkImport, $file);
+            return redirect()->route('evidence.bulkUpload',$request->ackno)->with('success', 'File uploaded successfully.');
+        }
+        return redirect('evidence.bulkUpload',$request->ackno)->with('error', 'File upload failed.');
         
-        return view('dashboard.bank-case-data.evidence.bulkUpload');
+
     }
 
 }

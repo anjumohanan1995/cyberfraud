@@ -74,7 +74,7 @@ Route::get('reset--password/{token}', [LogoutController::class, 'resetPassword']
 Route::get('reset-password-view', [LogoutController::class, 'resetPasswordView'])->name('reset.password.view');
 Route::post('password-update', [LogoutController::class, 'passwordUpdate'])->name('password.update');
 
-
+Route::post('/validate-otp',[AuthController::class,'validateOtp'])->name('validate.otp');
 
 // used default middlewire for authentication.
 Route::middleware('auth')->group(function () {
@@ -259,7 +259,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     //evidence bulk upload ncrp
     Route::get('evidence/bulkUpload/{acknowledgement_no}', [EvidenceController::class, 'evidenceBulkUpload'])->name('evidence.bulkUpload');
-
+    Route::post('evidence/bulk-upload',[EvidenceController::class, 'evidenceBulkUploadFile'])->name('evidence.bulk-upload');
+   
 
 });
 
