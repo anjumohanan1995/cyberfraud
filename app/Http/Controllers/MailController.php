@@ -274,8 +274,6 @@ class MailController extends Controller
         }
     }
 
-    dd();
-
 
         // Determine the view based on $option
         $viewName = 'mailmerge.' . $option . 'Preview';
