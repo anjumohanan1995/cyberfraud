@@ -257,6 +257,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('/update-reported-status/{ack_no}', [EvidenceController::class, 'updateReportedStatus']);
     Route::post('/update-reported-statusother/{case_no}', [EvidenceController::class, 'updateReportedStatusOther']);
 
+    //evidence bulk upload ncrp
+    Route::get('evidence/bulkUpload/{acknowledgement_no}', [EvidenceController::class, 'evidenceBulkUpload'])->name('evidence.bulkUpload');
+
 
 });
 

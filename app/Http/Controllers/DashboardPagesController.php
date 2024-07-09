@@ -60,7 +60,18 @@ class DashboardPagesController extends Controller
 
     $muleAccountCount = $layerOneQuery->merge($repeatedAccountNoQuery)->unique()->count();
 
-        return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount'));
+    //pending amount calculation
+    $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
+    $sum_amount = Complaint::where('com_status',1)->sum('amount'); 
+    $hold_amount = BankCaseData::where('com_status',1)
+        ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
+     
+    $lost_amount = BankCaseData::where('com_status',1)
+                                ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
+                                ->sum('transaction_amount');  
+    $pending_amount = $sum_amount - $hold_amount - $lost_amount;   
+
+        return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','pending_amount'));
     }
 
 }

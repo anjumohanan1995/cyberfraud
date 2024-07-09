@@ -22,7 +22,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     /**
      * @return int
      */
-    public function startRow(): int
+    public function startRow():int
     {
         return 2;
     }

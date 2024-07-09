@@ -14,6 +14,27 @@ $user = Auth::user();
                 }
 
 @endphp
+
+ <style>
+        /* Center the spinner */
+        .spinner-container {
+            position: fixed;
+            top: 40%;
+            left: 50%;                         
+            z-index: 9999; 
+            display: none;
+        }
+        .spinner-active {
+            display: block !important; 
+        }
+        .blur-background {
+            
+            pointer-events: none; 
+            opacity: 0.5; 
+        }
+       
+</style>
+
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -77,7 +98,7 @@ $user = Auth::user();
                             </div>
 
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('bank-case-data.store') }}" method="POST"
+                                <form id="uploadForm" action="{{ route('bank-case-data.store') }}" method="POST" onsubmit="showSpinner()"
                                     enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
@@ -120,7 +141,8 @@ $user = Auth::user();
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
-
+                                
+                                
                             </div>
 @endif
 
@@ -130,8 +152,40 @@ $user = Auth::user();
             </div>
             <!-- /row -->
 
+    <div id="spinnerContainer" class="spinner-container">
+        <div  role="status">
+            <span class="sr-only">Loading...</span>
+            <img src="{{ asset('img/Loading_2.gif') }}" alt="" width='80px';height='80px'; display="block">
+        </div>
+        <div class="mt-2" ><b style="font-weight:1000">Uploading...</b></div>
+    </div>
 
         </div>
         <!-- /row -->
     </div>
+    
+
+
+
 @endsection
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+        function showSpinner() {
+            var spinnerContainer = document.getElementById('spinnerContainer');
+            spinnerContainer.classList.add('spinner-active'); // Show spinner
+            
+            // Blur the background
+            document.body.classList.add('blur-background');
+        }
+        
+        // Hide spinner when page loaded
+        window.addEventListener('load', function() {
+            var spinnerContainer = document.getElementById('spinnerContainer');
+            spinnerContainer.classList.remove('spinner-active'); // Hide spinner after page loaded
+            
+            // Unblur the background
+            document.body.classList.remove('blur-background');
+        });
+    </script>

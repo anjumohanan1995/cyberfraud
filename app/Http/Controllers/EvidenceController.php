@@ -1007,5 +1007,9 @@ class EvidenceController extends Controller
         return response()->json(['message' => 'Status updated successfully']);
     }
 
+    public function evidenceBulkUpload(Request $request){
+        
+        return view('dashboard.bank-case-data.evidence.bulkUpload');
+    }
 
 }

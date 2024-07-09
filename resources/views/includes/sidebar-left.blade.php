@@ -7,9 +7,10 @@
 
     // Fetch the permissions for the current user's role
     $permission = RolePermission::where('role', $role)->first();
-
+    
     // Ensure the permissions are decoded only if they are not already arrays
     $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+     //dd($permissions);
     $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
 //dd($sub_permissions);
     // Check for main permissions
@@ -20,6 +21,7 @@
     $hasUploadOtherPermission = in_array('Upload Other Case Data Management', $permissions);
     $hasNCRPCasePermission = in_array('NCRP Case Data Management', $permissions);
     $hasOtherCasePermission = in_array('Other Case Data Management', $permissions);
+   
     $hasSourceTypeManagementPermission = in_array('Source Type Management', $permissions);
     $hasNoticeManagementPermission = in_array(' Notice Management', $permissions);
     $hasEvidenceManagementPermission = in_array('Evidence Management', $permissions);

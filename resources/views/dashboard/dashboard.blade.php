@@ -196,11 +196,13 @@
 
                                 </div>
                                 <div class="project-content">
-                                    <h6>Amount Retrived</h6>
+                                    {{-- <h6>Amount Retrived</h6> --}}
+                                    <h6>Amount Pending</h6>
                                     <ul>
                                         <li>
-                                            <strong>Total Amount Retrived:</strong>
-                                            <span>0</span>
+                                            {{-- <strong>Total Amount Retrived:</strong> --}}
+                                            <strong>Total Amount Pending:</strong>
+                                            <span>{{ $pending_amount }}</span>
                                         </li>
                                         <li hidden>
                                             <strong>Expensive</strong>

@@ -98,6 +98,10 @@ class PermissionSeeder extends Seeder
                 'name' => 'Evidence Type Management',
                 'sub_permission' => json_encode([]),
             ],
+            [
+                'name' => 'Other Case Data Management',
+                'sub_permission' => json_encode([]),
+            ],
         ];
 
         foreach ($permissions as $permission) {
