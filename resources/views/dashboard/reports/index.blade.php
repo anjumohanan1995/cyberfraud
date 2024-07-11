@@ -231,8 +231,8 @@
                                                                             <label for="evidence_type_others">Evidence Type:</label>
                                                                             <select class="form-control" id="evidence_type_others" name="evidence_type_others" onchange="showTextBox('evidence_type_others')">
                                                                                 <option value="">--select--</option>
-                                                                                @foreach($lowercaseEvidences as $evidenceType)
-                                                                                    <option value="{{ $evidenceType }}">{{ $evidenceType }}</option>
+                                                                                @foreach($evidenceTypes as $evidenceType)
+                                                                                    <option value="{{ $evidenceType->name}}">{{ $evidenceType->name }}</option>
                                                                                 @endforeach
                                                                             </select>
                                                                             <div id="searchBoxContainer_evidence_type_others"></div>
@@ -241,6 +241,23 @@
                                                                             @enderror
                                                                         </div>
                                                                     </div>
+
+
+                                                                    {{-- <div class="col-md-2">
+                                                                        <div class="form-group">
+                                                                            <label for="evidence_type_ncrp">Evidence Type:</label>
+                                                                            <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp" onchange="showTextBox('evidence_type_ncrp')">
+                                                                                <option value="">--select--</option>
+                                                                                @foreach($evidenceTypes as $evidenceType)
+                                                                                    <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            <div id="searchBoxContainer_evidence_type_ncrp"></div>
+                                                                            @error('evidence_type_ncrp')
+                                                                                <div class="text-danger">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div> --}}
 
                                                                 </div>
                                                                 <div class="row">
