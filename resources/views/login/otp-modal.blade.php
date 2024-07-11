@@ -47,44 +47,68 @@
 
 </head>
 
-<body style="overflow:hidden">
+<body class="main-body  dark-theme" style="overflow:hidden">
+    <!-- Loader -->
+    <div id="global-loader" style="display: none;"><img src="img/loader-4.svg" class="loader-img" alt="Loader" />
+    </div>
+    <!-- /Loader -->
+    <!-- Start Switcher -->
 
- <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h6 class="modal-title" id="otpModalLabel">We had send an OTP to your email ID</h6>
-                    {{-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button> --}}
-                </div>
-                <div class="modal-body">
-                    <!-- Modal body content, e.g., OTP form -->
-                    <form action="{{ route('validate.otp') }}" method="POST">
-                        @csrf
-                        <input type="text" name="otp" class="form-control" placeholder="Enter OTP"><br>
-                        <button type="submit" class="btn btn-primary">Verify OTP</button>
-                    </form>
+    <div class="page"> <!-- main-signin-wrapper -->
+        <div class="my-auto page page-h bg_login">
+            <div class="">
+                <div class="main-card-signin d-md-flex">
+                    <div class="p-5 w-100">
+                        <div class="main-signin-header">
+                            <img src="img/logo.png" class="" alt="" />
+                            <br> <br> <br>
+                            <div>
+
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('success') }}
+                                        {{-- <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button> --}}
+                                    </div>
+                                @endif
+
+                                @if (session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('error') }}
+                                        {{-- <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button> --}}
+                                    </div>
+                                @endif
+                            </div>
+
+                            <h4><br>OTP sent to Your Mail Id</h4>
+
+                            <form action="{{ route('validate.otp') }}" method="POST" >
+                                @csrf
+                                <div class="form-group">
+                                    <label for="email">OTP</label>
+                                    <input id="email" name="otp" class="form-control" placeholder="Enter your OTP" type="text">
+                                    @error('email')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                
+                                <button  class="btn btn-main-primary btn-block">Submit</button>
+                            </form>
+
+
+                        </div>
+                      
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+
 </body>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
 
-    $(document).ready(function() {
-        $('#otpModal').modal('show');
-    });
-</script>
+
 
 </html>
-
-
-
-
-
-

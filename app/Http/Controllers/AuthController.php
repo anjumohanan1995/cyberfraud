@@ -28,16 +28,10 @@ class AuthController extends Controller
             // Authentication passed
             $otp = Str::random(6);
             $user = Auth::user();
-            $user->otp = $otp;
-        
-            if($user->save()){
-                if($mail = Mail::to($user->email)->send(new SendOtpMail($user, ['otp'=>$user->otp]))){
-                    return view('login.otp-modal');
-                }
-                else{
-                    return redirect()->back()->withInput()->withErrors(['email' => 'Invalid Mail Id']);
-                }
-                
+            session(['otp' => $otp]);
+            $user_email = Auth::user()->email;
+            if(Mail::to($user_email)->send(new SendOtpMail($otp))){
+                return redirect()->route('verify-otp');
             }
             else{
                 return redirect()->back()->withInput()->withErrors(['email' => 'Invalid ']);
@@ -51,18 +45,22 @@ class AuthController extends Controller
         }
     }
 
+    public function verifyOtp(){
+        return view('login.otp-modal');
+    }
+
     public function validateOtp(Request $request){
 
         
-        $user = Auth::user();
-       
-        if($request->otp == $user['otp']){
-          
-        return redirect()->intended('/dashboard')->with('success','Login Success'); // Redirect to dashboard or any desired page
-        }
-        else{
-           //dd("fgiui");
-           return redirect('/')->with('error','Invalid OTP');
+        $otp = $request->otp;
+        if ($otp && $otp == session('otp')) {
+            session(['otp_verified' => true]);
+           
+            return redirect()->route('dashboard');
+        } else {
+            return back()->with('error', 'Invalid OTP. Please try again.');
         }
     }
+
+
 }
