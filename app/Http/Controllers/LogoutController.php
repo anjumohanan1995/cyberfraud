@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Session;
 
 
 
@@ -20,7 +21,7 @@ class LogoutController extends Controller
     public function logout()
     {
         Auth::logout();
-
+        Session::forget('otp_verified');
         return redirect('/');
     }
 

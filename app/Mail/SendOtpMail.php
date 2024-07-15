@@ -18,7 +18,8 @@ class SendOtpMail extends Mailable
      *
      * @return void
      */
-    public function __construct($user,$otp)
+    public $otp;
+    public function __construct($otp)
     {
         //
         $this->otp = $otp;
@@ -31,10 +32,14 @@ class SendOtpMail extends Mailable
      */
    
 
-    public function build()
-    {
-        
          
-        return $this->view('emails.otp-email',['otp'=>$this->otp['otp']]);
-    }
+        public function build()
+        {
+            return $this->subject('Your OTP for Verification')
+                        ->view('emails.otp-email')
+                        ->with([
+                            'otp' => $this->otp,
+                        ]);
+        }
+    
 }

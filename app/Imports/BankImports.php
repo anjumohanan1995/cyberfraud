@@ -12,6 +12,7 @@ use App\Models\BankCasedata;
 use App\Models\OldBankCaseData;
 use App\Models\OldCaseData;
 use Auth;
+use Illuminate\Support\Facades\DB;
 
 class BankImports implements ToCollection, WithStartRow, WithChunkReading
 {
@@ -74,22 +75,52 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             '*.acknowledgement_no' => 'required',
             
         ])->validate();
-
-        foreach ($collection as $collect){
-       
-            $collect['transaction_id_or_utr_no'] = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
-            $collect['transaction_id_sec'] = $this->convertAcknoToString($collect['transaction_id_sec']);
+        //dd($collection[0]['acknowledgement_no']); 
+        DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
       
+        foreach ($collection as $collect){
+            
+            // $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
+           
+    
+                $bank_data = new BankCasedata();
+                $bank_data->acknowledgement_no = $collect['acknowledgement_no'];
+                $bank_data->transaction_id_or_utr_no = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
+                $bank_data->Layer = $collect['Layer'];
+                $bank_data->account_no_1 = $collect['account_no_1'];
+                $bank_data->action_taken_by_bank = trim(strtolower($collect['action_taken_by_bank']));
+                $bank_data->bank = $collect['bank'];
+                $bank_data->account_no_2 = trim($collect['account_no_2']);
+                $bank_data->ifsc_code = $collect['ifsc_code'];
+                $bank_data->cheque_no = $collect['cheque_no'];
+                $bank_data->mid = $collect['mid'];
 
-        if (isset($collect['account_no_2'])) {
-            $collect['account_no_2'] = trim($collect['account_no_2']);
-        }
+                $bank_data->tid = $collect['tid'];
+                $bank_data->approval_code = $collect['approval_code'];
+                $bank_data->merchant_name = $collect['merchant_name'];
+                $bank_data->transaction_date = $collect['transaction_date'];
+                $bank_data->transaction_id_sec = $this->convertAcknoToString($collect['transaction_id_sec']);
+                $bank_data->transaction_amount = $collect['transaction_amount'];
+                $bank_data->reference_no = $collect['reference_no'];
 
-        // Trim and apply case insensitivity to 'action_taken_by_bank' field
-        if (isset($collect['action_taken_by_bank'])) {
-            $collect['action_taken_by_bank'] = trim(strtolower($collect['action_taken_by_bank']));
-        }
-        BankCasedata::create($collect);
+                $bank_data->remarks = $collect['remarks'];
+                $bank_data->date_of_action = $collect['date_of_action'];
+                $bank_data->action_taken_by_bank_sec = $collect['action_taken_by_bank_sec'];
+                $bank_data->action_taken_name = $collect['action_taken_name'];
+                $bank_data->action_taken_email = $collect['action_taken_email'];
+                $bank_data->branch_location = $collect['branch_location'];
+
+                $bank_data->branch_manager_details = $collect['branch_manager_details'];
+              
+                $bank_data->com_status = $collect['com_status'];
+
+                $bank_data->save();
+
+            
+       
+        
+
+        // BankCasedata::create($collect);
        
         // foreach ($collection as $collect) {
 

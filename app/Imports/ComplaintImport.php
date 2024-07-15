@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use App\Hospital;
 use Auth;
 
-class ComplaintImport implements ToCollection, WithStartRow , WithChunkReading, WithBatchInserts
+class ComplaintImport implements ToCollection, WithStartRow
 {
     /**
      * @param Collection $collection
@@ -23,15 +23,7 @@ class ComplaintImport implements ToCollection, WithStartRow , WithChunkReading, 
     protected $source_type;
 
     use Importable;
-    public function chunkSize(): int
-    {
-        return 500; // Adjust chunk size as needed
-    }
 
-    public function batchSize(): int
-    {
-        return 500; // Adjust batch size for database inserts
-    }
 
     public function __construct($source_type)
     {
@@ -86,14 +78,41 @@ class ComplaintImport implements ToCollection, WithStartRow , WithChunkReading, 
         });
 
         $validate = Validator::make($collection->toArray(), [
-            '*.acknowledgement_no' => 'required|max:150',
+            '*.acknowledgement_no' => 'required',
 
         ])->validate();
+            $c = $com = Complaint::all();
+            // print_r($c)."<br>";
+            // dd();
+        foreach ($collection as $collect){
 
 
-        foreach ($collection as $collect) {
+                $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id',(string)$collect['transaction_id'])->first();
 
-            $complaint = new Complaint();
+            if($complaint){
+                $complaint->source_type = $this->source_type;
+                $complaint->acknowledgement_no = $collect['acknowledgement_no'];
+                $complaint->district = $collect['district'];
+                $complaint->police_station = $collect['police_station'];
+                $complaint->complainant_name = $collect['complainant_name'];
+                $complaint->complainant_mobile = $collect['complainant_mobile'];
+                $complaint->transaction_id = $this->convertAcknoToString($collect['transaction_id']);
+                $complaint->bank_name = $collect['bank_name'];
+                $complaint->account_id = $collect['account_id'];
+                $complaint->amount = $collect['amount'];
+                $complaint->entry_date = $collect['entry_date'];
+                $complaint->current_status = $collect['current_status'];
+                $complaint->date_of_action = $collect['date_of_action'];
+                $complaint->action_taken_by_name = $collect['action_taken_by_name'];
+                $complaint->action_taken_by_designation = $collect['action_taken_by_designation'];
+                $complaint->action_taken_by_mobile = $collect['action_taken_by_mobile'];
+                $complaint->action_taken_by_email = $collect['action_taken_by_email'];
+                $complaint->action_taken_by_bank = $collect['action_taken_by_bank'];
+                $complaint->com_status = 1;
+                $complaint->update();
+            }
+            else{
+                $complaint = new Complaint();
             $complaint->source_type = $this->source_type;
             $complaint->acknowledgement_no = $collect['acknowledgement_no'];
             $complaint->district = $collect['district'];
@@ -113,23 +132,15 @@ class ComplaintImport implements ToCollection, WithStartRow , WithChunkReading, 
             $complaint->action_taken_by_email = $collect['action_taken_by_email'];
             $complaint->action_taken_by_bank = $collect['action_taken_by_bank'];
             $complaint->com_status = 1;
-
-            $ack="";
-            $ack = complaint::where('acknowledgement_no',$collect['acknowledgement_no']);
-            if($ack){
-                $transn = complaint::where('acknowledgement_no',$collect['acknowledgement_no'])->where('transaction_id',$collect['transaction_id'])->first();
-                if($transn){
-                    $complaint->update();
-                }
-                else{
-                    $complaint->save();
-                }
-
+            $complaint->save();
             }
 
 
 
+
         }
+
+
     }
 
     protected function convertAcknoToString($transaction_id)
