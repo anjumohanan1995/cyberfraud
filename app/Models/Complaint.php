@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class Complaint extends Eloquent
 {
@@ -45,4 +46,17 @@ class Complaint extends Eloquent
         'assigned_to',
         'case_status',
     ];
+
+        // // Define mutator for entry_date
+        // public function setEntryDateAttribute($value)
+        // {
+        //     // Assuming entry_date is stored in a 'entry_date' field in the database
+        //     $this->attributes['entry_date'] = Carbon::createFromFormat('d-m-Y, h:i A', $value)->format('Y-m-d H:i:s');
+        // }
+
+        // // Define accessor if needed
+        // public function getEntryDateAttribute($value)
+        // {
+        //     return Carbon::parse($value)->format('d-m-Y, h:i A');
+        // }
 }

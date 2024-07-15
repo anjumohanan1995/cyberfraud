@@ -7,9 +7,10 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Concerns\Importable; 
+use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
+
 
 use App\Hospital;
 use Auth;
@@ -133,7 +134,7 @@ class ComplaintImport implements ToCollection, WithStartRow , WithChunkReading, 
 
     protected function convertAcknoToString($transaction_id)
     {
-       
+
         return is_numeric($transaction_id) ? (string) $transaction_id : $transaction_id;
     }
 }

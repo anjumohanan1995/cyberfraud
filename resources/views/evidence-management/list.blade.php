@@ -198,8 +198,8 @@
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
                                                                             <th>Registry Details</th>
-                                                                            <th>Mail</th>
-                                                                            <th>Status</th>
+                                                                            {{-- <th>Mail</th> --}}
+                                                                            {{-- <th>Status</th> --}}
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -284,8 +284,8 @@
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
                                                                             <th>Registry Details</th>
-                                                                            <th>Mail</th>
-                                                                            <th>Status</th>
+                                                                            {{-- <th>Mail</th> --}}
+                                                                            {{-- <th>Status</th> --}}
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -407,8 +407,8 @@ $(document).ready(function() {
             { data: 'ip' },
             { data: 'registrar' },
             { data: 'registry_details' },
-            { data: 'edit'},
-            { data: 'status'}
+            // { data: 'edit'},
+            // { data: 'status'}
         ],
         order: [0, 'desc'],
         ordering: true
@@ -443,8 +443,8 @@ $(document).ready(function() {
             { data: 'ip' },
             { data: 'registrar' },
             { data: 'registry_details' },
-            { data: 'edit' },
-            { data: 'status'}
+            // { data: 'edit' },
+            // { data: 'status'}
         ],
         order: [0, 'desc'],
         ordering: true
@@ -482,73 +482,6 @@ $(document).ready(function() {
 </script>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
-<script>
-    // Function to handle the onchange event of radio buttons
-    function toggleReportStatus(radio) {
-        var ackNo = radio.getAttribute('data-ack-no');
-        var statusValue = radio.value;
-
-        // Get CSRF token from meta tag
-        var csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
-
-        // AJAX request to update the reported status
-        $.ajax({
-            url: '/update-reported-status/' + ackNo,
-            type: 'POST',
-            data: {
-                status: statusValue
-            },
-            headers: {
-                'X-CSRF-TOKEN': csrfToken // Include CSRF token in headers
-            },
-            success: function(response) {
-                // Update UI or handle success response
-                console.log('Status updated successfully.');
-            },
-            error: function(xhr, status, error) {
-                // Handle error
-                console.error('Error updating status:', error);
-            }
-        });
-    }
-</script>
-
-
-
-
-
-<script>
-    // Function to handle the onchange event of radio buttons
-    function toggleReportStatusOther(radio) {
-        var caseNo = radio.getAttribute('data-case-no');
-        var statusValue = radio.value;
-
-        // Get CSRF token from meta tag
-        var csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
-
-        // AJAX request to update the reported status
-        $.ajax({
-            url: '/update-reported-statusother/' + caseNo,
-            type: 'POST',
-            data: {
-                status: statusValue
-            },
-            headers: {
-                'X-CSRF-TOKEN': csrfToken // Include CSRF token in headers
-            },
-            success: function(response) {
-                // Update UI or handle success response
-                console.log('Status updated successfully.');
-            },
-            error: function(xhr, status, error) {
-                // Handle error
-                console.error('Error updating status:', error);
-            }
-        });
-    }
-</script>
 
 
 

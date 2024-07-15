@@ -214,7 +214,7 @@
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label for="to-date-others">To Date:</label>
-                                                                            <input type="date" class="form-control" id="to-date-others" name="to_date">
+                                                                            <input type="date" class="form-control" id="to-date-others" name="to_date" onchange="setFromDateothers()">
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-2">
@@ -510,6 +510,24 @@
     }
 </script>
 
+
+<script>
+    function setFromDateothers() {
+        const toDateElement = document.getElementById('to-date-others');
+        const fromDateElement = document.getElementById('from-date-others');
+
+        const toDateValue = toDateElement.value;
+        if (toDateValue) {
+            const toDate = new Date(toDateValue);
+            toDate.setMonth(toDate.getMonth() - 1);
+            const month = ("0" + (toDate.getMonth() + 1)).slice(-2);
+            const day = ("0" + toDate.getDate()).slice(-2);
+            const year = toDate.getFullYear();
+            const fromDateValue = `${year}-${month}-${day}`;
+            fromDateElement.value = fromDateValue;
+        }
+    }
+</script>
 
 
 @endsection

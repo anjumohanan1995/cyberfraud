@@ -332,13 +332,22 @@ if ($fir_lodge == "0") {
         // Total records count
         $totalRecords = $query->get()->count();
         // dd($totalRecords);
-
         // Fetch records
-        $records = $query->orderBy('created_at', 'desc')
+        $records = $query->orderBy('entry_date', 'desc')
                          ->orderBy($columnName, $columnSortOrder)
                          ->skip($start)
                          ->take($rowperpage)
                          ->get();
+                        //  ->map(function ($item) {
+                        //     // Convert entry_date to Carbon instance
+                        //     if (isset($item->entry_date)) {
+                        //         $item->entry_date = Carbon::createFromFormat('d-m-Y, h:i A', $item->entry_date);
+                        //     }
+                        //     return $item;
+                        // });
+
+
+    //    dd($records);
 
 
 
@@ -374,7 +383,6 @@ if ($fir_lodge == "0") {
                 $bank_name .= $com->bank_name."<br>";
                 $complainant_name = $com->complainant_name;
                 $complainant_mobile = $com->complainant_mobile;
-
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;

@@ -476,47 +476,35 @@ class EvidenceController extends Controller
             }
 
 
-        $status = '';
 
-        $statusOptions = [
-            ['value' => 1, 'label' => 'Reported', 'class' => 'badge-success'],
-            ['value' => 2, 'label' => 'Active', 'class' => 'badge-primary'],
-            ['value' => 0, 'label' => 'Inactive', 'class' => 'badge-secondary'],
-        ];
+        //     $editButton = '';
+        //     if ($website_id) {
+        //     $status = '
+        //     <div>
+        //         <a class="btn btn-primary" href="' . route('get-mailmerge-list', ['id' => $website_id,'ack_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
+        //     </div>';
+        // }
 
-        foreach ($statusOptions as $option) {
-            $checked = ($record->reported_status == $option['value']) ? 'checked' : '';
-            $status .= '
-            <div class="form-check form-check">
-                <input
-                    type="radio"
-                    id="statusRadio_' . $record->_id . '_' . $option['value'] . '"
-                    name="statusRadio_' . $record->_id . '"
-                    class="form-check-input status-radio"
-                    value="' . $option['value'] . '"
-                    ' . $checked . '
-                    data-ack-no="' . $record->_id . '"
-                    onchange="toggleReportStatus(this)">
-                <label class="form-check-label badge ' . $option['class'] . '" for="statusRadio_' . $record->_id . '_' . $option['value'] . '">
-                    ' . $option['label'] . '
-                </label>
-            </div>';
-        }
+
+        $ack_no = '
+        <div>
+            <a class="btn btn-primary" href="' . route('get-mailmerge-list', ['ack_no' => $record->_id ]) . '"><small>' . $record->_id . '</small></a>
+        </div>';
 
 
 
-        $editButton = '';
-        if ($website_id) {
-            $editButton = '
-            <div>
-                <a class="btn btn-primary" href="' . route('get-mailmerge-list', ['id' => $website_id,'ack_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
-            </div>';
-        }
+        // $editButton = '';
+        // if ($website_id) {
+        //     $editButton = '
+        //     <div>
+        //         <a class="btn btn-primary" href="' . route('get-mailmerge-list', ['id' => $website_id,'ack_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
+        //     </div>';
+        // }
 
 
     $data_arr[] = array(
         "id" => $i,
-        "acknowledgement_no" => $acknowledgement_no,
+        "acknowledgement_no" => $ack_no,
         "evidence_type" => $evidence_type,
         "url" => $url,
         "mobile" => $mobile,
@@ -524,8 +512,8 @@ class EvidenceController extends Controller
         "ip" => $ip,
         "registrar" => $registrar,
         "registry_details" => $registry_details,
-        "edit" => $editButton,
-        "status" => $status,
+        // "edit" => $editButton,
+        // "status" => $status,
     );
 
 
@@ -542,27 +530,28 @@ class EvidenceController extends Controller
 
     }
 
-
-    public function updateReportedStatus($ack_no, Request $request)
+    public function updateReportedStatus($id, Request $request)
     {
-
+        // dd($id);
         $status = $request->input('status');
-        // Update all documents with the given ack_no
-        $evidences = Evidence::where('ack_no', $ack_no)->get();
-        // dd($ack_no);
-        if ($evidences->isEmpty()) {
-            return response()->json(['error' => 'No documents found for the given case number'], 404);
+        // dd($status);
+
+        // Find the evidence by _id
+        $evidence = Evidence::where('_id', $id)->first();
+
+        // Check if evidence exists
+        if (!$evidence) {
+            return response()->json(['error' => 'No document found for the given _id'], 404);
         }
 
-        foreach ($evidences as $evidence) {
-            // Update reported_status based on the status parameter
-            $evidence->reported_status = $status;
-            $evidence->save();
-        }
+        // Update reported_status based on the status parameter
+        $evidence->reported_status = $status;
+        $evidence->save();
 
         // Respond with a success message
         return response()->json(['message' => 'Status updated successfully']);
     }
+
 
     public function evidenceOthers(Request $request){
         $draw = $request->get('draw');
@@ -763,8 +752,8 @@ class EvidenceController extends Controller
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";
 
-            $case_number = $record->_id;
-            $website_name = '';
+            // $case_number = $record->_id;
+            // $website_name = '';
 
             foreach ($record->url as $item) {
                 $url .= '<a href="#" data-url="' . $item . '" data-type="others" class="check-status">'.$item."</a><br>";
@@ -789,42 +778,10 @@ class EvidenceController extends Controller
                 $registry_details .= $item."<br>";
             }
 
-
-            $status = '';
-
-            $statusOptions = [
-                ['value' => 1, 'label' => 'Reported', 'class' => 'badge-success'],
-                ['value' => 2, 'label' => 'Active', 'class' => 'badge-primary'],
-                ['value' => 0, 'label' => 'Inactive', 'class' => 'badge-secondary'],
-            ];
-
-            foreach ($statusOptions as $option) {
-                $checked = ($record->reported_status == $option['value']) ? 'checked' : '';
-                $status .= '
-                <div class="form-check form-check">
-                    <input
-                        type="radio"
-                        id="statusRadio_' . $record->_id . '_' . $option['value'] . '"
-                        name="statusRadio_' . $record->_id . '"
-                        class="form-check-input status-radio"
-                        value="' . $option['value'] . '"
-                        ' . $checked . '
-                        data-case-no="' . $record->_id . '"
-                        onchange="toggleReportStatusOther(this)">
-                    <label class="form-check-label badge ' . $option['class'] . '" for="statusRadio_' . $record->_id . '_' . $option['value'] . '">
-                        ' . $option['label'] . '
-                    </label>
-                </div>';
-            }
-
-            $editButton = '';
-            if ($website_name) {
-                // dd($website_name);
-                $editButton = '
-                <div>
-                    <a class="btn btn-primary" href="' . route('get-mailmerge-listother', ['evidence_type' => $website_name,'case_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
-                </div>';
-            }
+            $case_number = '
+            <div>
+                <a class="btn btn-primary" href="' . route('get-mailmerge-listother', ['case_number' => $record->_id ]) . '"><small>' . $record->_id . '</small></a>
+            </div>';
             $data_arr[] = array(
                     "id" => $i,
                     "case_number" => $case_number,
@@ -834,8 +791,8 @@ class EvidenceController extends Controller
                     "ip" => $ip,
                     "registrar"=>$registrar,
                     "registry_details" => $registry_details,
-                    "edit" => $editButton,
-                    "status" => $status,
+                    // "edit" => $editButton,
+                    // "status" => $status,
                     );
 
         }
@@ -870,12 +827,12 @@ class EvidenceController extends Controller
 
                     $context = stream_context_create([
                         'http' => [
-                            'timeout' => 10, 
+                            'timeout' => 10,
                         ],
                     ]);
                     //$headers = @get_headers($url);
                     $headers = @get_headers($url, 0, $context);
-                   
+
                    // dd($headers);
                     if($headers === false){
                         $status_code = 400;
@@ -987,37 +944,37 @@ class EvidenceController extends Controller
         }
     }
 
-    public function updateReportedStatusOther($caseNo, Request $request)
+    public function updateReportedStatusOther($id, Request $request)
     {
-        // Retrieve status value from query parameters
+        // dd($id);
         $status = $request->input('status');
-// dd($caseNo);
-        // Update all documents with the given case number
-        $complaintothers = ComplaintOthers::where('case_number', $caseNo)->get();
+        // dd($status);
 
-        if ($complaintothers->isEmpty()) {
-            return response()->json(['error' => 'No documents found for the given case number'], 404);
+        // Find the evidence by _id
+        $evidence = ComplaintOthers::where('_id', $id)->first();
+
+        // Check if evidence exists
+        if (!$evidence) {
+            return response()->json(['error' => 'No document found for the given _id'], 404);
         }
 
-        foreach ($complaintothers as $complaint) {
-            // Update reported_status based on the status parameter
-            $complaint->reported_status = $status;
-            $complaint->save();
-        }
+        // Update reported_status based on the status parameter
+        $evidence->reported_status = $status;
+        $evidence->save();
 
         // Respond with a success message
         return response()->json(['message' => 'Status updated successfully']);
     }
 
     public function evidenceBulkUpload(Request $request, $ackno){
-       
+
         return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
     }
 
     public function evidenceBulkUploadFile(Request $request){
 
         $request->validate([
-            'file' => 'required|mimes:csv,xlsx,xls,ods' 
+            'file' => 'required|mimes:csv,xlsx,xls,ods'
         ]);
 
         if ($request->hasFile('file')){
@@ -1026,7 +983,7 @@ class EvidenceController extends Controller
             return redirect()->route('evidence.bulkUpload',$request->ackno)->with('success', 'File uploaded successfully.');
         }
         return redirect('evidence.bulkUpload',$request->ackno)->with('error', 'File upload failed.');
-        
+
 
     }
 
