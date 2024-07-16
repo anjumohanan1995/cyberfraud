@@ -1,5 +1,23 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasShowESTFPermission = in_array('Show Evidence Source Type Filter', $sub_permissions);
+                $hasShowETFPermission = in_array('Show Evidence Type Filter', $sub_permissions);
+                $hasShowStatusFPermission = in_array('Show Notice Status Filter', $sub_permissions);
+                $hasShowNoticeTypePermission = in_array('Show Notice Type Filter', $sub_permissions);
+                $hasGenerateTokenPermission = in_array('Generate Token', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -93,24 +111,29 @@
                                                 </div>
                                             </div>
                                            <div class="row">
+                                            @if($hasShowESTFPermission)
                                             <div class="col-md-3">
                                             <label for="source_type">Source Type</label>
                                                 <select class="form-control" name="source_type" id="source_type">
                                                 <option value="">--Select--</option>
                                                 @foreach ($source_types as $st)
-                                                 <option value="{{ $st->_id }}"> {{ $st->name }} </option>   
+                                                 <option value="{{ $st->_id }}"> {{ $st->name }} </option>
                                                 @endforeach
                                                 </select>
                                             </div>
+                                            @endif
+                                            @if($hasShowETFPermission)
                                             <div class="col-md-3">
                                             <label for="source_type">Evidence Type</label>
                                                 <select class="form-control" name="evidence_type" id="evidence_type">
                                                 <option value="">--Select--</option>
                                                 @foreach ($evidence_types as $et)
-                                                 <option value="{{ $et->_id }}"> {{ $et->name }} </option>   
+                                                 <option value="{{ $et->_id }}"> {{ $et->name }} </option>
                                                 @endforeach
                                                 </select>
                                             </div>
+                                            @endif
+                                            @if($hasShowStatusFPermission)
                                             <div class="col-md-3">
                                             <label for="source_type">Status</label>
                                                 <select name="status" id="" class="form-control">
@@ -118,6 +141,8 @@
                                                 <option value="0"> InActive </option>
                                                 </select>
                                             </div>
+                                            @endif
+                                            @if($hasShowNoticeTypePermission)
                                             <div class="col-md-3">
                                             <label for="source_type">Notice Type</label>
                                                 <select name="notice_type" id="" class="form-control">
@@ -125,15 +150,16 @@
                                                 <option value="Type2"> Type2 </option>
                                                 </select>
                                             </div>
+                                            @endif
                                            </div>
-                                        </div>                                       
+                                        </div>
                                     </div>
                                     <div class="row mt-3">
-                                
+
                                         <div class="col-md-2">
                                             <button id="notice_submit" type="button" class="btn btn-primary">Submit</button>
                                         </div>
-                                    
+
                                     </div>
                                 </form>
                         <div class="table-responsive mb-0">
@@ -146,7 +172,7 @@
                                 <th>Url</th>
                                 <th>Domain</th>
                                 <th>IP</th>
-                                <th>Action</th>
+                                @if($hasGenerateTokenPermission)<th>Action</th>@endif
                             </tr>
                         </thead>
                         <tbody>
@@ -155,14 +181,14 @@
                         </table>
                         </div>
                         </div>
-                     
+
                     </div>
-                    
+
             </div>
         </div>
             <!-- /row -->
 
-            
+
 
 
         </div>
@@ -182,14 +208,14 @@ $(document).ready(function() {
 
 
         if((from_date!=='') || (ackno!=='')){
-            
+
         if ($.fn.DataTable.isDataTable('#notice')){
           $('#notice').DataTable().destroy();
         }
         var tableNew = $('#notice').DataTable({
         processing: true,
         serverSide: true,
-       
+
         ajax:{
         url: "{{ route('get_evidence_list_notice') }}",
         data: function(d) {
@@ -209,7 +235,7 @@ $(document).ready(function() {
         { data: 'url' },
         { data: 'domain' },
         { data: 'ip' },
-        { data: 'edit' }
+        @if($hasGenerateTokenPermission) { data: 'edit' } @endif
         ],
         order: [0, 'desc'],
         ordering: true
@@ -223,15 +249,15 @@ $(document).ready(function() {
         var ackno = $("#acknowledgement_number").val();
         var source_type = $("#source_type").val();
         var evidence_type = $("#evidence_type").val();
-     
-                  
+
+
         if ($.fn.DataTable.isDataTable('#notice')){
           $('#notice').DataTable().destroy();
         }
         var tableNew = $('#notice').DataTable({
         processing: true,
         serverSide: true,
-       
+
         ajax:{
         url: "{{ route('get_evidence_list_notice') }}",
         data: function(d) {
@@ -249,13 +275,13 @@ $(document).ready(function() {
         { data: 'url' },
         { data: 'domain' },
         { data: 'ip' },
-        { data: 'edit' }
+        @if($hasGenerateTokenPermission){ data: 'edit' } @endif
         ],
         order: [0, 'desc'],
         ordering: true
         });
-        
-   } 
+
+   }
 
    display_notice_list();
 

@@ -1,5 +1,22 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasNCRPCSVPermission = in_array('NCRP CSV Download', $sub_permissions);
+                $hasOthersCSVPermission = in_array('Others CSV Download', $sub_permissions);
+                $hasNCRPExcelPermission = in_array('NCRP Excel Download', $sub_permissions);
+                $hasOthersExcelPermission = in_array('Others Excel Download', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
 <style>
     .tabs-menu1 ul li a {
@@ -167,9 +184,9 @@
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
                                                                         <!-- CSV Download Button -->
-                                                                        <a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>
+                                                                        @if($hasNCRPCSVPermission)<a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>@endif
                                                                         <!-- Excel Download Button -->
-                                                                        <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
+                                                                        @if($hasNCRPExcelPermission)<a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>@endif
                                                                     </div>
                                                                 </div>
                                                             </form>
@@ -264,9 +281,9 @@
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
                                                                         <!-- CSV Download Button -->
-                                                                        <a href="#" class="btn btn-success" id="csvDownloadothers">Download CSV</a>
+                                                                        @if($hasOthersCSVPermission)<a href="#" class="btn btn-success" id="csvDownloadothers">Download CSV</a>@endif
                                                                         <!-- Excel Download Button -->
-                                                                        <a href="#" class="btn btn-info" id="excelDownloadothers">Download Excel</a>
+                                                                        @if($hasOthersExcelPermission)<a href="#" class="btn btn-info" id="excelDownloadothers">Download Excel</a>@endif
                                                                     </div>
                                                                 </div>
                                                             </form>

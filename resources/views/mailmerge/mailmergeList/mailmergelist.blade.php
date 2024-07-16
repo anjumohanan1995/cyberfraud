@@ -1,5 +1,22 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasShowNCRPMailMergePermission = in_array('Show NCRP Mail Merge', $sub_permissions);
+                $hasShowOthersMailMergePermission = in_array('Show Others Mail Merge', $sub_permissions);
+                $hasViewNCRPStatus = in_array('View / Update NCRP Evidence Status', $sub_permissions);
+                $hasViewOtherStatus = in_array('View / Update Others Evidence Status', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
 
 @if ($errors->any())
@@ -77,11 +94,13 @@
                         <div class="col-7">
                             <h4 class="card-title" style="display: inline;">All Evidence Corresponding to Acknowledgement No : <b style="color: red;">{{ $ack_no }}</b></h4>
                         </div>
+@if($hasShowNCRPMailMergePermission)
                         <div class="col-2">
                             @if ($website->isNotEmpty())
                             <button id="statusBtn" class="btn btn-success" style="margin-left: 10px;">Mail Merge</button>
                             @endif
                         </div>
+                        @endif
                         <div class="col-3">
 
                         </div>
@@ -147,7 +166,7 @@
                                     <th>Registrar</th>
                                     <th>Registry Details</th>
                                     <th>Mail</th>
-                                    <th>Status</th>
+                                    @if($hasViewNCRPStatus)<th>Status</th>@endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -284,7 +303,7 @@
                 { data: 'registrar' },
                 { data: 'registry_details' },
                 { data: 'edit' },
-                { data: 'status' },
+                @if($hasViewNCRPStatus){ data: 'status' },@endif
             ],
             order: [0, 'desc'],
             ordering: true

@@ -1,5 +1,25 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasAddSTPermission = in_array('Add Source Type', $sub_permissions);
+                $hasAddCategoryPermission = in_array('Add Category', $sub_permissions);
+                $hasAddSubCategoryPermission = in_array('Add Subcategory', $sub_permissions);
+                $hasAddProfessionPermission = in_array('Add Profession', $sub_permissions);
+                $hasUploadRegistrarPermission = in_array('Upload registrar', $sub_permissions);
+                $hasEditSTPermission = in_array('Edit source Type', $sub_permissions);
+                $hasDeleteSTPermission = in_array('Delete Source Type', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -55,6 +75,7 @@
                                     All Source Types
                                 </h4>
                                 <div class="col-md-1"></div>
+                                @if ($hasAddSTPermission)
                                 <div class="col-md-2 text-center">
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('sourcetype.create') }}">
@@ -63,6 +84,9 @@
                                         </a>
                                     </div>
                                 </div>
+                                @endif
+
+                                @if ($hasAddCategoryPermission)
                                 <div class="col-md-2 col-6 text-center">
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('category.index') }}">
@@ -72,6 +96,8 @@
                                     </div>
 
                                 </div>
+                                @endif
+                                @if ($hasAddSubCategoryPermission)
                                 <div class="col-md-2 col-6 text-center">
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('subcategory.create') }}">
@@ -80,7 +106,8 @@
                                         </a>
                                     </div>
                                 </div>
-
+                                @endif
+                                @if ($hasAddProfessionPermission)
                                     <div class="col-md-2 text-center">
                                         <div class="task-box primary  mb-0">
                                             <a class="text-white" href="{{ url('profession') }}">
@@ -89,6 +116,8 @@
                                             </a>
                                         </div>
                                     </div>
+                                @endif
+                                @if($hasUploadRegistrarPermission)
                                     <div class="col-md-2 text-center">
                                         <div class="task-box primary  mb-0">
                                             <a class="text-white" href="{{ url('upload-registrar') }}">
@@ -97,6 +126,7 @@
                                             </a>
                                         </div>
                                     </div>
+                                @endif
                             </div>
 
                             <div class="table-responsive mb-0">
@@ -107,7 +137,7 @@
                                             <th>SL No</th>
                                             <th>NAME</th>
 
-                                            <th>ACTION</th>
+                                            @if($hasEditSTPermission || $hasDeleteSTPermission)<th>ACTION</th>@endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -148,7 +178,7 @@
             columns: [
                 { data: 'id' },
                 { data: 'name' },
-                { data: 'edit' }
+               @if($hasEditSTPermission || $hasDeleteSTPermission) { data: 'edit' } @endif
 			],
             "order": [0, 'desc'],
             'ordering': true

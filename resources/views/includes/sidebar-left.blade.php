@@ -7,7 +7,7 @@
 
     // Fetch the permissions for the current user's role
     $permission = RolePermission::where('role', $role)->first();
-    
+
     // Ensure the permissions are decoded only if they are not already arrays
     $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
      //dd($permissions);
@@ -21,9 +21,12 @@
     $hasUploadOtherPermission = in_array('Upload Other Case Data Management', $permissions);
     $hasNCRPCasePermission = in_array('NCRP Case Data Management', $permissions);
     $hasOtherCasePermission = in_array('Other Case Data Management', $permissions);
-   
+
     $hasSourceTypeManagementPermission = in_array('Source Type Management', $permissions);
-    $hasNoticeManagementPermission = in_array(' Notice Management', $permissions);
+    $hasNoticeManagementPermission = in_array('Notice Management', $permissions);
+    $hasAgainstEvidencePermission = in_array('Against Evidence Permission', $sub_permissions);
+    $hasAgainstBankManagement = in_array('Against Bank Management', $sub_permissions);
+    $hasAgainstMuleAccountManagement = in_array('Against Mule Account Management', $sub_permissions);
     $hasEvidenceManagementPermission = in_array('Evidence Management', $permissions);
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
     $hasReportsPermission = in_array('Reports Management', $permissions);
@@ -266,17 +269,22 @@
                     <i class="angle fe fe-chevron-down"> </i>
                 </a>
                 <ul class="slide-menu">
+                    @if($hasAgainstEvidencePermission)
                     <li>
                         <a class="slide-item" href="{{ route('notice.evidence') }}">Against Evidence</a>
                     </li>
+                    @endif
+                    @if($hasAgainstBankManagement)
                     <li>
                         <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Bank</a>
                     </li>
+                    @endif
+                    @if($hasAgainstMuleAccountManagement)
                     <li>
                         {{-- <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Mule Account</a> --}}
                         <a class="slide-item" href="#">Against Mule Account</a>
                     </li>
-
+                    @endif
                 </ul>
 
             </li>
