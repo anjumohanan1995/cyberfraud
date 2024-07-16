@@ -9,9 +9,9 @@ $user = Auth::user();
             $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
             if ($sub_permissions || $user->role == 'Super Admin') {
                 $hasNCRPCSVPermission = in_array('NCRP CSV Download', $sub_permissions);
-                $hasOthersCSVPermission = in_array('Others CSV Download', $sub_permissions);
+                $hasOthersCSVPermission = in_array('Other CSV Download', $sub_permissions);
                 $hasNCRPExcelPermission = in_array('NCRP Excel Download', $sub_permissions);
-                $hasOthersExcelPermission = in_array('Others Excel Download', $sub_permissions);
+                $hasOthersExcelPermission = in_array('Other Excel Download', $sub_permissions);
             } else{
                     $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
                 }
