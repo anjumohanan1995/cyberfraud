@@ -240,7 +240,7 @@
                                                                             <select class="form-control" id="evidence_type_others" name="evidence_type_ncrp" onchange="showTextBox('evidence_type_ncrp')">
                                                                                 <option value="">--select--</option>
                                                                                 @foreach($evidenceTypes as $evidenceType)
-                                                                                    <option value="{{ $evidenceType->id }}">{{ $evidenceType->name }}</option>
+                                                                                    <option value="{{ $evidenceType->name }}">{{ $evidenceType->name }}</option>
                                                                                 @endforeach
                                                                             </select>
                                                                             <div id="searchBoxContainer_evidence_type_ncrp"></div>
