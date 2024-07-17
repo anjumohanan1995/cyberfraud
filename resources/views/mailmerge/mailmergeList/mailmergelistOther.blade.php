@@ -2,6 +2,23 @@
 
 @section('content')
 
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasShowOthersMailMergePermission = in_array('Show Other mail Merge', $sub_permissions);
+                $hasViewOtherStatus = in_array('View / Update Other Evidence Status', $sub_permissions);
+            } else{
+                $hasShowOthersMailMergePermission = $hasViewOtherStatus = false;
+                }
+
+@endphp
+
 
 
 <style>
@@ -53,11 +70,13 @@
                         <div class="col-7">
                             <h4 class="card-title" style="display: inline;">All Evidence Corresponding to Acknowledgement No : <b style="color: red;">{{ $case_no }}</b></h4>
                         </div>
+                        @if($hasShowOthersMailMergePermission)
                         <div class="col-2">
                             @if ($website->isNotEmpty())
                             <button id="statusBtn" class="btn btn-success" style="margin-left: 10px;">Mail Merge</button>
                             @endif
                         </div>
+                        @endif
                         <div class="col-3">
 
                         </div>
@@ -117,7 +136,7 @@
                                     <th>Registry Details</th>
                                     <th>Portal Link</th>
                                     <th>Reported Status</th>
-                                    <th>Status</th>
+                                    @if($hasViewOtherStatus)<th>Status</th>@endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -259,7 +278,7 @@
             { data: 'registry_details' },
             { data: 'portal_link' },
             { data: 'mail_status' },
-            { data: 'status' },
+            @if($hasViewOtherStatus){ data: 'status' },@endif
 
             ],
             order: [0, 'desc'],

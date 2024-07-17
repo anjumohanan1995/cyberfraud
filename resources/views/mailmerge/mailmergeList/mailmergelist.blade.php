@@ -8,12 +8,11 @@ $user = Auth::user();
             $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
             $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
             if ($sub_permissions || $user->role == 'Super Admin') {
-                $hasShowNCRPMailMergePermission = in_array('Show NCRP Mail Merge', $sub_permissions);
-                $hasShowOthersMailMergePermission = in_array('Show Others Mail Merge', $sub_permissions);
+                $hasShowNCRPMailMergePermission = in_array('Show NCRP mail Merge', $sub_permissions);
                 $hasViewNCRPStatus = in_array('View / Update NCRP Evidence Status', $sub_permissions);
-                $hasViewOtherStatus = in_array('View / Update Others Evidence Status', $sub_permissions);
+
             } else{
-                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                $hasShowNCRPMailMergePermission = $hasViewNCRPStatus = false;
                 }
 
 @endphp
