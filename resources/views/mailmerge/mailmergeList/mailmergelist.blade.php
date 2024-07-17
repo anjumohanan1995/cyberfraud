@@ -2,31 +2,6 @@
 
 @section('content')
 
-@if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>
-                    {{ $error }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-@if (session('status'))
-    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
-        {{ session('status') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-@endif
-
-
 <style>
     .tabs-menu1 ul li a {
         padding: 10px 20px 11px 20px;
@@ -40,10 +15,10 @@
         color: #3858f9; /* Optional: Change color when active */
     }
 </style>
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <link rel="stylesheet" href="path_to_bootstrap_css">
 <link rel="stylesheet" href="path_to_font_awesome">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container-fluid">
     <div class="breadcrumb-header justify-content-between">
@@ -62,7 +37,14 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div id="alert_ajaxx" style="display:none;"></div>
+                    @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @endif
 
                     @if (session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -73,9 +55,12 @@
                     </div>
                     @endif
 
+                    <!-- Alert container for AJAX responses -->
+                    <div id="alert_ajaxx" style="display: none;"></div>
+
                     <div class="row">
                         <div class="col-7">
-                            <h4 class="card-title" style="display: inline;">All Evidence Corresponding to Acknowledgement No : <b style="color: red;">{{ $ack_no }}</b></h4>
+                            <h4 class="card-title" style="display: inline;">All Evidence Corresponding to Acknowledgement No: <b style="color: red;">{{ $ack_no }}</b></h4>
                         </div>
                         <div class="col-2">
                             @if ($website->isNotEmpty())
@@ -93,7 +78,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="modal-title">Mail Merge</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" onclick="closeModal()" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="uploadOrderForm" enctype="multipart/form-data">
@@ -109,9 +94,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="noticeType" class="form-label">Status:</label>
+                            <label for="noticeType" class="form-label">Notice Type:</label>
                             <select id="noticeType" class="form-select" name="noticeType" required>
-                                <option value="">Select Status Type</option>
+                                <option value="">Select Notice Type</option>
                             </select>
                         </div>
 
@@ -123,10 +108,7 @@
             </div>
         </div>
     </div>
-                    {{-- <div class="m-4">
 
-
-                    </div> --}}
 
 
 
@@ -146,7 +128,8 @@
                                     <th>IP</th>
                                     <th>Registrar</th>
                                     <th>Registry Details</th>
-                                    <th>Mail</th>
+                                    <th>Portal link</th>
+                                    <th>Reported Status</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -162,14 +145,7 @@
 </div>
 
 
-{{-- <!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Popper.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-
-<!-- Bootstrap 4.5.2 JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> --}}
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
 
 <script src="path_to_bootstrap_js"></script>
@@ -186,6 +162,11 @@
             $('#status-popup').modal('show');
         });
     }); // <-- Added closing parenthesis for $(document).ready() function
+
+    function closeModal() {
+    $('#status-popup').modal('hide');
+    // or use vanilla JavaScript approach
+}
 
 
 </script>
@@ -222,39 +203,45 @@
 <script>
     $(document).ready(function() {
         $('#sendMail').on('click', function() {
-            var statusType = $('#statusType').val();
-            var noticeType = $('#noticeType').val();
-            var  ack_no = $('#ack_no').val();
-            var caseData = $('#caseData').val();
+    var statusType = $('#statusType').val();
+    var noticeType = $('#noticeType').val();
+    var ack_no = $('#ack_no').val();
+    var caseData = $('#caseData').val();
 
-            // Validate if both fields are selected
-            if (statusType && noticeType) {
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route("send-email") }}', // Assuming you are using Blade templating for Laravel
-                    data: {
-                        statusType: statusType,
-                        noticeType: noticeType,
-                        ack_no: ack_no,
-                        caseData: caseData,
-                        _token: '{{ csrf_token() }}' // Ensure CSRF token is included
-                    },
-                    success: function(response) {
-                        // Handle success response if needed
-                        console.log('Email sent successfully');
-                        // Optionally, you can close the modal after successful submission
-                        $('#status-popup').modal('hide');
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle error response if needed
-                        console.error('Error sending email:', error);
-                    }
-                });
-            } else {
-                // Handle case where fields are not selected
-                alert('Please select both Status Type and Notice Type.');
+    // Validate if both fields are selected
+    if (statusType && noticeType) {
+        $.ajax({
+            type: 'POST',
+            url: '{{ route("send-email") }}',
+            data: {
+                statusType: statusType,
+                noticeType: noticeType,
+                ack_no: ack_no,
+                caseData: caseData,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                $('#alert_ajaxx').html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                    response.success +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button></div>').show();
+                $('#status-popup').modal('hide');
+                $('#ncrp').DataTable().ajax.reload();
+            },
+            error: function(xhr, status, error) {
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error sending email.';
+                $('#alert_ajaxx').html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                    errorMessage +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button></div>').show();
+                console.error('Error sending email:', error);
+                $('#status-popup').modal('hide');
             }
         });
+    } else {
+        alert('Please select both Status Type and Notice Type.');
+    }
+});
     });
 </script>
 
@@ -283,7 +270,8 @@
                 { data: 'ip' },
                 { data: 'registrar' },
                 { data: 'registry_details' },
-                { data: 'edit' },
+                { data: 'portal_link' },
+                { data: 'mail_status' },
                 { data: 'status' },
             ],
             order: [0, 'desc'],
@@ -323,6 +311,7 @@
         });
     }
 </script>
+
 
 
 

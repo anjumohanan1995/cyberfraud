@@ -2,29 +2,6 @@
 
 @section('content')
 
-@if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>
-                    {{ $error }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-@if (session('status'))
-    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
-        {{ session('status') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-@endif
 
 
 <style>
@@ -92,7 +69,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="modal-title">Mail Merge</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" onclick="closeModal()" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="uploadOrderForm" enctype="multipart/form-data">
@@ -117,6 +94,7 @@
                         <div class="text-center">
                             <button type="button" class="btn btn-success" id="sendMail">Send Mail</button>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -137,7 +115,8 @@
                                     <th>IP</th>
                                     <th>Registrar</th>
                                     <th>Registry Details</th>
-                                    <th>Mail</th>
+                                    <th>Portal Link</th>
+                                    <th>Reported Status</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -174,6 +153,10 @@
             $('#status-popup').modal('show');
         });
     }); // <-- Added closing parenthesis for $(document).ready() function
+
+    function closeModal() {
+        $('#status-popup').modal('hide');
+    }
 
 
 </script>
@@ -228,15 +211,22 @@
                         _token: '{{ csrf_token() }}' // Ensure CSRF token is included
                     },
                     success: function(response) {
-                        // Handle success response if needed
-                        console.log('Email sent successfully');
-                        // Optionally, you can close the modal after successful submission
-                        $('#status-popup').modal('hide');
-                    },
-                    error: function(xhr, status, error) {
-                        // Handle error response if needed
-                        console.error('Error sending email:', error);
-                    }
+                $('#alert_ajaxx').html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                    response.success +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button></div>').show();
+                $('#status-popup').modal('hide');
+                $('#other').DataTable().ajax.reload();
+            },
+            error: function(xhr, status, error) {
+                var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error sending email.';
+                $('#alert_ajaxx').html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                    errorMessage +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span></button></div>').show();
+                console.error('Error sending email:', error);
+                $('#status-popup').modal('hide');
+            }
                 });
             } else {
                 // Handle case where fields are not selected
@@ -267,7 +257,8 @@
             { data: 'ip' },
             { data: 'registrar' },
             { data: 'registry_details' },
-            { data: 'edit' },
+            { data: 'portal_link' },
+            { data: 'mail_status' },
             { data: 'status' },
 
             ],
@@ -307,6 +298,8 @@
         });
     }
 </script>
+
+
 
 
 @endsection

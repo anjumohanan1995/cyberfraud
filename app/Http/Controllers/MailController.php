@@ -69,18 +69,20 @@ class MailController extends Controller
         foreach ($records as $record) {
             $i++;
 
-            $editButton = "Portal link";
+            $editButton = '
+            <div>
+                <a class="btn btn-primary" href="' . route('get-portal') . '"><small>Portal Link</small></a>
+            </div>';
 
-        //     $editButton = '<div class="dropdown">
-        //     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        //         Portal Link
-        //     </button>
-        //     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        //         <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '91crpc_79itact', 'ack_no' => $record->ack_no, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
-        //         <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '91crpc', 'ack_no' => $record->ack_no, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 91 CrPC</a>
-        //         <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['id' => $record->evidence_type_id, 'option' => '79itact', 'ack_no' => $record->ack_no, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 79(3)(b) of IT Act</a>
-        //     </div>
-        // </div>';
+        $mailStatus = '';
+        if($record->evidence_type == 'website'){
+            $mailStatus = '
+            <div>
+                <span class="badge badge-info">Reported-M- ' . $record->mail_status_count . '</span>
+            </div>';
+        }
+
+
 
         $status = '';
 
@@ -120,10 +122,12 @@ class MailController extends Controller
                 "ip" => $record->ip,
                 "registrar" => $record->registrar,
                 "registry_details" => $record->registry_details,
-                "edit" => $editButton,
+                "portal_link" => $editButton,
+                "mail_status" => $mailStatus,
                 "status" => $status,
             ];
         }
+
 
         // Prepare response for DataTable
         $response = [
@@ -134,6 +138,11 @@ class MailController extends Controller
         ];
 
         return response()->json($response);
+    }
+
+    public function portal(){
+
+        echo "This is portal";
     }
 
 
@@ -189,17 +198,18 @@ class MailController extends Controller
         foreach ($records as $record) {
             // dd($record->_id);
             $i++;
-            $editButton = "Portal link";
-        //     $editButton = '<div class="dropdown">
-        //     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        //         Portal link
-        //     </button>
-        //     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        //         <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '91crpc_79itact', 'case_no' => $record->case_number, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 91 CrPC & 79(3)(b) of IT Act</a>
-        //         <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '91crpc', 'case_no' => $record->case_number, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 91 CrPC</a>
-        //         <a class="dropdown-item" href="' . route('get-mailmerge-preview', ['evidence_type' => $record->evidence_type, 'option' => '79itact', 'case_no' => $record->case_number, 'document_id' => $record->_id,'registrar' => $record->registrar]) . '">Notice U/s 79(3)(b) of IT Act</a>
-        //     </div>
-        // </div>';
+            $editButton = '
+            <div>
+                <a class="btn btn-primary" href="' . route('get-portal') . '"><small>Portal Link</small></a>
+            </div>';
+
+            $mailStatus = '';
+            if($record->evidence_type == 'website'){
+                $mailStatus = '
+                <div>
+                    <span class="badge badge-info">Reported-M- ' . $record->mail_status_count . '</span>
+                </div>';
+            }
 
         $status = '';
 
@@ -238,7 +248,8 @@ class MailController extends Controller
                 "ip" => $record->ip,
                 "registrar" => $record->registrar,
                 "registry_details" => $record->registry_details,
-                "edit" => $editButton,
+                "portal_link" => $editButton,
+                "mail_status" => $mailStatus,
                 "status" => $status,
             ];
         }
@@ -255,103 +266,6 @@ class MailController extends Controller
 
 
     }
-
-
-
-
-
-
-
-
-    // public function mailMergePreview(Request $request)
-    // {
-
-    //     $evidence_type = $request->evidence_type;
-    //     $case_no = $request->case_no;
-    //     $acknowledgement_no = $request->ack_no;
-    //     $evidence_type_id = $request->id;
-    //     $option = $request->option;
-    //     $document_id = $request->document_id;
-
-    //     if ($evidence_type && $case_no) {
-    //         $otherData = ComplaintOthers::find(new ObjectId($document_id));
-    //     } elseif($acknowledgement_no && $evidence_type_id){
-    //         $ncrpData = Evidence::find(new ObjectId($document_id));
-    //     }
-
-    //     // $domain_name = $otherData->domain;
-    //     // dd($domain_name);
-    //     // Initialize variables
-
-    // if (isset($ncrpData)) {
-    //     switch ($option) {
-    //         case '91crpc_79itact':
-    //             $sub = "Notice U/s 91 CrPC & 79(3)(b) of IT Act";
-    //             $number = $ncrpData->ack_no;
-    //             $url = $ncrpData->url;
-    //             $domain_name = $ncrpData->domain;
-    //             $domain_id = '123';
-    //             $registrar = $ncrpData->registrar;
-    //             break;
-    //         case '91crpc':
-    //             $sub = "Notice U/s 91 CrPC";
-    //             $number = $ncrpData->ack_no;
-    //             $url = $ncrpData->url;
-    //             $domain_name = $ncrpData->domain;
-    //             $domain_id = '123';
-    //             $registrar = $ncrpData->registrar;
-    //             break;
-    //         case '79itact':
-    //             $sub = "Notice U/s 79(3)(b) of IT Act";
-    //             $number = $ncrpData->ack_no;
-    //             $url = $ncrpData->url;
-    //             $domain_name = $ncrpData->domain;
-    //             $domain_id = '123';
-    //             $registrar = $ncrpData->registrar;
-    //             break;
-    //     }
-    // }
-
-    // if (isset($otherData)) {
-    //     switch ($option) {
-    //         case '91crpc_79itact':
-    //             $sub = "Notice U/s 91 CrPC & 79(3)(b) of IT Act";
-    //             $number = $otherData->case_number;
-    //             $url = $otherData->url;
-    //             $domain_name = $otherData->domain;
-    //             $domain_id = '123';
-    //             $registrar = $otherData->registrar;
-    //             break;
-    //         case '91crpc':
-    //             $sub = "Notice U/s 91 CrPC";
-    //             $number = $otherData->case_number;
-    //             $url = $otherData->url;
-    //             $domain_name = $otherData->domain;
-    //             $domain_id = '123';
-    //             $registrar = $otherData->registrar;
-    //             break;
-    //         case '79itact':
-    //             $sub = "Notice U/s 79(3)(b) of IT Act";
-    //             $number = $otherData->case_number;
-    //             $url = $otherData->url;
-    //             $domain_name = $otherData->domain;
-    //             $domain_id = '123';
-    //             $registrar = $otherData->registrar;
-    //             break;
-    //     }
-    // }
-
-
-    //     // Determine the view based on $option
-    //     $viewName = 'mailmerge.' . $option . 'Preview';
-
-    //     // Check if the view exists, otherwise fallback to a default view
-    //     if (view()->exists($viewName)) {
-    //         return view($viewName, compact('sub', 'number', 'url', 'domain_name', 'domain_id','registrar','evidence_type','case_no','acknowledgement_no','evidence_type_id'));
-    //     }
-    // }
-
-
     public function sendEmail(Request $request)
     {
         // Retrieve data from the request
@@ -361,9 +275,14 @@ class MailController extends Controller
         $case_no = $request->case_no;
         $caseData = $request->caseData;
 
+             // Example validation
+    if (!$statusType || !$noticeType) {
+        return response()->json(['error' => 'Please select both Status Type and Notice Type!'], 400);
+    }
+
         // Initialize arrays to hold data and notices
         $noticeData = [];
-        $data = [];
+        $data = collect();
 
         // Retrieve data based on $caseData type
         if ($caseData == "ncrp") {
@@ -378,10 +297,10 @@ class MailController extends Controller
                                    ->get();
         }
 
-        // Check if data is empty
         if ($data->isEmpty()) {
-            return redirect()->back()->withErrors(['message' => 'There is no data available for corresponding status type']);
+            return response()->json(['error' => 'There is no data available for corresponding status type!'], 400);
         }
+        // dd($data);
 
         // Initialize arrays to hold registrars and documents
         $registrars = [];
@@ -389,15 +308,13 @@ class MailController extends Controller
 
         // Extract unique registrars from $data
         $registrars = $data->pluck('registrar')->unique()->toArray();
-        // dd($registrars);
 
         // Fetch documents for each registrar
         $documents = Registrar::whereIn('registrar', $registrars)->get();
-        // dd($documents);
 
         // Check if documents were found for the given registrar
         if ($documents->isEmpty()) {
-            return redirect()->back()->withErrors(['message' => 'No documents found for the selected registrar.']);
+            return response()->json(['error' => 'No documents found for the selected registrar!'], 400);
         }
 
         // Prepare notice data based on notice type
@@ -468,20 +385,17 @@ class MailController extends Controller
                 }
             }
         }
-
-        // dd($noticeData);
-
+// dd("ghfjh");
         // Initialize an array to store recipient emails
         $recipientEmails = [];
 
         // Extract email addresses from documents
         foreach ($documents as $document) {
             $emailIds = $document->email_id;
-            // print_r($emailIds);
 
             // Check if $emailIds is empty
             if (empty($emailIds)) {
-                return redirect()->back()->withErrors(['message' => 'No email addresses found for the selected registrar.']);
+                return response()->json(['error' => 'No email addresses found for the selected registrar!'], 400);
             }
 
             // Add each email in $emailIds to $recipientEmails array
@@ -492,45 +406,74 @@ class MailController extends Controller
 
         // Merge demo emails with any provided emails from the form
         $emails = array_merge($recipientEmails, explode(',', $request->input('emails')));
-        // dd($emails);
 
-// Send email to each recipient
-foreach ($emails as $email) {
-    // Fetch the registrar data where the email exists in the email_id array
-    $registrarData = Registrar::where('email_id', 'all', [$email])->get();
+        // Send email to each recipient
+        foreach ($emails as $email) {
+            // Fetch the registrar data where the email exists in the email_id array
+            $registrarData = Registrar::where('email_id', 'all', [$email])->get();
 
-    foreach ($registrarData as $registrar) {
-        // Check if $email exists in the $registrar->email_id array
-        if (in_array($email, $registrar->email_id)) {
-            // Print the notice related to this registrar
-            foreach ($noticeData as $notice) {
-                if ($registrar->registrar == $notice['registrar']) {
-                // Print or process $notice
-                // print_r($email);
-                // print_r($notice);
-                // Uncomment the line below to send the email
-                Mail::to($email)->send(new MailMergePreview([$notice]));
+            foreach ($registrarData as $registrar) {
+                // Check if $email exists in the $registrar->email_id array
+                if (in_array($email, $registrar->email_id)) {
+                    // Print the notice related to this registrar
+                    foreach ($noticeData as $notice) {
+                        if ($registrar->registrar == $notice['registrar']) {
+                            // Print or process $notice
+                            Mail::to($email)->send(new MailMergePreview([$notice]));
+                        }
+                    }
                 }
             }
-            // Uncomment the line below to send the email
-            // Mail::to($email)->send(new MailMergePreview([$notice]));
         }
+        // dd($caseData);
+
+        // Update models based on $caseData and $statusType
+        if ($caseData == "ncrp") {
+            if ($statusType == 'active' || $statusType == 'inactive') {
+                $this->updateEvidenceModel('reported', 1, $ack_no, $statusType);
+            } elseif ($statusType == 'reported') {
+                $this->incrementEvidenceMailStatusCount($ack_no, $statusType);
+            }
+        } elseif ($caseData == "other") {
+            if ($statusType == 'active' || $statusType == 'inactive') {
+                $this->updateComplaintOthersModel('reported', 1, $case_no, $statusType);
+            } elseif ($statusType == 'reported') {
+                $this->incrementComplaintOthersMailStatusCount($case_no, $statusType);
+            }
+        }
+        return response()->json(['success' => 'Email sent successfully.']);
     }
+
+
+private function updateEvidenceModel($reportedStatsValue, $mailStatusCountValue, $ack_no, $statusType)
+{
+    Evidence::where('evidence_type', 'website')->where('ack_no', $ack_no)->where('reported_status', $statusType) // Add your condition here
+        ->update([
+            'reported_status' => $reportedStatsValue,
+            'mail_status_count' => $mailStatusCountValue
+        ]);
 }
-            // // Print the notice related to this registrar
-            // if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            //     print_r($notice);
-            //     // Uncomment the line below to send the email
-            //     // Mail::to($email)->send(new MailMergePreview([$notice]));
-            //     }
-            // }
 
-    // Debug message to confirm the function has executed
-    // dd("hello");
-    return redirect()->back()->with('status', 'Emails sent successfully.');
+private function incrementEvidenceMailStatusCount($ack_no, $statusType)
+{
+    Evidence::where('evidence_type', 'website')->where('ack_no', $ack_no)->where('reported_status', $statusType) // Add your condition here
+        ->increment('mail_status_count');
+}
 
-    }
+private function updateComplaintOthersModel($reportedStatsValue, $mailStatusCountValue, $case_no, $statusType)
+{
+    ComplaintOthers::where('evidence_type', 'website')->where('case_number', $case_no)->where('reported_status', $statusType) // Add your condition here
+        ->update([
+            'reported_status' => $reportedStatsValue,
+            'mail_status_count' => $mailStatusCountValue
+        ]);
+}
 
-
+private function incrementComplaintOthersMailStatusCount($case_no, $statusType)
+{
+    ComplaintOthers::where('evidence_type', 'website')->where('case_number', $case_no)->where('reported_status', $statusType) // Add your condition here
+        ->increment('mail_status_count');
+}
 
 }
+
