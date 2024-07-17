@@ -1,5 +1,21 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasAddEvidenceTypePermission = in_array('Add Evidence Type', $sub_permissions);
+                $hasEditEvidenceTypePermission = in_array('Edit Evidence Type', $sub_permissions);
+                $hasDeleteEvidenceTypePermission = in_array('Delete Evidence Type', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -54,6 +70,7 @@
                                 <h4 class="card-title mg-b-10">
                                     Evidence Type
                                 </h4>
+                                @if($hasAddEvidenceTypePermission)
                                 <div class="col-md-1 col-6 text-center">
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('evidencetype.create') }}">
@@ -62,6 +79,7 @@
                                         </a>
                                     </div>
                                 </div>
+                                @endif
                             </div>
 
                             <div class="table-responsive mb-0">
@@ -72,7 +90,7 @@
                                             <th>SL No</th>
                                             <th>NAME</th>
 
-                                            <th>ACTION</th>
+                                           @if($hasEditEvidenceTypePermission || $hasDeleteEvidenceTypePermission) <th>ACTION</th> @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -113,7 +131,7 @@
             columns: [
                 { data: 'id' },
                 { data: 'name' },
-                { data: 'edit' }
+                @if($hasEditEvidenceTypePermission || $hasDeleteEvidenceTypePermission) { data: 'edit' } @endif
 			],
             "order": [0, 'desc'],
             'ordering': true

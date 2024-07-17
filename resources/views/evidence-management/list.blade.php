@@ -1,5 +1,24 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasShowNCRPMailMergePermission = in_array('Show NCRP Mail Merge', $sub_permissions);
+                $hasShowOthersMailMergePermission = in_array('Show Others Mail Merge', $sub_permissions);
+                $hasShowNCRPETFilter = in_array('Show NCRP Evidence Type Filter', $sub_permissions);
+                $hasShowOtherETFilter = in_array('Show Others Evidence Type Filter', $sub_permissions);
+                $hasViewNCRPStatus = in_array('View / Update NCRP Evidence Status', $sub_permissions);
+                $hasViewOtherStatus = in_array('View / Update Others Evidence Status', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
 
 @if ($errors->any())
@@ -145,6 +164,7 @@
 
 
                                                                     <div class="col-md-2">
+                                                                        @if($hasShowNCRPETFilter)
                                                                         <div class="form-group">
                                                                             <label for="evidence_type_ncrp">Evidence Type:</label>
                                                                             <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp" onchange="showTextBox('evidence_type_ncrp')">
@@ -158,6 +178,7 @@
                                                                                 <div class="text-danger">{{ $message }}</div>
                                                                             @enderror
                                                                         </div>
+                                                                        @endif
                                                                     </div>
 
                                                                 </div>
@@ -233,7 +254,7 @@
                                                                         </div>
                                                                     </div>
 
-
+                                                                    @if($hasShowOtherETFilter)
                                                                     <div class="col-md-2">
                                                                         <div class="form-group">
                                                                             <label for="evidence_type_ncrp">Evidence Type:</label>
@@ -249,7 +270,7 @@
                                                                             @enderror
                                                                         </div>
                                                                     </div>
-
+                                                                    @endif
                                                                 </div>
                                                                 <div class="row">
                                                                      <div class="col-md-3">

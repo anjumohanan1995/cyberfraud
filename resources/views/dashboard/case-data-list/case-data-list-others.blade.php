@@ -1,5 +1,19 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasOthersSelfAssign = in_array('Show Others Self Assign Button', $sub_permissions);
+                } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
 
+@endphp
 @section('content')
     <!-- container -->
     <div class="container-fluid">
@@ -116,7 +130,7 @@
                                             <th>IP</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
-                                            <th>Actions</th>
+                                           @if($hasOthersSelfAssign) <th>Actions</th>@endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -209,9 +223,9 @@
                     {
                         data: 'remarks'
                     },
-                    {
+                   @if($hasOthersSelfAssign) {
                         data: 'action'
-                    }
+                    }@endif
 
                 ],
                 "order": [0, 'desc'],

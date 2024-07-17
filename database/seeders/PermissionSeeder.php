@@ -67,6 +67,12 @@ class PermissionSeeder extends Seeder
                 ]),
             ],
             [
+                'name' => 'Other Case Data Management',
+                'sub_permission' => json_encode([
+                    '1' => 'Show Others Self Assign Button',
+                ]),
+            ],
+            [
                 'name' => 'Source Type Management',
                 'sub_permission' => json_encode([
                     '1' => 'Add Source Type',
@@ -80,11 +86,27 @@ class PermissionSeeder extends Seeder
             ],
             [
                 'name' => 'Notice Management',
-                'sub_permission' => json_encode([]),
+                'sub_permission' => json_encode([
+                    '1' => 'Against Evidence Permission',
+                    '2' => 'Show Evidence Source Type Filter',
+                    '3' => 'Show Evidence Type Filter',
+                    '4' => 'Show Notice Status Filter',
+                    '5' => 'Show Notice Type Filter',
+                    '6' => 'Generate Token',
+                    '7' => 'Against Bank Management',
+                    '8' => 'Against Mule Account Management',
+                ]),
             ],
             [
                 'name' => 'Evidence Management',
-                'sub_permission' => json_encode([]),
+                'sub_permission' => json_encode([
+                    '1' => 'Show NCRP mail Merge',
+                    '2' => 'Show Other mail Merge',
+                    '3' => 'Show NCRP Evidence Type Filter',
+                    '4' => 'Show Others Evidence Type Filter',
+                    '5' => 'View / Update NCRP Evidence Status',
+                    '6' => 'View / Update Other Evidence Status',
+                ]),
             ],
             [
                 'name' => 'Mule Account Management',
@@ -92,16 +114,22 @@ class PermissionSeeder extends Seeder
             ],
             [
                 'name' => 'Reports Management',
-                'sub_permission' => json_encode([]),
+                'sub_permission' => json_encode([
+                    '1' => 'NCRP CSV Download',
+                    '2' => 'Other CSV Download',
+                    '3' => 'NCRP Excel Download',
+                    '4' => 'Other Excel Download',
+                ]),
             ],
             [
                 'name' => 'Evidence Type Management',
-                'sub_permission' => json_encode([]),
+                'sub_permission' => json_encode([
+                    '1' => 'Add Evidence Type',
+                    '2' => 'Edit Evidence Type',
+                    '3' => 'Delete Evidence Type',
+                ]),
             ],
-            [
-                'name' => 'Other Case Data Management',
-                'sub_permission' => json_encode([]),
-            ],
+
         ];
 
         foreach ($permissions as $permission) {
