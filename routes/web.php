@@ -261,9 +261,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('evidence/bulkUpload/{acknowledgement_no}', [EvidenceController::class, 'evidenceBulkUpload'])->name('evidence.bulkUpload');
     Route::post('evidence/bulk-upload',[EvidenceController::class, 'evidenceBulkUploadFile'])->name('evidence.bulk-upload');
 
-    Route::get('/portal', [MailController::class, 'portal'])->name('get-portal');
-
-
+    Route::get('/get-portal-link/{registrar}', [MailController::class, 'getPortalLink'])->name('get-portal-link');
+    Route::post('/update-portal-count', [MailController::class, 'updatePortalCount'])->name('update.portal.count');
 
 
 });

@@ -55,58 +55,39 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Last Name:</label>
-                                                <input type="text"  name="last_name" class="form-control" placeholder="Enter your last name" value="{{ old('last_name') }}" required>
-                                                @error('last_name')
+                                                <label for="email">Email:</label>
+                                                <input type="email" id="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required>
+                                                @error('email')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Email:</label>
-                                             	<input type="email" class="form-control" placeholder="Email" name="email" value="{{old('email')}}" />
-													@error('email')
-														<span class="text-danger">{{$message}}</span>
-													@enderror
-												
+                                                <label for="password">Password:</label>
+                                                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                                                @error('password')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Password:</label>
-                                                <input type="password" class="form-control" placeholder="Password" name="password" value="{{old('password')}}"/>
-                                                @error('password')
-                                                    <span class="text-danger">{{$message}}</span>
+                                                <label for="role">Role:</label>
+                                                <select id="role" name="role" class="form-control">
+                                                    <option value="" selected>Select Role</option>
+                                                    @foreach($roles as $role)
+                                                        <option value="{{ $role->name }}" @if(old('role') == $role->name) selected @endif>{{ $role->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('role')
+                                                    <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="name">Role:</label>
-                                             	<select id="role" name="role" class="form-control"  >
-													<option value="" selected>Select Role</option>
-														@foreach($role as $roles)
-															<option value="{{$roles->name}}" @if (old('role') == $roles['name']) selected @endif>{{$roles->name}}</option>
-														@endforeach
-												</select>
-
-												@error('role')
-													<span class="text-danger">{{$message}}</span>
-												@enderror
-												
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    
-                                    
-                                    
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
 

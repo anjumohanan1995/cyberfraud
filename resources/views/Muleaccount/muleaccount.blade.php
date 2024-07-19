@@ -12,15 +12,14 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Muleaccount</a>
+                            <i class="fas fa-university"></i> Mule account
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Muleaccount
+                            <i class="fas fa-university"></i> Mule account
                         </li>
                     </ol>
                 </nav>
             </div>
-
         </div>
         <!-- /breadcrumb -->
         <!-- main-content-body -->
@@ -54,7 +53,7 @@
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
-                                    Muleaccount List
+                                    Mule Account List
                                 </h4>
 
                             </div>

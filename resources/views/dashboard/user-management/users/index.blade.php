@@ -63,6 +63,14 @@
                                         </button>
                                     </div>
                                 @endif
+
+                                <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
+
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
@@ -157,9 +165,17 @@
                     _method: 'DELETE' // Override method to DELETE
                 },
                 success: function(response) {
-                    // Handle success response
-                    // Reload the page
-                    location.reload();
+                    console.log('Success response:', response); // Log the response
+                // Handle success response
+                $('.alert-success-one').html('<div class="alert alert-success alert-dismissible fade show w-100" role="alert">' +
+                    response.success +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span>' +
+                    '</button>' +
+                    '</div>').show();
+
+                // Optionally reload the page or update the UI
+                $('#example').DataTable().ajax.reload();
                 },
                 error: function(xhr, status, error) {
                     // Handle error response

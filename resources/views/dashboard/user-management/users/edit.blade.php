@@ -7,7 +7,7 @@
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                  
+
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -45,21 +45,22 @@
                                     @csrf
                                     @method('put')
 
-                                     <div class="row">
+                                    <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="name">Name:</label>
-                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" value="{{ old('name') ?: $data->name  }}" required>
+                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" value="{{ old('name') ?: $data->name }}" required>
                                                 @error('name')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
+
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Last Name:</label>
-                                                <input type="text"  name="last_name" class="form-control" placeholder="Enter your last name" value="{{ old('last_name')?: $data->last_name  }}" required>
-                                                @error('last_name')
+                                                <label for="email">Email:</label>
+                                                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" value="{{ old('email') ?: $data->email }}" required>
+                                                @error('email')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -69,36 +70,23 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Email:</label>
-                                             	<input type="email" class="form-control" placeholder="Email" name="email" value="{{old('email')?: $data->email}}" />
-													@error('email')
-														<span class="text-danger">{{$message}}</span>
-													@enderror
-												
+                                                <label for="role">Role:</label>
+                                                <select id="role" name="role" class="form-control" required>
+                                                    <option value="" selected>Select Role</option>
+                                                    @foreach($roles as $role)
+                                                        <option value="{{ $role->name }}" @if ($data->role == $role->name) selected @endif>{{ $role->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('role')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="name">Role:</label>
-                                             	<select id="role" name="role" class="form-control"  >
-													<option value="" selected>Select Role</option>
-														@foreach($role as $roles)
-															<option value="{{$roles->name}}" @if ($data->role == $roles['name']) selected @endif>{{$roles->name}}</option>
-														@endforeach
-												</select>
-
-												@error('role')
-													<span class="text-danger">{{$message}}</span>
-												@enderror
-												
-                                            </div>
-                                        </div>
-                                      
                                     </div>
-                                  
 
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
+
 
                             </div>
                         </div>

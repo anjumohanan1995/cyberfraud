@@ -53,6 +53,7 @@ $user = Auth::user();
                         <div class="card-body">
                           <div class=" m-4 d-flex justify-content-between">
 
+
                                 @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
@@ -61,6 +62,7 @@ $user = Auth::user();
                                         </button>
                                     </div>
                                 @endif
+
                                 <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
 
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -144,32 +146,36 @@ $user = Auth::user();
       	table.draw();
     });
     $(document).on('click', '.delete-btn', function() {
-        var Id = $(this).data('id');
-        if (confirm('Are you sure you want to delete this item?')) {
-            $.ajax({
-                url: '/roles/' + Id,
-                type: 'POST', // Use POST method
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: {
-                    _method: 'DELETE' // Override method to DELETE
-                },
-                success: function(response) {
-                    // Handle success response
-                    // Reload the page
-                    $('.alert-success-one').html(response.success +'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +'<span aria-hidden="true">&times;</span>' +'</button>').show();
+    var Id = $(this).data('id');
+    if (confirm('Are you sure you want to delete this item?')) {
+        $.ajax({
+            url: '/roles/' + Id,
+            type: 'POST', // Use POST method
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                _method: 'DELETE' // Override method to DELETE
+            },
+            success: function(response) {
+                console.log('Success response:', response); // Log the response
+                // Handle success response
+                $('.alert-success-one').html('<div class="alert alert-success alert-dismissible fade show w-100" role="alert">' +
+                    response.success +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                    '<span aria-hidden="true">&times;</span>' +
+                    '</button>' +
+                    '</div>').show();
 
-      	            //table.draw();
+                // Optionally reload the page or update the UI
+                $('#example').DataTable().ajax.reload();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error response:', xhr.responseText); // Log the error response
+            }
+        });
+    }
+});
 
-                    location.reload();
-                },
-                error: function(xhr, status, error) {
-                    // Handle error response
-                    console.error(xhr.responseText)
-                }
-            });
-        }
-    });
 </script>
 @endsection

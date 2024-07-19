@@ -29,8 +29,8 @@ class UsersController extends Controller
      */
     public function create()
     {
-        $role =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view("dashboard.user-management.users.create",compact('role'));
+        $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
+        return view("dashboard.user-management.users.create",compact('roles'));
     }
 
     /**
@@ -59,7 +59,7 @@ class UsersController extends Controller
 
         User::create([
             'name' => @$request->name? $request->name:'',
-            'last_name' => @$request->lname?$request->lname:'',
+            // 'last_name' => @$request->lname?$request->lname:'',
             'email' => @$request->email?$request->email:'',
             'password' => Hash::make($request->password),
             'role' => @$request->role?$request->role:''
@@ -92,7 +92,7 @@ class UsersController extends Controller
         $data = User::findOrFail($id);
 
         $role =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view('dashboard.user-management.users.edit', ['data' => $data,'role'=>$role]);
+        return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$role]);
     }
 
     /**
@@ -115,7 +115,7 @@ class UsersController extends Controller
 
         // Update the permission with the data from the request
         $data->name = $request->name;
-        $data->last_name = $request->last_name;
+        // $data->last_name = $request->last_name;
         $data->email = $request->email;
         $data->role = $request->role;
         // Update other attributes as needed
@@ -139,7 +139,9 @@ class UsersController extends Controller
 
         $data->delete();
 
-        return back()->with('success', 'User successfully deleted!');
+        return response()->json(['success' => 'User successfully deleted!']);
+
+        // return back()->with('success', 'User successfully deleted!');
     }
 
 
@@ -162,17 +164,29 @@ class UsersController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-            // Total records
-            $totalRecord = User::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
+    // Query to count total records
+    $totalRecord = User::whereNull('deleted_at');
+    if (!empty($searchValue)) {
+        $totalRecord->where('name', 'like', '%' . $searchValue . '%');
+    }
+    $totalRecords = $totalRecord->count();
 
-            $totalRecordswithFilte = User::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+    // Query to count filtered records
+    $totalRecordswithFilte = User::whereNull('deleted_at');
+    if (!empty($searchValue)) {
+        $totalRecordswithFilte->where('name', 'like', '%' . $searchValue . '%');
+    }
+    $totalRecordswithFilter = $totalRecordswithFilte->count();
 
-            // Fetch records
-            $items = User::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
+    // Fetch filtered records
+    $items = User::whereNull('deleted_at');
+    if (!empty($searchValue)) {
+        $items->where('name', 'like', '%' . $searchValue . '%');
+    }
+    $items->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+    $records = $items->skip($start)->take($rowperpage)->get();
+
 
             $user = Auth::user();
             $role = $user->role;
@@ -182,6 +196,7 @@ class UsersController extends Controller
             if ($sub_permissions || $user->role == 'Super Admin') {
                 $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
                 $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+                // dd($hasDeleteUserPermission);
                 } else{
                     $hasEditUserPermission = false;
                     $hasDeleteUserPermission = false;
@@ -199,7 +214,8 @@ class UsersController extends Controller
                 // only show links to edit and delete if they have permission. if they ave both permission it should show both edit and delete
                 if($hasEditUserPermission || $user->role == 'Super Admin'){
                     $edit .= '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
-                }elseif($hasDeleteUserPermission || $user->role == 'Super Admin'){
+                }
+                if($hasDeleteUserPermission || $user->role == 'Super Admin'){
                     $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
                 }
                 //$edit = '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';

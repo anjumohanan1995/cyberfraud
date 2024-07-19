@@ -73,7 +73,12 @@ $user = Auth::user();
                         @if($hasShowOthersMailMergePermission)
                         <div class="col-2">
                             @if ($website->isNotEmpty())
-                            <button id="statusBtn" class="btn btn-success" style="margin-left: 10px;">Mail Merge</button>
+                            <button id="statusBtn" class="btn btn-success" style="margin-left: 10px;">
+                                <i class="fas fa-envelope" data-toggle="tooltip" data-placement="top" title="Mail Merge"></i>
+                            </button>
+                            {{-- <button id="portalBtn" class="btn btn-success" style="margin-left: 10px;">
+                                <i class="fas fa-link" data-toggle="tooltip" data-placement="top" title="Portal Link"></i>
+                              </button> --}}
                             @endif
                         </div>
                         @endif
@@ -119,6 +124,40 @@ $user = Auth::user();
             </div>
         </div>
     </div>
+
+        <!-- Portal Modal -->
+<div class="modal fade" id="portal-popup" tabindex="-1" role="dialog" aria-labelledby="portalPopupLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="portalPopupLabel">Enter Portal Count</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+                            <!-- Hidden input to store registrar ID -->
+                            <input type="hidden" id="registrarId" name="registrarId">
+          <form>
+            <div class="form-group">
+                <label for="portalstatusType" class="form-label">Status:</label>
+                <select id="portalstatusType" class="form-select" name="portalstatusType" required>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+              <label for="portalCount">Portal Count</label>
+              <input type="number" class="form-control" id="portalCount" placeholder="Enter portal count">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="savePortalCount">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
                     <input type="hidden" id="caseData" value="other">
                     <input type="hidden" id="case_no" value="{{ $case_no }}">
 
@@ -315,6 +354,71 @@ $user = Auth::user();
                 console.error('Error updating status:', error);
             }
         });
+    }
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        $('#savePortalCount').on('click', function() {
+            var portalCount = $('#portalCount').val();
+            var  case_no = $('#case_no').val();
+            var portalstatusType = $('#portalstatusType').val();
+            var registrarId = $('#registrarId').val();
+            var caseData = $('#caseData').val();
+
+            $.ajax({
+                url: '{{ route("update.portal.count") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    portalCount: portalCount,
+                    case_no: case_no,
+                    portalstatusType: portalstatusType,
+                    registrarId: registrarId,
+                    caseData: caseData,
+                },
+                success: function(response) {
+                    $('#alert_ajaxx').html('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                            response.success +
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                            '<span aria-hidden="true">&times;</span></button></div>').show();
+                    $('#portal-popup').modal('hide');
+                    $('#other').DataTable().ajax.reload();
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Error updating portal count.';
+                    $('#alert_ajaxx').html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                        errorMessage +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span></button></div>').show();
+                    console.error('Error updating portal count:', error);
+                    $('#portal-popup').modal('hide');
+                }
+            });
+        });
+    });
+</script>
+
+
+<script>
+    function showPortalModal(id, reported_status) {
+        $('#registrarId').val(id);
+
+        // Update the options based on reported_status
+        let selectElement = $('#portalstatusType');
+        selectElement.empty(); // Clear existing options
+
+        if (reported_status == "reported") {  // Fix comparison operator
+            selectElement.append('<option value="reported">Reported</option>');
+        } else {
+            selectElement.append('<option value="">Select Status Type</option>');
+            selectElement.append('<option value="active">Active</option>');
+            selectElement.append('<option value="inactive">Inactive</option>');
+            selectElement.append('<option value="reported">Reported</option>');
+        }
+
+        $('#portal-popup').modal('show');
     }
 </script>
 

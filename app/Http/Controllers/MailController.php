@@ -20,7 +20,6 @@ class MailController extends Controller
         $website = Evidence::where('ack_no', $ack_no)
         ->where('evidence_type', 'website')
         ->get();
-
         return view('mailmerge.mailmergeList.mailmergelist', compact('website', 'ack_no'));
     }
 
@@ -69,16 +68,18 @@ class MailController extends Controller
         foreach ($records as $record) {
             $i++;
 
-            $editButton = '
-            <div>
-                <a class="btn btn-primary" href="' . route('get-portal') . '"><small>Portal Link</small></a>
-            </div>';
+
+            $editButton = $this->generateEditButton($record);
+
 
         $mailStatus = '';
         if($record->evidence_type == 'website'){
             $mailStatus = '
             <div>
                 <span class="badge badge-info">Reported-M- ' . $record->mail_status_count . '</span>
+            </div><br>
+              <div>
+                <span class="badge badge-info">Reported-P- ' . $record->portal_status_count . '</span>
             </div>';
         }
 
@@ -140,9 +141,91 @@ class MailController extends Controller
         return response()->json($response);
     }
 
-    public function portal(){
+    private function generateEditButton($record)
+{
+    if ($record->evidence_type == 'website') {
+        // Generate edit button HTML with tooltip and icon
+        // dd($record->portal_status_count);
+        $editButton = '
+        <div class="d-flex align-items-center">
+            <div>
+                <a class="btn btn-primary" href="' . route('get-portal-link', ['registrar' => $record->registrar]) . '">
+                    <small>
+                        <i class="fas fa-link" data-toggle="tooltip" data-placement="top" title="Portal Link"></i>
+                    </small>
+                </a>
+            </div>
+        <div style="margin-left: 10px;">
+            <button class="btn btn-success" onclick="showPortalModal(\'' . $record->_id . '\', \'' . $record->reported_status . '\')">
+                <i class="fas fa-list" data-toggle="tooltip" data-placement="top" title="Portal Status Count"></i>
+            </button>
+        </div>
+        </div>
+    ';
+    } else {
+        $editButton = ''; // If not a website, return empty button
+    }
 
-        echo "This is portal";
+    return $editButton;
+}
+
+
+    public function getPortalLink($registrar)
+    {
+        // Fetch the portal link based on the registrar
+        $portal = Registrar::where('registrar', $registrar)->first();
+
+        if ($portal) {
+            // Redirect to the portal_link if found
+            return redirect()->away($portal->portal_link);
+        } else {
+            // Handle case where registrar is not found
+            abort(404, 'Registrar not found');
+        }
+    }
+
+    public function updatePortalCount(Request $request)
+    {
+        // Retrieve the input values from the request
+        $portalCount = $request->input('portalCount');
+        $case_no = $request->input('case_no');
+        $portalstatusType = $request->input('portalstatusType');
+        $registrarId = $request->input('registrarId');
+        $caseData = $request->input('caseData');
+        // dd($registrarId);
+
+        $data = collect();
+
+        // Retrieve data based on $caseData type
+        if ($caseData == "ncrp") {
+            $data = Evidence::where('_id', $registrarId)
+                            ->where('evidence_type', 'website')
+                            ->where('reported_status', $portalstatusType)
+                            ->first();
+        } elseif ($caseData == "other") {
+            $data = ComplaintOthers::where('_id', $registrarId)
+                                   ->where('evidence_type', 'website')
+                                   ->where('reported_status', $portalstatusType)
+                                   ->first();
+        }
+
+        if (!$data) {
+            return response()->json(['error' => 'There is no data available for corresponding status type!'], 400);
+        }
+
+        // Check the value of portalstatusType
+        if (in_array($portalstatusType, ['active', 'inactive'])) {
+            // Update reported_status to 'reported'
+            $data->reported_status = 'reported';
+        }
+
+        // Update portal_status_count
+        $data->portal_status_count = $portalCount;
+// dd($data);
+        // Save the changes to the database
+        $data->save();
+
+        return response()->json(['success' => 'Portal count and status updated successfully']);
     }
 
 
@@ -198,17 +281,19 @@ class MailController extends Controller
         foreach ($records as $record) {
             // dd($record->_id);
             $i++;
-            $editButton = '
-            <div>
-                <a class="btn btn-primary" href="' . route('get-portal') . '"><small>Portal Link</small></a>
-            </div>';
+
+
+            $editButton = $this->generateEditButton($record);
 
             $mailStatus = '';
             if($record->evidence_type == 'website'){
                 $mailStatus = '
                 <div>
                     <span class="badge badge-info">Reported-M- ' . $record->mail_status_count . '</span>
-                </div>';
+                </div><br>
+              <div>
+                <span class="badge badge-info">Reported-P- ' . $record->portal_status_count . '</span>
+            </div>';
             }
 
         $status = '';
@@ -266,6 +351,27 @@ class MailController extends Controller
 
 
     }
+
+    public function updatePortalCountother(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'portalCount' => 'required|integer',
+            'ack_no' => 'required',
+        ]);
+
+        // Get the portal count and ack_no from the request
+        $portalCount = $request->input('portalCount');
+        $ack_no = $request->input('ack_no');
+
+        // Update the Evidence model where conditions match
+        ComplaintOthers::where('ack_no', $ack_no)
+                ->where('evidence_type', 'website')
+                ->update(['portal_status_count' => $portalCount]);
+
+        return response()->json(['success' => 'Portal count updated successfully!']);
+    }
+
     public function sendEmail(Request $request)
     {
         // Retrieve data from the request

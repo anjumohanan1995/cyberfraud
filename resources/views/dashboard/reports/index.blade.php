@@ -516,7 +516,7 @@ $user = Auth::user();
             var searchBoxContainer = document.getElementById("searchBoxContainer_" + selectId);
             var newSearchBox = document.createElement("div");
             newSearchBox.id = "searchBox_" + selectId + "_" + selectedValue;
-            newSearchBox.innerHTML = '<input type="text" class="form-control" placeholder="Search..." oninput="setSearchValue(\'' + selectId + '\', \'' + selectedValue + '\', this.value)">';
+            newSearchBox.innerHTML = '<input type="text" class="form-control" placeholder="Search url..." oninput="setSearchValue(\'' + selectId + '\', \'' + selectedValue + '\', this.value)">';
             searchBoxContainer.appendChild(newSearchBox);
         }
     }

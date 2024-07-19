@@ -154,17 +154,29 @@ class RoleController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-            // Total records
-            $totalRecord = Role::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+    // Query to count total records
+    $totalRecord = Role::whereNull('deleted_at');
+    if (!empty($searchValue)) {
+        $totalRecord->where('name', 'like', '%' . $searchValue . '%');
+    }
+    $totalRecords = $totalRecord->count();
+
+    // Query to count filtered records
+    $totalRecordswithFilte = Role::whereNull('deleted_at');
+    if (!empty($searchValue)) {
+        $totalRecordswithFilte->where('name', 'like', '%' . $searchValue . '%');
+    }
+    $totalRecordswithFilter = $totalRecordswithFilte->count();
+
+    // Fetch filtered records
+    $items = Role::whereNull('deleted_at');
+    if (!empty($searchValue)) {
+        $items->where('name', 'like', '%' . $searchValue . '%');
+    }
+    $items->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+    $records = $items->skip($start)->take($rowperpage)->get();
 
 
-            $totalRecordswithFilte = Role::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
-
-            // Fetch records
-            $items = Role::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
             $user = Auth::user();
             $role = $user->role;
             $permission = RolePermission::where('role', $role)->first();

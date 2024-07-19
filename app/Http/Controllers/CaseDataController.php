@@ -892,7 +892,7 @@ if ($fir_lodge == "0") {
         $url = $request->url;
         $registrar = $request->registrar;
         $ip = $request->ip;
-        //dd($casenumber);
+        // dd($casenumber);
         $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
 
             $pipeline = [
