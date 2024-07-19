@@ -425,7 +425,8 @@ if ($fir_lodge == "0") {
 </div>
             </div>';
          }elseif($com->assigned_to == $CUser){
-            $edit.='<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            $edit.='
+            <div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
 
                 <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
 
@@ -440,7 +441,8 @@ if ($fir_lodge == "0") {
             $user = User::find($com->assigned_to);
            // dd($user);
             if($user != null){
-            $edit.= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            $edit.= '<p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
+            <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
             <p class="text-success">Assigned To: '. $user->name.'</p>
             </div>';
         }
@@ -892,7 +894,7 @@ if ($fir_lodge == "0") {
         $url = $request->url;
         $registrar = $request->registrar;
         $ip = $request->ip;
-        // dd($casenumber);
+        //dd($casenumber);
         $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
 
             $pipeline = [
@@ -1098,8 +1100,10 @@ if ($fir_lodge == "0") {
                            $user = User::find($record->assigned_to);
                           // dd($user);
                            if($user != null){
-
-                           $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+if($record->case_status != null){
+    $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
+}
+                           $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                            <p class="text-success">Assigned To: '. $user->name.'</p>
                            </div>';
                        }
@@ -1272,3 +1276,4 @@ if ($fir_lodge == "0") {
 
 
 }
+
