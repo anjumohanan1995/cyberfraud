@@ -181,6 +181,7 @@
                             <span class="side-menu__label">Police Stations</span>
                         </a>
                     </li> --}}
+                    @if ($hasUserManagementPermission)
                     <li class="slide">
                         <a class="side-menu__item" data-toggle="slide" href="#">
                             <i class="side-menu__icon fe fe-user"> </i>
@@ -188,11 +189,11 @@
                             <i class="angle fe fe-chevron-down"> </i>
                         </a>
                         <ul class="slide-menu">
-                            @if ($hasUserManagementPermission)
+
                                 <li>
                                     <a class="slide-item" href="{{ url('users') }}">Users</a>
                                 </li>
-                            @endif
+
                             @if ($hasRoleManagementPermission)
                                 <li>
                                     <a class="slide-item" href="{{ url('roles') }}">Roles</a>
@@ -207,7 +208,7 @@
 
                         </ul>
                     </li>
-
+                    @endif
         @if ($hasUploadNCRPPermission)
          <li class="slide">
                         <a class="side-menu__item" data-toggle="slide" href="#">
@@ -372,3 +373,4 @@
         <div class="ps__thumb-y" tabindex="0" style="top: 0px; height: 426px"></div>
     </div>
 </aside>
+

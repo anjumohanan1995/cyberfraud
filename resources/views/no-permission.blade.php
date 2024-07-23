@@ -13,10 +13,8 @@
                     <div class="col-6">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item">
-                                <a href="{{ url('/') }}">
-                                    <svg class="stroke-icon">
-                                        <use href="svg/icon-sprite.svg#stroke-home"></use>
-                                    </svg>
+                                <a href="{{ url('/dashboard') }}">
+                                    <i data-feather="home"></i>
                                 </a>
                             </li>
                             <li class="breadcrumb-item">No Permission</li>
@@ -37,3 +35,4 @@
         </div>
     </div>
 @endsection
+
