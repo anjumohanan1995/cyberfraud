@@ -33,7 +33,7 @@
              color:red !important;
         }
         .table-wrapper {
-        max-height: 200px !important; 
+        max-height: 200px !important;
         overflow-y: auto !important;
         }
     </style>
@@ -192,7 +192,7 @@
                                                 </a>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>
@@ -276,9 +276,9 @@
                             </div>
 
 
-                           
+
                             <br>
-                            
+
                             <br>
                             <table class="table table-bordered">
                                 <thead>
@@ -302,7 +302,7 @@
                                          <td> {{ $loop->iteration }} </td>
                                             <td>{{ @$complnt->transaction_id }}</td>
                                             <td>{{ @$complnt->account_id }}</td>
-                                            <td>{{ @$complnt->entry_date }}</td>
+                                            <td>{{ @$complnt->bankCaseData->transaction_date }}</td>
                                             <td>{{ @$complnt->amount }}</td>
                                             <td>{{ @$complnt->bank_name }}</td>
                                             <td>{{ @$complnt->current_status }}</td>
@@ -319,32 +319,32 @@
                                 </tbody>
                             </table>
                             <br>
-                            
+
                             <table>
                             <tbody>
                             <tr>
                                 <td>Total Fraudulent Amount reported by Complainant : </td>
                                 <td><span
                                 style="color: red;">₹{{ number_format($sum_amount, 2) }}</span></td>
-                                
+
                             {{-- </tr>
                              <tr>
                                 <td>Total amount hold</td>
                                 <td><span
                                 style="color: red;">₹{{ number_format($hold_amount, 2) }}</span></td>
-                                
+
                             </tr> --}}
                              {{-- <tr>
                                 <td>Total amount lost</td>
                                 <td><span
                                 style="color: red;">₹{{ number_format($lost_amount, 2) }}</span></td>
-                                
+
                             </tr>  --}}
                             <tr>
                                 <td>Pending amount : </td>
                                 <td><span
                                 style="color: red;">₹{{ number_format($pending_amount, 2) }}</span></td>
-                                
+
                             </tr>
                            </tbody>
                            </table>
@@ -355,13 +355,14 @@
                                 <th colspan="4" class="tdblack"><b>Pending Banks Details</b></th>
                                 </tr>
                                     <tr >
-                                    <th>Sl.no</th>                                     
+                                    <th>Sl.no</th>
                                         <th >Pending Banks</th>
                                         <th >Transaction ID</th>
                                         <th >Transaction Amount</th>
+                                        <th>Disputed Amount</th>
                                     </tr>
                                 @if($finalData_pending_banks)
-                                    @foreach ($finalData_pending_banks as $item)    
+                                    @foreach ($finalData_pending_banks as $item)
                                 <tr>
                                 <td class="tdred"> {{ $loop->iteration }} </td>
                                     <td class="tdred">{{ $item['pending_banks'] }}</td>
@@ -370,10 +371,15 @@
                                     </td>
                                     <td class="tdred">
                                         {{ $item['transaction_amount'] }}
+                                        <span class="copy-icon" style="cursor:pointer; color:blue;"> => </span>
+                                    </td>
+                                    <td class="tdred">
+                                        <input type="number" class="editable-field" value="{{ $item['desputed_amount'] }}" data-amount="{{ $item['transaction_amount'] }}" data-transaction-id="{{ $item['transaction_id'] }}" data-pending_banks="{{ $item['pending_banks'] }}">
+                                        {{-- {{ $item['desputed_amount'] }} --}}
                                     </td>
                                 </tr>
                                 @endforeach
-                           
+
                                 @else
 
                                 <tr>
@@ -384,13 +390,13 @@
 
                                 <tr>
                                 </tr>
-                                
+
                                 </thead>
                             </table>
 
                         </div>
-                     
-                   
+
+
 
                     <div class="card overflow-hidden review-project">
 
@@ -399,7 +405,7 @@
                             Action Taken By Bank
                             <br>
                             <div style="overflow-x: auto;">
-                           
+
 
                                 @if (empty($final_array))
                                     <div class="d-flex justify-content-center align-items-center">
@@ -511,11 +517,11 @@
 
         function activateLink(identifier){
             // alert("dsf");
-            var status = $(identifier).prop('checked') == true ? 1 : 0; 
-            var com_id = $(identifier).data('id'); 
-            var transaction_id_sec = $(identifier).data('transaction'); 
-            var ackno = $(identifier).data('ackno'); 
-         
+            var status = $(identifier).prop('checked') == true ? 1 : 0;
+            var com_id = $(identifier).data('id');
+            var transaction_id_sec = $(identifier).data('transaction');
+            var ackno = $(identifier).data('ackno');
+
             $.ajax({
                 type: "GET",
                 dataType: "json",
@@ -533,10 +539,10 @@
                     toastr.success(' status successfully updated!');
                     }
                     else{
-                        
+
                         toastr.error(' updation error!');
                     }
-                    
+
 
                 },
 
@@ -728,4 +734,66 @@
         //     });
         // });
     </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyIcons = document.querySelectorAll('.copy-icon');
+        copyIcons.forEach(function(icon) {
+            icon.addEventListener('click', function() {
+                const amount = this.previousSibling.textContent.trim();
+                const inputField = this.parentElement.nextElementSibling.querySelector('.editable-field');
+                inputField.value = amount;
+                inputField.dispatchEvent(new Event('input')); // Trigger input event
+
+            });
+        });
+    });
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editableFields = document.querySelectorAll('.editable-field');
+
+            function sendAjaxRequest(field) {
+                const transactionId = field.getAttribute('data-transaction-id');
+                const pendingBanks = field.getAttribute('data-pending_banks');
+                const transactionAmount = field.value;
+
+                $.ajax({
+                    url: '{{ route('update.transaction.amount') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        transaction_id: transactionId,
+                        pending_banks: pendingBanks,
+                        transaction_amount: transactionAmount
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            console.log('Transaction amount updated successfully.');
+                        } else {
+                            console.log('Error: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('AJAX Error: ' + error);
+                    }
+                });
+            }
+
+            editableFields.forEach(function(field) {
+                // Trigger AJAX request when the value is changed
+                field.addEventListener('change', function() {
+                    sendAjaxRequest(this);
+                });
+
+                // Trigger AJAX request when the value is initially set
+                field.addEventListener('input', function() {
+                    sendAjaxRequest(this);
+                });
+            });
+        });
+
+    </script>
+
 @endsection

@@ -100,7 +100,7 @@ $user = Auth::user();
                                     <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="to-date">To Date:</label>
-                                            <input type="date" class="form-control" id="to-date" name="to_date">
+                                            <input type="date" class="form-control" id="to-date" name="to_date" onchange="setFromDatencrp()">
                                         </div>
                                     </div>
                                     <div class="col-md-2">
@@ -582,7 +582,7 @@ $user = Auth::user();
                     @endif
 
                 ],
-                "order": [0, 'desc'],
+                "order": [8, 'asc'],
                 'ordering': true
             });
            /* $('#example').on('click', '.editable', function() {
@@ -671,4 +671,23 @@ $user = Auth::user();
         }
     }
 </script>
+
+<script>
+    function setFromDatencrp() {
+        const toDateElement = document.getElementById('to-date');
+        const fromDateElement = document.getElementById('from-date');
+
+        const toDateValue = toDateElement.value;
+        if (toDateValue) {
+            const toDate = new Date(toDateValue);
+            toDate.setMonth(toDate.getMonth() - 1);
+            const month = ("0" + (toDate.getMonth() + 1)).slice(-2);
+            const day = ("0" + toDate.getDate()).slice(-2);
+            const year = toDate.getFullYear();
+            const fromDateValue = `${year}-${month}-${day}`;
+            fromDateElement.value = fromDateValue;
+        }
+    }
+</script>
+
 @endsection

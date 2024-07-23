@@ -20,7 +20,7 @@ class Complaint extends Eloquent
 
     protected $casts = [
 
-        'entry_date' => 'date',
+        'entry_date' => 'datetime',
 
     ];
     protected $fillable = [
@@ -46,6 +46,12 @@ class Complaint extends Eloquent
         'assigned_to',
         'case_status',
     ];
+
+        // Define the relationship with BankCasedata
+        public function bankCaseData()
+        {
+            return $this->hasOne(BankCasedata::class, 'transaction_id_or_utr_no', 'transaction_id');
+        }
 
         // // Define mutator for entry_date
         // public function setEntryDateAttribute($value)

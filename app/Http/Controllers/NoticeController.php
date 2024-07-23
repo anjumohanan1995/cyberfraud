@@ -95,7 +95,8 @@ class NoticeController extends Controller
 
         $source_types = SourceType::where('deleted_at',null)->get();
         $evidence_types = EvidenceType::where('deleted_at',null)->get();
-        return view('notice.evidence',compact('source_types','evidence_types'));
+        $evidence = Evidence::where('deleted_at',null)->get();
+        return view('notice.evidence',compact('source_types','evidence_types','evidence'));
     }
 
     public function evidenceListNotice(Request $request){
@@ -280,7 +281,11 @@ class NoticeController extends Controller
             foreach ($record->ip as $item) {
                 $ip .= $item."<br>";
             }
-            $edit = '<button class="btn btn-danger delete-btn">Generate Notice</button>';
+            $edit = '<div style="margin-left: 10px;">
+            <button class="btn btn-success" onclick="showPortalModal(\'' . $acknowledgement_no . '\', \'' . addslashes($evidence_type) . '\', \'' . addslashes($url) . '\')">
+                <i class="fas fa-file-alt" data-toggle="tooltip" data-placement="top" title="Generate Notice"></i>
+            </button>
+        </div>';
 
             $data_arr[] = array(
                     "id" => $i,

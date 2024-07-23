@@ -228,17 +228,18 @@ class CaseDataController extends Controller
         $fir_lodge = $request->get('fir_lodge');
         $filled_by_who = $request->get('filled_by_who');
         $transaction_id = $request->get('transaction_id');
+        // dd($transaction_id);
         $account_id = $request->get('account_id');
 
         // Filter conditions
         if ($com_status == "1"){
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1);
+            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1)->orderBy('entry_date', 'asc');
         }
         elseif ($com_status == "0"){
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0);
+            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0)->orderBy('entry_date', 'asc');
 
         }else{
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
+            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('entry_date', 'asc');
         }
 
         // if (!empty($com_status)) {
@@ -254,7 +255,7 @@ class CaseDataController extends Controller
         }
 
         if (!empty($transaction_id)) {
-            $query->where('transaction_id', (int)$transaction_id);
+            $query->whereIn('transaction_id', [(int)$transaction_id, (string)$transaction_id]);
         }
 
         if (!empty($account_id)) {
@@ -331,23 +332,19 @@ if ($fir_lodge == "0") {
 
         // Total records count
         $totalRecords = $query->get()->count();
-        // dd($totalRecords);
-        // Fetch records
-        $records = $query->orderBy('entry_date', 'desc')
-                         ->orderBy($columnName, $columnSortOrder)
-                         ->skip($start)
-                         ->take($rowperpage)
-                         ->get();
-                        //  ->map(function ($item) {
-                        //     // Convert entry_date to Carbon instance
-                        //     if (isset($item->entry_date)) {
-                        //         $item->entry_date = Carbon::createFromFormat('d-m-Y, h:i A', $item->entry_date);
-                        //     }
-                        //     return $item;
-                        // });
+
+            // Sort by entry_date first, then by dynamic column
+    $query // Ensure entry_date sorting is first
+    ->orderBy($columnName, $columnSortOrder)  // Apply dynamic column sorting
+    ->skip($start)
+    ->take($rowperpage);
+
+// Get results
+$records = $query->get();
+
+// dd($query);
 
 
-    //    dd($records);
 
 
 
@@ -386,7 +383,8 @@ if ($fir_lodge == "0") {
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
+                $utc_date = Carbon::parse($com->entry_date, 'UTC')->setTimezone('Asia/Kolkata');
+                $entry_date = $utc_date->format('Y-m-d H:i:s');
                 $current_status = $com->current_status;
                 $date_of_action = $com->date_of_action;
                 $action_taken_by_name = $com->action_taken_by_name;
@@ -456,7 +454,7 @@ if ($fir_lodge == "0") {
                 "bank_name" => $bank_name,
                 "account_id" => $account_id,
                 "amount" => $amount,
-                "entry_date" => $entry_date,
+                "entry_date" => $entry_date, // Use the formatted entry_date array here
                 "current_status" => $current_status,
                 "date_of_action" => $date_of_action,
                 "action_taken_by_name" => $action_taken_by_name,
@@ -557,7 +555,21 @@ if ($fir_lodge == "0") {
     public function caseDataView(Request $request,$id){
         $id = Crypt::decrypt($id);
         $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
-        $complaint = Complaint::where('acknowledgement_no',(int)$id)->first();
+
+        $complaints = Complaint::with('bankCaseData')->get();
+
+        $transaction_date = null;
+
+        if ($id !== null) {
+            $complaint = Complaint::where('acknowledgement_no', (int)$id)->first();
+            if ($complaint) {
+                $bankCaseData = $complaint->bankCaseData;
+                if ($bankCaseData) {
+                    $transaction_date = $bankCaseData->transaction_date;
+                }
+            }
+        }
+
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
         $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
         $hold_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
@@ -640,7 +652,8 @@ if ($fir_lodge == "0") {
                         $pending_banks_array[] = array(
                             "pending_banks" => $tn->bank,
                             "transaction_id" => $tn->transaction_id_sec,
-                            "transaction_amount" => $tn->transaction_amount
+                            "transaction_amount" => $tn->transaction_amount,
+                            "desputed_amount" => $tn->desputed_amount
                         );
 
                      }
@@ -659,13 +672,16 @@ if ($fir_lodge == "0") {
     $pendingBank = $item['pending_banks'];
     $transactionId = $item['transaction_id'];
     $transactionAmount = $item['transaction_amount'];
+    $desputedAmount = $item['desputed_amount'];
 
     if (!isset($finalData_pending_banks)) {
         $finalData_pending_banks = [];
     }
 
-    $finalData_pending_banks[] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId , 'transaction_amount'=> $transactionAmount];
+    $finalData_pending_banks[] = ['pending_banks' => $pendingBank, 'transaction_id' => $transactionId , 'transaction_amount'=> $transactionAmount, 'desputed_amount' => $desputedAmount];
     }
+
+    // dd($finalData_pending_banks);
 
 
 
@@ -673,8 +689,29 @@ if ($fir_lodge == "0") {
         ->whereNull('deleted_at')
         ->get();
 
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks','hold_amount','lost_amount','pending_amount'));
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks','hold_amount','lost_amount','pending_amount','transaction_date'));
     }
+
+    public function updateTransactionAmount(Request $request)
+    {
+        // Get the input values
+        $transaction_amount = $request->transaction_amount;
+        $transaction_id = $request->transaction_id;
+        $pending_banks = $request->pending_banks;
+        // dd($transaction_amount);
+
+        // Update the document in the BankCasedata collection
+        $updateResult = BankCasedata::where('transaction_id_or_utr_no', $transaction_id)
+                                    ->where('bank', $pending_banks)
+                                    ->update(['desputed_amount' => $transaction_amount]);
+
+        if ($updateResult) {
+            return response()->json(['success' => true, 'message' => 'Transaction amount updated successfully.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'No matching record found or update failed.']);
+        }
+    }
+
 
     public function checkifempty($layer, $first_rows, $id, &$processed_ids = [])
     {

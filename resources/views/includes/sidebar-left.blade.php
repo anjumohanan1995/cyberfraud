@@ -271,6 +271,7 @@
                 <ul class="slide-menu">
                     @if($hasAgainstEvidencePermission)
                     <li>
+                        {{-- <a class="slide-item" href="{{ route('notice.evidence') }}">Against Evidence</a> --}}
                         <a class="slide-item" href="{{ route('notice.evidence') }}">Against Evidence</a>
                     </li>
                     @endif

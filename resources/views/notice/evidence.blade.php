@@ -180,6 +180,42 @@ $user = Auth::user();
                         </tbody>
                         </table>
                         </div>
+
+<!-- Portal Modal -->
+<div class="modal fade" id="portal-popup" tabindex="-1" role="dialog" aria-labelledby="portalPopupLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="portalPopupLabel">Notice Generation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Hidden input to store acknowledgment number -->
+                <input type="hidden" id="ack_no" name="ack_no">
+                <form>
+                    <div class="form-group">
+                        <label for="evidenceType" class="form-label">Evidence Type:</label>
+                        <select id="evidenceType" class="form-select" name="evidenceType" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="evidenceUrl">Evidence URL:</label>
+                        <select id="evidenceUrl" class="form-select" name="evidenceUrl" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="savePortalCount">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
                         </div>
 
                     </div>
@@ -288,6 +324,59 @@ $(document).ready(function() {
 })
 
 </script>
+
+
+<script>
+    function showPortalModal(acknowledgement_no) {
+        // Set the hidden input with the acknowledgment number
+        $('#ack_no').val(acknowledgement_no);
+
+        // Fetch the evidence data corresponding to the acknowledgment number
+        const evidenceData = @json($evidence);
+
+        const filteredData = evidenceData.filter(evidence => evidence.ack_no == acknowledgement_no);
+
+        let evidenceTypeSelect = document.getElementById('evidenceType');
+        let evidenceUrlSelect = document.getElementById('evidenceUrl');
+
+        evidenceTypeSelect.innerHTML = ''; // Clear existing options
+        evidenceUrlSelect.innerHTML = ''; // Clear existing options
+
+        const evidenceTypes = new Set();
+
+        filteredData.forEach(evidence => {
+            evidenceTypes.add(evidence.evidence_type);
+        });
+
+        evidenceTypes.forEach(type => {
+            let typeOption = document.createElement('option');
+            typeOption.value = type;
+            typeOption.text = type;
+            evidenceTypeSelect.appendChild(typeOption);
+        });
+
+        // Populate URLs corresponding to the selected evidence type
+        evidenceTypeSelect.addEventListener('change', function() {
+            let selectedType = this.value;
+            evidenceUrlSelect.innerHTML = ''; // Clear existing options
+            filteredData.forEach(evidence => {
+                if (evidence.evidence_type === selectedType) {
+                    let urlOption = document.createElement('option');
+                    urlOption.value = evidence.url;
+                    urlOption.text = evidence.url;
+                    evidenceUrlSelect.appendChild(urlOption);
+                }
+            });
+        });
+
+        // Trigger change event to populate URLs for the first evidence type
+        evidenceTypeSelect.dispatchEvent(new Event('change'));
+
+        // Show the modal
+        $('#portal-popup').modal('show');
+    }
+</script>
+
 
 
 @endsection
