@@ -309,10 +309,26 @@
         @endif
         @if ($hasReportsPermission)
             <li class="slide">
-                <a class="side-menu__item" href="{{ url('reports') }}">
+                <a class="side-menu__item" data-toggle="slide" href="#">
                     <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Reports</span>
+                    <span class="side-menu__label">Reports</span>\
+                    <i class="angle fe fe-chevron-down"> </i>
                 </a>
+                <ul class="slide-menu">
+                    <li>
+                        <a class="slide-item" href="{{ url('reports') }}">NCRP / Others Case Data</a>
+                    </li>
+                    {{-- @if ($hasUploadPrimaryDataPermission) --}}
+                        <li>
+                            <a class="slide-item" href="{{ url('/bank-daily-reports') }}">Daily Bank Reports</a>
+                        </li>
+                    {{-- @endif --}}
+                    {{-- @if ($hasUploadBankActionPermission) --}}
+                        <li>
+                            <a class="slide-item" href="{{--{{ route('bank-case-data.index') }}--}}">Above 1 Lach Report</a>
+                        </li>
+                    {{-- @endif --}}
+                </ul>
             </li>
         @endif
         @if ($hasEvidenceTypePermission)

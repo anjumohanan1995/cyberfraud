@@ -24,14 +24,13 @@ use App\Http\Controllers\MuleAccountController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\MailController;
-use App\Http\Controllers\BankReportController;
-use App\Http\Controllers\ComplaintStatController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use MongoDB\Operation\DropCollection;
+use App\Http\Controllers\ComplaintStatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -140,7 +139,6 @@ Route::middleware(['auth','verify-otp'])->group(function () {
     Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
     Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
     Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
-    Route::post('/update-transaction-amount', [CaseDataController::class, 'updateTransactionAmount'])->name('update.transaction.amount');
 
     //for listing casedata of cyberdomain souurcetype
     Route::get('case-data-others', [CaseDataController::class, 'caseDataOthers'])->name("case-data-others");
@@ -269,11 +267,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 });
-//Route for bank Reports
-Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
-
 Route::get('/complaint-stats', [ComplaintStatController::class, 'getComplaintStats'])->name('complaint.stats');
 Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableFilters'])->name('complaint.filters');
+
 Route::post('/validate-otp',[AuthController::class,'validateOtp'])->name('validate.otp')->middleware('auth');
 Route::get('/verfiy-otp',[AuthController::class, 'verifyOtp'])->name('verify-otp')->middleware('auth');
 

@@ -9,6 +9,7 @@
     /* Add more styles as needed */
 }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css">
     <!-- container -->
     <div class="container-fluid">
         <!-- breadcrumb -->
@@ -513,6 +514,19 @@
                             </div>
                         </div>
                     </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <input type="date" id="start_date">
+    <input type="date" id="end_date">
+    <button onclick="fetchData()">Get Stats</button>
+    <div id="chart"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -724,5 +738,95 @@
                     }
                 });
             </script>
+          <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+          <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+          <script>
+            function fetchData() {
+                const startDate = document.getElementById('start_date').value;
+                const endDate = document.getElementById('end_date').value;
 
+                axios.get('{{ route('complaint.stats') }}', {
+                    params: {
+                        start_date: startDate,
+                        end_date: endDate
+                    }
+                })
+                .then(response => {
+                    const data = response.data;
+
+                    // Log data for debugging
+                    console.log('Fetched Data:', data);
+
+                    const users = [];
+                    const startedData = [];
+                    const ongoingData = [];
+                    const completedData = [];
+
+                    data.forEach(user => {
+                        users.push(user.user_name);
+                        startedData.push(user.Started);
+                        ongoingData.push(user.Ongoing);
+                        completedData.push(user.Completed);
+                    });
+
+                    const options = {
+                        series: [
+                            {
+                                name: 'Started',
+                                data: startedData
+                            },
+                            {
+                                name: 'Ongoing',
+                                data: ongoingData
+                            },
+                            {
+                                name: 'Completed',
+                                data: completedData
+                            }
+                        ],
+                        chart: {
+                            type: 'bar',
+                            height: 350
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                columnWidth: '55%',
+                                endingShape: 'rounded'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        xaxis: {
+                            categories: users
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Count'
+                            }
+                        },
+                        fill: {
+                            opacity: 1
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function (val) {
+                                    return val;
+                                }
+                            }
+                        }
+                    };
+
+                    const chart = new ApexCharts(document.querySelector("#chart"), options);
+                    chart.render();
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+            }
+
+            // Fetch data on page load without filters
+            window.onload = fetchData;
+        </script>
 @endsection

@@ -2,75 +2,130 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use MongoDB\Client as Mongo;
-use MongoDB\BSON\ObjectId;
+use App\Models\Complaint;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use MongoDB\BSON\UTCDateTime;
 
 class ComplaintStatController extends Controller
 {
-    public function getComplaintStats()
+    public function getAvailableFilters()
     {
-        $client = new Mongo();
-        $complaintsCollection = $client->cyber->complaints;
-        $usersCollection = $client->cyber->users;
-
-        // Fetch all users
-        $users = $usersCollection->find();
-        $data = [];
-
-        foreach ($users as $user) {
-            $userId = $user['_id'];
-            $userIdString = (string) $userId;
-
-            // Validate ObjectId
-            try {
-                $objectId = new ObjectId($userIdString);
-            } catch (\Exception $e) {
-                \Log::error('Invalid ObjectId: ' . $userIdString);
-                continue; // Skip invalid ObjectId
-            }
-dd($objectId);
-            // Debug: Log the user ID and the type
-            \Log::info('Processing User ID: ' . $userIdString);
-
-            // Count started cases
-            $startedCount = $complaintsCollection->countDocuments([
-                'assigned_to' => $objectId,
-                '$or' => [
-                    ['case_status' => 'Started'],
-                    ['case_status' => ['$exists' => false]]
-                ]
+        // Fetch distinct years
+        $years = Complaint::raw(function($collection) {
+            return $collection->aggregate([
+                ['$project' => ['year' => ['$year' => '$created_at']]],
+                ['$group' => ['_id' => '$year']],
+                ['$sort' => ['_id' => -1]]
             ]);
+        })->pluck('_id')->toArray();
 
-            // Count ongoing cases
-            $ongoingCount = $complaintsCollection->countDocuments([
-                'assigned_to' => $objectId,
-                'case_status' => 'Ongoing'
+        // Fetch distinct months
+        $months = Complaint::raw(function($collection) {
+            return $collection->aggregate([
+                ['$project' => ['month' => ['$month' => '$created_at']]],
+                ['$group' => ['_id' => '$month']],
+                ['$sort' => ['_id' => 1]]
             ]);
+        })->pluck('_id')->toArray();
 
-            // Count completed cases
-            $completedCount = $complaintsCollection->countDocuments([
-                'assigned_to' => $objectId,
-                'case_status' => 'Completed'
+        // Fetch distinct days
+        $days = Complaint::raw(function($collection) {
+            return $collection->aggregate([
+                ['$project' => ['day' => ['$dayOfMonth' => '$created_at']]],
+                ['$group' => ['_id' => '$day']],
+                ['$sort' => ['_id' => 1]]
             ]);
+        })->pluck('_id')->toArray();
 
-            // Log counts
-            \Log::info('Started Count: ' . $startedCount);
-            \Log::info('Ongoing Count: ' . $ongoingCount);
-            \Log::info('Completed Count: ' . $completedCount);
+        return response()->json([
+            'years' => $years,
+            'months' => $months,
+            'days' => $days
+        ]);
+    }
 
-            // Collect data
-            $data[] = [
-                'user' => $user['name'], // Adjust if necessary
-                'started' => $startedCount,
-                'ongoing' => $ongoingCount,
-                'completed' => $completedCount,
+
+   // ComplaintStatController.php
+// ComplaintStatController.php
+
+public function getComplaintStats(Request $request)
+{
+    $startDate = $request->query('start_date');
+    $endDate = $request->query('end_date');
+    $userId = $request->query('user_id');
+
+    $query = [];
+
+    // Check and convert dates to MongoDB UTCDateTime if provided
+    if ($startDate && $endDate) {
+        try {
+            $startDate = new \MongoDB\BSON\UTCDateTime(new \DateTime($startDate));
+            $endDate = new \MongoDB\BSON\UTCDateTime(new \DateTime($endDate));
+            $query['status_changed'] = [
+                '$gte' => $startDate,
+                '$lte' => $endDate
+            ];
+        } catch (\Exception $e) {
+            \Log::error('Date conversion error: ' . $e->getMessage());
+            return response()->json(['error' => 'Invalid date format'], 400);
+        }
+    }
+
+    if ($userId) {
+        $query['assigned_to'] = $userId;
+    }
+
+    // Log the query for debugging
+    \Log::info('MongoDB Query:', $query);
+
+    // Fetch complaints with applied filters
+    $complaints = Complaint::where($query)->get();
+
+    // Fetch all users
+    $users = User::all()->keyBy('_id');
+
+    // Initialize an empty array to store results
+    $result = [];
+
+    // Process each complaint
+    foreach ($complaints as $complaint) {
+        $userId = (string) $complaint->assigned_to;
+
+        // Initialize user data if not already present
+        if (!isset($result[$userId])) {
+            $result[$userId] = [
+                'assigned_to' => $userId,
+                'user_name' => isset($users[$userId]) ? $users[$userId]->name : 'Unknown User',
+                'Started' => 0,
+                'Ongoing' => 0,
+                'Completed' => 0,
             ];
         }
 
-        // Log final data
-        \Log::info('Complaint Stats Data: ' . json_encode($data));
-
-        return response()->json($data);
+        // Increment the count based on the case status
+        switch ($complaint->case_status) {
+            case 'Started':
+                $result[$userId]['Started']++;
+                break;
+            case 'Ongoing':
+                $result[$userId]['Ongoing']++;
+                break;
+            case 'Completed':
+                $result[$userId]['Completed']++;
+                break;
+        }
     }
+
+    // Log the processed results
+    \Log::info('Processed Results:', $result);
+
+    // Return the results as JSON
+    return response()->json(array_values($result));
 }
 
+
+
+}

@@ -55,6 +55,8 @@ class ReportsController extends Controller
         $searchValue = $request->get('search')['value'] ?? '';
 
         // Custom filters
+        $dailyDate = $request->get('daily_date');
+        //dd($dailyDate);
         $fromDate = $request->get('from_date');
         $toDate = $request->get('to_date');
         $current_date = $request->get('current_date');
@@ -83,6 +85,32 @@ if ($current_date === 'today') {
     // dd($todayEnd);
 }
 
+if ($dailyDate) {
+    $formattedDate = Carbon::createFromFormat('Y-m-d', $dailyDate)->format('d-m-Y');
+
+    $acknowledgementNos = BankCasedata::where('transaction_date', 'like', '%' . $dailyDate . '%')
+                                      ->pluck('acknowledgement_no');
+
+    if ($acknowledgementNos->isNotEmpty()) {
+        $query->whereIn('acknowledgement_no', $acknowledgementNos);
+        dd($query);
+    } else {
+        // If no acknowledgement numbers are found, apply an empty filter to return no results
+        $query->whereIn('acknowledgement_no', []);
+    }
+}
+
+
+// if ($dailyDate) {
+
+//     $date = Carbon::parse($dailyDate);
+//     //dd($date);
+//     $startOfDay = $date->startOfDay();
+//     $endOfDay = $date->endOfDay();
+//     //            dd($endOfDay);
+
+//     $query->whereBetween('entry_date', [$startOfDay, $endOfDay]);
+// }
 // Filter based on bank_action_status
 if ($normalizedBankActionStatus) {
     $acknowledgementNos = BankCasedata::whereRaw([
