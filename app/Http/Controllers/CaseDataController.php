@@ -12,6 +12,7 @@ use App\Models\Wallet;
 use App\Models\Merchant;
 use App\Models\Insurance;
 use App\Models\Profession;
+use App\Models\Modus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -712,7 +713,7 @@ while (BankCaseData::where('Layer', $currentLayer)->where('acknowledgement_no', 
 
          }
         //dd($final_array);
-        $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
+        $additional = ComplaintAdditionalData::where('ack_no', (string)$id)->first();
 
        // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
         $layers = BankCasedata::where('acknowledgement_no',(int)$id)->groupBy('Layer')->pluck('Layer');
@@ -803,7 +804,11 @@ while (BankCaseData::where('Layer', $currentLayer)->where('acknowledgement_no', 
         ->whereNull('deleted_at')
         ->get();
 
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks','hold_amount','lost_amount','pending_amount','transaction_date'));
+        $modus = Modus::where('status','1')
+        ->whereNull('deleted_at')
+        ->get();
+
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','modus','finalData_pending_banks','hold_amount','lost_amount','pending_amount','transaction_date'));
     }
 
     public function updateTransactionAmount(Request $request)
@@ -1376,6 +1381,7 @@ if($record->case_status != null){
         $complaint->ack_no=$request->acknowledgement_no;
         $complaint->age=$request->age;
         $complaint->profession=$request->profession;
+        $complaint->modus=$request->modus;
         $complaint->save();
 
         return redirect()->back()->with('status', 'Profile updated successfully.');

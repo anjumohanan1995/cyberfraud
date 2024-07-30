@@ -102,8 +102,8 @@ Route::middleware(['auth','verify-otp'])->group(function () {
 
 
 
-    Route::resource('modus', ModusController::class);
-    Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
+    // Route::resource('modus', ModusController::class);
+    // Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
 
     //permmission route starts here.
     Route::resource('permissions', PermissionController::class);
@@ -232,6 +232,11 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::resource('category', CategoryController::class);
     Route::get('get-categories', [CategoryController::class,'getCategories'])->name('get.categories');
     Route::post('add-category', [CategoryController::class,'addCategory'])->name('add.category');
+
+    //modus module
+    Route::resource('modus', ModusController::class);
+    Route::get('get-modus', [ModusController::class,'getModus'])->name('get.modus');
+    Route::post('add-modus', [ModusController::class,'addModus'])->name('add.modus');
 
     //Sub CAtegory module
 

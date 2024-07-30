@@ -108,7 +108,12 @@
                                             <tr>
                                                 <td>Profession</td>
                                                 <td>:</td>
-                                                <td>{{ @$additional->profession }}</td>
+                                                <td>{{ optional($additional->professionRelation)->name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Modus</td>
+                                                <td>:</td>
+                                                <td>{{ optional($additional->modusRelation)->name }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -232,6 +237,20 @@
                                                         @endforeach
                                                     </select>
                                                     @error('profession')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="profession">Modus:</label>
+                                                    <select class="form-control" id="modus" name="modus">
+                                                        <option value="">--select--</option>
+                                                        @foreach($modus as $modus)
+                                                            <option value="{{ $modus->id }}" {{ (isset($additional->modus) && $additional->modus== $modus->id) ? 'selected' : '' }}>
+                                                                {{ $modus->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('modus')
                                                         <div class="text-danger">{{ $message }}</div>
                                                     @enderror
                                                 </div>

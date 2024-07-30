@@ -12,11 +12,12 @@ $user = Auth::user();
                 $hasAddCategoryPermission = in_array('Add Category', $sub_permissions);
                 $hasAddSubCategoryPermission = in_array('Add Subcategory', $sub_permissions);
                 $hasAddProfessionPermission = in_array('Add Profession', $sub_permissions);
+                $hasAddModusPermission = in_array('Add Modus', $sub_permissions);
                 $hasUploadRegistrarPermission = in_array('Upload registrar', $sub_permissions);
                 $hasEditSTPermission = in_array('Edit source Type', $sub_permissions);
                 $hasDeleteSTPermission = in_array('Delete Source Type', $sub_permissions);
             } else{
-                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                $hasAddSTPermission = $hasAddCategoryPermission = $hasAddSubCategoryPermission = $hasAddProfessionPermission = $hasAddModusPermission = $hasUploadRegistrarPermission = $hasEditSTPermission = $hasDeleteSTPermission = false;
                 }
 
 @endphp
@@ -70,16 +71,14 @@ $user = Auth::user();
                                         </button>
                                     </div>
                             </div>
-                            <div class=" m-4 d-flex justify-content-between">
-                                <h4 class="card-title mg-b-10">
-                                    All Source Types
-                                </h4>
-                                <div class="col-md-1"></div>
+                            <div class="m-4 d-flex justify-content-between flex-wrap">
+                                <h4 class="card-title mg-b-10">All Source Types</h4>
+
                                 @if ($hasAddSTPermission)
-                                <div class="col-md-2 text-center">
-                                    <div class="task-box primary  mb-0">
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
                                         <a class="text-white" href="{{ route('sourcetype.create') }}">
-                                            <p class="mb-0 tx-12 "> Source Type </p>
+                                            <p class="mb-0 tx-12"> Source Type </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
                                     </div>
@@ -87,19 +86,19 @@ $user = Auth::user();
                                 @endif
 
                                 @if ($hasAddCategoryPermission)
-                                <div class="col-md-2 col-6 text-center">
-                                    <div class="task-box primary  mb-0">
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
                                         <a class="text-white" href="{{ route('category.index') }}">
                                             <p class="mb-0 tx-12">Category</p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
                                     </div>
-
                                 </div>
                                 @endif
+
                                 @if ($hasAddSubCategoryPermission)
-                                <div class="col-md-2 col-6 text-center">
-                                    <div class="task-box primary  mb-0">
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
                                         <a class="text-white" href="{{ route('subcategory.create') }}">
                                             <p class="mb-0 tx-12">SubCategory</p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
@@ -107,27 +106,41 @@ $user = Auth::user();
                                     </div>
                                 </div>
                                 @endif
+
                                 @if ($hasAddProfessionPermission)
-                                    <div class="col-md-2 text-center">
-                                        <div class="task-box primary  mb-0">
-                                            <a class="text-white" href="{{ url('profession') }}">
-                                                <p class="mb-0 tx-12 "> Profession </p>
-                                                <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
-                                            </a>
-                                        </div>
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('profession') }}">
+                                            <p class="mb-0 tx-12"> Profession </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
                                     </div>
+                                </div>
                                 @endif
-                                @if($hasUploadRegistrarPermission)
-                                    <div class="col-md-2 text-center">
-                                        <div class="task-box primary  mb-0">
-                                            <a class="text-white" href="{{ url('upload-registrar') }}">
-                                                <p class="mb-0 tx-12 "> Registrar upload </p>
-                                                <h3 class="mb-0"><i class="fa fa-upload"></i></h3>
-                                            </a>
-                                        </div>
+
+                                @if ($hasAddModusPermission)
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('modus') }}">
+                                            <p class="mb-0 tx-12"> Modus </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
                                     </div>
+                                </div>
+                                @endif
+
+                                @if($hasUploadRegistrarPermission)
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('upload-registrar') }}">
+                                            <p class="mb-0 tx-12"> Registrar upload </p>
+                                            <h3 class="mb-0"><i class="fa fa-upload"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
                                 @endif
                             </div>
+
 
                             <div class="table-responsive mb-0">
                                 <table id="example"
