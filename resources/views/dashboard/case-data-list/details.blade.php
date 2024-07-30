@@ -108,12 +108,12 @@
                                             <tr>
                                                 <td>Profession</td>
                                                 <td>:</td>
-                                                <td>{{ optional($additional->professionRelation)->name }}</td>
+                                                <td>{{ optional(@$additional->professionRelation)->name }}</td>
                                             </tr>
                                             <tr>
                                                 <td>Modus</td>
                                                 <td>:</td>
-                                                <td>{{ optional($additional->modusRelation)->name }}</td>
+                                                <td>{{ optional(@$additional->modusRelation)->name }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -488,7 +488,7 @@
                                                         {{ @$bank_data['transaction_id_sec'] }}<br><br>
                                                         Transaction Amount : {{ @$bank_data['transaction_amount'] }}
                                                         <br><br>
-                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
+                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></td>
                                                         
                                                     <td>{{ @$bank_data['branch_location'] }}<br><br>
                                                         {{ @$bank_data['branch_manager_details'] }} </td>
@@ -793,7 +793,7 @@
                 const pendingBanks = field.getAttribute('data-pending_banks');
                 const transactionAmount = field.value;
 
-                $.ajax({
+                /*$.ajax({
                     url: '{{ route('update.transaction.amount') }}',
                     method: 'POST',
                     data: {
@@ -813,6 +813,7 @@
                         console.log('AJAX Error: ' + error);
                     }
                 });
+                */
             }
 
             editableFields.forEach(function(field) {
