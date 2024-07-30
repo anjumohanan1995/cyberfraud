@@ -41,7 +41,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
        
         $collection->transform(function ($values) {
 
-
+            
             return [
                 'acknowledgement_no' => $values[1],
                 'transaction_id_or_utr_no' => $values[2],
@@ -80,14 +80,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
       
         foreach ($collection as $collect){
             
-            // $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
-           
-    
+             $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
+                      
                 $bank_data = new BankCasedata();
                 $bank_data->acknowledgement_no = $collect['acknowledgement_no'];
                 $bank_data->transaction_id_or_utr_no = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
                 $bank_data->Layer = $collect['Layer'];
-                $bank_data->account_no_1 = $collect['account_no_1'];
+                $bank_data->account_no_1 = preg_replace('/[^a-zA-Z0-9]/', '',$collect['account_no_1']);
                 $bank_data->action_taken_by_bank = trim(strtolower($collect['action_taken_by_bank']));
                 $bank_data->bank = $collect['bank'];
                 $bank_data->account_no_2 = trim($collect['account_no_2']);
@@ -115,10 +114,8 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->com_status = $collect['com_status'];
 
                 $bank_data->save();
-
             
-       
-        
+           
 
         // BankCasedata::create($collect);
        

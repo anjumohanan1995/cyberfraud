@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 
 use App\Hospital;
 use Auth;
+use DateTime;
 
 class ComplaintImport implements ToCollection, WithStartRow
 {
@@ -66,14 +67,14 @@ class ComplaintImport implements ToCollection, WithStartRow
                 'bank_name'                  => $row[7],
                 'account_id'                  => $row[8],
                 'amount'                    => $row[9],
-                'entry_date'                => $row[10],
+                'entry_date'                => DateTime::createFromFormat('d/m/Y H:i:s', $row[10]),
                 'current_status'             => $row[11],
                 'date_of_action'            => $row[12],
-                'action_taken_by_name'         => $row[13],
-                'action_taken_by_designation'   => $row[14],
-                'action_taken_by_mobile'         => $row[15],
-                'action_taken_by_email'         => $row[16],
-                'action_taken_by_bank'         => $row[17],
+                'action_taken_by_name'         => "",
+                'action_taken_by_designation'   => "",
+                'action_taken_by_mobile'         => "",
+                'action_taken_by_email'         => "",
+                'action_taken_by_bank'         => "",
             ];
         });
 
