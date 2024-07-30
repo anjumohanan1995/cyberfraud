@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 
 use App\Hospital;
 use Auth;
+use DateTime;
 
 class ComplaintImport implements ToCollection, WithStartRow
 {
@@ -44,6 +45,7 @@ class ComplaintImport implements ToCollection, WithStartRow
      */
     public function collection(Collection $collection)
     {
+
         // dd($collection);
         /*dd($collection);
          return new Patient([
@@ -56,6 +58,10 @@ class ComplaintImport implements ToCollection, WithStartRow
 
         $collection->transform(function ($row) {
 
+            // Convert the 'entry_date' field
+            $entryDate = DateTime::createFromFormat('d-m-y H:i', $row[10]);
+            $formattedEntryDate = $entryDate ? $entryDate->format('Y-m-d H:i:s') : null;
+
             return [
                 'acknowledgement_no'        => $row[1],
                 'district'                  => $row[2],
@@ -66,14 +72,14 @@ class ComplaintImport implements ToCollection, WithStartRow
                 'bank_name'                  => $row[7],
                 'account_id'                  => $row[8],
                 'amount'                    => $row[9],
-                'entry_date'                => $row[10],
+                'entry_date'                => $formattedEntryDate,
                 'current_status'             => $row[11],
                 'date_of_action'            => $row[12],
-                'action_taken_by_name'         => $row[13],
-                'action_taken_by_designation'   => $row[14],
-                'action_taken_by_mobile'         => $row[15],
-                'action_taken_by_email'         => $row[16],
-                'action_taken_by_bank'         => $row[17],
+                'action_taken_by_name'         => "",
+                'action_taken_by_designation'   => "",
+                'action_taken_by_mobile'         => "",
+                'action_taken_by_email'         => "",
+                'action_taken_by_bank'         => "",
             ];
         });
 
@@ -85,9 +91,11 @@ class ComplaintImport implements ToCollection, WithStartRow
             // print_r($c)."<br>";
             // dd();
         foreach ($collection as $collect){
+            // echo $date->format('Y-m-d');
 
-
-                $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id',(string)$collect['transaction_id'])->first();
+                $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
+                                        ->where('transaction_id',(string)$collect['transaction_id'])
+                                        ->first();
 
             if($complaint){
                 $complaint->source_type = $this->source_type;
@@ -100,6 +108,7 @@ class ComplaintImport implements ToCollection, WithStartRow
                 $complaint->bank_name = $collect['bank_name'];
                 $complaint->account_id = $collect['account_id'];
                 $complaint->amount = $collect['amount'];
+                // dd($collect['entry_date']);
                 $complaint->entry_date = $collect['entry_date'];
                 $complaint->current_status = $collect['current_status'];
                 $complaint->date_of_action = $collect['date_of_action'];
@@ -123,6 +132,7 @@ class ComplaintImport implements ToCollection, WithStartRow
             $complaint->bank_name = $collect['bank_name'];
             $complaint->account_id = $collect['account_id'];
             $complaint->amount = $collect['amount'];
+            // dd($collect['entry_date']);
             $complaint->entry_date = $collect['entry_date'];
             $complaint->current_status = $collect['current_status'];
             $complaint->date_of_action = $collect['date_of_action'];
@@ -148,4 +158,6 @@ class ComplaintImport implements ToCollection, WithStartRow
 
         return is_numeric($transaction_id) ? (string) $transaction_id : $transaction_id;
     }
+
+
 }

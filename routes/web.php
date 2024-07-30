@@ -79,7 +79,8 @@ Route::post('password-update', [LogoutController::class, 'passwordUpdate'])->nam
 
 
 // used default middlewire for authentication.
-Route::middleware(['auth','verify-otp'])->group(function () {
+//Route::middleware(['auth','verify-otp'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
 
     //dashboard pages starts here.
@@ -271,11 +272,15 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 });
 //Route for bank Reports
 Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
+Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
+
+Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
+Route::get('/above-report-data', [BankReportController::class, 'getAboveData'])->name('aboveReport');
 
 Route::get('/complaint-stats', [ComplaintStatController::class, 'getComplaintStats'])->name('complaint.stats');
 Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableFilters'])->name('complaint.filters');
-Route::post('/validate-otp',[AuthController::class,'validateOtp'])->name('validate.otp')->middleware('auth');
-Route::get('/verfiy-otp',[AuthController::class, 'verifyOtp'])->name('verify-otp')->middleware('auth');
+//Route::post('/validate-otp',[AuthController::class,'validateOtp'])->name('validate.otp')->middleware('auth');
+//Route::get('/verfiy-otp',[AuthController::class, 'verifyOtp'])->name('verify-otp')->middleware('auth');
 
 
 

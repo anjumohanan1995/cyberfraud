@@ -528,7 +528,8 @@ $records = $query->get();
     try {
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
-            ->update(['case_status' => $status]);
+            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
+
 
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);
