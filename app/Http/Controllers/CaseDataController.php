@@ -529,6 +529,8 @@ $records = $query->get();
     try {
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
+            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
+
             ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
         if ($affected > 0) {
@@ -634,7 +636,7 @@ function updateDisputeAmounts($parentLayer, $nextLayer, $id, &$updatedObjectIds)
 
             // Update the child's dispute_amount only if it hasn't been updated yet
             if (!isset($updatedObjectIds[$child->_id])) {
-               
+
                 $child->dispute_amount = $disputeAmount;
                 $child->save();
                 // Mark child as updated
@@ -644,7 +646,7 @@ function updateDisputeAmounts($parentLayer, $nextLayer, $id, &$updatedObjectIds)
 
         // Mark parent as updated if it's not already updated
         if (!isset($updatedObjectIds[$parent->_id])) {
-            
+
             $updatedObjectIds[$parent->_id] = true;
         }
     }
@@ -674,7 +676,7 @@ while (BankCaseData::where('Layer', $currentLayer)->where('acknowledgement_no', 
     $nextLayer = $currentLayer + 1;
 
     if (BankCaseData::where('Layer', $nextLayer)->where('acknowledgement_no', (int)$id)->exists()) {
-       
+
         updateDisputeAmounts($currentLayer, $nextLayer, (int)$id, $updatedObjectIds);
     }
 

@@ -7,7 +7,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="#">Reports</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Bank Daily Reports</li>
+                    <li class="breadcrumb-item active" aria-current="page">1 Lakh Above Cases</li>
                 </ol>
             </nav>
         </div>
@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="m-4 d-flex justify-content-between">
-                        <h4 class="card-title mg-b-10">All Case Data</h4>
+                        <h4 class="card-title mg-b-10">1 Lakh Above Cases</h4>
                     </div>
                     <div class="main-content-body">
                         <div class="row row-sm">
@@ -73,18 +73,16 @@
                                                                 <thead>
                                                                     <tr>
                                                                         <th>SL No</th>
+                                                                        <th>Acknowledgement No</th>
                                                                         <th>District</th>
-                                                                        <th>1930</th>
-                                                                        <th>NCRP</th>
-                                                                        <th>Total</th>
-                                                                        <th>Actual Amount<br>Lost</th>
-                                                                        <th>Actual Amount<br>Lost On</th>
-                                                                        <th>Actual Amount<br>Hold On</th>
-                                                                        <th>Hold Other<br>Than</th>
-                                                                        <th>Total Hold<br>On</th>
-                                                                        <th>Amount Lost<br>From ECO ON</th>
-                                                                        {{-- <th>Total Amount<br>LOST FROM ECO</th> --}}
-                                                                        <th>Amount For<br>Pending Action</th>
+                                                                        <th>Reported Date & Time</th>
+                                                                        <th>Amount Reported</th>
+                                                                        <th>TXN Date</th>
+                                                                        <th>Lien Amount</th>
+                                                                        <th>Amount Lost</th>
+                                                                        <th>Amount Pending</th>
+                                                                        <th>Pending Bank</th>
+                                                                        <th>Modus</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -109,18 +107,7 @@
     </div>
 </div>
 @endsection
-<style>
-    .csv-btn {
-    color: #fff!important;
-    background-color: #28a745!important;
-    border-color: #28a745!important;
-}
-.excel-btn {
-    color: #fff!important;
-    background-color: #17a2b8!important;
-    border-color: #17a2b8!important;
-}
-</style>
+
 @section('scripts')
 <script>
     $(document).ready(function () {
@@ -128,51 +115,30 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{{ route('bank-daily-reports.index') }}",
+                url: "{{ route('aboveReport') }}",
                 data: function (d) {
                     d.from_date = $('#from-date-new').val();
                     d.to_date = $('#to-date-new').val();
                 }
             },
-            dom: 'Bfrtip',
- buttons: [
-    { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
-    { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
- ],
             columns: [
-                {
-                    "data": null, "render": function (data, type, full, meta) {
-                        return meta.row + 1;
-                    }
-         },
+                { data: 'id', name: 'id' },
+                { data: 'acknowledgement_no', name: 'acknowledgement_no' },
                 { data: 'district', name: 'district' },
-                { data: '1930_count', name: '1930_count' },
-                { data: 'NCRP_count', name: 'NCRP_count' },
-                { data: 'total', name: 'total' },
-                { data: 'actual_amount', name: 'actual_amount' },
-                { data: 'actual_amount_lost_on', name: 'actual_amount_lost_on' },
-                { data: 'actual_amount_hold_on', name: 'actual_amount_hold_on' },
-                { data: 'hold_amount_otherthan', name: 'hold_amount_otherthan' },
-                { data: 'total_hold', name: 'total_hold' },
-                { data: 'total_amount_lost_from_eco', name: 'total_amount_lost_from_eco' },
-                { data: 'amount_for_pending_action', name: 'amount_for_pending_action' }
+                { data: 'reported_date', name: 'reported_date' },
+                // { data: 'total', name: 'total' },
+                // { data: 'actual_amount', name: 'actual_amount' },
+                // { data: 'actual_amount_lost_on', name: 'actual_amount_lost_on' },
+                // { data: 'actual_amount_hold_on', name: 'actual_amount_hold_on' },
+                // { data: 'hold_amount_otherthan', name: 'hold_amount_otherthan' },
+                // { data: 'total_hold', name: 'total_hold' },
+                // { data: 'total_amount_lost_from_eco', name: 'total_amount_lost_from_eco' },
+                // { data: 'amount_for_pending_action', name: 'amount_for_pending_action' }
             ],
             order: [[0, 'desc']],
             // Add any additional options you need
         });
-        $('#csvDownload, #excelDownload').on('click', function(e) {
-        e.preventDefault();
-        var format = $(this).attr('id') === 'csvDownload' ? 'csv' : 'excel'; // Determine format based on button clicked
-        var url = "{{ route('bank-daily-reports.index') }}" + '?format=' + format + '&' + $.param({
-            from_date: $('#from-date-new').val(),
-            to_date: $('#to-date-new').val(),
-            current_date: $('#current_date').val(),
-            bank_action_status: $('#bank_action_status').val(),
-            evidence_type_ncrp: $('#evidence_type_ncrp').val(),
-            search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
-        });
-        window.location.href = url;
-    });
+
         $('#complaint-form-ncrp').on('submit', function (e) {
             e.preventDefault();
             table.draw();

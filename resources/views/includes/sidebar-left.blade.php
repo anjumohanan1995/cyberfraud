@@ -325,7 +325,7 @@
                     {{-- @endif --}}
                     {{-- @if ($hasUploadBankActionPermission) --}}
                         <li>
-                            <a class="slide-item" href="{{--{{ route('bank-case-data.index') }}--}}">Above 1 Lach Report</a>
+                            <a class="slide-item" href="{{ route('above-one-lakh') }}">Above 1 Lach Report</a>
                         </li>
                     {{-- @endif --}}
                 </ul>
