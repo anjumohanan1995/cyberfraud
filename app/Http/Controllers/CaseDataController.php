@@ -12,6 +12,7 @@ use App\Models\Wallet;
 use App\Models\Merchant;
 use App\Models\Insurance;
 use App\Models\Profession;
+use App\Models\Modus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -530,6 +531,7 @@ $records = $query->get();
         $affected = Complaint::where('acknowledgement_no', $ackno)
             ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
 
+            ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);
@@ -555,6 +557,8 @@ $records = $query->get();
         return view('dashboard.case-data-list.index');
     }
 
+
+
     public function caseDataView(Request $request,$id){
         $id = Crypt::decrypt($id);
         $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
@@ -578,13 +582,109 @@ $records = $query->get();
         $hold_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
         ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
         //dd($hold_amount );
+        // $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
+        //                             ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
+        //                             ->sum('transaction_amount');
         $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
-                                    ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
-                                    ->sum('transaction_amount');
+                                    ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos' , 'aadhaar enabled payment System'])
+                                    ->sum('dispute_amount');
+
         $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();
+
+// ============================FOR FINDONG DESPUTED AMOUNT=======================================
+
+
+function updateDisputeAmounts($parentLayer, $nextLayer, $id, &$updatedObjectIds) {
+    // Retrieve all documents for the current parent layer
+    $parents = BankCaseData::where('Layer', $parentLayer)
+        ->where('acknowledgement_no', (int)$id)
+        ->get();
+
+    foreach ($parents as $parent) {
+        // Retrieve child rows in the next layer
+        $children = BankCaseData::where('Layer', $nextLayer)
+            ->where('transaction_id_or_utr_no', 'like', '%' . $parent->transaction_id_sec)
+            ->get();
+
+        // Initialize capital amount with parent's transaction amount
+        $capitalAmount = $parent->transaction_amount;
+
+        foreach ($children as $child) {
+            // Update the dispute_amount based on the current capital amount
+            if ($capitalAmount <= 0) {
+                // If capital amount is zero or negative, no need to process further
+                break;
+            }
+
+            if ($child->transaction_amount < $capitalAmount) {
+                // Child's amount is less than capital amount
+                $disputeAmount = $child->transaction_amount;
+                $capitalAmount -= $disputeAmount;
+            } elseif ($child->transaction_amount == $capitalAmount) {
+                // Child's amount equals the capital amount
+                $disputeAmount = $capitalAmount;
+                $capitalAmount = 0;
+            } else {
+                // Child's amount is greater than the capital amount
+                //echo $child->transaction_amount."<br>";
+                $disputeAmount = $capitalAmount;
+                $capitalAmount = -1; // Set to negative to stop further processing
+            }
+
+            // Update the child's dispute_amount only if it hasn't been updated yet
+            if (!isset($updatedObjectIds[$child->_id])) {
+
+                $child->dispute_amount = $disputeAmount;
+                $child->save();
+                // Mark child as updated
+                $updatedObjectIds[$child->_id] = true;
+            }
+        }
+
+        // Mark parent as updated if it's not already updated
+        if (!isset($updatedObjectIds[$parent->_id])) {
+
+            $updatedObjectIds[$parent->_id] = true;
+        }
+    }
+}
+
+// Initialize and process records for the base layer (Layer 1)
+$updatedObjectIds = [];
+$records = BankCaseData::where('acknowledgement_no', (int)$id)
+    ->where('Layer', 1)
+    ->where('com_status', 1)
+    ->get();
+
+foreach ($records as $record) {
+    // Skip updating if already updated
+    if (!isset($updatedObjectIds[$record->_id])) {
+        $record->dispute_amount = $record->transaction_amount;
+        $record->save();
+        // Mark record as updated
+        $updatedObjectIds[$record->_id] = true;
+    }
+}
+
+// Process each layer iteratively
+$currentLayer = 1;
+
+while (BankCaseData::where('Layer', $currentLayer)->where('acknowledgement_no', (int)$id)->exists()) {
+    $nextLayer = $currentLayer + 1;
+
+    if (BankCaseData::where('Layer', $nextLayer)->where('acknowledgement_no', (int)$id)->exists()) {
+
+        updateDisputeAmounts($currentLayer, $nextLayer, (int)$id, $updatedObjectIds);
+    }
+
+    $currentLayer = $nextLayer;
+}
+
+
+//================================FOR FINDING DESPUTE AMOUNT====================================
 
         $transaction_based_array_final = [];$final_array=[];
         for($i=0;$i<count($layer_one_transactions);$i++){
@@ -610,7 +710,7 @@ $records = $query->get();
 
          }
         //dd($final_array);
-        $additional = ComplaintAdditionalData::where('ack_no',(string)$id)->first();
+        $additional = ComplaintAdditionalData::where('ack_no', (string)$id)->first();
 
        // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
         $layers = BankCasedata::where('acknowledgement_no',(int)$id)->groupBy('Layer')->pluck('Layer');
@@ -623,7 +723,8 @@ $records = $query->get();
             $transaction_numbers_left_side_array_final="";
 
             $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->where('com_status',1)
-                                                            ->where('action_taken_by_bank','money transfer to')->get();
+                                                            ->where('action_taken_by_bank','money transfer to')
+                                                            ->where('bank','!=','Others')->get();
 
             ++$i;
 
@@ -686,13 +787,25 @@ $records = $query->get();
 
     // dd($finalData_pending_banks);
 
+ $finalData_pending_banks = collect($finalData_pending_banks)->groupBy('pending_banks')->map(function ($group) {
+        return [
+            'pending_banks' => $group->first()['pending_banks'],
+            'transaction_id'=> $group->count(),
+            'transaction_amount' => $group->sum('transaction_amount'),
+            'desputed_amount' => $group->first()['desputed_amount']
 
+        ];
+    })->values()->all();
 
         $professions = Profession::where('status', 'active')
         ->whereNull('deleted_at')
         ->get();
 
-        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','finalData_pending_banks','hold_amount','lost_amount','pending_amount','transaction_date'));
+        $modus = Modus::where('status','1')
+        ->whereNull('deleted_at')
+        ->get();
+
+        return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','modus','finalData_pending_banks','hold_amount','lost_amount','pending_amount','transaction_date'));
     }
 
     public function updateTransactionAmount(Request $request)
@@ -1265,6 +1378,7 @@ if($record->case_status != null){
         $complaint->ack_no=$request->acknowledgement_no;
         $complaint->age=$request->age;
         $complaint->profession=$request->profession;
+        $complaint->modus=$request->modus;
         $complaint->save();
 
         return redirect()->back()->with('status', 'Profile updated successfully.');

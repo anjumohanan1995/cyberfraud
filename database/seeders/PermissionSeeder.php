@@ -79,9 +79,10 @@ class PermissionSeeder extends Seeder
                     '2' => 'Add Category',
                     '3' => 'Add Subcategory',
                     '4' => 'Add Profession',
-                    '5' => 'Upload registrar',
-                    '6' => 'Edit source Type',
-                    '7' => 'Delete Source Type',
+                    '5' => 'Add Modus',
+                    '6' => 'Upload registrar',
+                    '7' => 'Edit source Type',
+                    '8' => 'Delete Source Type',
                 ]),
             ],
             [

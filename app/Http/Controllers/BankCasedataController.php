@@ -25,6 +25,7 @@ class BankCasedataController extends Controller
 
     public function store(Request $request)
     {
+       
         // Validate the uploaded file.
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,txt,ods'
@@ -32,6 +33,7 @@ class BankCasedataController extends Controller
 
         // Get the uploaded file.
         $file = $request->file('file');
+        //dd($file->getMimeType()); // Check the MIME type
 
         // Check if a file was uploaded.
         if ($file) {

@@ -1,12 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Modus;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Modus;
+use Illuminate\Support\Facades\Redirect;
 
+use Illuminate\Http\Request;
 
 class ModusController extends Controller
 {
@@ -17,7 +16,8 @@ class ModusController extends Controller
      */
     public function index()
     {
-        return view("dashboard.modus.index");
+        // dd("hi");
+        return view('modus.list');
     }
 
     /**
@@ -28,7 +28,7 @@ class ModusController extends Controller
     public function create()
     {
 
-        return view("dashboard.modus.create");
+        return view('modus.list');
     }
 
     /**
@@ -39,28 +39,24 @@ class ModusController extends Controller
      */
     public function store(Request $request)
     {
-
-
-        $validate = Validator::make(
-            $request->all(),
-            [
-                'name' => 'required',
-
-
-
-            ]
-        );
+        //
+        $validate = Validator::make($request->all(),
+        [
+          'name' => 'required',
+          'status' => 'required',
+        ]);
         if ($validate->fails()) {
             //dd($validate);
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
         Modus::create([
-            'name' => @$request->name ? $request->name : '',
+            'name' => @$request->name? $request->name:'',
+            'status' => $request->input('status'),
 
         ]);
 
-        return redirect()->route('modus.index')->with('success', 'Modus Added successfully.');
+        return redirect()->back()->with('success', 'Modus Added successfully!');
     }
 
     /**
@@ -82,10 +78,9 @@ class ModusController extends Controller
      */
     public function edit($id)
     {
-        $data = Modus::findOrFail($id);
-
-
-        return view('dashboard.modus.edit', ['data' => $data,]);
+        //
+        $modus = Modus::find($id);
+        return view('modus.edit',compact('modus'));
     }
 
     /**
@@ -97,24 +92,22 @@ class ModusController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validate the incoming request data
-        $request->validate([
-            'name' => 'required|string|max:255',
-            // Add more validation rules as needed
+        //
+        $validate = Validator::make($request->all(),
+        [
+          'name' => 'required',
+          'status' => 'required',
         ]);
+        if ($validate->fails()) {
+            //dd($validate);
+            return Redirect::back()->withInput()->withErrors($validate);
+        }
+        $modus = Modus::find($id);
+        $modus->name = $request->name;
+        $modus->status = $request->status;
+        $modus->update();
+        return redirect()->route('modus.index')->with('success', 'Modus Updated successfully!');
 
-        // Find the role by its ID.
-        $data = Modus::findOrFail($id);
-
-        // Update the role with the data from the request
-        $data->name = $request->name;
-
-        // Update other attributes as needed
-        // Save the updated role
-        $data->save();
-
-        // Redirect back with success message
-        return redirect()->route('modus.index')->with('success', 'Modus updated successfully!');
     }
 
     /**
@@ -125,103 +118,87 @@ class ModusController extends Controller
      */
     public function destroy($id)
     {
-        $data = Modus::findOrFail($id);
 
-        $data->delete();
-
-        return response()->json(['success' => 'Modus successfully deleted!']);
+            $modus = Modus::findOrFail($id);
+            $modus->delete();
+            return response()->json(['success' => 'Modus Deleted successfully!'], 200);
     }
 
+    public function getModus(Request $request){
 
-
-    public function getModus(Request $request)
-    {
-
-        ## Read value
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
+        $rowperpage = $request->get("length");
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
 
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+        $columnIndex = $columnIndex_arr[0]['column'];
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
 
-        // Total records
-        $totalRecord = Modus::where('deleted_at', null)->orderBy('created_at', 'desc');
-        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $from_date="";$to_date="";
+        $from_date = $request->from_date;
+        $to_date = $request->to_date;
 
+        $items = Modus::where('deleted_at',null)->orderBy('_id', 'desc')
+                          ->orderBy($columnName, $columnSortOrder);
 
-        $totalRecordswithFilte = Modus::where('deleted_at', null)->orderBy('created_at', 'desc');
-        $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
-
-        // Fetch records
-        $items = Modus::where('deleted_at', null)->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
         $records = $items->skip($start)->take($rowperpage)->get();
+        $totalRecord = Modus::where('deleted_at',null)->orderBy('_id', 'desc');
+        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $totalRecordswithFilter = $totalRecords;
 
         $data_arr = array();
-        $i = $start;
+        $i=$start;
 
-        foreach ($records as $record) {
+        foreach($records as $record){
             $i++;
             $id = $record->id;
-            $source_type = $record->source_type;
-            $acknowledgement_no = $record->acknowledgement_no;
-            $district = $record->district;
-            $police_station = $record->police_station;
-            $complainant_name = $record->complainant_name;
-            $complainant_mobile = $record->complainant_mobile;
-            $transaction_id = $record->transaction_id;
-            $bank_name = $record->bank_name;
-            $account_id = $record->account_id;
-            $amount = $record->amount;
-            $entry_date = $record->entry_date;
-            $current_status = $record->current_status;
-            $date_of_action = $record->date_of_action;
-            $action_taken_by_name = $record->action_taken_by_name;
-            $action_taken_by_designation = $record->action_taken_by_designation;
-            $action_taken_by_mobile = $record->action_taken_by_mobile;
-            $action_taken_by_email = $record->action_taken_by_email;
-            $action_taken_by_bank = $record->action_taken_by_bank;
-
-
-            $edit = '<a  href="' . url('modus/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
+            $name = $record->name;
+            $status = $record->status == 1 ? 'Active' : 'Inactive';
+            $edit = '<a  href="' . url('modus/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
 
             $data_arr[] = array(
-                "source_type" => $source_type,
-                "acknowledgement_no" => $acknowledgement_no,
-                "district" => $district,
-                "police_station" => $police_station,
-                "complainant_name" => $complainant_name,
-                "complainant_mobile" => $complainant_mobile,
-                "transaction_id" => $transaction_id,
-                "bank_name" => $bank_name,
-                "account_id" => $account_id,
-                "amount" => $amount,
-                "entry_date" => $entry_date,
-                "current_status" => $current_status,
-                "date_of_action" => $date_of_action,
-                "action_taken_by_name" => $action_taken_by_name,
-                "action_taken_by_designation" => $action_taken_by_designation,
-                "action_taken_by_mobile" => $action_taken_by_mobile,
-                "action_taken_by_email" => $action_taken_by_email,
-                "action_taken_by_bank" => $action_taken_by_bank,
+                "id" => $i,
+                "name" => $name,
+                "status" => $status,
                 "edit" => $edit
             );
         }
 
         $response = array(
-            "draw" => intval($draw),
-            "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
-            "aaData" => $data_arr
+        "draw" => intval($draw),
+        "iTotalRecords" => $totalRecords,
+        "iTotalDisplayRecords" => $totalRecordswithFilter,
+        "aaData" => $data_arr
         );
 
         return response()->json($response);
+
+    }
+
+    public function addModus(Request $request){
+
+
+        $validate = Validator::make($request->all(),
+        [
+          'name' => 'required',
+          'status' => 'required',
+        ]);
+        if ($validate->fails()) {
+
+            return response()->json(['errors' => $validate->errors()], 422);
+        }
+
+        Modus::create([
+            'name' => @$request->name? $request->name:'',
+            'status' => $request->input('status'),
+
+        ]);
+        return response()->json(['success' => 'Modus Added successfully!'], 200);
     }
 }

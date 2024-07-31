@@ -108,7 +108,12 @@
                                             <tr>
                                                 <td>Profession</td>
                                                 <td>:</td>
-                                                <td>{{ @$additional->profession }}</td>
+                                                <td>{{ optional(@$additional->professionRelation)->name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Modus</td>
+                                                <td>:</td>
+                                                <td>{{ optional(@$additional->modusRelation)->name }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -235,6 +240,20 @@
                                                         <div class="text-danger">{{ $message }}</div>
                                                     @enderror
                                                 </div>
+                                                <div class="form-group">
+                                                    <label for="profession">Modus:</label>
+                                                    <select class="form-control" id="modus" name="modus">
+                                                        <option value="">--select--</option>
+                                                        @foreach($modus as $modus)
+                                                            <option value="{{ $modus->id }}" {{ (isset($additional->modus) && $additional->modus== $modus->id) ? 'selected' : '' }}>
+                                                                {{ $modus->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('modus')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
                                                 <input type="hidden" name="acknowledgement_no"
                                                     value="{{ @$complaint->acknowledgement_no }}">
                                                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -346,6 +365,18 @@
                                 style="color: red;">₹{{ number_format($pending_amount, 2) }}</span></td>
 
                             </tr>
+                            <tr>
+                                <td>Total amount hold</td>
+                                <td><span
+                                style="color: green;">₹{{ number_format($hold_amount, 2) }}</span></td>
+
+                            </tr>
+                            <tr>
+                                <td>Total amount lost</td>
+                                <td><span
+                                style="color: blue;">₹{{ number_format($lost_amount, 2) }}</span></td>
+
+                            </tr>
                            </tbody>
                            </table>
                         </div>
@@ -357,9 +388,9 @@
                                     <tr >
                                     <th>Sl.no</th>
                                         <th >Pending Banks</th>
-                                        <th >Transaction ID</th>
+                                        <th >Transaction Count</th>
                                         <th >Transaction Amount</th>
-                                        <th>Disputed Amount</th>
+                                        
                                     </tr>
                                 @if($finalData_pending_banks)
                                     @foreach ($finalData_pending_banks as $item)
@@ -371,12 +402,12 @@
                                     </td>
                                     <td class="tdred">
                                         {{ $item['transaction_amount'] }}
-                                        <span class="copy-icon" style="cursor:pointer; color:blue;"> => </span>
+                                        {{-- <span class="copy-icon" style="cursor:pointer; color:blue;"> => </span> --}}
                                     </td>
-                                    <td class="tdred">
+                                    {{-- <td class="tdred">
                                         <input type="number" class="editable-field" value="{{ $item['desputed_amount'] }}" data-amount="{{ $item['transaction_amount'] }}" data-transaction-id="{{ $item['transaction_id'] }}" data-pending_banks="{{ $item['pending_banks'] }}">
-                                        {{-- {{ $item['desputed_amount'] }} --}}
-                                    </td>
+                                    {{ $item['desputed_amount'] }} 
+                                    </td> --}}
                                 </tr>
                                 @endforeach
 
@@ -455,7 +486,10 @@
                                                     <td>
                                                         Transaction ID /UTR Number :
                                                         {{ @$bank_data['transaction_id_sec'] }}<br><br>
-                                                        Transaction Amount : {{ @$bank_data['transaction_amount'] }}</td>
+                                                        Transaction Amount : {{ @$bank_data['transaction_amount'] }}
+                                                        <br><br>
+                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></td>
+                                                        
                                                     <td>{{ @$bank_data['branch_location'] }}<br><br>
                                                         {{ @$bank_data['branch_manager_details'] }} </td>
                                                     <td>{{ @$bank_data['reference_no'] }}<br><br>
@@ -759,7 +793,7 @@
                 const pendingBanks = field.getAttribute('data-pending_banks');
                 const transactionAmount = field.value;
 
-                $.ajax({
+                /*$.ajax({
                     url: '{{ route('update.transaction.amount') }}',
                     method: 'POST',
                     data: {
@@ -779,6 +813,7 @@
                         console.log('AJAX Error: ' + error);
                     }
                 });
+                */
             }
 
             editableFields.forEach(function(field) {

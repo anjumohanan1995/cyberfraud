@@ -282,10 +282,13 @@ class NoticeController extends Controller
                 $ip .= $item."<br>";
             }
             $edit = '<div style="margin-left: 10px;">
-            <button class="btn btn-success" onclick="showPortalModal(\'' . $acknowledgement_no . '\', \'' . addslashes($evidence_type) . '\', \'' . addslashes($url) . '\')">
+            <button class="btn btn-success" >
                 <i class="fas fa-file-alt" data-toggle="tooltip" data-placement="top" title="Generate Notice"></i>
             </button>
         </div>';
+
+        // PENDING NOTICE MANAGMENT ONCLICK ON ABOVE  <button class="btn btn-success" >
+        // onclick="showPortalModal(\'' . $acknowledgement_no . '\', \'' . addslashes($evidence_type) . '\', \'' . addslashes($url) . '\')"
 
             $data_arr[] = array(
                     "id" => $i,
