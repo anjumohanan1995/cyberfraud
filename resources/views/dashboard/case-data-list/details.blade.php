@@ -495,10 +495,13 @@
                                                     <td>{{ @$bank_data['reference_no'] }}<br><br>
                                                         {{ @$bank_data['remarks'] }}</td>
                                                     <td></td>
-                                                    <td><i class="side-menu__icon fe fe-user"> </i> :
+                                                    <td>
+                                                    <i class="side-menu__icon fe fe-home"> </i>
+                                                     {{ @$bank_data['action_taken_by_bank_sec'] }} <br>
+                                                    <i class="side-menu__icon fe fe-user"> </i> :
                                                         {{ @$bank_data['action_taken_name'] }}<br>
                                                         <i class="side-menu__icon fe fe-mail"> </i>
-                                                        {{ @$bank_data['action_taken_email'] }}
+                                                        {{ @$bank_data['action_taken_email'] }}<br>
                                                         {{ @$bank_data['date_of_action'] }}
                                                     </td>
                                                 </tr>
