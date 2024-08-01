@@ -36,6 +36,8 @@
         max-height: 200px !important;
         overflow-y: auto !important;
         }
+
+
     </style>
     <!-- container -->
     <div class="container-fluid">
@@ -321,7 +323,7 @@
                                          <td> {{ $loop->iteration }} </td>
                                             <td>{{ @$complnt->transaction_id }}</td>
                                             <td>{{ @$complnt->account_id }}</td>
-                                            <td>{{ @$complnt->bankCaseData->transaction_date }}</td>
+                                            <td>{{ @$complnt->bankCaseData->account_id }}</td>
                                             <td>{{ @$complnt->amount }}</td>
                                             <td>{{ @$complnt->bank_name }}</td>
                                             <td>{{ @$complnt->current_status }}</td>
@@ -446,10 +448,10 @@
 
                                     </div>
                                 @else
-                                    <table class="table table-bordered ">
+                                    <table class="table table-bordered table-responsive">
                                         <thead>
                                             <tr>
-                                                <th>Account No./(Wallet/PG/PA) Id<br>
+                                                <th >Account No./(Wallet/PG/PA) Id<br>
                                                     <hr> Transaction ID / UTR Number
                                                 </th>
                                                 <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
@@ -474,12 +476,43 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($final_array as $bank_data)
+
+                                            <?php
+                                           $date = new DateTime($bank_data['date_of_action']);
+                                           $formattedDate = $date->format('l, F j, Y g:i A'); 
+
+                                            $accountNumbers = $bank_data['account_no_1'];
+                                            if($accountNumbers){
+                                                $accountNumbersArray = explode(' ', $accountNumbers);
+                                            }
+
+                                            $transactionNumbers = $bank_data['transaction_id_or_utr_no'];
+                                            if($transactionNumbers){
+                                                $transactionNumbersArray = explode(' ', $transactionNumbers);
+                                            }
+
+                                            ?>
                                                 <tr>
-                                                    <td>{{ @$bank_data['account_no_1'] }}<br><br>
-                                                        {{ @$bank_data['transaction_id_or_utr_no'] }}<br><br>
+                                                    {{-- <td>{{ @$bank_data['account_no_1'] }}<br><br> --}}
+                                                    <td>
+                                                    @if($accountNumbersArray)
+                                                    @foreach ($accountNumbersArray as $accountNumber)
+                                                            {{ $accountNumber }}<br>
+                                                    @endforeach
+
+                                                    @endif
+                                                    <br><br>
+                                                        {{-- {{ @$bank_data['transaction_id_or_utr_no'] }} --}}
+                                                    @if($transactionNumbersArray)
+                                                    @foreach ($transactionNumbersArray as $transactionNumber)
+                                                            {{ $transactionNumber }}<br>
+                                                    @endforeach
+
+                                                    @endif
+                                                        <br><br>
                                                         Layer : {{ @$bank_data['Layer'] }}</td>
                                                     <td>{{ @$bank_data['action_taken_by_bank'] }}<br><br>
-                                                        Txn Date: {{ @$bank_data['transaction_date'] }}</td>
+                                                        Txn Date: {{ @$bank_data['bank'] }}</td>
                                                     <td>{{ @$bank_data['bank'] }}</td>
                                                     <td>A/C No : {{ @$bank_data['account_no_2'] }}<br>
                                                         ifsc Code : {{ @$bank_data['ifsc_code'] }}</td>
@@ -490,16 +523,23 @@
                                                         <br><br>
                                                         <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
 
+                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></td>
+
                                                     <td>{{ @$bank_data['branch_location'] }}<br><br>
                                                         {{ @$bank_data['branch_manager_details'] }} </td>
                                                     <td>{{ @$bank_data['reference_no'] }}<br><br>
                                                         {{ @$bank_data['remarks'] }}</td>
                                                     <td></td>
-                                                    <td><i class="side-menu__icon fe fe-user"> </i> :
+                                                    <td>
+                                                    <i class="side-menu__icon fe fe-home"> </i>
+                                                     {{ @$bank_data['action_taken_by_bank_sec'] }} <br>
+                                                    <i class="side-menu__icon fe fe-user"> </i> :
                                                         {{ @$bank_data['action_taken_name'] }}<br>
                                                         <i class="side-menu__icon fe fe-mail"> </i>
-                                                        {{ @$bank_data['action_taken_email'] }}
-                                                        {{ @$bank_data['date_of_action'] }}
+                                                        {{ @$bank_data['action_taken_email'] }}<br>
+                                                        {{-- {{ @$bank_data['date_of_action'] }} --}}
+
+                                                        {{ @$formattedDate}}
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -793,26 +833,7 @@
                 const pendingBanks = field.getAttribute('data-pending_banks');
                 const transactionAmount = field.value;
 
-                $.ajax({
-                    url: '{{ route('update.transaction.amount') }}',
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        transaction_id: transactionId,
-                        pending_banks: pendingBanks,
-                        transaction_amount: transactionAmount
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            console.log('Transaction amount updated successfully.');
-                        } else {
-                            console.log('Error: ' + response.message);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.log('AJAX Error: ' + error);
-                    }
-                });
+
             }
 
             editableFields.forEach(function(field) {

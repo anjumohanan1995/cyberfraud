@@ -29,7 +29,9 @@ class BankCasedataController extends Controller
         // Validate the uploaded file.
         $request->validate([
             'file' => 'required|file|mimes:xlsx,csv,txt,ods'
-        ]);
+        ],[
+    'file.mimes' => 'The uploaded file format is not supported. Please upload a file with one of the following formats: xlsx, csv, txt, ods.'
+]);
 
         // Get the uploaded file.
         $file = $request->file('file');

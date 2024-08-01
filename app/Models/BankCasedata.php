@@ -16,6 +16,12 @@ class BankCasedata extends Eloquent
     protected $collection = 'bank_casedata';
 
     protected $guarded = [];
+    protected $casts = [
+
+        'transaction_date' => 'datetime',
+        'date_of_action' => 'datetime',
+        
+    ];
 
 
 }

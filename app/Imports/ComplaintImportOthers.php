@@ -87,4 +87,5 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
 
         ];
     }
+
 }
