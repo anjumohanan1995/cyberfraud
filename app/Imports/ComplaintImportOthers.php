@@ -40,6 +40,9 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
      */
     public function collection(Collection $rows)
     {
+        // dd($rows);
+
+
        foreach($rows as $row){
         $data = [
                 'case_number' => $this->caseNumber,
@@ -52,29 +55,36 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
                 'registry_details'=> $row['registry_details'],
                 'remarks'=> $row['remarks'],
                 'ticket_number'=> $row['ticket_number'],
-                'evidence_type' => $row['evidence_type'],
+                'evidence_type' => strtolower($row['evidence_type']),
                 'source' => $row['source'],
                 'status' => 1
         ];
         ComplaintOthers::create($data);
        }
- 
+
     }
-        
+
     public function rules(): array
     {
         $evidenceTypes = EvidenceType::where('status', 'active')
         ->whereNull('deleted_at')
         ->pluck('name')
         ->toArray();
-        
+
         $uniqueItems = array_unique($evidenceTypes);
-        
+
         return[
             'url' => 'required',
             'domain' => 'required',
-            'evidence_type' => 'required|in:' . implode(',', $uniqueItems),
-           
+            'evidence_type' => [
+                'required',
+                function ($attribute, $value, $fail) use ($uniqueItems) {
+                    if (!in_array(strtolower($value), $uniqueItems)) {
+                        $fail("The selected {$attribute} is invalid.");
+                    }
+                },
+            ],
+
         ];
     }
 }

@@ -182,6 +182,14 @@
 
     <script src="{{ asset('js/custom.js') }}"></script>
 
+    <script src="{{ asset('js/ckeditor/ckeditor.js')}}"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('.ckeditor').ckeditor();
+            });
+
+        </script>
+
     {{-- <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script> --}}
 
     {{-- for datatable export --}}

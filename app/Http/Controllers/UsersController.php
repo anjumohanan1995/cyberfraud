@@ -29,8 +29,8 @@ class UsersController extends Controller
      */
     public function create()
     {
-        $role =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view("dashboard.user-management.users.create",compact('role'));
+        $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
+        return view("dashboard.user-management.users.create",compact('roles'));
     }
 
     /**
@@ -91,8 +91,8 @@ class UsersController extends Controller
     {
         $data = User::findOrFail($id);
 
-        $role =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view('dashboard.user-management.users.edit', ['data' => $data,'role'=>$role]);
+        $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
+        return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$roles]);
     }
 
     /**

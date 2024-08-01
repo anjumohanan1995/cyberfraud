@@ -108,12 +108,12 @@
                                             <tr>
                                                 <td>Profession</td>
                                                 <td>:</td>
-                                                <td>{{ optional($additional->professionRelation)->name }}</td>
+                                                <td>{{ optional(@$additional->professionRelation)->name }}</td>
                                             </tr>
                                             <tr>
                                                 <td>Modus</td>
                                                 <td>:</td>
-                                                <td>{{ optional($additional->modusRelation)->name }}</td>
+                                                <td>{{ optional(@$additional->modusRelation)->name }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -390,7 +390,7 @@
                                         <th >Pending Banks</th>
                                         <th >Transaction Count</th>
                                         <th >Transaction Amount</th>
-                                        
+
                                     </tr>
                                 @if($finalData_pending_banks)
                                     @foreach ($finalData_pending_banks as $item)
@@ -406,7 +406,7 @@
                                     </td>
                                     {{-- <td class="tdred">
                                         <input type="number" class="editable-field" value="{{ $item['desputed_amount'] }}" data-amount="{{ $item['transaction_amount'] }}" data-transaction-id="{{ $item['transaction_id'] }}" data-pending_banks="{{ $item['pending_banks'] }}">
-                                    {{ $item['desputed_amount'] }} 
+                                    {{ $item['desputed_amount'] }}
                                     </td> --}}
                                 </tr>
                                 @endforeach
@@ -489,7 +489,7 @@
                                                         Transaction Amount : {{ @$bank_data['transaction_amount'] }}
                                                         <br><br>
                                                         <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
-                                                        
+
                                                     <td>{{ @$bank_data['branch_location'] }}<br><br>
                                                         {{ @$bank_data['branch_manager_details'] }} </td>
                                                     <td>{{ @$bank_data['reference_no'] }}<br><br>

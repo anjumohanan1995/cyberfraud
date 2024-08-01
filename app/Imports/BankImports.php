@@ -13,6 +13,7 @@ use App\Models\OldBankCaseData;
 use App\Models\OldCaseData;
 use Auth;
 use Illuminate\Support\Facades\DB;
+use DateTime;
 
 class BankImports implements ToCollection, WithStartRow, WithChunkReading
 {
@@ -38,10 +39,39 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     }
     public function collection(Collection $collection)
     {
-       
+        // dd($collection);
+
         $collection->transform(function ($values) {
 
-            
+        // Convert the 'entry_date' field
+        // dd($values[14]);
+
+       // Try to create DateTime object from the date with time format
+           $transaction_date = DateTime::createFromFormat('d/m/Y H:i:s', $values[14]);
+
+           // If that fails, try to create DateTime object from the date-only format
+           if (!$transaction_date) {
+               $transaction_date = DateTime::createFromFormat('d/m/Y', $values[14]);
+           }
+
+           // Format the DateTime object
+           $formattedTransactionDate = $transaction_date ? $transaction_date->format('Y-m-d H:i:s') : null;
+
+           // dd($formattedTransactionDate);
+           // dd($values[19]);
+           // Attempt to create DateTime object from the format with time
+           $date_of_action = DateTime::createFromFormat('d/m/Y H:i:s', $values[19]);
+
+           // If that fails, try the format without time
+           if (!$date_of_action) {
+               $date_of_action = DateTime::createFromFormat('d/m/Y', $values[19]);
+           }
+
+           // Format the DateTime object
+           $formattedDateOfAction = $date_of_action ? $date_of_action->format('Y-m-d H:i:s') : null;
+
+           // dd($formattedDateOfAction);
+
             return [
                 'acknowledgement_no' => $values[1],
                 'transaction_id_or_utr_no' => $values[2],
@@ -56,12 +86,12 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'tid' => $values[11],
                 'approval_code' => $values[12],
                 'merchant_name' => $values[13],
-                'transaction_date' => $values[14],
+                'transaction_date' => $formattedTransactionDate,
                 'transaction_id_sec' => $values[15],
                 'transaction_amount' => $values[16],
                 'reference_no' => $values[17],
                 'remarks' => $values[18],
-                'date_of_action' => $values[19],
+                'date_of_action' => $formattedDateOfAction,
                  'action_taken_by_bank_sec' => $values[20],
                 'action_taken_name' => $values[21],
                 'action_taken_email' => $values[22],
@@ -73,15 +103,15 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         $validate = Validator::make($collection->toArray(),[
             '*.acknowledgement_no' => 'required',
-            
+
         ])->validate();
-        //dd($collection[0]['acknowledgement_no']); 
+        //dd($collection[0]['acknowledgement_no']);
         DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
-      
+
         foreach ($collection as $collect){
-            
+
              $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
-                      
+
                 $bank_data = new BankCasedata();
                 $bank_data->acknowledgement_no = $collect['acknowledgement_no'];
                 $bank_data->transaction_id_or_utr_no = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
@@ -110,15 +140,15 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->branch_location = $collect['branch_location'];
 
                 $bank_data->branch_manager_details = $collect['branch_manager_details'];
-              
+
                 $bank_data->com_status = $collect['com_status'];
 
                 $bank_data->save();
-            
-           
+
+
 
         // BankCasedata::create($collect);
-       
+
         // foreach ($collection as $collect) {
 
         //     // Check if there's an existing record with matching acknowledgement_no and transaction_id_or_utr_no.
@@ -164,7 +194,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
     protected function convertAcknoToString($acknowledgement_no)
     {
-       
+
         return is_numeric($acknowledgement_no) ? (string) $acknowledgement_no : $acknowledgement_no;
     }
 }
