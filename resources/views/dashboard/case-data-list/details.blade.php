@@ -476,7 +476,11 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($final_array as $bank_data)
+                                            
                                             <?php
+                                           $date = new DateTime($bank_data['date_of_action']);
+                                           $formattedDate = $date->format('l, F j, Y g:i A'); 
+                               
                                             $accountNumbers = $bank_data['account_no_1'];
                                             if($accountNumbers){
                                                 $accountNumbersArray = explode(' ', $accountNumbers);
@@ -531,7 +535,9 @@
                                                         {{ @$bank_data['action_taken_name'] }}<br>
                                                         <i class="side-menu__icon fe fe-mail"> </i>
                                                         {{ @$bank_data['action_taken_email'] }}<br>
-                                                        {{ @$bank_data['date_of_action'] }}
+                                                        {{-- {{ @$bank_data['date_of_action'] }} --}}
+
+                                                        {{ @$formattedDate}}
                                                     </td>
                                                 </tr>
                                             @endforeach
