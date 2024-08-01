@@ -9,11 +9,13 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Illuminate\Support\Facades\Validator;
 use App\Hospital;
 use App\Models\BankCasedata;
+use App\Models\Complaint;
 use App\Models\OldBankCaseData;
 use App\Models\OldCaseData;
 use Auth;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use DateTime;
+use Carbon\Carbon;
 
 class BankImports implements ToCollection, WithStartRow, WithChunkReading
 {
@@ -39,8 +41,11 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     }
     public function collection(Collection $collection)
     {
+        $acknowledgementNos = Complaint::pluck('acknowledgement_no')->toArray();
 
         $collection->transform(function ($values) {
+             // Convert the 'entry_date' field
+ 
 
 
             return [
@@ -57,13 +62,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'tid' => $values[11],
                 'approval_code' => $values[12],
                 'merchant_name' => $values[13],
-               // 'transaction_date' => $values[14],
-                'transaction_date' => date('Y-m-d', strtotime($values[14])),
+             
+               'transaction_date' => $this->parseDate(@$values[14]),
                 'transaction_id_sec' => $values[15],
                 'transaction_amount' => $values[16],
                 'reference_no' => $values[17],
                 'remarks' => $values[18],
-                'date_of_action' => $values[19],
+                'date_of_action' => $this->parseDate(@$values[19]),
                  'action_taken_by_bank_sec' => $values[20],
                 'action_taken_name' => $values[21],
                 'action_taken_email' => $values[22],
@@ -73,11 +78,22 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             ];
         });
 
-        $validate = Validator::make($collection->toArray(),[
-            '*.acknowledgement_no' => 'required',
+        $rules = [
+            '*.acknowledgement_no' => 'required|in:' . implode(',', $acknowledgementNos),
+        
+        ];
+        
+        $validator = Validator::make($collection->toArray(), $rules);
 
-        ])->validate();
-        //dd($collection[0]['acknowledgement_no']);
+        if ($validator->fails()) {
+            // Handle validation failure
+            throw new \Illuminate\Validation\ValidationException($validator);
+        }
+        // $validate = Validator::make($collection->toArray(),[
+        //     '*.acknowledgement_no' => 'required',
+
+        // ])->validate();
+  
         DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
 
         foreach ($collection as $collect){
@@ -92,7 +108,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->acknowledgement_no = $collect['acknowledgement_no'];
                 $bank_data->transaction_id_or_utr_no = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
                 $bank_data->Layer = $collect['Layer'];
-                $bank_data->account_no_1 = preg_replace('/[^a-zA-Z0-9]/', '',$collect['account_no_1']);
+                $bank_data->account_no_1 = $collect['account_no_1'];
                 $bank_data->action_taken_by_bank = trim(strtolower($collect['action_taken_by_bank']));
                 $bank_data->bank = $collect['bank'];
                 $bank_data->account_no_2 = trim($collect['account_no_2']);
@@ -175,4 +191,58 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         return is_numeric($acknowledgement_no) ? (string) $acknowledgement_no : $acknowledgement_no;
     }
+
+    function parseDate($dateString) {
+        // Define possible date formats with placeholders for two-digit years
+        if (is_numeric($dateString)) {
+            return $this->excelSerialToDate($dateString);
+        }
+        
+          
+        $formats = [
+            'd/m/Y H:i:s',
+            'd-m-Y H:i:s',
+            'd/m/Y',
+            'd-m-Y',
+            'd-F-Y',
+            'd-F-y',
+            'd/m/Y H:i',
+            'd-m-Y H:i',
+            'd/M/Y',
+            'd-M-Y'
+        ];
+    
+        // Try each format until one succeeds
+        foreach ($formats as $format) {
+            try {
+                $date = Carbon::createFromFormat($format, $dateString);
+    
+                // Check if year is two-digit
+                if (strlen($date->year) == 2) {
+                    // Assuming years 00-29 are 2000-2029, and 30-99 are 1930-1999
+                    $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
+                }
+    
+                return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
+            } catch (\Exception $e) {
+                // Continue to the next format
+            }
+        }
+    
+        // Return null or handle error if no format matches
+        return null;
+    }
+
+    function excelSerialToDate($serial) {
+        // Convert Excel serial date to a Carbon date
+        try {
+            $baseDate = Carbon::create(1899, 12, 30); // Excel starts from Dec 30, 1899
+            $date = $baseDate->addDays((int)$serial);
+    
+            return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
+        } catch (\Exception $e) {
+            return null; // Return null if conversion fails
+        }
+    }
+
 }

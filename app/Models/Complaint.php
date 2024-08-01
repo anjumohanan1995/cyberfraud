@@ -21,7 +21,8 @@ class Complaint extends Eloquent
     protected $casts = [
 
         'entry_date' => 'datetime',
-
+        'date_of_action' => 'datetime',
+        
     ];
     protected $fillable = [
         'source_type',

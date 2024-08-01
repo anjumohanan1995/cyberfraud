@@ -52,7 +52,7 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
                 'registry_details'=> $row['registry_details'],
                 'remarks'=> $row['remarks'],
                 'ticket_number'=> $row['ticket_number'],
-                'evidence_type' => $row['evidence_type'],
+                'evidence_type' => strtolower($row['evidence_type']),
                 'source' => $row['source'],
                 'status' => 1
         ];
@@ -73,8 +73,16 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
         return[
             'url' => 'required',
             'domain' => 'required',
-            'evidence_type' => 'required|in:' . implode(',', $uniqueItems),
-           
+            'evidence_type' => [
+                'required',
+                function ($attribute, $value, $fail) use ($uniqueItems) {
+                    if (!in_array(strtolower($value), $uniqueItems)) {
+                        $fail("The selected {$attribute} is invalid.");
+                    }
+                },
+            ],
+
         ];
     }
+
 }
