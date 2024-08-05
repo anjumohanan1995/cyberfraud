@@ -40,6 +40,9 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
      */
     public function collection(Collection $rows)
     {
+        // dd($rows);
+
+
        foreach($rows as $row){
         $data = [
                 'case_number' => $this->caseNumber,
@@ -58,18 +61,18 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
         ];
         ComplaintOthers::create($data);
        }
- 
+
     }
-        
+
     public function rules(): array
     {
         $evidenceTypes = EvidenceType::where('status', 'active')
         ->whereNull('deleted_at')
         ->pluck('name')
         ->toArray();
-        
+
         $uniqueItems = array_unique($evidenceTypes);
-        
+
         return[
             'url' => 'required',
             'domain' => 'required',

@@ -31,6 +31,7 @@
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
     $hasReportsPermission = in_array('Reports Management', $permissions);
     $hasEvidenceTypePermission = in_array('Evidence Type Management', $permissions);
+    $hasNoticeViewPermission = in_array('Notice View', $permissions) || $user->role == 'Super Admin';
     if ($sub_permissions) {
     $hasUploadPrimaryDataPermission = in_array('Upload Primary Data', $sub_permissions);
     $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions);
@@ -308,29 +309,29 @@
             </li>
         @endif
         @if ($hasReportsPermission)
-            <li class="slide">
-                <a class="side-menu__item" data-toggle="slide" href="#">
-                    <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Reports</span>\
-                    <i class="angle fe fe-chevron-down"> </i>
-                </a>
-                <ul class="slide-menu">
+        <li class="slide">
+            <a class="side-menu__item" data-toggle="slide" href="#">
+                <i class="side-menu__icon fe fe-database"> </i>
+                <span class="side-menu__label">Reports</span>
+                <i class="angle fe fe-chevron-down"> </i>
+            </a>
+            <ul class="slide-menu">
+                <li>
+                    <a class="slide-item" href="{{ url('reports') }}">NCRP / Others Case Data</a>
+                </li>
+                {{-- @if ($hasUploadPrimaryDataPermission) --}}
                     <li>
-                        <a class="slide-item" href="{{ url('reports') }}">NCRP / Others Case Data</a>
+                        <a class="slide-item" href="{{ url('/bank-daily-reports') }}">Daily Bank Reports</a>
                     </li>
-                    {{-- @if ($hasUploadPrimaryDataPermission) --}}
-                        <li>
-                            <a class="slide-item" href="{{ url('/bank-daily-reports') }}">Daily Bank Reports</a>
-                        </li>
-                    {{-- @endif --}}
-                    {{-- @if ($hasUploadBankActionPermission) --}}
-                        <li>
-                            <a class="slide-item" href="{{ route('above-one-lakh') }}">Above 1 Lach Report</a>
-                        </li>
-                    {{-- @endif --}}
-                </ul>
-            </li>
-        @endif
+                {{-- @endif --}}
+                {{-- @if ($hasUploadBankActionPermission) --}}
+                    <li>
+                        <a class="slide-item" href="{{ route('above-one-lakh') }}">Above 1 Lakh Report</a>
+                    </li>
+                {{-- @endif --}}
+            </ul>
+        </li>
+    @endif
         @if ($hasEvidenceTypePermission)
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('evidencetype') }}">
@@ -339,6 +340,14 @@
                 </a>
             </li>
         @endif
+        @if ($hasNoticeViewPermission)
+        <li class="slide">
+            <a class="side-menu__item" href="{{ url('notices') }}">
+                <i class="side-menu__icon fe fe-database"> </i>
+                <span class="side-menu__label">View Notices</span>
+            </a>
+        </li>
+    @endif
 
             {{-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">

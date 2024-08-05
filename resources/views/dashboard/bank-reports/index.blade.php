@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="m-4 d-flex justify-content-between">
-                        <h4 class="card-title mg-b-10">All Case Data</h4>
+                        <h4 class="card-title mg-b-10">Daily Bank Reports</h4>
                     </div>
                     <div class="main-content-body">
                         <div class="row row-sm">
@@ -59,14 +59,13 @@
                                                                         <input type="date" class="form-control" id="to-date-new"  value="{{ $today }}" name="to_date" onchange="setFromDatencrp()">
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-md-12 text-right">
-                                                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                                                    <a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>
-                                                                    <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
+                                                                <div class="col-md-2 fil-btn">
+                                                                    <div class="form-group">
+                                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
+
                                                         </form>
                                                         <div class="table-responsive">
                                                             <table id="example" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
@@ -110,6 +109,9 @@
 </div>
 @endsection
 <style>
+    .fil-btn{
+    padding-top: 30px;
+}
     .csv-btn {
     color: #fff!important;
     background-color: #28a745!important;

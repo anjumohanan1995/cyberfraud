@@ -37,7 +37,7 @@
         overflow-y: auto !important;
         }
 
-        
+
     </style>
     <!-- container -->
     <div class="container-fluid">
@@ -392,7 +392,7 @@
                                         <th >Pending Banks</th>
                                         <th >Transaction Count</th>
                                         <th >Transaction Amount</th>
-                                        
+
                                     </tr>
                                 @if($finalData_pending_banks)
                                     @foreach ($finalData_pending_banks as $item)
@@ -408,7 +408,7 @@
                                     </td>
                                     {{-- <td class="tdred">
                                         <input type="number" class="editable-field" value="{{ $item['desputed_amount'] }}" data-amount="{{ $item['transaction_amount'] }}" data-transaction-id="{{ $item['transaction_id'] }}" data-pending_banks="{{ $item['pending_banks'] }}">
-                                    {{ $item['desputed_amount'] }} 
+                                    {{ $item['desputed_amount'] }}
                                     </td> --}}
                                 </tr>
                                 @endforeach
@@ -476,7 +476,7 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($final_array as $bank_data)
-                                            
+
                                             <?php
                                            $date = new DateTime($bank_data['date_of_action']);
                                            $formattedDate = $date->format('l, F j, Y g:i A');
@@ -490,7 +490,7 @@
                                             if($transactionNumbers){
                                                 $transactionNumbersArray = explode(' ', $transactionNumbers);
                                             }
-                                            
+
                                             ?>
                                                 <tr>
                                                     {{-- <td>{{ @$bank_data['account_no_1'] }}<br><br> --}}
@@ -499,7 +499,7 @@
                                                     @foreach ($accountNumbersArray as $accountNumber)
                                                             {{ $accountNumber }}<br>
                                                     @endforeach
-                                                    
+
                                                     @endif
                                                     <br><br>
                                                         {{-- {{ @$bank_data['transaction_id_or_utr_no'] }} --}}
@@ -507,7 +507,7 @@
                                                     @foreach ($transactionNumbersArray as $transactionNumber)
                                                             {{ $transactionNumber }}<br>
                                                     @endforeach
-                                                    
+
                                                     @endif
                                                         <br><br>
                                                         Layer : {{ @$bank_data['Layer'] }}</td>
@@ -521,8 +521,10 @@
                                                         {{ @$bank_data['transaction_id_sec'] }}<br><br>
                                                         Transaction Amount : {{ @$bank_data['transaction_amount'] }}
                                                         <br><br>
+                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
+
                                                         <span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></td>
-                                                        
+
                                                     <td>{{ @$bank_data['branch_location'] }}<br><br>
                                                         {{ @$bank_data['branch_manager_details'] }} </td>
                                                     <td>{{ @$bank_data['reference_no'] }}<br><br>
@@ -831,7 +833,7 @@
                 const pendingBanks = field.getAttribute('data-pending_banks');
                 const transactionAmount = field.value;
 
-               
+
             }
 
             editableFields.forEach(function(field) {

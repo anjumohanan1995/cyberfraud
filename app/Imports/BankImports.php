@@ -47,7 +47,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         $collection->transform(function ($values) {
              // Convert the 'entry_date' field
- 
+
 
 
             return [
@@ -311,7 +311,7 @@ protected function validationMessages($index)
         try {
             $baseDate = Carbon::create(1899, 12, 30); // Excel starts from Dec 30, 1899
             $date = $baseDate->addDays((int)$serial);
-    
+
             return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
         } catch (\Exception $e) {
             return null; // Return null if conversion fails

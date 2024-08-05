@@ -19,363 +19,550 @@ $user = Auth::user();
 
 @endphp
 @section('content')
-    <!-- container -->
-    <div class="container-fluid">
-        <!-- breadcrumb -->
-        <div class="breadcrumb-header justify-content-between">
-            <div>
-                <h4 class="content-title mb-2">
-                    Hi, welcome back!
-                </h4>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="#">Notice</a>
-                        </li>
-                        <li class="breadcrumb-item active" aria-current="page">
-                            Against Evidence
-                        </li>
-                    </ol>
-                </nav>
-            </div>
+<div class="container mt-5">
+    <!-- Trigger the modal with a button -->
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Open Evidence Modal</button>
 
-        </div>
-        <!-- /breadcrumb -->
-        <!-- main-content-body -->
-        <div class="main-content-body">
+    <!-- Modal -->
+    <div id="evidenceModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
 
-
-
-            <!-- row -->
-            <div class="row row-sm">
-                <div class="col-md-12 col-xl-12">
-                    <div class="card overflow-hidden review-project">
-                        <div class="card-body">
-                            <div class=" m-4 d-flex justify-content-between">
-
-                                @if (session('success'))
-                                    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
-                                        {{ session('success') }}
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                @endif
-                                @if (session('error'))
-                                    <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-                                        {{ session('error') }}
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class=" m-4 d-flex justify-content-between">
-                                <h4 class="card-title mg-b-10">
-                                    Generate Notice Against Evidence
-                                </h4>
-
-                            </div>
-
-                                <form action="{{ route('complaints.store') }}" method="POST" enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="row">
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="source_type">From Date</label>
-                                                         <input type="date" class="form-control" id="from_date" name="from_date">
-                                                        @error('from_date')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-group">
-                                                        <label for="source_type">To Date</label>
-                                                         <input type="date" class="form-control"  id="to_date" name="to_date">
-                                                        @error('to_date')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="source_type">Acknowledgement Number</label>
-                                                         <input type="text" id="acknowledgement_number" class="form-control" name="acknowledgement_number">
-                                                        @error('to_date')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                            </div>
-                                           <div class="row">
-                                            @if($hasShowESTFPermission)
-                                            <div class="col-md-3">
-                                            <label for="source_type">Source Type</label>
-                                                <select class="form-control" name="source_type" id="source_type">
-                                                <option value="">--Select--</option>
-                                                @foreach ($source_types as $st)
-                                                 <option value="{{ $st->_id }}"> {{ $st->name }} </option>
-                                                @endforeach
-                                                </select>
-                                            </div>
-                                            @endif
-                                            @if($hasShowETFPermission)
-                                            <div class="col-md-3">
-                                            <label for="source_type">Evidence Type</label>
-                                                <select class="form-control" name="evidence_type" id="evidence_type">
-                                                <option value="">--Select--</option>
-                                                @foreach ($evidence_types as $et)
-                                                 <option value="{{ $et->_id }}"> {{ $et->name }} </option>
-                                                @endforeach
-                                                </select>
-                                            </div>
-                                            @endif
-                                            @if($hasShowStatusFPermission)
-                                            <div class="col-md-3">
-                                            <label for="source_type">Status</label>
-                                                <select name="status" id="" class="form-control">
-                                                <option value="1"> Active </option>
-                                                <option value="0"> InActive </option>
-                                                </select>
-                                            </div>
-                                            @endif
-                                            @if($hasShowNoticeTypePermission)
-                                            <div class="col-md-3">
-                                            <label for="source_type">Notice Type</label>
-                                                <select name="notice_type" id="" class="form-control">
-                                                <option value="Type1"> Type1 </option>
-                                                <option value="Type2"> Type2 </option>
-                                                </select>
-                                            </div>
-                                            @endif
-                                           </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mt-3">
-
-                                        <div class="col-md-2">
-                                            <button id="notice_submit" type="button" class="btn btn-primary">Submit</button>
-                                        </div>
-
-                                    </div>
-                                </form>
-                        <div class="table-responsive mb-0">
-                        <table id="notice" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
-                        <thead>
-                            <tr>
-                                <th>SL No</th>
-                                <th>Acknowledgement Number</th>
-                                <th>Evidence Type</th>
-                                <th>Url</th>
-                                <th>Domain</th>
-                                <th>IP</th>
-                                @if($hasGenerateTokenPermission)<th>Action</th>@endif
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                        </table>
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Select Evidence</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="evidenceForm">
+                        <div class="form-group">
+                            <label for="source_type">Source Type:</label>
+                            <select class="form-control" id="source_type" name="source_type">
+                                <option value="">--Select--</option>
+                                <option value="ncrp">NCRP</option>
+                                <option value="other">Other</option>
+                            </select>
                         </div>
 
-<!-- Portal Modal -->
-<div class="modal fade" id="portal-popup" tabindex="-1" role="dialog" aria-labelledby="portalPopupLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+                        <div class="form-group">
+                            <label for="from_date">From Date:</label>
+                            <input type="date" class="form-control" id="from_date" name="from_date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="to_date">To Date:</label>
+                            <input type="date" class="form-control" id="to_date" name="to_date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ack_no">Acknowledgement Number:</label>
+                            <input type="text" class="form-control" id="ack_no" name="ack_no">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="case_no">Case Number:</label>
+                            <input type="text" class="form-control" id="case_no" name="case_no">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="evidence_type_ncrp">Evidence Type:</label>
+                            <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp">
+                                <option value="">--Select--</option>
+                                @foreach ($evidence_types as $et)
+                                    <option value="{{ $et->_id }}"> {{ $et->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="evidence_type_other">Evidence Type:</label>
+                            <select class="form-control" id="evidence_type_other" name="evidence_type_other">
+                                <option value="">--Select--</option>
+                                @foreach ($evidence_types as $et)
+                                    <option value="{{ $et->name }}"> {{ $et->name }} </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Status:</label>
+
+                            <select class="form-control" id="status" name="status">
+                                <option value="">--Select--</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="reported">Reported</option>
+                            </select>
+
+                        </div>
+
+                        <button type="button" class="btn btn-primary" id="submitEvidence">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+<!-- Modal Structure -->
+<div id="noticeTable_ncrp" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="portalPopupLabel">Notice Generation</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Hidden input to store acknowledgment number -->
-                <input type="hidden" id="ack_no" name="ack_no">
-                <form>
-                    <div class="form-group">
-                        <label for="evidenceType" class="form-label">Evidence Type:</label>
-                        <select id="evidenceType" class="form-select" name="evidenceType" required>
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="evidenceUrl">Evidence URL:</label>
-                        <select id="evidenceUrl" class="form-select" name="evidenceUrl" required>
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                    </div>
-                </form>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - NCRP</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_ncrp_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="both_ncrp_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="79_ncrp_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-4" data-notice="79_ncrp_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-5" data-notice="94_ncrp_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="94_ncrp_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>For All Notice Type Above</td>
+                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="all_ncrp">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="savePortalCount">Save changes</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="noticeTable_other" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - Other</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Assign unique IDs to each button for handling clicks -->
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_other_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="both_other_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="79_other_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-4" data-notice="79_other_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-5" data-notice="94_other_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="94_other_website">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-                        </div>
 
-                    </div>
+<!-- Modal Structure -->
+<div id="noticeTable_ncrp_website" class="modal fade" role="dialog">
+    <div class="modal-dialog">
 
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - NCRP - Website</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_ncrp_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_ncrp_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_ncrp_website">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-            <!-- /row -->
 
-
-
-
-        </div>
-        <!-- /row -->
     </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="noticeTable_ncrp_social_media" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - NCRP - Social Media</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_ncrp_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_ncrp_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_ncrp_social_media">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="noticeTable_other_website" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - Other - Website</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_other_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_other_website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_other_website">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="noticeTable_other_social_media" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - Other - Social Media</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_other_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_other_social_media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_other_social_media">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
 
 <script>
+$(document).ready(function(){
+    $('#submitEvidence').click(function(){
+        var source_type = $('#source_type').val();
+        var from_date = $('#from_date').val();
+        var to_date = $('#to_date').val();
+        var ack_no = $('#ack_no').val();
+        var case_no = $('#case_no').val();
+        var evidence_type_ncrp = $('#evidence_type_ncrp').val();
+        var evidence_type_other = $('#evidence_type_other').val();
+        var status = $('#status').val();
 
-$(document).ready(function() {
-    $("#notice_submit").click(function(){
+        $.ajax({
+            url: "{{ route('evidenceStore') }}", // Replace with your route
+            type: "POST",
+            data: {
+                source_type: source_type,
+                from_date: from_date,
+                to_date: to_date,
+                ack_no: ack_no,
+                case_no: case_no,
+                evidence_type_ncrp: evidence_type_ncrp,
+                evidence_type_other: evidence_type_other,
+                status: status,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+    // Handle success response
+    alert("Data submitted successfully");
 
-        var from_date = $("#from_date").val();
-        var to_date = $("#to_date").val();
-        var ackno = $("#acknowledgement_number").val();
-        var source_type = $("#source_type").val();
-        var evidence_type = $("#evidence_type").val();
-
-
-        if((from_date!=='') || (ackno!=='')){
-
-        if ($.fn.DataTable.isDataTable('#notice')){
-          $('#notice').DataTable().destroy();
-        }
-        var tableNew = $('#notice').DataTable({
-        processing: true,
-        serverSide: true,
-
-        ajax:{
-        url: "{{ route('get_evidence_list_notice') }}",
-        data: function(d) {
-        return $.extend({}, d, {
-            from_date: from_date,
-            to_date: to_date,
-            ackno: ackno,
-            source_type:source_type,
-            evidence_type:evidence_type,
-         });
-        }
-        },
-        columns: [
-        { data: 'id' },
-        { data: 'acknowledgement_no' },
-        { data: 'evidence_type' },
-        { data: 'url' },
-        { data: 'domain' },
-        { data: 'ip' },
-        @if($hasGenerateTokenPermission) { data: 'edit' } @endif
-        ],
-        order: [0, 'desc'],
-        ordering: true
-        });
-        }
-    })
-
-   function display_notice_list(){
-        var from_date = $("#from_date").val();
-        var to_date = $("#to_date").val();
-        var ackno = $("#acknowledgement_number").val();
-        var source_type = $("#source_type").val();
-        var evidence_type = $("#evidence_type").val();
+    // Access the data from the response
+    var data = response.data;
+    var source_type = response.source_type;
+    var evidence_type_ncrp = response.evidence_type_ncrp;
+    var evidence_type_ncrp_name = response.evidence_type_ncrp_name;
+    var evidence_type_other = response.evidence_type_other;
 
 
-        if ($.fn.DataTable.isDataTable('#notice')){
-          $('#notice').DataTable().destroy();
-        }
-        var tableNew = $('#notice').DataTable({
-        processing: true,
-        serverSide: true,
+    // Process the data as needed
+    console.log(data);
 
-        ajax:{
-        url: "{{ route('get_evidence_list_notice') }}",
-        data: function(d) {
-        return $.extend({}, d, {
-            from_date: from_date,
-            to_date: to_date,
-            ackno: ackno,
-         });
-        }
-        },
-        columns: [
-        { data: 'id' },
-        { data: 'acknowledgement_no' },
-        { data: 'evidence_type' },
-        { data: 'url' },
-        { data: 'domain' },
-        { data: 'ip' },
-        @if($hasGenerateTokenPermission){ data: 'edit' } @endif
-        ],
-        order: [0, 'desc'],
-        ordering: true
-        });
+    // Hide all modals first to ensure they are correctly toggled
+    $('#evidenceModal').modal('hide');
+    $('#noticeTable_ncrp').modal('hide');
+    $('#noticeTable_ncrp_website').modal('hide');
+    $('#noticeTable_ncrp_social_media').modal('hide');
+    $('#noticeTable_other').modal('hide');
+    $('#noticeTable_other_website').modal('hide');
+    $('#noticeTable_other_social_media').modal('hide');
 
-   }
-
-   display_notice_list();
-
-})
-
-</script>
-
-
-<script>
-    function showPortalModal(acknowledgement_no) {
-        // Set the hidden input with the acknowledgment number
-        $('#ack_no').val(acknowledgement_no);
-
-        // Fetch the evidence data corresponding to the acknowledgment number
-        const evidenceData = @json($evidence);
-
-        const filteredData = evidenceData.filter(evidence => evidence.ack_no == acknowledgement_no);
-
-        let evidenceTypeSelect = document.getElementById('evidenceType');
-        let evidenceUrlSelect = document.getElementById('evidenceUrl');
-
-        evidenceTypeSelect.innerHTML = ''; // Clear existing options
-        evidenceUrlSelect.innerHTML = ''; // Clear existing options
-
-        const evidenceTypes = new Set();
-
-        filteredData.forEach(evidence => {
-            evidenceTypes.add(evidence.evidence_type);
-        });
-
-        evidenceTypes.forEach(type => {
-            let typeOption = document.createElement('option');
-            typeOption.value = type;
-            typeOption.text = type;
-            evidenceTypeSelect.appendChild(typeOption);
-        });
-
-        // Populate URLs corresponding to the selected evidence type
-        evidenceTypeSelect.addEventListener('change', function() {
-            let selectedType = this.value;
-            evidenceUrlSelect.innerHTML = ''; // Clear existing options
-            filteredData.forEach(evidence => {
-                if (evidence.evidence_type === selectedType) {
-                    let urlOption = document.createElement('option');
-                    urlOption.value = evidence.url;
-                    urlOption.text = evidence.url;
-                    evidenceUrlSelect.appendChild(urlOption);
-                }
-            });
-        });
-
-        // Trigger change event to populate URLs for the first evidence type
-        evidenceTypeSelect.dispatchEvent(new Event('change'));
-
-        // Show the modal
-        $('#portal-popup').modal('show');
+    // Show the appropriate table based on the conditions
+    if (source_type == 'ncrp') {
+        if (evidence_type_ncrp_name == 'website' && data) {
+            $('#noticeTable_ncrp_website').modal('show'); // Show the website table
+        } else if (evidence_type_ncrp_name != 'website' && evidence_type_ncrp_name != null && data) {
+            $('#noticeTable_ncrp_social_media').modal('show'); // Show the social media table
+        } else if (source_type == 'ncrp' && data) {
+            $('#noticeTable_ncrp').modal('show'); // Show the general table
     }
+}
+
+    if (source_type == 'other') {
+        if (evidence_type_other == 'website'  && data) {
+            $('#noticeTable_other_website').modal('show'); // Show the website table
+        } else if (evidence_type_other != 'website' && evidence_type_other != null  && data) {
+            $('#noticeTable_other_social_media').modal('show'); // Show the social media table
+        } else if (source_type == 'other' && data) {
+            $('#noticeTable_other').modal('show'); // Show the general table
+    }
+}
+
+          // Attach click event handlers to "Generate Notice" buttons
+          $('#noticeTable_ncrp .btn').click(function(){
+                    var noticeId = $(this).data('notice');
+                    // alert(noticeId);// Get the notice ID from button data attribute
+                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                });
+                          // Attach click event handlers to "Generate Notice" buttons
+          $('#noticeTable_ncrp_social_media .btn').click(function(){
+                    var noticeId = $(this).data('notice');
+                    // alert(noticeId);// Get the notice ID from button data attribute
+                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                });
+                          // Attach click event handlers to "Generate Notice" buttons
+          $('#noticeTable_ncrp_website .btn').click(function(){
+                    var noticeId = $(this).data('notice');
+                    // alert(noticeId);// Get the notice ID from button data attribute
+                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                });
+                          // Attach click event handlers to "Generate Notice" buttons
+          $('#noticeTable_other .btn').click(function(){
+                    var noticeId = $(this).data('notice');
+                    // alert(noticeId);// Get the notice ID from button data attribute
+                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                });
+                          // Attach click event handlers to "Generate Notice" buttons
+          $('#noticeTable_other_social_media .btn').click(function(){
+                    var noticeId = $(this).data('notice');
+                    // alert(noticeId);// Get the notice ID from button data attribute
+                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                });
+                          // Attach click event handlers to "Generate Notice" buttons
+          $('#noticeTable_other_website .btn').click(function(){
+                    var noticeId = $(this).data('notice');
+                    // alert(noticeId);// Get the notice ID from button data attribute
+                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                });
+},
+            error: function(xhr, status, error){
+                // Handle error response
+                alert("An error occurred");
+            }
+        });
+    });
+    // Function to generate notice
+    function generateNotice(noticeId, data) {
+        // console.log(data)
+        $.ajax({
+            url: "{{ route('generate.notice') }}", // Replace with your route to generate notice
+            type: "POST",
+            data: {
+                notice_id: noticeId,
+                data: data,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                alert("Notice generated successfully");
+                location.reload();
+                // Process the response if needed
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred while generating notice");
+            }
+        });
+    }
+
+});
 </script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Hide all fields initially
+        $('#ack_no').closest('.form-group').hide();
+        $('#case_no').closest('.form-group').hide();
+        $('#evidence_type_ncrp').closest('.form-group').hide();
+        $('#evidence_type_other').closest('.form-group').hide();
+
+        $('#source_type').change(function() {
+            var selectedValue = $(this).val();
+
+            if (selectedValue === 'ncrp') {
+                // Show Acknowledgement Number and hide Case Number
+                $('#ack_no').closest('.form-group').show();
+                $('#evidence_type_ncrp').closest('.form-group').show();
+                $('#case_no').closest('.form-group').hide();
+                $('#evidence_type_other').closest('.form-group').hide();
+            } else if (selectedValue === 'other') {
+                // Show Case Number and hide Acknowledgement Number
+                $('#ack_no').closest('.form-group').hide();
+                $('#evidence_type_ncrp').closest('.form-group').hide();
+                $('#case_no').closest('.form-group').show();
+                $('#evidence_type_other').closest('.form-group').show();
+            } else {
+                // Hide both fields if no valid option is selected
+                $('#ack_no').closest('.form-group').hide();
+                $('#evidence_type_ncrp').closest('.form-group').hide();
+                $('#case_no').closest('.form-group').hide();
+                $('#evidence_type_other').closest('.form-group').hide();
+            }
+        });
+    });
+    </script>
+
+
 
 
 

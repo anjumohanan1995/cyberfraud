@@ -35,7 +35,6 @@ class Complaint extends Eloquent
         'bank_name',
         'account_id',
         'amount',
-        // 'entry_date',
         'current_status',
         'date_of_action',
         'action_taken_by_name',

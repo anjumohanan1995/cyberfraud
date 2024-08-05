@@ -987,4 +987,101 @@ class EvidenceController extends Controller
 
     }
 
+    public function storeEvidence(Request $request)
+    {
+        $source_type = $request->input('source_type');
+        // dd($source_type);
+        $from_date_input = $request->input('from_date');
+        $to_date_input = $request->input('to_date');
+        $ack_no = $request->input('ack_no');
+        $case_no = $request->input('case_no');
+        $evidence_type_ncrp = $request->input('evidence_type_ncrp');
+        $evidence_type_ncrp_name = Evidence::whereNull('deleted_at')
+                                            ->where('evidence_type_id', $evidence_type_ncrp)
+                                            ->pluck('evidence_type')
+                                            ->unique()
+                                            ->first();
+                                            // dd($evidence_type_ncrp_name);
+        // dd($evidence_type_ncrp);
+        $evidence_type_other = $request->input('evidence_type_other');
+        // dd($evidence_type_other);
+        $status = $request->input('status');
+        // dd($evidence_type);
+
+        // Convert dates to Carbon instances and then to MongoDB compatible date format
+        $from_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($from_date_input)->startOfDay());
+        $to_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($to_date_input)->endOfDay());
+
+        // Initialize query
+        $query = null;
+
+        // Retrieve data based on $source_type
+        if ($source_type == "ncrp") {
+            $query = Evidence::whereNull('deleted_at');
+        } elseif ($source_type == "other") {
+            $query = ComplaintOthers::whereNull('deleted_at');
+        }
+
+
+        // Apply date range filter
+        if ($from_date_input && $to_date_input) {
+            // dd("date");
+            $query->whereBetween('created_at', [$from_date, $to_date]);
+        }
+
+
+        // Apply additional filters
+        if ($ack_no) {
+            // dd("ack_no");
+            $query->where('ack_no', $ack_no);
+        }
+
+        if ($case_no) {
+            // dd("case_no");
+            $query->where('case_number', $case_no);
+        }
+
+        if ($evidence_type_ncrp) {
+            // dd("evidence_type_ncrp");
+            $query->where('evidence_type_id', $evidence_type_ncrp);
+        }
+
+        if ($evidence_type_other) {
+            // dd("evidence_type_other");
+            $query->where('evidence_type', $evidence_type_other);
+        }
+
+        // dd($query->get());
+
+        if ($status) {
+            // dd("status");
+            $query->where('reported_status', $status);
+        }
+
+        $data = $query->get();
+        // dd($data);
+
+        // Execute query and get data
+
+
+        // Your logic to handle the request
+        // For example, querying the database with the provided data
+
+            // Return data to the view
+    return response()->json([
+        'message' => 'Data received successfully',
+        'data' => $data,
+        'source_type' => $source_type,
+        'from_date' => $from_date_input,
+        'to_date' => $to_date_input,
+        'ack_no' => $ack_no,
+        'case_no' => $case_no,
+        'evidence_type_ncrp' => $evidence_type_ncrp,
+        'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+        'evidence_type_other' => $evidence_type_other,
+        'status' => $status
+    ]);
+
+    }
+
 }
