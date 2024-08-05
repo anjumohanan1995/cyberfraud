@@ -25,13 +25,14 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\BankReportController;
-use App\Http\Controllers\ComplaintStatController;
+
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use MongoDB\Operation\DropCollection;
+use App\Http\Controllers\ComplaintStatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,7 +80,6 @@ Route::post('password-update', [LogoutController::class, 'passwordUpdate'])->nam
 
 
 // used default middlewire for authentication.
-//Route::middleware(['auth','verify-otp'])->group(function () {
 Route::middleware(['auth'])->group(function () {
 
 
@@ -89,25 +89,25 @@ Route::middleware(['auth'])->group(function () {
 
 
     //users route starts here.
-    Route::resource('users', UsersController::class);
+    Route::resource('users', UsersController::class)->middleware('check.permission:User Management');
     //profile
     Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
     Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
 
-    Route::resource('roles', RoleController::class);
+    Route::resource('roles', RoleController::class)->middleware('check.permission:Role Management');
     Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
-    Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission');
-    Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store');
+    Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission')->middleware('check.permission:Role Management');
+    Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store')->middleware('check.permission:Role Management');
 
 
 
 
-    // Route::resource('modus', ModusController::class);
-    // Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
+    Route::resource('modus', ModusController::class);
+    Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
 
     //permmission route starts here.
-    Route::resource('permissions', PermissionController::class);
+    Route::resource('permissions', PermissionController::class)->middleware('check.permission:Permission Management');
     Route::get('users-management/permissions/get', [PermissionController::class, 'getPermissions'])->name("get.permissions");
 
     Route::resource('police_stations', PoliceStationsController::class);
@@ -115,7 +115,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     //bank case status route starts here.
-    Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index");
+    Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index")->middleware('check.permission:Upload NCRP Case Data Management,Upload Bank Action');
     Route::post('bank-case-data/store', [BankCasedataController::class, 'store'])->name("bank-case-data.store");
 
     Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
@@ -126,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('police_stations', PoliceStationsController::class);
     Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
 
-    Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints");
+    Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints")->middleware('check.permission:Upload NCRP Case Data Management,Upload Primary Data');
     Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
 
     Route::get('/no-permission', function () {
@@ -134,17 +134,17 @@ Route::middleware(['auth'])->group(function () {
     });
 
     //case data controller starts here.
-    Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index");
+    Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index")->middleware('check.permission:NCRP Case Data Management');
     Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
     // Route::post('case-data/post-datalist/filter', [CaseDataController::class, 'getDatalist'])->name("post.datalist-filter");
     Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
-    Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data");
+    Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data")->middleware('check.permission:Upload NCRP Case Data Management,Upload Bank Action');
     Route::get('case-data/details-view', [CaseDataController::class, 'detailsView'])->name("case-data/details-view");
-    Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view");
+    Route::get('case-data/{id}/view', [CaseDataController::class, 'caseDataView'])->name("case-data.view")->middleware('check.permission:NCRP Case Data Management,Show Detail Page');;
     Route::post('/update-transaction-amount', [CaseDataController::class, 'updateTransactionAmount'])->name('update.transaction.amount');
 
     //for listing casedata of cyberdomain souurcetype
-    Route::get('case-data-others', [CaseDataController::class, 'caseDataOthers'])->name("case-data-others");
+    Route::get('case-data-others', [CaseDataController::class, 'caseDataOthers'])->name("case-data-others")->middleware('check.permission:Other Case Data Management');
     Route::get('case-data/get-datalist-others', [CaseDataController::class, 'getDatalistOthers'])->name("get.datalist.others");
 
     Route::post('case-data/edit', [CaseDataController::class, 'editdataList'])->name("edit.datalist");
@@ -158,7 +158,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('activateLinkIndividualOthers', [CaseDataController::class, 'activateLinkIndividualOthers'])->name('activateLinkIndividualOthers');
 
     //for uploading others case data
-    Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData");
+    Route::get('upload-others', [CaseDataController::class, 'uploadOthersCaseData'])->name("upload-others-caseData")->middleware('check.permission:Upload Other Case Data Management');
 
     //for creating and download excel tmplate of other case data upload
 
@@ -179,9 +179,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
 
 
-    Route::resource('sourcetype', SourceTypeController::class);
+    Route::resource('sourcetype', SourceTypeController::class)->middleware('check.permission:Source Type Management');
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
-    Route::get('upload-registrar', [SourceTypeController::class, 'uploadRegistrar'])->name("upload-registrar");
+    Route::get('upload-registrar', [SourceTypeController::class, 'uploadRegistrar'])->name("upload-registrar")->middleware('check.permission:Source Type Management,Upload registrar');
     Route::post('registrarStore', [SourceTypeController::class, 'registrarStore'])->name("registrar.store");
 
 //dashboard graph
@@ -189,15 +189,15 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 
-    Route::get('reports', [ReportsController::class, 'index'])->name("reports.index");
+    Route::get('reports', [ReportsController::class, 'index'])->name("reports.index")->middleware('check.permission:Reports Management');
     // Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-othersourcetype', [ReportsController::class, 'getDatalistOthersourcetype'])->name("get.datalist.othersourcetype");
 
-    Route::resource('evidencetype', EvidenceTypeController::class);
+    Route::resource('evidencetype', EvidenceTypeController::class)->middleware('check.permission:Evidence Type Management');
     Route::get('evidencetype-list/get', [EvidenceTypeController::class, 'getevidencetype'])->name("get.evidencetype");
 
-    Route::resource('profession', ProfessionController::class);
+    Route::resource('profession', ProfessionController::class)->middleware('check.permission:Source Type Management,Add Profession');
     Route::get('profession-list/get', [ProfessionController::class, 'getprofession'])->name("get.profession");
 
 
@@ -214,23 +214,23 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     //evidence management
 
-    Route::get('evidence.management', [EvidenceController::class, 'evidenceManagement'])->name('evidence.management');
+    Route::get('evidence.management', [EvidenceController::class, 'evidenceManagement'])->name('evidence.management')->middleware('check.permission:Evidence Management');
     Route::get('evidence.ncrp', [EvidenceController::class, 'evidenceNcrp'])->name('get.evidence.ncrp');
     Route::get('evidence.others', [EvidenceController::class, 'evidenceOthers'])->name('get.evidence.others');
 
 
     //notice module
 
-    Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence');
+    Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence')->middleware('check.permission:Notice Management,Against Evidence Permission');
 
     Route::get('evidence-list-notice', [NoticeController::class,'evidenceListNotice'])->name('get_evidence_list_notice');
 
     //mule account
-    Route::get('muleaccount', [MuleAccountController::class,'Muleaccount'])->name('muleaccount');
+    Route::get('muleaccount', [MuleAccountController::class,'Muleaccount'])->name('muleaccount')->middleware('check.permission:Mule Account Management');
     Route::get('muleaccount-list', [MuleAccountController::class,'muleaccountList'])->name('get_muleaccount_list');
 
     // category module
-    Route::resource('category', CategoryController::class);
+    Route::resource('category', CategoryController::class)->middleware('check.permission:Source Type Management');
     Route::get('get-categories', [CategoryController::class,'getCategories'])->name('get.categories');
     Route::post('add-category', [CategoryController::class,'addCategory'])->name('add.category');
 
@@ -241,16 +241,16 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     //Sub CAtegory module
 
-    Route::resource('subcategory', SubCategoryController::class);
+    Route::resource('subcategory', SubCategoryController::class)->middleware('check.permission:Source Type Management,Add Subcategory');
     Route::get('get-subcategories', [SubCategoryController::class,'getSubCategories'])->name('get.subcategories');
-    Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory');
+    Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory')->middleware('check.permission:Source Type Management,Add Subcategory');
 
     // Mail Merge
-    Route::get('/get-mailmerge-list/{ack_no}', [MailController::class, 'mailMergeList'])->name('get-mailmerge-list');
+    Route::get('/get-mailmerge-list/{ack_no}', [MailController::class, 'mailMergeList'])->name('get-mailmerge-list')->middleware('check.permission:Evidence Management,Show NCRP mail Merge');
     Route::get('get-mailmergelist-ncrp', [MailController::class, 'getMailmergeListNcrp'])->name("get.mailmergelist.ncrp");
     // Route::get('/get-mailmerge-preview', [MailController::class, 'mailMergePreview'])->name('get-mailmerge-preview');
 
-    Route::get('/get-mailmerge-listother/{case_number}', [MailController::class, 'mailMergeListOther'])->name('get-mailmerge-listother');
+    Route::get('/get-mailmerge-listother/{case_number}', [MailController::class, 'mailMergeListOther'])->name('get-mailmerge-listother')->middleware('check.permission:Evidence Management,Show Other mail Merge');
     Route::get('get-mailmergelist-other', [MailController::class, 'getMailmergeListOther'])->name("get.mailmergelist.other");
     // Route::get('/get-mailmerge-previewOther/{evidence_type}/{option}/{case_no}', [MailController::class, 'mailMergePreviewOther'])->name('get-mailmerge-previewOther');
 
@@ -273,14 +273,10 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('/get-portal-link/{registrar}', [MailController::class, 'getPortalLink'])->name('get-portal-link');
     Route::post('/update-portal-count', [MailController::class, 'updatePortalCount'])->name('update.portal.count');
 
-
-});
-//Route for bank Reports
-Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
-Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
-
-Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
-Route::get('/above-report-data', [BankReportController::class, 'getAboveData'])->name('aboveReport');
+    Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
+    Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
+    Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
+    Route::get('/above-report-data', [BankReportController::class, 'getAboveData'])->name('aboveReport');
 
 Route::get('/complaint-stats', [ComplaintStatController::class, 'getComplaintStats'])->name('complaint.stats');
 Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableFilters'])->name('complaint.filters');

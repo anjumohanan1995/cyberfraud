@@ -531,7 +531,7 @@ $records = $query->get();
         $affected = Complaint::where('acknowledgement_no', $ackno)
             ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
 
-            ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
+           // ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);
