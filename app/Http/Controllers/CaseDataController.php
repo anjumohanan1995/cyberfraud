@@ -530,7 +530,7 @@ $records = $query->get();
     try {
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
-            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()])
+            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
 
            // ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
@@ -579,7 +579,7 @@ $records = $query->get();
         }
 
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
-       
+
 
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();

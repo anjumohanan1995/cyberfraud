@@ -162,7 +162,7 @@
                 { data: 'amount_lost', name: 'amount_lost' },
                 { data: 'amount_pending', name: 'amount_pending' },
                 { data: 'pending_banks', name: 'pending_banks' },
-                // { data: 'modus', name: 'modus' }
+                 { data: 'modus', name: 'modus' }
                 // Additional columns can be added here
             ],
             order: [[0, 'desc']],

@@ -283,7 +283,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 
-});
+
 //Route for bank Reports
 Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
 Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');

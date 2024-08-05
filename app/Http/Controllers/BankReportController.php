@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bank;
+use App\Models\Modus;
+use App\Models\ComplaintAdditionalData;
 use App\Models\BankCasedata;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
@@ -319,9 +321,14 @@ if (empty($bankCaseData)) {
                 $bankNames = 'No pending banks';
             }
             $filteredResults[$ackNo]['pending_banks'] = $bankNames;
-
-
-
+            $ACK = (string)$ackNo;
+            //Fetching Modus
+            //dd($ACK);
+            $modus = ComplaintAdditionalData::Where('ack_no', $ACK)->pluck('modus')->first();
+//dd($modus);
+$modus_name = Modus::Where('_id', $modus)->pluck('name')->first();
+//dd($modus_name);
+$filteredResults[$ackNo]['modus'] = $modus_name;
         }
 
 
