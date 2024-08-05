@@ -96,6 +96,7 @@ class PermissionSeeder extends Seeder
                     '6' => 'Generate Token',
                     '7' => 'Against Bank Management',
                     '8' => 'Against Mule Account Management',
+                    '9' => 'Notice View'
                 ]),
             ],
             [

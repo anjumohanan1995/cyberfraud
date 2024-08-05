@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Carbon\Carbon;
 
 
 use App\Hospital;
 use Auth;
-use DateTime;
+
 use DateTime;
 
 class ComplaintImport implements ToCollection, WithStartRow
@@ -60,8 +61,30 @@ class ComplaintImport implements ToCollection, WithStartRow
         $collection->transform(function ($row) {
 
             // Convert the 'entry_date' field
-            $entryDate = DateTime::createFromFormat('d-m-y H:i', $row[10]);
-            $formattedEntryDate = $entryDate ? $entryDate->format('Y-m-d H:i:s') : null;
+
+            // if (strpos($row[10], ' ') === false) {
+
+            //     $entryDate = $row[10].' 00:00:00';
+            //     $entryDate = DateTime::createFromFormat('d-m-Y H:i:s', $entryDate);
+            //     if($entryDate == false){
+            //         $entryDate = $row[10].' 00:00:00';
+            //         $entryDate = DateTime::createFromFormat('d/m/Y H:i:s', $entryDate);
+            //     }
+            //  }
+            //  else{
+            //     $entryDate = DateTime::createFromFormat('d-m-Y H:i:s', $row[10]);
+            //     if($entryDate == false){
+            //         $entryDate = DateTime::createFromFormat('d/m/Y H:i:s', $entryDate);
+            //     }
+            //  }
+            //  if($row[10]===null){
+            //    $entryDate=null;
+
+            // }
+
+            // If that fails, try to create DateTime object from the date-only format
+
+            // $formattedEntryDate = $entryDate ? $entryDate->format('Y-m-d H:i:s') : null;
 
             return [
                 'acknowledgement_no'        => $row[1],
@@ -73,9 +96,8 @@ class ComplaintImport implements ToCollection, WithStartRow
                 'bank_name'                  => $row[7],
                 'account_id'                  => $row[8],
                 'amount'                    => $row[9],
-                'entry_date'                => $formattedEntryDate,
-                'entry_date'                => DateTime::createFromFormat('d/m/Y H:i:s', $row[10]),
-                'current_status'             => $row[11],
+                'entry_date'                => $this->parseDate(@$row[10]),
+                'current_status'             => $this->parseDate(@$row[11]),
                 'date_of_action'            => $row[12],
                 'action_taken_by_name'         => "",
                 'action_taken_by_designation'   => "",
@@ -164,6 +186,59 @@ class ComplaintImport implements ToCollection, WithStartRow
     {
 
         return is_numeric($transaction_id) ? (string) $transaction_id : $transaction_id;
+    }
+
+    function parseDate($dateString) {
+        // Define possible date formats with placeholders for two-digit years
+        if (is_numeric($dateString)) {
+            return $this->excelSerialToDate($dateString);
+        }
+
+
+        $formats = [
+            'd/m/Y H:i:s',
+            'd-m-Y H:i:s',
+            'd/m/Y',
+            'd-m-Y',
+            'd-F-Y',
+            'd-F-y',
+            'd/m/Y H:i',
+            'd-m-Y H:i',
+            'd/M/Y',
+            'd-M-Y'
+        ];
+
+        // Try each format until one succeeds
+        foreach ($formats as $format) {
+            try {
+                $date = Carbon::createFromFormat($format, $dateString);
+
+                // Check if year is two-digit
+                if (strlen($date->year) == 2) {
+                    // Assuming years 00-29 are 2000-2029, and 30-99 are 1930-1999
+                    $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
+                }
+
+                return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
+            } catch (\Exception $e) {
+                // Continue to the next format
+            }
+        }
+
+        // Return null or handle error if no format matches
+        return null;
+    }
+
+    function excelSerialToDate($serial) {
+        // Convert Excel serial date to a Carbon date
+        try {
+            $baseDate = Carbon::create(1899, 12, 30); // Excel starts from Dec 30, 1899
+            $date = $baseDate->addDays((int)$serial);
+
+            return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
+        } catch (\Exception $e) {
+            return null; // Return null if conversion fails
+        }
     }
 
 

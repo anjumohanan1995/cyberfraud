@@ -273,10 +273,23 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('/get-portal-link/{registrar}', [MailController::class, 'getPortalLink'])->name('get-portal-link');
     Route::post('/update-portal-count', [MailController::class, 'updatePortalCount'])->name('update.portal.count');
 
-    Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
-    Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
-    Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
-    Route::get('/above-report-data', [BankReportController::class, 'getAboveData'])->name('aboveReport');
+    Route::post('/evidence/store', [EvidenceController::class, 'storeEvidence'])->name('evidenceStore');
+    Route::post('/generate/notice', [NoticeController::class, 'generateNotice'])->name('generate.notice');
+    Route::get('/notices', [NoticeController::class, 'Notices'])->name('notices.index');
+    Route::get('/notices/{id}', [NoticeController::class, 'showNotice'])->name('notices.show');
+    Route::get('/notices/{id}/edit', [NoticeController::class, 'editNoticeView'])->name('notices.edit');
+    Route::put('/notices/{id}', [NoticeController::class, 'updateNotice'])->name('notices.update');
+
+
+
+
+});
+//Route for bank Reports
+Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
+Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
+
+Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
+Route::get('/above-report-data', [BankReportController::class, 'getAboveData'])->name('aboveReport');
 
 
 });

@@ -24,10 +24,11 @@ use App\Models\SourceType;
 use Excel;
 use App\Models\EvidenceType;
 use App\exports\SampleExport;
+use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
-use App\Models\RolePermission;
+
 
 
 
@@ -529,7 +530,7 @@ $records = $query->get();
     try {
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
-            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
+            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()])
 
            // ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
@@ -578,18 +579,7 @@ $records = $query->get();
         }
 
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
-        $sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
-        $hold_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
-        ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
-        //dd($hold_amount );
-        // $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
-        //                             ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
-        //                             ->sum('transaction_amount');
-        $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
-                                    ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos' , 'aadhaar enabled payment System'])
-                                    ->sum('dispute_amount');
-
-        $pending_amount = $sum_amount - $hold_amount - $lost_amount;
+       
 
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();
@@ -685,6 +675,19 @@ while (BankCaseData::where('Layer', $currentLayer)->where('acknowledgement_no', 
 
 
 //================================FOR FINDING DESPUTE AMOUNT====================================
+
+$sum_amount = Complaint::where('acknowledgement_no', (int)$id)->where('com_status',1)->sum('amount');
+$hold_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
+->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
+//dd($hold_amount );
+// $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
+//                             ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
+//                             ->sum('transaction_amount');
+$lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_status',1)
+                            ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos' , 'aadhaar enabled payment System'])
+                            ->sum('dispute_amount');
+
+$pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         $transaction_based_array_final = [];$final_array=[];
         for($i=0;$i<count($layer_one_transactions);$i++){

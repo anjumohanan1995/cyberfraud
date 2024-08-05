@@ -21,7 +21,8 @@ class Complaint extends Eloquent
     protected $casts = [
 
         'entry_date' => 'datetime',
-
+        'date_of_action' => 'datetime',
+        
     ];
     protected $fillable = [
         'source_type',
@@ -34,7 +35,6 @@ class Complaint extends Eloquent
         'bank_name',
         'account_id',
         'amount',
-        // 'entry_date',
         'current_status',
         'date_of_action',
         'action_taken_by_name',
