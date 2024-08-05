@@ -50,23 +50,25 @@
                                                                 <div class="col-md-2">
                                                                     <div class="form-group">
                                                                         <label for="from-date-new">From Date:</label>
-                                                                        <input type="date" class="form-control" id="from-date-new"  value="{{ $today }}" name="from_date">
+                                                                        <input type="date" class="form-control" id="from-date-new" value="{{ $today }}" name="from_date">
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-2">
                                                                     <div class="form-group">
                                                                         <label for="to-date-new">To Date:</label>
-                                                                        <input type="date" class="form-control" id="to-date-new"  value="{{ $today }}" name="to_date" onchange="setFromDatencrp()">
+                                                                        <input type="date" class="form-control" id="to-date-new" value="{{ $today }}" name="to_date" onchange="setFromDatencrp()">
                                                                     </div>
                                                                 </div>
+                                                                <div class="col-md-2 fil-btn">
+                                                            <div class="form-group">
+                                                                <button type="submit" class="btn btn-primary">Submit</button>
                                                             </div>
-                                                            <div class="row">
-                                                                <div class="col-md-12 text-right">
-                                                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                                                    <a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>
-                                                                    <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
                                                                 </div>
                                                             </div>
+                                                            {{-- <div class="row">
+                                                                <div class="col-md-12  text-right">
+                                                                </div>
+                                                            </div> --}}
                                                         </form>
                                                         <div class="table-responsive">
                                                             <table id="example" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
@@ -77,7 +79,7 @@
                                                                         <th>District</th>
                                                                         <th>Reported Date & Time</th>
                                                                         <th>Amount Reported</th>
-                                                                        <th>TXN Date</th>
+                                                                        <th>Transaction Date</th>
                                                                         <th>Lien Amount</th>
                                                                         <th>Amount Lost</th>
                                                                         <th>Amount Pending</th>
@@ -107,7 +109,21 @@
     </div>
 </div>
 @endsection
-
+<style>
+    .fil-btn{
+    padding-top: 30px;
+}
+    .csv-btn {
+    color: #fff!important;
+    background-color: #28a745!important;
+    border-color: #28a745!important;
+}
+.excel-btn {
+    color: #fff!important;
+    background-color: #17a2b8!important;
+    border-color: #17a2b8!important;
+}
+</style>
 @section('scripts')
 <script>
     $(document).ready(function () {
@@ -119,28 +135,42 @@
                 data: function (d) {
                     d.from_date = $('#from-date-new').val();
                     d.to_date = $('#to-date-new').val();
+                },
+                error: function(xhr, error, thrown) {
+                    let response = xhr.responseJSON;
+                    let errorMessage = response && response.error ? response.error : 'An error occurred. Please try again.';
+                    $('#alert_ajaxx').html('<div class="alert alert-danger">' + errorMessage + '</div>').show();
                 }
             },
+            dom: 'Bfrtip',
+ buttons: [
+    { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
+    { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
+ ],
             columns: [
-                { data: 'id', name: 'id' },
+                {
+                    "data": null, "render": function (data, type, full, meta) {
+                        return meta.row + 1;
+                    }
+                },
                 { data: 'acknowledgement_no', name: 'acknowledgement_no' },
                 { data: 'district', name: 'district' },
                 { data: 'reported_date', name: 'reported_date' },
-                // { data: 'total', name: 'total' },
-                // { data: 'actual_amount', name: 'actual_amount' },
-                // { data: 'actual_amount_lost_on', name: 'actual_amount_lost_on' },
-                // { data: 'actual_amount_hold_on', name: 'actual_amount_hold_on' },
-                // { data: 'hold_amount_otherthan', name: 'hold_amount_otherthan' },
-                // { data: 'total_hold', name: 'total_hold' },
-                // { data: 'total_amount_lost_from_eco', name: 'total_amount_lost_from_eco' },
-                // { data: 'amount_for_pending_action', name: 'amount_for_pending_action' }
+                { data: 'total_amount', name: 'total_amount' },
+                { data: 'transaction_period', name: 'transaction_period' },
+                { data: 'lien_amount', name: 'lien_amount' },
+                { data: 'amount_lost', name: 'amount_lost' },
+                { data: 'amount_pending', name: 'amount_pending' },
+                { data: 'pending_banks', name: 'pending_banks' },
+                // { data: 'modus', name: 'modus' }
+                // Additional columns can be added here
             ],
             order: [[0, 'desc']],
-            // Add any additional options you need
         });
 
         $('#complaint-form-ncrp').on('submit', function (e) {
             e.preventDefault();
+            $('#alert_ajaxx').hide();  // Hide any previous error messages
             table.draw();
         });
     });

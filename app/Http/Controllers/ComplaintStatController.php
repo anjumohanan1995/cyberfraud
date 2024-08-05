@@ -58,32 +58,16 @@ public function getComplaintStats(Request $request)
     $userId = $request->query('user_id');
 
     $query = [];
-
-    // Check and convert dates to MongoDB UTCDateTime if provided
-    if ($startDate && $endDate) {
-        try {
-            $startDate = new \MongoDB\BSON\UTCDateTime(new \DateTime($startDate));
-            $endDate = new \MongoDB\BSON\UTCDateTime(new \DateTime($endDate));
-            $query['status_changed'] = [
-                '$gte' => $startDate,
-                '$lte' => $endDate
-            ];
-        } catch (\Exception $e) {
-            \Log::error('Date conversion error: ' . $e->getMessage());
-            return response()->json(['error' => 'Invalid date format'], 400);
-        }
-    }
-
-    if ($userId) {
-        $query['assigned_to'] = $userId;
-    }
-
     // Log the query for debugging
     \Log::info('MongoDB Query:', $query);
 
     // Fetch complaints with applied filters
     $complaints = Complaint::where($query)->get();
+    if($startDate && $endDate){
+        $complaints = Complaint::whereBetween('status_changed',[Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay()])->get();
+    }
 
+    //dd($complaints);
     // Fetch all users
     $users = User::all()->keyBy('_id');
 

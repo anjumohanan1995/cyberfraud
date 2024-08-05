@@ -16,3 +16,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+resources/views/dashboard/dashboard_bk.blade.php
+resources/views/includes/sidebar-left_my_bk.blade.php
+routes/web (1).php
+routes/web_my_bk.php
+routes/web_mycode.php
+resources/views/dashboard/dashboard.blade_mycode.php
+app/Http/Controllers/ComplaintStatController_mycode.php
