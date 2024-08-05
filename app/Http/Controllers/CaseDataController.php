@@ -27,6 +27,7 @@ use App\exports\SampleExport;
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use DateTime;
 use Illuminate\Support\Facades\Log;
 
 
@@ -385,8 +386,11 @@ $records = $query->get();
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $utc_date = Carbon::parse($com->entry_date, 'UTC')->setTimezone('Asia/Kolkata');
-                $entry_date = $utc_date->format('Y-m-d H:i:s');
+                $date = new DateTime($com->entry_date);
+                $entry_date = $date->format('l, F j, Y g:i A');
+                // dd($entry_date);
+                // $utc_date = Carbon::parse($com->entry_date, 'UTC')->setTimezone('Asia/Kolkata');
+                // $entry_date = $utc_date->format('Y-m-d H:i:s');
                 $current_status = $com->current_status;
                 $date_of_action = $com->date_of_action;
                 $action_taken_by_name = $com->action_taken_by_name;
@@ -530,9 +534,9 @@ $records = $query->get();
     try {
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
-            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()])
+            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
 
-            ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
+            // ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);

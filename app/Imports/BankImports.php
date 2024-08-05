@@ -41,6 +41,8 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     }
     public function collection(Collection $collection)
     {
+       
+        $errors = [];
         $acknowledgementNos = Complaint::pluck('acknowledgement_no')->toArray();
 
         $collection->transform(function ($values) {
@@ -62,14 +64,14 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'tid' => $values[11],
                 'approval_code' => $values[12],
                 'merchant_name' => $values[13],
-             
-               'transaction_date' => $this->parseDate(@$values[14]),
+                'transaction_date' => $values[14],
                 'transaction_id_sec' => $values[15],
                 'transaction_amount' => $values[16],
                 'reference_no' => $values[17],
                 'remarks' => $values[18],
-                'date_of_action' => $this->parseDate(@$values[19]),
-                 'action_taken_by_bank_sec' => $values[20],
+                 'date_of_action' => $values[19],
+           
+                'action_taken_by_bank_sec' => $values[20],
                 'action_taken_name' => $values[21],
                 'action_taken_email' => $values[22],
                 'branch_location' => $values[23],
@@ -78,26 +80,103 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             ];
         });
 
-        $rules = [
-            '*.acknowledgement_no' => 'required|in:' . implode(',', $acknowledgementNos),
+        $rows = $collection; 
+      
         
-        ];
+        foreach ($rows as $index => $row){
+         
+            $rowIndex = $index + 1;
         
-        $validator = Validator::make($collection->toArray(), $rules);
+            $data = [
+                'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
+                'transaction_id_or_utr_no' => $row['transaction_id_or_utr_no'] ?? null,
+                'Layer' => $row['Layer'] ?? null,
+                'account_no_1' => $row['account_no_1'] ?? null,
+                'action_taken_by_bank' => $row['action_taken_by_bank'] ?? null,
+                'bank' => $row['bank'] ?? null,
+                'account_no_2' => $row['account_no_2'] ?? null,
+                'ifsc_code' => $row['ifsc_code'] ?? null,
+                'cheque_no' => $row['cheque_no'] ?? null,
 
-        if ($validator->fails()) {
-            // Handle validation failure
-            throw new \Illuminate\Validation\ValidationException($validator);
+                'mid' => $row['mid'] ?? null,
+                'tid' => $row['tid'] ?? null,
+                'approval_code' => $row['approval_code'] ?? null,
+                'merchant_name' => $row['merchant_name'] ?? null,
+                'transaction_date' => $row['transaction_date'] ?? null,
+
+                'transaction_id_sec' => $row['transaction_id_sec'] ?? null,
+                'transaction_amount' => $row['transaction_amount'] ?? null,
+                'reference_no' => $row['reference_no'] ?? null,
+                'remarks' => $row['remarks'] ?? null,
+                'date_of_action' => $row['date_of_action'] ?? null,
+
+                'action_taken_by_bank_sec' => $row['action_taken_by_bank_sec'] ?? null,
+                'action_taken_name' => $row['action_taken_name'] ?? null,
+                'action_taken_email' => $row['action_taken_email'] ?? null,
+                'branch_location' => $row['branch_location'] ?? null,
+                'branch_manager_details' => $row['branch_manager_details'] ?? null,
+               
+            ];
+
+            $validator = Validator::make($data, [
+
+                'acknowledgement_no' => 'required|numeric',
+                'transaction_id_or_utr_no' => 'required',
+                'Layer' => 'required|numeric',
+                'account_no_1' => 'nullable',
+                'action_taken_by_bank' => 'required',
+                'bank' => 'required',
+                'account_no_2' => 'nullable',
+                'ifsc_code' => 'nullable',
+                'cheque_no' => 'nullable',
+
+                'mid' => 'nullable',
+                'tid' => 'nullable',
+                'approval_code' => 'nullable',
+                'merchant_name' => 'nullable',
+                'transaction_date' => 'required',
+
+                'transaction_id_sec' => 'nullable',
+                'transaction_amount' => 'required',
+                'reference_no' => 'nullable',
+                'remarks' => 'nullable',
+                'date_of_action' => 'required',
+
+                'action_taken_by_bank_sec' => 'nullable',
+                'action_taken_name' => 'nullable',
+                'action_taken_email' => 'nullable',
+                'branch_location' => 'nullable',
+                'branch_manager_details' => 'nullable',
+
+
+
+            ], $this->validationMessages($rowIndex));
+
+            if ($validator->fails()) {
+                $errors[$rowIndex] = $validator->errors()->all();
+            } 
+            if (!empty($errors)) {
+                // Create a validator with accumulated errors to throw ValidationException
+                $dummyValidator = Validator::make([], []);
+                foreach ($errors as $rowIndex => $messages) {
+                    foreach ($messages as $message) {
+                        $dummyValidator->errors()->add('row_'.$rowIndex, $message);
+                    }
+                }
+                throw new \Illuminate\Validation\ValidationException($dummyValidator);
+            }
+          
+          
+        
+          
+          
         }
-        // $validate = Validator::make($collection->toArray(),[
-        //     '*.acknowledgement_no' => 'required',
 
-        // ])->validate();
-  
         DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
 
         foreach ($collection as $collect){
 
+       
             // $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
 
 
@@ -119,13 +198,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->tid = $collect['tid'];
                 $bank_data->approval_code = $collect['approval_code'];
                 $bank_data->merchant_name = $collect['merchant_name'];
-                $bank_data->transaction_date = $collect['transaction_date'];
+                $bank_data->transaction_date = $this->parseDate($collect['transaction_date']);
                 $bank_data->transaction_id_sec = $this->convertAcknoToString($collect['transaction_id_sec']);
                 $bank_data->transaction_amount = $collect['transaction_amount'];
                 $bank_data->reference_no = $collect['reference_no'];
 
                 $bank_data->remarks = $collect['remarks'];
-                $bank_data->date_of_action = $collect['date_of_action'];
+                $bank_data->date_of_action = $this->parseDate($collect['date_of_action']);
                 $bank_data->action_taken_by_bank_sec = $collect['action_taken_by_bank_sec'];
                 $bank_data->action_taken_name = $collect['action_taken_name'];
                 $bank_data->action_taken_email = $collect['action_taken_email'];
@@ -184,6 +263,33 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
         //     }
         // }
     }
+    
+}
+
+protected function validationMessages($index)
+{
+    return [
+        'acknowledgement_no.required' => 'Row ' . ($index) . ': Acknowledgement number is required.',
+        'transaction_id_or_utr_no.required' => 'Row ' . ($index) . ': Transaction id or UTR number field is required.',
+        'transaction_id_or_utr_no.regex' => 'Row ' . $index . ': Transaction/UTR ID must be alphanumeric.',
+        
+        'Layer.required' => 'Row ' . ($index) . ': Layer field is required.',
+        
+        'Layer.numeric' => 'Row ' . ($index) . ': Layer field is invalid.',
+        'action_taken_by_bank.required' => 'Row ' . ($index) . ': Action taken by bank field is required.',
+        'bank.required' => 'Row ' . ($index) . ': Bank field is required.',
+        'bank.required' => 'Row ' . ($index) . ': Bank field is required.',
+        'transaction_date.required' => 'Row ' . ($index) . ': Transaction Date is required.',
+
+        'transaction_id_sec.regex' => 'Row ' . $index . ': Transaction ID must be alphanumeric.',
+        
+        'transaction_amount.required' => 'Row ' . ($index) . ': Transaction Amount is required.',
+
+        'date_of_action.required' => 'Row ' . $index . ': Date of action is required.',
+        'date_of_action.valid_date_format' => 'Row ' . $index . ': Date of action is not in a valid format.',
+
+        
+    ];
 }
 
     protected function convertAcknoToString($acknowledgement_no)
@@ -197,40 +303,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
         if (is_numeric($dateString)) {
             return $this->excelSerialToDate($dateString);
         }
-        
-          
-        $formats = [
-            'd/m/Y H:i:s',
-            'd-m-Y H:i:s',
-            'd/m/Y',
-            'd-m-Y',
-            'd-F-Y',
-            'd-F-y',
-            'd/m/Y H:i',
-            'd-m-Y H:i',
-            'd/M/Y',
-            'd-M-Y'
-        ];
-    
-        // Try each format until one succeeds
-        foreach ($formats as $format) {
-            try {
-                $date = Carbon::createFromFormat($format, $dateString);
-    
-                // Check if year is two-digit
-                if (strlen($date->year) == 2) {
-                    // Assuming years 00-29 are 2000-2029, and 30-99 are 1930-1999
-                    $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
-                }
-    
-                return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
-            } catch (\Exception $e) {
-                // Continue to the next format
-            }
-        }
-    
-        // Return null or handle error if no format matches
-        return null;
+     
     }
 
     function excelSerialToDate($serial) {
@@ -244,5 +317,8 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             return null; // Return null if conversion fails
         }
     }
+   
+
+    
 
 }

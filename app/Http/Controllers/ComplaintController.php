@@ -64,16 +64,17 @@ class ComplaintController extends Controller
 
                     // Import data from the file
                     Excel::import(new ComplaintImport($source_type), $file);
-
+                    
 
                         // Provide feedback to the user
                         return redirect()->back()->with('success', 'Form submitted successfully!');
 
-                    } catch (\Exception $e){
+                    } 
+                    catch (\Exception $e){
                         if ($e instanceof \Illuminate\Validation\ValidationException) {
                             // Retrieve the validation errors
                             $errors = $e->validator->getMessageBag()->all();
-
+                    
                             // Redirect back with validation errors and input data
                             return redirect()->back()->withErrors($errors)->withInput();
                         } else {

@@ -51,20 +51,26 @@ class BankCasedataController extends Controller
            
                 // Provide feedback to the user.
                 return redirect()->back()->with('success', 'File imported successfully!');
-            } catch (\Exception $e) {
-
+            }  catch (\Exception $e){
                 if ($e instanceof \Illuminate\Validation\ValidationException) {
                     // Retrieve the validation errors
                     $errors = $e->validator->getMessageBag()->all();
-
+                    
+            
                     // Redirect back with validation errors and input data
                     return redirect()->back()->withErrors($errors)->withInput();
                 } else {
                     // Handle other exceptions
                     return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                 }
+
+                // return response()->json([
+                //     'error' => 'An error occurred during import',
+                //     'message' => $e->getMessage()
+                // ], 500);
             }
-        } else {
+        } 
+         else {
             // No file uploaded.
             return redirect()->back()->with('error', 'No file uploaded. Please select a file to import.');
         }

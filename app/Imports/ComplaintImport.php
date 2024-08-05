@@ -47,57 +47,25 @@ class ComplaintImport implements ToCollection, WithStartRow
      */
     public function collection(Collection $collection)
     {
-
-        // dd($collection);
-        /*dd($collection);
-         return new Patient([
-            'name'     => @$collection[0],
-            'age'    => @$collection[1],
-            'user_id' =>Auth::user()->id
-
-
-        ]);*/
-
+       
+        $errors = [];
+       
         $collection->transform(function ($row) {
-
-            // Convert the 'entry_date' field
-           
-            // if (strpos($row[10], ' ') === false) {
-                
-            //     $entryDate = $row[10].' 00:00:00'; 
-            //     $entryDate = DateTime::createFromFormat('d-m-Y H:i:s', $entryDate);
-            //     if($entryDate == false){
-            //         $entryDate = $row[10].' 00:00:00'; 
-            //         $entryDate = DateTime::createFromFormat('d/m/Y H:i:s', $entryDate);
-            //     }
-            //  }
-            //  else{
-            //     $entryDate = DateTime::createFromFormat('d-m-Y H:i:s', $row[10]);
-            //     if($entryDate == false){
-            //         $entryDate = DateTime::createFromFormat('d/m/Y H:i:s', $entryDate);
-            //     }
-            //  }    
-            //  if($row[10]===null){
-            //    $entryDate=null;
-               
-            // }
-                               
-            // If that fails, try to create DateTime object from the date-only format
-   
-            // $formattedEntryDate = $entryDate ? $entryDate->format('Y-m-d H:i:s') : null;
-
+        //    dd($row[10]);
             return [
                 'acknowledgement_no'        => $row[1],
                 'district'                  => $row[2],
                 'police_station'            => $row[3],
-                'complainant_name'           => $row[4],
-                'complainant_mobile'         => $row[5],
-                'transaction_id'             => $row[6],
-                'bank_name'                  => $row[7],
-                'account_id'                  => $row[8],
+                'complainant_name'          => $row[4],
+                'complainant_mobile'        => $row[5],
+                'transaction_id'            => $row[6],
+                'bank_name'                 => $row[7],
+                'account_id'                => $row[8],
                 'amount'                    => $row[9],
-                'entry_date'                => $this->parseDate(@$row[10]),
-                'current_status'             => $this->parseDate(@$row[11]),
+                // 'entry_date'                => $this->parseDate(@$row[10]),
+                'entry_date'                => $row[10],
+                'current_status'            =>$row[11], 
+                // 'date_of_action'            => $this->parseDate(@$row[12]),
                 'date_of_action'            => $row[12],
                 'action_taken_by_name'         => "",
                 'action_taken_by_designation'   => "",
@@ -112,19 +80,67 @@ class ComplaintImport implements ToCollection, WithStartRow
             ];
         });
 
-        $validate = Validator::make($collection->toArray(), [
-            '*.acknowledgement_no' => 'required',
 
-        ])->validate();
-            $c = $com = Complaint::all();
-            // print_r($c)."<br>";
-            // dd();
+        $rows = $collection; 
+        //dd($rows);
+        foreach ($rows as $index => $row){
+            $rowIndex = $index + 1;
+        
+            $data = [
+                'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
+                'district' => $row['district'] ?? null,
+                'police_station' => $row['police_station'] ?? null,
+                'complainant_name' => $row['complainant_name'] ?? null,
+                'complainant_mobile' => $row['complainant_mobile'] ?? null,
+                'transaction_id' => $row['transaction_id'] ?? null,
+                'bank_name' => $row['bank_name'] ?? null,
+                'amount' => $row['amount'] ?? null,
+                'date_of_action' => $row['date_of_action'] ?? null,
+                'entry_date' => $row['entry_date'] ?? null,
+            ];
+
+            $validator = Validator::make($data, [
+
+                'acknowledgement_no' => 'required|numeric',
+                'district' => 'nullable',
+                'police_station' => 'nullable',
+                'complainant_name' => 'nullable',
+                'complainant_mobile' => 'nullable|numeric|digits:10',
+                'transaction_id' => 'required',
+                'amount' => 'required|numeric',
+                'date_of_action' => 'required|valid_date_format',
+                'bank_name' => 'required',
+                'entry_date' => 'required|valid_date_format_entry_date',
+
+
+            ], $this->validationMessages($rowIndex));
+
+            if ($validator->fails()) {
+                $errors[$rowIndex] = $validator->errors()->all();
+            } 
+            if (!empty($errors)) {
+                // Create a validator with accumulated errors to throw ValidationException
+                $dummyValidator = Validator::make([], []);
+                foreach ($errors as $rowIndex => $messages) {
+                    foreach ($messages as $message) {
+                        $dummyValidator->errors()->add('row_'.$rowIndex, $message);
+                    }
+                }
+                throw new \Illuminate\Validation\ValidationException($dummyValidator);
+            }
+          
+          
+        }
+    
+ 
+
+        
         foreach ($collection as $collect){
-            // echo $date->format('Y-m-d');
-
-                $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
-                                        ->where('transaction_id',(string)$collect['transaction_id'])
-                                        ->first();
+         
+            $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
+                                    ->where('transaction_id',(string)$collect['transaction_id'])
+                                    ->where('amount',(int)$collect['amount'])
+                                    ->first();
 
             if($complaint){
                 $complaint->source_type = $this->source_type;
@@ -137,10 +153,10 @@ class ComplaintImport implements ToCollection, WithStartRow
                 $complaint->bank_name = $collect['bank_name'];
                 $complaint->account_id = $collect['account_id'];
                 $complaint->amount = $collect['amount'];
-                // dd($collect['entry_date']);
-                $complaint->entry_date = $collect['entry_date'];
+     
+                $complaint->entry_date = $this->parseDate($collect['entry_date']);
                 $complaint->current_status = $collect['current_status'];
-                $complaint->date_of_action = $collect['date_of_action'];
+                $complaint->date_of_action = $this->parseDate($collect['date_of_action']);
                 $complaint->action_taken_by_name = $collect['action_taken_by_name'];
                 $complaint->action_taken_by_designation = $collect['action_taken_by_designation'];
                 $complaint->action_taken_by_mobile = $collect['action_taken_by_mobile'];
@@ -162,9 +178,9 @@ class ComplaintImport implements ToCollection, WithStartRow
             $complaint->account_id = $collect['account_id'];
             $complaint->amount = $collect['amount'];
             // dd($collect['entry_date']);
-            $complaint->entry_date = $collect['entry_date'];
+            $complaint->entry_date = $this->parseDate($collect['entry_date']);
             $complaint->current_status = $collect['current_status'];
-            $complaint->date_of_action = $collect['date_of_action'];
+            $complaint->date_of_action = $this->parseDate($collect['date_of_action']);
             $complaint->action_taken_by_name = $collect['action_taken_by_name'];
             $complaint->action_taken_by_designation = $collect['action_taken_by_designation'];
             $complaint->action_taken_by_mobile = $collect['action_taken_by_mobile'];
@@ -179,8 +195,37 @@ class ComplaintImport implements ToCollection, WithStartRow
 
         }
 
-
+      
     }
+
+    protected function validationMessages($index)
+{
+    return [
+        'acknowledgement_no.required' => 'Row ' . ($index) . ': Acknowledgement number is required.',
+        'acknowledgement_no.numeric' => 'Row ' . ($index) . ': Acknowledgement number format invalid.',
+        
+        'complainant_mobile.digits' => 'Row ' . $index . ': Mobile number must be exactly 10 digits.',
+        'complainant_mobile.numeric' => 'Row ' . $index . ': Mobile number must be numeric.',
+        'transaction_id.required' => 'Row ' . $index . ': Transaction ID is required.',
+       
+        'bank_name.required' => 'Row ' . $index . ': Bank name field is required.',
+        'amount.required' => 'Row ' . $index . ': Amount is required.',
+        'amount.numeric' => 'Row ' . $index . ': Amount must be a valid number.',
+        'date_of_action.required' => 'Row ' . $index . ': Date of action is required.',
+        'date_of_action.valid_date_format' => 'Row ' . $index . ': Date of action is not in a valid format.',
+        'entry_date.required' => 'Row ' . $index . ': Entry date is required.',
+        'entry_date.valid_date_format_entry_date' => 'Row ' . $index . ': Entry date not in valid format.',
+
+       
+    ];
+}
+
+protected function formatErrorMessage($message, $index)
+{
+    // Replace "The" with "Row" and include row number
+    return str_replace('The ', 'Row ' . ($index + 2) . ': ', $message);
+}
+    
 
     protected function convertAcknoToString($transaction_id)
     {
@@ -189,57 +234,68 @@ class ComplaintImport implements ToCollection, WithStartRow
     }
 
     function parseDate($dateString) {
-        // Define possible date formats with placeholders for two-digit years
+       
+      
         if (is_numeric($dateString)) {
             return $this->excelSerialToDate($dateString);
         }
-        
-          
-        $formats = [
-            'd/m/Y H:i:s',
-            'd-m-Y H:i:s',
-            'd/m/Y',
-            'd-m-Y',
-            'd-F-Y',
-            'd-F-y',
-            'd/m/Y H:i',
-            'd-m-Y H:i',
-            'd/M/Y',
-            'd-M-Y'
-        ];
-    
-        // Try each format until one succeeds
-        foreach ($formats as $format) {
-            try {
-                $date = Carbon::createFromFormat($format, $dateString);
-    
-                // Check if year is two-digit
-                if (strlen($date->year) == 2) {
-                    // Assuming years 00-29 are 2000-2029, and 30-99 are 1930-1999
-                    $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
-                }
-    
-                return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
-            } catch (\Exception $e) {
-                // Continue to the next format
-            }
+        else{
+            return $dateString;
         }
+        
     
-        // Return null or handle error if no format matches
-        return null;
     }
-
-    function excelSerialToDate($serial) {
-        // Convert Excel serial date to a Carbon date
+   
+    function excelSerialToDate($serial){
+      
         try {
-            $baseDate = Carbon::create(1899, 12, 30); // Excel starts from Dec 30, 1899
+            $baseDate = Carbon::create(1899, 12, 30); 
             $date = $baseDate->addDays((int)$serial);
     
-            return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
+            return $date->toDateTimeString(); 
         } catch (\Exception $e) {
-            return null; // Return null if conversion fails
+            return null; 
         }
     }
+
+
+
+    protected function validDateFormat($dateString)
+{
+    // Define acceptable date formats
+    $formats = [
+        'd/m/Y H:i:s A',
+        'd-m-Y H:i:s A',
+        'd/m/Y h:i:s A',
+        'd-m-Y h:i:s A',
+        'd/m/Y',
+        'd-m-Y',
+        'd/F/Y',
+        'd-F-Y',
+        'd/m/Y H:i',
+        'd-m-Y H:i',
+        'd/M/Y',
+        'd-M-Y'
+    ];
+
+    // Try each format to see if it matches
+    foreach ($formats as $format) {
+        try {
+            $date = Carbon::createFromFormat($format, $dateString);
+
+            // Adjust year if it is a 2-digit year
+            if (strlen($date->year) == 2) {
+                $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            // Continue to next format
+        }
+    }
+
+    return false;
+}
 
 
 }
