@@ -51,38 +51,42 @@ class ComplaintImport implements ToCollection, WithStartRow
         $errors = [];
        
         $collection->transform(function ($row) {
-        //    dd($row[10]);
+        
             return [
-                'acknowledgement_no'        => $row[1],
-                'district'                  => $row[2],
-                'police_station'            => $row[3],
-                'complainant_name'          => $row[4],
-                'complainant_mobile'        => $row[5],
-                'transaction_id'            => $row[6],
-                'bank_name'                 => $row[7],
-                'account_id'                => $row[8],
-                'amount'                    => $row[9],
+                'sl_no'                     => $row[0] ?? null ,
+                'acknowledgement_no'        => $row[1] ?? null,
+                'district'                  => $row[2] ?? null,
+                'police_station'            => $row[3] ?? null,
+                'complainant_name'          => $row[4] ?? null,
+                'complainant_mobile'        => $row[5] ?? null,
+                'transaction_id'            => $row[6] ?? null,
+                'bank_name'                 => $row[7] ?? null,
+                'account_id'                => $row[8] ?? null,
+                'amount'                    => $row[9] ?? null,
                 // 'entry_date'                => $this->parseDate(@$row[10]),
-                'entry_date'                => $row[10],
-                'current_status'            =>$row[11], 
+                'entry_date'                => $row[10] ?? null,
+                'current_status'            =>$row[11] ?? null, 
                 // 'date_of_action'            => $this->parseDate(@$row[12]),
-                'date_of_action'            => $row[12],
-                'action_taken_by_name'         => "",
-                'action_taken_by_designation'   => "",
-                'action_taken_by_mobile'         => "",
-                'action_taken_by_email'         => "",
-                'action_taken_by_bank'         => "",
-                'action_taken_by_name'         => "",
-                'action_taken_by_designation'   => "",
-                'action_taken_by_mobile'         => "",
-                'action_taken_by_email'         => "",
-                'action_taken_by_bank'         => "",
+                'date_of_action'            => $row[12] ?? null,
+                'action_taken_by_name'         => $row[13] ?? null,
+                'action_taken_by_designation'   => $row[14] ?? null,
+                'action_taken_by_mobile'         => $row[15] ?? null,
+                'action_taken_by_email'         => $row[16] ?? null,
+                'action_taken_by_bank'         => $row[17] ?? null,
+                'action_taken_by_name'         => $row[18] ?? null,
+                'action_taken_by_designation'   => $row[19] ?? null,
+                'action_taken_by_mobile'         => $row[20] ?? null,
+                'action_taken_by_email'         => $row[21] ?? null,
+                'action_taken_by_bank'         => $row[22] ?? null,
             ];
         });
 
-
-        $rows = $collection; 
-        //dd($rows);
+        $filteredCollection = $collection->filter(function ($row) {
+            return !empty($row['sl_no']);
+        });
+       
+        $rows = $filteredCollection; 
+       
         foreach ($rows as $index => $row){
             $rowIndex = $index + 2;
         
@@ -140,13 +144,12 @@ class ComplaintImport implements ToCollection, WithStartRow
  
 
         
-        foreach ($collection as $collect){
+        foreach ($filteredCollection as $collect){
          
             $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
                                     ->where('transaction_id',(string)$collect['transaction_id'])
-                                    ->where('amount',(int)$collect['amount'])
                                     ->first();
-
+         
             if($complaint){
                 $complaint->source_type = $this->source_type;
                 $complaint->acknowledgement_no = $collect['acknowledgement_no'];
@@ -199,7 +202,7 @@ class ComplaintImport implements ToCollection, WithStartRow
 
 
         }
-
+       
       
     }
 

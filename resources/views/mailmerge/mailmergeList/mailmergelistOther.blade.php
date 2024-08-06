@@ -76,6 +76,9 @@ $user = Auth::user();
                             <button id="statusBtn" class="btn btn-success" style="margin-left: 10px;">
                                 <i class="fas fa-envelope" data-toggle="tooltip" data-placement="top" title="Mail Merge"></i>
                             </button>
+
+                             <button class="btn btn-success btn-small status_recheck" style="margin-bottom:0px;margin-left:5px;font-size:smaller"
+                             data-type="others" data-ackno="{{ $case_no }}" title="Others Recheck"> Recheck <i class="fa fa-sync" ></i></button>
                             {{-- <button id="portalBtn" class="btn btn-success" style="margin-left: 10px;">
                                 <i class="fas fa-link" data-toggle="tooltip" data-placement="top" title="Portal Link"></i>
                               </button> --}}
@@ -422,7 +425,79 @@ $user = Auth::user();
     }
 </script>
 
+<script>
 
+$(document).ready(function() {
+    $('.status_recheck').click(function(){
+
+     var type = $(this).data('type');
+     var ackno = $(this).data('ackno');
+    
+     var $button = $(this);
+     var buttonText = $button.text().trim();
+     $button.prop('disabled', true);
+     $button.addClass('loading');
+     var spinner = $('<div class="spinner"></div>');
+     $button.append(spinner);
+
+    $.ajax({
+    url: "{{ route('url_status_recheck') }}",
+    data:{type:type,ackno:ackno},
+    success: function(response){
+
+    $button.removeClass('loading');
+    $button.prop('disabled', false); // Re-enable button
+    spinner.remove(); // Remove spinner element
+
+    console.log(response);
+            if(response.success){
+
+            toastr.success(' url status updated!');
+            }
+            else{
+
+                toastr.error(' updation error!');
+            }
+    }
+    });
+    })
+
+  $(document).on('click', '.check-status', function(e) {
+
+       e.preventDefault();
+       var url = $(this).data('url');
+       var type = $(this).data('type');
+
+       $.ajax({
+        url:"{{ route('get_url_status') }}",
+        data:{
+            url:url,
+            type:type
+        },
+        success:function(response){
+
+            console.log(response.statuscode);
+             var statuscode = response.statuscode !== null ? response.statuscode : 'Not updated.Recheck';
+             var statustext = response.statustext !== null ? response.statustext : 'Not updated.Recheck';
+             var htm = 'URL - ' +response.url + '<br> Status Code - '+statuscode+ '<br> Status - '+statustext+'';
+
+             $('.url-display').html(htm);
+             $('#showUrlStatus').modal('show');
+        },
+        error: function(xhr, status, error) {
+            // Handle AJAX errors here
+            console.error(xhr);
+            var errorMessage = "Error fetching URL status.Recheck";
+            $('.url-display').html(errorMessage);
+            $('#showUrlStatus').modal('show');
+        }
+       })
+
+
+     })
+})
+
+</script>
 
 
 @endsection

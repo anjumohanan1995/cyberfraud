@@ -41,47 +41,48 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     }
     public function collection(Collection $collection)
     {
-       
+      
         $errors = [];
         $acknowledgementNos = Complaint::pluck('acknowledgement_no')->toArray();
-
+        $acknowledgementNos = array_unique($acknowledgementNos);
+       
         $collection->transform(function ($values) {
              // Convert the 'entry_date' field
-
+             
 
 
             return [
-                'acknowledgement_no' => $values[1],
-                'transaction_id_or_utr_no' => $values[2],
-                'Layer' => $values[3],
-                'account_no_1' => $values[4],
-                'action_taken_by_bank' => $values[5],
-                'bank' => $values[6],
-                'account_no_2' => $values[7],
-                'ifsc_code' => $values[8],
-                'cheque_no' => $values[9],
-                'mid' => $values[10],
-                'tid' => $values[11],
-                'approval_code' => $values[12],
-                'merchant_name' => $values[13],
-                'transaction_date' => $values[14],
-                'transaction_id_sec' => $values[15],
-                'transaction_amount' => $values[16],
-                'reference_no' => $values[17],
-                'remarks' => $values[18],
-                 'date_of_action' => $values[19],
+                'acknowledgement_no' => $values[1] ?? null,
+                'transaction_id_or_utr_no' => $values[2] ?? null,
+                'Layer' => $values[3] ?? null,
+                'account_no_1' => $values[4] ?? null,
+                'action_taken_by_bank' => $values[5] ?? null,
+                'bank' => $values[6] ?? null,
+                'account_no_2' => $values[7] ?? null,
+                'ifsc_code' => $values[8] ?? null,
+                'cheque_no' => $values[9] ?? null,
+                'mid' => $values[10] ?? null,
+                'tid' => $values[11] ?? null,
+                'approval_code' => $values[12] ?? null,
+                'merchant_name' => $values[13] ?? null,
+                'transaction_date' => $values[14] ?? null,
+                'transaction_id_sec' => $values[15] ?? null,
+                'transaction_amount' => $values[16] ?? null,
+                'reference_no' => $values[17] ?? null,
+                'remarks' => $values[18] ?? null,
+                 'date_of_action' => $values[19] ?? null,
            
-                'action_taken_by_bank_sec' => $values[20],
-                'action_taken_name' => $values[21],
-                'action_taken_email' => $values[22],
-                'branch_location' => $values[23],
-                'branch_manager_details' => $values[24],
+                'action_taken_by_bank_sec' => $values[20] ?? null,
+                'action_taken_name' => $values[21] ?? null,
+                'action_taken_email' => $values[22] ?? null,
+                'branch_location' => $values[23] ?? null,
+                'branch_manager_details' => $values[24] ?? null,
                 'com_status'=>1,
             ];
         });
 
         $rows = $collection; 
-      
+        
         
         foreach ($rows as $index => $row){
          
@@ -120,7 +121,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
             $validator = Validator::make($data, [
 
-                'acknowledgement_no' => 'required|numeric',
+                'acknowledgement_no' => 'required|numeric|exists_in_acknowledgement_nos',
                 'transaction_id_or_utr_no' => 'required|regex:/^[A-Za-z0-9\s]+$/',
                 'Layer' => 'required|numeric',
                 'account_no_1' => 'nullable',
@@ -134,13 +135,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'tid' => 'nullable',
                 'approval_code' => 'nullable',
                 'merchant_name' => 'nullable',
-                'transaction_date' => 'required',
+                'transaction_date' => 'required|valid_date_format',
 
                 'transaction_id_sec' => 'nullable',
                 'transaction_amount' => 'required',
                 'reference_no' => 'nullable',
                 'remarks' => 'nullable',
-                'date_of_action' => 'required',
+                'date_of_action' => 'required|valid_date_format',
 
                 'action_taken_by_bank_sec' => 'nullable',
                 'action_taken_name' => 'nullable',
@@ -228,6 +229,7 @@ protected function validationMessages($index)
 {
     return [
         'acknowledgement_no.required' => 'Row ' . ($index) . ': Acknowledgement number is required.',
+        'acknowledgement_no.exists_in_acknowledgement_nos' => 'Row ' . ($index) . ': Acknowledgement number not in Primary Data.',
         'transaction_id_or_utr_no.required' => 'Row ' . ($index) . ': Transaction id or UTR number field is required.',
         'transaction_id_or_utr_no.regex' => 'Row ' . $index . ': Transaction/UTR ID is invalid.',
         
@@ -238,7 +240,7 @@ protected function validationMessages($index)
         'bank.required' => 'Row ' . ($index) . ': Bank field is required.',
         'bank.required' => 'Row ' . ($index) . ': Bank field is required.',
         'transaction_date.required' => 'Row ' . ($index) . ': Transaction Date is required.',
-
+        'transaction_date.valid_date_format' => 'Row ' . ($index) . ': Transaction Date is Invalid.',           
         'transaction_id_sec.regex' => 'Row ' . $index . ': Transaction ID must be alphanumeric.',
         
         'transaction_amount.required' => 'Row ' . ($index) . ': Transaction Amount is required.',

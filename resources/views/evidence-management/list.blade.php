@@ -206,7 +206,7 @@ $user = Auth::user();
 
                                                                 <table id="ncrp" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
 
-                                                                <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="ncrp" title="NCRP Recheck"> Recheck <i class="fa fa-sync" ></i></button>
+                                                                {{-- <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="ncrp" title="NCRP Recheck"> Recheck <i class="fa fa-sync" ></i></button> --}}
 
                                                                     <thead>
                                                                         <tr>
@@ -294,7 +294,7 @@ $user = Auth::user();
                                                             </form>
                                                             <div class="table-responsive">
                                                                 <table id="others" style="width:100%" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
-                                                                 <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="others" title="Others Recheck"> Recheck <i class="fa fa-sync" ></i></button>
+                                                                 {{-- <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="others" title="Others Recheck"> Recheck <i class="fa fa-sync" ></i></button> --}}
                                                                     <thead>
                                                                         <tr>
                                                                             <th>SL No</th>

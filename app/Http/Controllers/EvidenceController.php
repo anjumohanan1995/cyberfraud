@@ -353,7 +353,7 @@ class EvidenceController extends Controller
 
             return $collection->aggregate($pipeline);
         });
-
+    
         $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ,$from_date , $to_date) {
 
             if ($from_date && $to_date) {
@@ -433,14 +433,14 @@ class EvidenceController extends Controller
 
         $totalRecordswithFilter =  $totalRecords;
 
-
+       
         foreach($evidences as $record){
-
+           
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";$mobile="";
 
             $acknowledgement_no = $record->_id;
-            $website_id = '';
+            // $website_id = '';
 
             foreach ($record->url as $item) {
                 $url .= '<a href="#" data-url="' . $item . '" data-type="ncrp" class="check-status">'.$item."</a><br>";
@@ -454,13 +454,16 @@ class EvidenceController extends Controller
             //     }
             // }
 
+          
 
-
-            foreach ($record->evidence_type_ids as $item) {
+            foreach ($record->evidence_type_ids as $item){
+                
                 $evidence_type .= $item['evidence_type'] . "<br>";
-                if ($item['evidence_type'] == "website") {
-                    $website_id = $item['evidence_type_id'];
-                }
+              
+                // if ($item['evidence_type'] === "website") {
+                 
+                //     $website_id = $item['evidence_type_id'];
+                // }
             }
             foreach ($record->domain as $item) {
                 $domain .= $item."<br>";
@@ -484,7 +487,7 @@ class EvidenceController extends Controller
         //         <a class="btn btn-primary" href="' . route('get-mailmerge-list', ['id' => $website_id,'ack_no' => $record->_id ]) . '"><small>Mail Merge</small></a>
         //     </div>';
         // }
-
+       
 
         $ack_no = '
         <div>
@@ -808,11 +811,13 @@ class EvidenceController extends Controller
     }
 
     public function statusRecheck(Request $request){
+        $ackno = $request->ackno;
+        
         if($request->type=='ncrp'){
-            $urls = Evidence::pluck('url');
+            $urls = Evidence::where('ack_no',$ackno )->pluck('url');
         }
         else{
-            $urls = ComplaintOthers::pluck('url');
+            $urls = ComplaintOthers::where('case_number',$ackno )->pluck('url');
         }
 
         if($urls){
@@ -854,8 +859,9 @@ class EvidenceController extends Controller
 
                     }
 
-                        Evidence::where('url', $url)
-                        ->update(['url_status' => $status_code,
+                        Evidence::where('ack_no',$ackno)->where('url', $url)
+                                ->where('reported_status','reported')
+                                ->update(['url_status' => $status_code,
                                   'url_status_text'=> $status_text
                        ]);
 
@@ -903,8 +909,9 @@ class EvidenceController extends Controller
 
                     }
 
-                        ComplaintOthers::where('url', $url)
-                        ->update(['url_status' => $status_code,
+                        ComplaintOthers::where('ack_no',$ackno)->where('url', $url)
+                                   ->where('reported_status','reported')
+                                   ->update(['url_status' => $status_code,
                                   'url_status_text'=> $status_text
                        ]);
 
