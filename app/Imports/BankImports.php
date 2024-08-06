@@ -85,7 +85,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
         
         foreach ($rows as $index => $row){
          
-            $rowIndex = $index + 1;
+            $rowIndex = $index + 2;
         
             $data = [
                 'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
@@ -121,7 +121,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             $validator = Validator::make($data, [
 
                 'acknowledgement_no' => 'required|numeric',
-                'transaction_id_or_utr_no' => 'required',
+                'transaction_id_or_utr_no' => 'required|regex:/^[A-Za-z0-9\s]+$/',
                 'Layer' => 'required|numeric',
                 'account_no_1' => 'nullable',
                 'action_taken_by_bank' => 'required',
@@ -154,7 +154,10 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
             if ($validator->fails()) {
                 $errors[$rowIndex] = $validator->errors()->all();
-            } 
+            }
+
+            $rowIndex++;
+
             if (!empty($errors)) {
                 // Create a validator with accumulated errors to throw ValidationException
                 $dummyValidator = Validator::make([], []);
@@ -163,13 +166,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                         $dummyValidator->errors()->add('row_'.$rowIndex, $message);
                     }
                 }
-                throw new \Illuminate\Validation\ValidationException($dummyValidator);
+                
             }
+                  
           
-          
-        
-          
-          
+        }
+        if($errors){
+            throw new \Illuminate\Validation\ValidationException($dummyValidator);
         }
 
         DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
@@ -217,51 +220,6 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->save();
 
 
-
-
-
-        // BankCasedata::create($collect);
-
-        // foreach ($collection as $collect) {
-
-        //     // Check if there's an existing record with matching acknowledgement_no and transaction_id_or_utr_no.
-        //     $existingRecord = BankCasedata::where('acknowledgement_no', $collect['acknowledgement_no'])
-        //         ->where('transaction_id_or_utr_no', $collect['transaction_id_or_utr_no'])
-        //         ->first();
-
-        //     if ($existingRecord) {
-        //         // checking if the existing data is already recorded before. if is recorded before then there
-        //         // is no need to reupload it again . or duplecate it again.
-
-        //         $existingRecordData = $existingRecord->toArray();
-        //         unset($existingRecordData['updated_at']);
-        //         unset($existingRecordData['created_at']);
-        //         unset($existingRecordData['_id']);
-
-        //         //unseting the data which is different from the old data.
-
-
-        //         // Check if the existing record data is the same as the data in OldBankCaseData
-        //         $oldRecord = OldBankCaseData::where($existingRecordData)->first();
-
-        //         // If the old record doesn't exist, create it.
-        //         // copying the orginal data to old data collection for backup or history.
-        //         if (!$oldRecord) {
-        //             $oldBankCaseData = new OldBankCaseData();
-        //             $oldBankCaseData->fill($existingRecord->toArray());
-        //             $oldBankCaseData->old_id = $existingRecord->_id;
-        //             $oldBankCaseData->updated_date = now()->format('Y-m-d');
-        //             $oldBankCaseData->save();
-        //         }
-
-        //         //updating if there is any change in the previous data.
-        //         $existingRecord->update($collect);
-        //     } else {
-
-        //         //saving new data.
-        //         BankCasedata::create($collect);
-        //     }
-        // }
     }
     
 }
@@ -271,7 +229,7 @@ protected function validationMessages($index)
     return [
         'acknowledgement_no.required' => 'Row ' . ($index) . ': Acknowledgement number is required.',
         'transaction_id_or_utr_no.required' => 'Row ' . ($index) . ': Transaction id or UTR number field is required.',
-        'transaction_id_or_utr_no.regex' => 'Row ' . $index . ': Transaction/UTR ID must be alphanumeric.',
+        'transaction_id_or_utr_no.regex' => 'Row ' . $index . ': Transaction/UTR ID is invalid.',
         
         'Layer.required' => 'Row ' . ($index) . ': Layer field is required.',
         
@@ -322,3 +280,50 @@ protected function validationMessages($index)
     
 
 }
+
+
+
+
+
+        // BankCasedata::create($collect);
+
+        // foreach ($collection as $collect) {
+
+        //     // Check if there's an existing record with matching acknowledgement_no and transaction_id_or_utr_no.
+        //     $existingRecord = BankCasedata::where('acknowledgement_no', $collect['acknowledgement_no'])
+        //         ->where('transaction_id_or_utr_no', $collect['transaction_id_or_utr_no'])
+        //         ->first();
+
+        //     if ($existingRecord) {
+        //         // checking if the existing data is already recorded before. if is recorded before then there
+        //         // is no need to reupload it again . or duplecate it again.
+
+        //         $existingRecordData = $existingRecord->toArray();
+        //         unset($existingRecordData['updated_at']);
+        //         unset($existingRecordData['created_at']);
+        //         unset($existingRecordData['_id']);
+
+        //         //unseting the data which is different from the old data.
+
+
+        //         // Check if the existing record data is the same as the data in OldBankCaseData
+        //         $oldRecord = OldBankCaseData::where($existingRecordData)->first();
+
+        //         // If the old record doesn't exist, create it.
+        //         // copying the orginal data to old data collection for backup or history.
+        //         if (!$oldRecord) {
+        //             $oldBankCaseData = new OldBankCaseData();
+        //             $oldBankCaseData->fill($existingRecord->toArray());
+        //             $oldBankCaseData->old_id = $existingRecord->_id;
+        //             $oldBankCaseData->updated_date = now()->format('Y-m-d');
+        //             $oldBankCaseData->save();
+        //         }
+
+        //         //updating if there is any change in the previous data.
+        //         $existingRecord->update($collect);
+        //     } else {
+
+        //         //saving new data.
+        //         BankCasedata::create($collect);
+        //     }
+        // }

@@ -84,7 +84,7 @@ class ComplaintImport implements ToCollection, WithStartRow
         $rows = $collection; 
         //dd($rows);
         foreach ($rows as $index => $row){
-            $rowIndex = $index + 1;
+            $rowIndex = $index + 2;
         
             $data = [
                 'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
@@ -116,22 +116,27 @@ class ComplaintImport implements ToCollection, WithStartRow
             ], $this->validationMessages($rowIndex));
 
             if ($validator->fails()) {
+
                 $errors[$rowIndex] = $validator->errors()->all();
             } 
+            $rowIndex++;
             if (!empty($errors)) {
                 // Create a validator with accumulated errors to throw ValidationException
                 $dummyValidator = Validator::make([], []);
                 foreach ($errors as $rowIndex => $messages) {
                     foreach ($messages as $message) {
-                        $dummyValidator->errors()->add('row_'.$rowIndex, $message);
+                        $dummyValidator->errors()->add('row_' . $rowIndex, $message);
                     }
                 }
-                throw new \Illuminate\Validation\ValidationException($dummyValidator);
+               
             }
           
           
         }
-    
+        if($errors){
+            throw new \Illuminate\Validation\ValidationException($dummyValidator);
+        }
+        
  
 
         

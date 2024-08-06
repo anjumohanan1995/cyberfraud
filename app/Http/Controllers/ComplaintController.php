@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Validator;
 use Excel;
 use App\Imports\ComplaintImport;
 use App\Imports\ComplaintImportOthers;
+use Maatwebsite\Excel\Excel as ExcelExcel;
+use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
+use Maatwebsite\Excel\Fakes\ExcelFake;
+
 class ComplaintController extends Controller
 {
     public function importComplaints()
@@ -60,34 +64,14 @@ class ComplaintController extends Controller
                 if ($file){
                     try {
                         // Import data from the file
-                        $source_type = $request->source_type;
-
-                    // Import data from the file
-                    Excel::import(new ComplaintImport($source_type), $file);
-                    
-
-                        // Provide feedback to the user
+                        Excel::import(new ComplaintImport($source_type), $file);
                         return redirect()->back()->with('success', 'Form submitted successfully!');
-
-                    } 
-                    catch (\Exception $e){
-                        if ($e instanceof \Illuminate\Validation\ValidationException) {
-                            // Retrieve the validation errors
-                            $errors = $e->validator->getMessageBag()->all();
-                    
-                            // Redirect back with validation errors and input data
-                            return redirect()->back()->withErrors($errors)->withInput();
-                        } else {
-                            // Handle other exceptions
-                            return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
-                        }
-
-                        // return response()->json([
-                        //     'error' => 'An error occurred during import',
-                        //     'message' => $e->getMessage()
-                        // ], 500);
+                    } catch (\Illuminate\Validation\ValidationException $e) {
+                        // Show all validation errors
+                        return redirect()->back()->withErrors($e->errors())->withInput();
+                    } catch (\Exception $e) {
+                        return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                     }
-                    //dd('ho');
                 } else {
                     // No file uploaded
                     return response()->json(['error' => 'No file uploaded'], 400);

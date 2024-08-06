@@ -27,8 +27,13 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Validator::extend('valid_date_format', function ($attribute, $value, $parameters, $validator) {
+
              $value = str_replace(',', '', $value);
-          
+             if (is_numeric($value)) {
+                $value =  $this->excelSerialToDate($value);
+                
+            }
+            
             $formats = [
                 'd/m/Y H:i:s',
                 'd-m-Y H:i:s',
@@ -44,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 'd-m-Y, h:i:s A',
                 'd/m/Y',
                 'd-m-Y H:i:s A',
+                'Y-m-d H:i:s',
             ];
     
             foreach ($formats as $format){
@@ -57,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
     
                     return $date->format($format) === $value;
                 } catch (\Exception $e) {
-                   
+                  
                     // Continue to the next format
                 }
             }
@@ -98,22 +104,7 @@ class AppServiceProvider extends ServiceProvider
            ];
    
            foreach ($formats as $format){
-            //dd($format);
-//             if($format){
-//                // dd("wo");
-//                 $date = Carbon::createFromFormat($format, $value);
-//                 //dd($date);
-                                   
-//                  // Adjust year if necessary
-//                  if (strlen($date->year) == 2) {
-//                      $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
-//                  }
  
-//                  return $date->format($format) === $value;
-//             }
-//             else{
-//                // dd("not");
-//  // Continue to the next format
 //             }
                try {
                 $date = Carbon::createFromFormat($format, $value);
@@ -126,11 +117,11 @@ class AppServiceProvider extends ServiceProvider
  
                  return $date->format($format) === $value;
                } catch (\Exception $e) {
-               //dd("hjsdf");
+              
                    // Continue to the next format
                }
            }
-           
+           dd($value);
            return false;
        }, 'The :attribute is not in a valid date format.');
         

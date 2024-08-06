@@ -392,7 +392,10 @@ $records = $query->get();
                 // $utc_date = Carbon::parse($com->entry_date, 'UTC')->setTimezone('Asia/Kolkata');
                 // $entry_date = $utc_date->format('Y-m-d H:i:s');
                 $current_status = $com->current_status;
-                $date_of_action = $com->date_of_action;
+
+                $date_of_action = new DateTime($com->date_of_action);
+                $date_of_action = $date_of_action->format('l, F j, Y g:i A');
+                
                 $action_taken_by_name = $com->action_taken_by_name;
                 $action_taken_by_designation = $com->action_taken_by_designation;
                 $action_taken_by_mobile = $com->action_taken_by_mobile;
@@ -1427,7 +1430,7 @@ if($record->case_status != null){
             ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Ticket Number','Evidence Type','Source' ],
             ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','Instagram','Public'],
             ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','Website','Public'],
-            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebok','Open'],
+            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebook','Open'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
