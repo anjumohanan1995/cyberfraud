@@ -121,7 +121,7 @@ class AppServiceProvider extends ServiceProvider
                    // Continue to the next format
                }
            }
-           dd($value);
+           
            return false;
        }, 'The :attribute is not in a valid date format.');
         
