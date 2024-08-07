@@ -388,14 +388,11 @@ $records = $query->get();
                 $account_id = $com->account_id;
                 $date = new DateTime($com->entry_date);
                 $entry_date = $date->format('l, F j, Y g:i A');
-                // dd($entry_date);
-                // $utc_date = Carbon::parse($com->entry_date, 'UTC')->setTimezone('Asia/Kolkata');
-                // $entry_date = $utc_date->format('Y-m-d H:i:s');
                 $current_status = $com->current_status;
 
                 $date_of_action = new DateTime($com->date_of_action);
                 $date_of_action = $date_of_action->format('l, F j, Y g:i A');
-                
+
                 $action_taken_by_name = $com->action_taken_by_name;
                 $action_taken_by_designation = $com->action_taken_by_designation;
                 $action_taken_by_mobile = $com->action_taken_by_mobile;

@@ -31,7 +31,7 @@
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
     $hasReportsPermission = in_array('Reports Management', $permissions);
     $hasEvidenceTypePermission = in_array('Evidence Type Management', $permissions);
-    $hasNoticeViewPermission = in_array('Notice View', $permissions) || $user->role == 'Super Admin';
+    $hasNoticeViewPermission = in_array('Notice View', $sub_permissions) || $user->role == 'Super Admin';
     if ($sub_permissions) {
     $hasUploadPrimaryDataPermission = in_array('Upload Primary Data', $sub_permissions);
     $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions);
@@ -288,6 +288,11 @@
                         <a class="slide-item" href="{{ route('notice.mule.account') }}">Against Mule Account</a>
                     </li>
                     @endif
+                    @if ($hasNoticeViewPermission)
+                    <li class="slide">
+                        <a class="side-item" href="{{ url('notices') }}">View Notices</a>
+                    </li>
+                @endif
                 </ul>
 
             </li>
@@ -340,14 +345,7 @@
                 </a>
             </li>
         @endif
-        @if ($hasNoticeViewPermission)
-        <li class="slide">
-            <a class="side-menu__item" href="{{ url('notices') }}">
-                <i class="side-menu__icon fe fe-database"> </i>
-                <span class="side-menu__label">View Notices</span>
-            </a>
-        </li>
-    @endif
+
 
             {{-- <li class="slide">
                 <a class="side-menu__item" href="{{ url('modus') }}">

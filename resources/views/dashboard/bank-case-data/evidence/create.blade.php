@@ -754,6 +754,12 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
+                                                <label for="domain">Post/Account/profile/group/e-mail.</label>
+                                                 <input type="text" name="domain[]" class="form-control" value="" placeholder="Enter Domain">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
                                                 <label for="pdf">Document: <span style="color: red;">(PDF files are allowed-less than 2MB in size.)</span></label>
                                                 <input type="file" name="pdf[]" class="form-control" multiple>
                                             </div>
@@ -766,7 +772,7 @@
                                         </div>
                                         <div class="col-md-6 hid-field">
                                             <div class="form-group">
-                                        <input type="text" name="domain[]" class="form-control" value="" placeholder="Enter Domain" hidden>
+
 
        </div>
                                         </div>

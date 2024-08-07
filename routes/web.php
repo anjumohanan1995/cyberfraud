@@ -278,6 +278,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('/notices/{id}', [NoticeController::class, 'showNotice'])->name('notices.show');
     Route::get('/notices/{id}/edit', [NoticeController::class, 'editNoticeView'])->name('notices.edit');
     Route::put('/notices/{id}', [NoticeController::class, 'updateNotice'])->name('notices.update');
+    Route::post('/notices/{id}/follow', [NoticeController::class, 'follow'])->name('notices.follow');
+
+
 
 
 

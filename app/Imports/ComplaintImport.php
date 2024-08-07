@@ -47,11 +47,11 @@ class ComplaintImport implements ToCollection, WithStartRow
      */
     public function collection(Collection $collection)
     {
-       
+
         $errors = [];
-       
+
         $collection->transform(function ($row) {
-        
+
             return [
                 'sl_no'                     => $row[0] ?? null ,
                 'acknowledgement_no'        => $row[1] ?? null,
@@ -65,7 +65,7 @@ class ComplaintImport implements ToCollection, WithStartRow
                 'amount'                    => $row[9] ?? null,
                 // 'entry_date'                => $this->parseDate(@$row[10]),
                 'entry_date'                => $row[10] ?? null,
-                'current_status'            =>$row[11] ?? null, 
+                'current_status'            =>$row[11] ?? null,
                 // 'date_of_action'            => $this->parseDate(@$row[12]),
                 'date_of_action'            => $row[12] ?? null,
                 'action_taken_by_name'         => $row[13] ?? null,
@@ -84,12 +84,12 @@ class ComplaintImport implements ToCollection, WithStartRow
         $filteredCollection = $collection->filter(function ($row) {
             return !empty($row['sl_no']);
         });
-       
-        $rows = $filteredCollection; 
-       
+
+        $rows = $filteredCollection;
+
         foreach ($rows as $index => $row){
             $rowIndex = $index + 2;
-        
+
             $data = [
                 'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
                 'district' => $row['district'] ?? null,
@@ -122,7 +122,7 @@ class ComplaintImport implements ToCollection, WithStartRow
             if ($validator->fails()) {
 
                 $errors[$rowIndex] = $validator->errors()->all();
-            } 
+            }
             $rowIndex++;
             if (!empty($errors)) {
                 // Create a validator with accumulated errors to throw ValidationException
@@ -132,24 +132,24 @@ class ComplaintImport implements ToCollection, WithStartRow
                         $dummyValidator->errors()->add('row_' . $rowIndex, $message);
                     }
                 }
-               
+
             }
-          
-          
+
+
         }
         if($errors){
             throw new \Illuminate\Validation\ValidationException($dummyValidator);
         }
-        
- 
 
-        
+
+
+
         foreach ($filteredCollection as $collect){
-         
+
             $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
                                     ->where('transaction_id',(string)$collect['transaction_id'])
                                     ->first();
-         
+
             if($complaint){
                 $complaint->source_type = $this->source_type;
                 $complaint->acknowledgement_no = $collect['acknowledgement_no'];
@@ -161,7 +161,7 @@ class ComplaintImport implements ToCollection, WithStartRow
                 $complaint->bank_name = $collect['bank_name'];
                 $complaint->account_id = $collect['account_id'];
                 $complaint->amount = $collect['amount'];
-     
+
                 $complaint->entry_date = $this->parseDate($collect['entry_date']);
                 $complaint->current_status = $collect['current_status'];
                 $complaint->date_of_action = $this->parseDate($collect['date_of_action']);
@@ -202,8 +202,8 @@ class ComplaintImport implements ToCollection, WithStartRow
 
 
         }
-       
-      
+
+
     }
 
     protected function validationMessages($index)
@@ -211,11 +211,11 @@ class ComplaintImport implements ToCollection, WithStartRow
     return [
         'acknowledgement_no.required' => 'Row ' . ($index) . ': Acknowledgement number is required.',
         'acknowledgement_no.numeric' => 'Row ' . ($index) . ': Acknowledgement number format invalid.',
-        
+
         'complainant_mobile.digits' => 'Row ' . $index . ': Mobile number must be exactly 10 digits.',
         'complainant_mobile.numeric' => 'Row ' . $index . ': Mobile number must be numeric.',
         'transaction_id.required' => 'Row ' . $index . ': Transaction ID is required.',
-       
+
         'bank_name.required' => 'Row ' . $index . ': Bank name field is required.',
         'amount.required' => 'Row ' . $index . ': Amount is required.',
         'amount.numeric' => 'Row ' . $index . ': Amount must be a valid number.',
@@ -224,7 +224,7 @@ class ComplaintImport implements ToCollection, WithStartRow
         'entry_date.required' => 'Row ' . $index . ': Entry date is required.',
         'entry_date.valid_date_format_entry_date' => 'Row ' . $index . ': Entry date not in valid format.',
 
-       
+
     ];
 }
 
@@ -233,7 +233,6 @@ protected function formatErrorMessage($message, $index)
     // Replace "The" with "Row" and include row number
     return str_replace('The ', 'Row ' . ($index + 2) . ': ', $message);
 }
-    
 
     protected function convertAcknoToString($transaction_id)
     {
@@ -242,27 +241,27 @@ protected function formatErrorMessage($message, $index)
     }
 
     function parseDate($dateString) {
-       
-      
+
+
         if (is_numeric($dateString)) {
             return $this->excelSerialToDate($dateString);
         }
         else{
             return $dateString;
         }
-        
-    
+
+
     }
-   
+
     function excelSerialToDate($serial){
-      
+
         try {
-            $baseDate = Carbon::create(1899, 12, 30); 
+            $baseDate = Carbon::create(1899, 12, 30);
             $date = $baseDate->addDays((int)$serial);
-    
-            return $date->toDateTimeString(); 
+
+            return $date->toDateTimeString();
         } catch (\Exception $e) {
-            return null; 
+            return null;
         }
     }
 
