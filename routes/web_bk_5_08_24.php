@@ -25,13 +25,14 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\BankReportController;
-use App\Http\Controllers\ComplaintStatController;
+
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use MongoDB\Operation\DropCollection;
+use App\Http\Controllers\ComplaintStatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -272,20 +273,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('/get-portal-link/{registrar}', [MailController::class, 'getPortalLink'])->name('get-portal-link');
     Route::post('/update-portal-count', [MailController::class, 'updatePortalCount'])->name('update.portal.count');
 
-    Route::post('/evidence/store', [EvidenceController::class, 'storeEvidence'])->name('evidenceStore');
-    Route::post('/generate/notice', [NoticeController::class, 'generateNotice'])->name('generate.notice');
-    Route::get('/notices', [NoticeController::class, 'Notices'])->name('notices.index');
-    Route::get('/notices/{id}', [NoticeController::class, 'showNotice'])->name('notices.show');
-    Route::get('/notices/{id}/edit', [NoticeController::class, 'editNoticeView'])->name('notices.edit');
-    Route::put('/notices/{id}', [NoticeController::class, 'updateNotice'])->name('notices.update');
-    Route::post('/notices/{id}/follow', [NoticeController::class, 'follow'])->name('notices.follow');
 
-
-
-
-
-
-
+});
 //Route for bank Reports
 Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
 Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
@@ -301,9 +290,7 @@ Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableF
 //Route::post('/validate-otp',[AuthController::class,'validateOtp'])->name('validate.otp')->middleware('auth');
 //Route::get('/verfiy-otp',[AuthController::class, 'verifyOtp'])->name('verify-otp')->middleware('auth');
 
-// mule account notice
-Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name('notice.mule.account');
-Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
+
 
 
 

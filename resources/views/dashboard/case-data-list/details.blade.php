@@ -479,8 +479,8 @@
 
                                             <?php
                                            $date = new DateTime($bank_data['date_of_action']);
-                                           $formattedDate = $date->format('l, F j, Y g:i A'); 
-
+                                           $formattedDate = $date->format('l, F j, Y g:i A');
+                               
                                             $accountNumbers = $bank_data['account_no_1'];
                                             if($accountNumbers){
                                                 $accountNumbersArray = explode(' ', $accountNumbers);

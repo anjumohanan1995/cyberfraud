@@ -27,8 +27,8 @@ use App\exports\SampleExport;
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use DateTime;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -389,7 +389,10 @@ $records = $query->get();
                 $date = new DateTime($com->entry_date);
                 $entry_date = $date->format('l, F j, Y g:i A');
                 $current_status = $com->current_status;
-                $date_of_action = $com->date_of_action;
+
+                $date_of_action = new DateTime($com->date_of_action);
+                $date_of_action = $date_of_action->format('l, F j, Y g:i A');
+
                 $action_taken_by_name = $com->action_taken_by_name;
                 $action_taken_by_designation = $com->action_taken_by_designation;
                 $action_taken_by_mobile = $com->action_taken_by_mobile;
@@ -531,9 +534,9 @@ $records = $query->get();
     try {
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
-            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()])
+            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
 
-            ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
+           // ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
 
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);
@@ -1424,7 +1427,7 @@ if($record->case_status != null){
             ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Ticket Number','Evidence Type','Source' ],
             ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','Instagram','Public'],
             ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','Website','Public'],
-            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebok','Open'],
+            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebook','Open'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');

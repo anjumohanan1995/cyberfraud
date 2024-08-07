@@ -457,9 +457,12 @@ class EvidenceController extends Controller
 
 
 
-            foreach ($record->evidence_type_ids as $item) {
+            foreach ($record->evidence_type_ids as $item){
+
                 $evidence_type .= $item['evidence_type'] . "<br>";
-                // if ($item['evidence_type'] == "website") {
+
+                // if ($item['evidence_type'] === "website") {
+
                 //     $website_id = $item['evidence_type_id'];
                 // }
             }
@@ -809,15 +812,19 @@ class EvidenceController extends Controller
     }
 
     public function statusRecheck(Request $request){
-        if($request->type=='ncrp'){
-            $urls = Evidence::pluck('url');
+        $ackno = $request->ackno;
+
+        if($request->type==='ncrp'){
+
+            $urls = Evidence::where('ack_no',$ackno )->pluck('url');
         }
         else{
-            $urls = ComplaintOthers::pluck('url');
+
+            $urls = ComplaintOthers::where('case_number',$ackno )->pluck('url');
         }
 
         if($urls){
-            if($request->type=='ncrp'){
+            if($request->type==='ncrp'){
                 foreach($urls as $url){
                     if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
                         // Handle invalid URL
@@ -855,8 +862,9 @@ class EvidenceController extends Controller
 
                     }
 
-                        Evidence::where('url', $url)
-                        ->update(['url_status' => $status_code,
+                        Evidence::where('ack_no',$ackno)->where('url', $url)
+                                ->where('reported_status','reported')
+                                ->update(['url_status' => $status_code,
                                   'url_status_text'=> $status_text
                        ]);
 
@@ -904,8 +912,10 @@ class EvidenceController extends Controller
 
                     }
 
-                        ComplaintOthers::where('url', $url)
-                        ->update(['url_status' => $status_code,
+
+                        ComplaintOthers::where('case_number',$ackno)->where('url', $url)
+                                   ->where('reported_status','reported')
+                                   ->update(['url_status' => $status_code,
                                   'url_status_text'=> $status_text
                        ]);
 
