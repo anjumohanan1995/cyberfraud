@@ -5,16 +5,26 @@ use App\Models\SourceType;
 use App\Models\EvidenceType;
 use App\Models\Evidence;
 use App\Models\Notice;
+use App\Models\Bank;
+use App\Models\Wallet;
+use App\Models\Merchant;
+use App\Models\Insurance;
+use App\Models\BankCasedata;
+use App\Models\Complaint;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use MongoDB;
+use Illuminate\Support\Facades\DB;
 
-use Illuminate\Http\Request;
+
 
 class NoticeController extends Controller
 {
@@ -569,8 +579,342 @@ public function updateNotice(Request $request, $id)
     return redirect()->route('notices.show', $notice->id)->with('success', 'Notice updated successfully');
 }
 
+    public function againstMuleAccount()
+    {
+        $bank = Bank::get();
+        $wallet= Wallet::get();
+        $insurance=Insurance::get();
+        $merchant=Merchant::get();
+        return view('notice.muleaccount',compact('bank','wallet','insurance','merchant'));
+    }
 
 
 
+
+    public function generateMuleNotice(Request $request)
+    {
+        try {
+            $sourceType = $request->input('source_type');
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $entityId = $request->input('entity_id');
+            $entityType = $request->input('entity_type'); // Get the entity type
+
+
+                $validator = Validator::make($request->all(), [
+                    'from_date' => 'required|date',
+                    'to_date' => 'required|date|after_or_equal:from_date',
+                    'entity_type' => 'required|in:bank,wallet,insurance,merchant',
+                    'entity_id' => 'required',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+                }
+            Log::info('Generate Mule Notice Request Data', [
+                'source_type' => $sourceType,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'entity_id' => $entityId,
+                'entity_type' => $entityType,
+            ]);
+
+            // Convert fromDate and toDate to start and end of the day
+            $fromDateStart = Carbon::parse($fromDate)->startOfDay();
+            $toDateEnd = Carbon::parse($toDate)->endOfDay();
+
+            // Determine which model to use based on the entity type
+            switch ($entityType) {
+                case 'bank':
+                    $entity = Bank::find($entityId);
+                    break;
+                case 'wallet':
+                    $entity = Wallet::find($entityId);
+                    break;
+                case 'insurance':
+                    $entity = Insurance::find($entityId);
+                    break;
+                case 'merchant':
+                    $entity = Merchant::find($entityId);
+                    break;
+                default:
+                    return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+            }
+
+            if (!$entity) {
+                return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+            }
+
+            Log::info('Entity Details', ['entity' => $entity]);
+
+            // Retrieve acknowledgement_no values from complaints within the specified date range
+            $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+                ->pluck('acknowledgement_no')->toArray();
+
+            // Aggregation to sanitize account_no_2 and find account numbers with at least 3 occurrences
+            $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
+                return $collection->aggregate([
+                    [
+                        '$addFields' => [
+                            'sanitized_account_no_2' => [
+                                '$trim' => [
+                                    'input' => [
+                                        '$replaceAll' => [
+                                            'input' => '$account_no_2',
+                                            'find' => ' [ Reported',
+                                            'replacement' => ''
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    [
+                        '$match' => [
+                            'sanitized_account_no_2' => ['$ne' => ''],
+                            'sanitized_account_no_2' => ['$ne' => null]
+                        ]
+                    ],
+                    [
+                        '$group' => [
+                            '_id' => '$sanitized_account_no_2',
+                            'count' => ['$sum' => 1]
+                        ]
+                    ],
+                    [
+                        '$match' => [
+                            'count' => ['$gte' => 3]
+                        ]
+                    ]
+                ]);
+            })->pluck('_id')->toArray();
+
+            // Fetch cases based on the sanitized account numbers and acknowledgement_no
+            $cases = BankCasedata::where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant)
+                ->whereIn('acknowledgement_no', $acknowledgementNos)
+                ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+                ->where(function ($query) use ($frequentAccountNumbers) {
+                    $query->where('Layer', 1)
+                        ->orWhereIn('account_no_2', $frequentAccountNumbers);
+                })
+                ->get();
+
+            Log::info('Query Results', ['cases' => $cases]);
+
+            if ($cases->isEmpty()) {
+                return response()->json(['success' => false, 'message' => "No data found for the given criteria"], 400);
+            }
+
+            // Prepare notice data
+            $noticeData = [];
+
+            // Group cases by account_no_2
+            $groupedCases = $cases->groupBy('account_no_2');
+
+            foreach ($groupedCases as $accountNo => $group) {
+                $firstRecord = $group->first();
+                $cleanAccountNo = preg_replace('/\s+\[.*\]/', '', $accountNo);
+
+                $noticeData[] = [
+                    'acknowledgement_no' => $firstRecord->acknowledgement_no,
+                    'bank' => $firstRecord->bank,
+                    'account_no_2' => $cleanAccountNo,
+                    'state' => 'kerala',
+                    'Layer' => $firstRecord->Layer,
+                    'date' => now()->format('Y-m-d'),
+                    'action_taken_by_bank' => $firstRecord->action_taken_by_bank
+                    // Add other fields as necessary
+                ];
+            }
+
+            Log::info('noticeData Results', ['noticeData' => $noticeData]);
+
+            // Ensure that noticeData is not empty
+            if (empty($noticeData)) {
+                return response()->json(['success' => false, 'message' => "No valid case data found to generate notices."], 400);
+            }
+
+            // Generate HTML content for the notice
+            $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
+
+            Notice::Create(
+                [
+                    'user_id' => Auth::user()->id,
+                    'ack_number' => $noticeData[0]['acknowledgement_no'], // Corrected array access
+                    'notice_type' => 'Mule', // Assuming 'sourceType' is noticeType
+                    'content' => $htmlContent,
+                ]
+            );
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error generating notice: ' . $e->getMessage());
+
+            return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
+        }
+    }
+
+
+
+    // public function generateMuleNotice(Request $request)
+    // {
+    //     try {
+    //         $sourceType = $request->input('source_type');
+    //         $fromDate = $request->input('from_date');
+    //         $toDate = $request->input('to_date');
+    //         $entityId = $request->input('entity_id');
+    //         $entityType = $request->input('entity_type'); // Get the entity type
+
+    //         $request->validate([
+    //             'source_type' => 'required|string',
+    //             'from_date' => 'required|date',
+    //             'to_date' => 'required|date',
+    //             'entity_id' => 'required|exists:entities,_id', // Adjust as necessary
+    //             'entity_type' => 'required|string',
+    //             'status' => 'nullable|string'
+    //         ]);
+
+    //         Log::info('Generate Mule Notice Request Data', [
+    //             'source_type' => $sourceType,
+    //             'from_date' => $fromDate,
+    //             'to_date' => $toDate,
+    //             'entity_id' => $entityId,
+    //             'entity_type' => $entityType,
+    //         ]);
+
+    //         // Convert fromDate and toDate to start and end of the day
+    //         $fromDateStart = Carbon::parse($fromDate)->startOfDay();
+    //         $toDateEnd = Carbon::parse($toDate)->endOfDay();
+
+    //         // Determine which model to use based on the entity type
+    //         switch ($entityType) {
+    //             case 'bank':
+    //                 $entity = Bank::find($entityId);
+    //                 break;
+    //             case 'wallet':
+    //                 $entity = Wallet::find($entityId);
+    //                 break;
+    //             case 'insurance':
+    //                 $entity = Insurance::find($entityId);
+    //                 break;
+    //             case 'merchant':
+    //                 $entity = Merchant::find($entityId);
+    //                 break;
+    //             default:
+    //                 return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+    //         }
+
+    //         if (!$entity) {
+    //             return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+    //         }
+
+    //         Log::info('Entity Details', ['entity' => $entity]);
+
+    //         // Retrieve acknowledgement_no values from complaints within the specified date range
+    //         $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+    //             ->pluck('acknowledgement_no')->toArray();
+
+    //         // Aggregation to sanitize account_no_2 and find account numbers with at least 3 occurrences
+    //         $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
+    //             return $collection->aggregate([
+    //                 [
+    //                     '$addFields' => [
+    //                         'sanitized_account_no_2' => [
+    //                             '$trim' => [
+    //                                 'input' => [
+    //                                     '$replaceAll' => [
+    //                                         'input' => '$account_no_2',
+    //                                         'find' => ' [ Reported',
+    //                                         'replacement' => ''
+    //                                     ]
+    //                                 ]
+    //                             ]
+    //                         ]
+    //                     ]
+    //                 ],
+    //                 [
+    //                     '$match' => [
+    //                         'sanitized_account_no_2' => ['$ne' => ''],
+    //                         'sanitized_account_no_2' => ['$ne' => null]
+    //                     ]
+    //                 ],
+    //                 [
+    //                     '$group' => [
+    //                         '_id' => '$sanitized_account_no_2',
+    //                         'count' => ['$sum' => 1]
+    //                     ]
+    //                 ],
+    //                 [
+    //                     '$match' => [
+    //                         'count' => ['$gte' => 3]
+    //                     ]
+    //                 ]
+    //             ]);
+    //         })->pluck('_id')->toArray();
+
+    //         // Fetch cases based on the sanitized account numbers and acknowledgement_no
+    //         $cases = BankCasedata::where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant)
+    //             ->whereIn('acknowledgement_no', $acknowledgementNos)
+    //             ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    //             ->where(function ($query) use ($frequentAccountNumbers) {
+    //                 $query->where('Layer', 1)
+    //                     ->orWhereIn('account_no_2', $frequentAccountNumbers);
+    //             })
+    //             ->get();
+
+    //         Log::info('Query Results', ['cases' => $cases]);
+
+    //         if ($cases->isEmpty()) {
+    //             return response()->json(['success' => false, 'message' => "No data found for the given criteria"], 400);
+    //         }
+
+    //         // Prepare notice data
+    //         $noticeData = [];
+
+    //         // Group cases by account_no_2
+    //         $groupedCases = $cases->groupBy('account_no_2');
+
+    //         foreach ($groupedCases as $accountNo => $group) {
+    //             $firstRecord = $group->first();
+    //             $cleanAccountNo = preg_replace('/\s+\[.*\]/', '', $accountNo);
+
+    //             $noticeData[] = [
+    //                 'acknowledgement_no' => $firstRecord->acknowledgement_no,
+    //                 'bank' => $firstRecord->bank,
+    //                 'account_no_2' => $cleanAccountNo,
+    //                 'state' => 'kerala',
+    //                 'Layer' => $firstRecord->Layer,
+    //                 'date' => now()->format('Y-m-d'),
+    //                 'action_taken_by_bank' => $firstRecord->action_taken_by_bank
+    //                 // Add other fields as necessary
+    //             ];
+    //         }
+
+    //         Log::info('noticeData Results', ['noticeData' => $noticeData]);
+
+    //         // Ensure that noticeData is not empty
+    //         if (empty($noticeData)) {
+    //             return response()->json(['success' => false, 'message' => "No valid case data found to generate notices."], 400);
+    //         }
+
+    //         // Generate HTML content for the notice
+    //         $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
+
+    //         Notice::Create(
+    //             [
+    //                 'user_id' => Auth::user()->id,
+    //                 'ack_number' => $noticeData[0]['acknowledgement_no'], // Corrected array access
+    //                 'notice_type' => 'Mule', // Assuming 'sourceType' is noticeType
+    //                 'content' => $htmlContent,
+    //             ]
+    //         );
+
+    //         return response()->json(['success' => true]);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error generating notice: ' . $e->getMessage());
+
+    //         return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
+    //     }
+    // }
 
 }

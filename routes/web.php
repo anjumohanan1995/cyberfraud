@@ -25,14 +25,13 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\BankReportController;
-
+use App\Http\Controllers\ComplaintStatController;
 use App\Models\BankCasedata;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use MongoDB\Operation\DropCollection;
-use App\Http\Controllers\ComplaintStatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -299,7 +298,9 @@ Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableF
 //Route::post('/validate-otp',[AuthController::class,'validateOtp'])->name('validate.otp')->middleware('auth');
 //Route::get('/verfiy-otp',[AuthController::class, 'verifyOtp'])->name('verify-otp')->middleware('auth');
 
-
+// mule account notice
+Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name('notice.mule.account');
+Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
 
 
 

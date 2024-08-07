@@ -285,7 +285,7 @@
                     @if($hasAgainstMuleAccountManagement)
                     <li>
                         {{-- <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Mule Account</a> --}}
-                        <a class="slide-item" href="#">Against Mule Account</a>
+                        <a class="slide-item" href="{{ route('notice.mule.account') }}">Against Mule Account</a>
                     </li>
                     @endif
                 </ul>
