@@ -58,7 +58,7 @@ $user = Auth::user();
 <div class="container mt-5">
     <div id="error-message" style="display: none; color: red;"></div>
     <!-- Trigger the modal with a button -->
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Open Evidence Modal</button>
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Evidence</button>
 
 
     <!-- Modal -->
