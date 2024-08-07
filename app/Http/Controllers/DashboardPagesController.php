@@ -35,41 +35,67 @@ class DashboardPagesController extends Controller
     //                            ->count();
     // dd($newComplaints);
 
-    $layerOneQuery = BankCasedata::whereNull('deleted_at')
-    ->where('Layer', 1)
+// Exclude specific values from action_taken_by_bank
+$filteredQuery = BankCasedata::whereNull('deleted_at')
     ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
     ->where(function($query) {
         $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
-    })
-    ->groupBy('account_no_2')
-    ->pluck('account_no_2');
+    });
 
-    $repeatedAccountNoQuery = BankCasedata::whereNull('deleted_at')
-        ->whereIn('account_no_2', function ($subquery) {
-            $subquery->select('account_no_2')
-                ->from('bank_casedata')
-                ->groupBy('account_no_2')
-                ->havingRaw('COUNT(*) >= 3');
-        })
-        ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-        ->where(function($query) {
-            $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
-        })
-        ->groupBy('account_no_2')
-        ->pluck('account_no_2');
+// Get frequent account numbers
+$frequentAccountNumbers = BankCasedata::raw(function ($collection) {
+    return $collection->aggregate([
+        [
+            '$project' => [
+                'sanitized_account_no_2' => [
+                    '$cond' => [
+                        'if' => ['$regexMatch' => ['input' => '$account_no_2', 'regex' => '\[ Reported \d+ times \]']],
+                        'then' => [
+                            '$substr' => [
+                                '$account_no_2',
+                                0,
+                                ['$indexOfBytes' => ['$account_no_2', ' [ Reported ']]
+                            ]
+                        ],
+                        'else' => '$account_no_2'
+                    ]
+                ]
+            ]
+        ],
+        [
+            '$group' => [
+                '_id' => '$sanitized_account_no_2',
+                'count' => ['$sum' => 1]
+            ]
+        ],
+        [
+            '$match' => [
+                'count' => ['$gte' => 3]
+            ]
+        ]
+    ]);
+})->pluck('_id')->toArray();
 
-    $muleAccountCount = $layerOneQuery->merge($repeatedAccountNoQuery)->unique()->count();
+// Get mule account count based on frequent account numbers
+$muleAccountCount = $filteredQuery->where(function ($query) use ($frequentAccountNumbers) {
+    $query->where('Layer', 1)
+        ->orWhereIn('account_no_2', $frequentAccountNumbers)
+        ->whereNotNull('account_no_2');
+})->groupBy('account_no_2')
+  ->pluck('account_no_2')
+  ->unique()
+  ->count();
 
     //pending amount calculation
     $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
-    $sum_amount = Complaint::where('com_status',1)->sum('amount'); 
+    $sum_amount = Complaint::where('com_status',1)->sum('amount');
     $hold_amount = BankCaseData::where('com_status',1)
         ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
-     
+
     $lost_amount = BankCaseData::where('com_status',1)
                                 ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
-                                ->sum('transaction_amount');  
-    $pending_amount = $sum_amount - $hold_amount - $lost_amount;   
+                                ->sum('transaction_amount');
+    $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','pending_amount'));
     }

@@ -28,6 +28,7 @@ use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use DateTime;
 
 
 
@@ -385,8 +386,8 @@ $records = $query->get();
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $utc_date = Carbon::parse($com->entry_date, 'UTC')->setTimezone('Asia/Kolkata');
-                $entry_date = $utc_date->format('Y-m-d H:i:s');
+                $date = new DateTime($com->entry_date);
+                $entry_date = $date->format('l, F j, Y g:i A');
                 $current_status = $com->current_status;
                 $date_of_action = $com->date_of_action;
                 $action_taken_by_name = $com->action_taken_by_name;
@@ -579,7 +580,7 @@ $records = $query->get();
         }
 
         $complaints = Complaint::where('acknowledgement_no',(int)$id)->get();
-       
+
 
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();

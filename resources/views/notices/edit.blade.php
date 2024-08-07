@@ -7,7 +7,7 @@
         border: 1px solid #902b2b;
         display: none !important;
     }
-    </style>
+</style>
 
 <div class="container-fluid">
     <!-- breadcrumb -->
@@ -45,44 +45,44 @@
                             </button>
                         </div>
                     </div>
-<div class="container-fluid">
-    <div class="notice-header">
-        <h4>Edit Notice</h4>
+
+                    <div class="container-fluid">
+                        <div class="notice-header">
+                            <h4>Edit Notice</h4>
+                        </div>
+
+                        <form action="{{ route('notices.update', $notice->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="section">
+                                <label for="content">Notice Content:</label>
+                                <textarea id="content" name="content" class="ckeditor form-control">
+                                    {!! $notice->content !!}
+                                </textarea>
+                            </div>
+
+                            <div class="footer">
+                                <button type="submit" class="btn btn-success">Update</button>
+                                <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
-
-    <form action="{{ route('notices.update', $notice->id) }}" method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="section">
-            <label for="content">Notice Content:</label>
-            <textarea id="content" name="content" class="ckeditor form-control">
-
-                {{ $notice->content }}
-            </textarea>
-        </div>
-
-        <div class="footer">
-            <button type="submit" class="btn btn-success">Update</button>
-            <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
-</div>
-
-</div>
-</div>
-</div>
-</div>
-<!-- /row -->
+    <!-- /row -->
 </div>
 
 <script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
 <script>
-    // Replace the textarea with CKEditor
+    // Initialize CKEditor
     CKEDITOR.replace('content', {
-        height: 600
+        height: 600,
+        allowedContent: true // Allows all HTML content to be included
     });
 </script>
-
 
 @endsection

@@ -162,6 +162,7 @@ class EvidenceController extends Controller
                             break;
                     default:
                         $evidence->url = $request->url[$key];
+                        $evidence->domain = $request->domain[$key];
                         break;
                 }
 
@@ -440,7 +441,7 @@ class EvidenceController extends Controller
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $evidence_type="";$registry_details="";$mobile="";
 
             $acknowledgement_no = $record->_id;
-            $website_id = '';
+            // $website_id = '';
 
             foreach ($record->url as $item) {
                 $url .= '<a href="#" data-url="' . $item . '" data-type="ncrp" class="check-status">'.$item."</a><br>";
@@ -458,9 +459,9 @@ class EvidenceController extends Controller
 
             foreach ($record->evidence_type_ids as $item) {
                 $evidence_type .= $item['evidence_type'] . "<br>";
-                if ($item['evidence_type'] == "website") {
-                    $website_id = $item['evidence_type_id'];
-                }
+                // if ($item['evidence_type'] == "website") {
+                //     $website_id = $item['evidence_type_id'];
+                // }
             }
             foreach ($record->domain as $item) {
                 $domain .= $item."<br>";
@@ -989,6 +990,19 @@ class EvidenceController extends Controller
 
     public function storeEvidence(Request $request)
     {
+
+            // Validate inputs
+    $validated = $request->validate([
+        'source_type' => 'nullable|string',
+        'from_date' => 'nullable|date',
+        'to_date' => 'nullable|date',
+        'ack_no' => 'nullable|string',
+        'case_no' => 'nullable|string',
+        'evidence_type_ncrp' => 'nullable|string',
+        'evidence_type_other' => 'nullable|string',
+        'status' => 'nullable|string',
+    ]);
+
         $source_type = $request->input('source_type');
         // dd($source_type);
         $from_date_input = $request->input('from_date');
@@ -1027,6 +1041,7 @@ class EvidenceController extends Controller
         if ($from_date_input && $to_date_input) {
             // dd("date");
             $query->whereBetween('created_at', [$from_date, $to_date]);
+
         }
 
 
@@ -1061,6 +1076,24 @@ class EvidenceController extends Controller
         $data = $query->get();
         // dd($data);
 
+            // Check if data is empty and return error message
+    if ($data->isEmpty()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No data found for the given filters.',
+            'errors' => [
+                'source_type' => 'No matching records found',
+                'from_date' => 'No matching records found',
+                'to_date' => 'No matching records found',
+                'ack_no' => 'No matching records found',
+                'case_no' => 'No matching records found',
+                'evidence_type_ncrp' => 'No matching records found',
+                'evidence_type_other' => 'No matching records found',
+                'status' => 'No matching records found',
+            ],
+        ]);
+    }
+
         // Execute query and get data
 
 
@@ -1069,7 +1102,7 @@ class EvidenceController extends Controller
 
             // Return data to the view
     return response()->json([
-        'message' => 'Data received successfully',
+        'success' => true,
         'data' => $data,
         'source_type' => $source_type,
         'from_date' => $from_date_input,
