@@ -26,4 +26,5 @@ class Evidence extends Eloquent
         'category',
         'ticket',
     ];
+   
 }

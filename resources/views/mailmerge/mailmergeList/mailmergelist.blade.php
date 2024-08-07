@@ -509,6 +509,7 @@ $(document).ready(function(){
 
                 toastr.error(' updation error!');
             }
+            $('#ncrp').DataTable().ajax.reload();
     }
     });
     })

@@ -65,6 +65,8 @@ class AppServiceProvider extends ServiceProvider
                 'd-m-Y H:i:s A',
                 'Y-m-d H:i:s',
             ];
+            
+
     
             foreach ($formats as $format){
                 try {
@@ -87,14 +89,14 @@ class AppServiceProvider extends ServiceProvider
 
 
         Validator::extend('valid_date_format_entry_date', function ($attribute, $value, $parameters, $validator) {
-          
+            
              if (is_numeric($value)) {
                 $value =  $this->excelSerialToDate($value);
             }
            
             $value = str_replace(',', '', $value);
+                                
            
-           //dd($value);
            $formats = [
                'd-m-Y',
                'd-m-y',
@@ -114,9 +116,12 @@ class AppServiceProvider extends ServiceProvider
                'Y-m-d H:i:s',
                'dd-mm-YYYY H:i:s',
                'd/m/YYYY',
+               'dd/mm/YYYY',
               
               
            ];
+     
+
    
            foreach ($formats as $format){
            
@@ -138,7 +143,7 @@ class AppServiceProvider extends ServiceProvider
                    // Continue to the next format
                }
            }
-           
+          
            return false;
           
        }, 'The :attribute is not in a valid date format.');

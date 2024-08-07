@@ -72,6 +72,7 @@ class EvidenceController extends Controller
                 'category.*' => 'nullable|string|in:phishing,malware,fraud,other',
                 'mobile.*' => 'required_with:country_code.*', // Requires 'country_code' when 'mobile' is present
                 'country_code.*' => 'required_with:mobile.*', // Requires 'mobile' when 'country_code' is present
+                
             ], [
                 'evidence_type.*.required' => 'The evidence type field is required.',
                 'evidence_type_id.*.required' => 'The evidence type ID field is required.',
@@ -829,6 +830,7 @@ class EvidenceController extends Controller
                         // Handle invalid URL
                         $status_code = 400;
                         $status_text = 'Bad Request';
+                        $reported_status = 'inactive';
                         continue;
                     }
 
@@ -844,6 +846,7 @@ class EvidenceController extends Controller
                     if($headers === false){
                         $status_code = 400;
                         $status_text = 'Bad Request';
+                        $reported_status = 'inactive';
 
                     }
                     else{
@@ -858,13 +861,15 @@ class EvidenceController extends Controller
                             $status_text = "Failed to determine status text.";
 
                         }
+                        $reported_status = $status_code === '200' ? 'reported' : 'inactive'; 
 
                     }
 
                         Evidence::where('ack_no',$ackno)->where('url', $url)
                                 ->where('reported_status','reported')
                                 ->update(['url_status' => $status_code,
-                                  'url_status_text'=> $status_text
+                                  'url_status_text'=> $status_text,
+                                  'reported_status' => $reported_status
                        ]);
 
 
@@ -879,6 +884,7 @@ class EvidenceController extends Controller
                         // Handle invalid URL
                         $status_code = 400;
                         $status_text = 'Bad Request';
+                        $reported_status = 'inactive';
                         continue;
                     }
 
@@ -893,6 +899,7 @@ class EvidenceController extends Controller
                     if($headers === false){
                         $status_code = 400;
                         $status_text = 'Bad Request';
+                        $reported_status = 'inactive';
                         
                     }
                     else{
@@ -908,14 +915,17 @@ class EvidenceController extends Controller
                             $status_text = "Failed to determine status text.";
 
                         }
+                        $reported_status = $status_code === '200' ? 'reported' : 'inactive'; 
 
                     }
-                    
+
                   
                         ComplaintOthers::where('case_number',$ackno)->where('url', $url)
                                    ->where('reported_status','reported')
                                    ->update(['url_status' => $status_code,
-                                  'url_status_text'=> $status_text
+                                  'url_status_text'=> $status_text,
+                                  'reported_status' => $reported_status
+
                        ]);
 
 

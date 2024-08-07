@@ -52,6 +52,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
 
             return [
+                'sl_no' => $values[0] ?? null,
                 'acknowledgement_no' => $values[1] ?? null,
                 'transaction_id_or_utr_no' => $values[2] ?? null,
                 'Layer' => $values[3] ?? null,
@@ -80,8 +81,12 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'com_status'=>1,
             ];
         });
+        
+        $filteredCollection = $collection->filter(function ($row) {
+            return !empty($row['sl_no']);
+        });
 
-        $rows = $collection; 
+        $rows = $filteredCollection; 
         
         
         foreach ($rows as $index => $row){
@@ -178,7 +183,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
 
-        foreach ($collection as $collect){
+        foreach ($filteredCollection as $collect){
 
        
             // $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
@@ -221,9 +226,10 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->save();
 
 
-    }
     
-}
+    
+        }
+    }
 
 protected function validationMessages($index)
 {

@@ -492,6 +492,7 @@ $(document).ready(function() {
 
                 toastr.error(' updation error!');
             }
+            $('#other').DataTable().ajax.reload();
     }
     });
     })
