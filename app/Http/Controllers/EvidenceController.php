@@ -813,15 +813,17 @@ class EvidenceController extends Controller
     public function statusRecheck(Request $request){
         $ackno = $request->ackno;
         
-        if($request->type=='ncrp'){
+        if($request->type==='ncrp'){
+           
             $urls = Evidence::where('ack_no',$ackno )->pluck('url');
         }
         else{
+            
             $urls = ComplaintOthers::where('case_number',$ackno )->pluck('url');
         }
 
         if($urls){
-            if($request->type=='ncrp'){
+            if($request->type==='ncrp'){
                 foreach($urls as $url){
                     if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
                         // Handle invalid URL
@@ -870,7 +872,7 @@ class EvidenceController extends Controller
                 }
             }
             else{
-
+                
                 foreach($urls as $url){
 
                     if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
@@ -891,10 +893,10 @@ class EvidenceController extends Controller
                     if($headers === false){
                         $status_code = 400;
                         $status_text = 'Bad Request';
-
+                        
                     }
                     else{
-
+                        
                         $statusLine = $headers[0];
                         preg_match('/\d{3}/', $statusLine, $matches);
                         $status_code = isset($matches[0]) ? $matches[0] : null;
@@ -908,8 +910,9 @@ class EvidenceController extends Controller
                         }
 
                     }
-
-                        ComplaintOthers::where('ack_no',$ackno)->where('url', $url)
+                    
+                  
+                        ComplaintOthers::where('case_number',$ackno)->where('url', $url)
                                    ->where('reported_status','reported')
                                    ->update(['url_status' => $status_code,
                                   'url_status_text'=> $status_text

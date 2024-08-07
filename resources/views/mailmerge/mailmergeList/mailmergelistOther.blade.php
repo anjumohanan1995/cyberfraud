@@ -33,6 +33,40 @@ $user = Auth::user();
         border-bottom: 3px solid #3858f9;
         color: #3858f9; /* Optional: Change color when active */
     }
+        /* Spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button with spinner */
+.status_recheck {
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0; /* Adjust background color of the button */
+    padding: 10px 20px; /* Adjust padding for button size */
+    border: 1px solid #ccc; /* Button border */
+    color: #333; /* Button text color */
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.status_recheck .spinner {
+    position: absolute;
+    top: 30%; /* Position at the center vertically */
+    left: 40%; /* Position at the center horizontally */
+    transform: translate(-50%, -50%); /* Center the spinner precisely */
+    border: 3px solid rgba(0, 0, 0, 0.1); /* Adjust spinner border */
+    border-top-color: #007bff; /* Blue spinner color */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: none; /* Initially hidden */
+}
+
+.status_recheck.loading .spinner {
+    display: block; /* Show spinner when button is loading */
+}
 </style>
 
 <link rel="stylesheet" href="path_to_bootstrap_css">

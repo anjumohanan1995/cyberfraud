@@ -478,7 +478,7 @@ $user = Auth::user();
 
 <script>
 
-$(document).ready(function() {
+$(document).ready(function(){
     $('.status_recheck').click(function(){
 
      var type = $(this).data('type');
@@ -494,7 +494,7 @@ $(document).ready(function() {
     $.ajax({
     url: "{{ route('url_status_recheck') }}",
     data:{type:type,ackno:ackno},
-    success: function(response){
+    success:function(response){
 
     $button.removeClass('loading');
     $button.prop('disabled', false); // Re-enable button
