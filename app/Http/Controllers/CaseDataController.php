@@ -28,7 +28,7 @@ use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
-
+use DateTime;
 
 
 
@@ -485,14 +485,16 @@ $records = $query->get();
 
     $caseNo = $request->caseNo;
     $status = $request->status;
-
+   // dd(Carbon::now());
+    $current_date = new DateTime(Carbon::now());
+    $formated_date = $current_date->format('Y-m-d');
     // Log the incoming request data
     Log::info('Received update status request', ['caseNo' => $caseNo, 'status' => $status]);
 
     try {
         // Update all complaints with the matching case_number
         $affected = ComplaintOthers::where('case_number', $caseNo)
-            ->update(['case_status' => $status]);
+        ->update(['case_status' => $status, 'status_changed'=>$formated_date]);
 
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['caseNo' => $caseNo, 'status' => $status]);
@@ -513,7 +515,7 @@ $records = $query->get();
     }
 }
 
-    public function updateStatus(Request $request)
+public function updateStatus(Request $request)
 {
     // Validate the incoming request
     $request->validate([
@@ -523,17 +525,17 @@ $records = $query->get();
 
     $ackno = (int) $request->ackno;
     $status = $request->status;
-
+    $current_date = new DateTime(Carbon::now());
+    $formated_date = $current_date->format('Y-m-d');
     // Log the incoming request data
     Log::info('Received update status request', ['ackno' => $ackno, 'status' => $status]);
 
     try {
+        
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
-            ->update(['case_status' => $status, 'status_changed'=>Carbon::now()]);
-
-           // ->update(['case_status' => $status , 'status_changed' => new UTCDateTime(new \DateTime())]);
-
+        ->update(['case_status' => $status, 'status_changed'=> $formated_date]);
+//dd($affected);
         if ($affected > 0) {
             Log::info('Complaints status updated successfully', ['ackno' => $ackno, 'status' => $status]);
             return response()->json(['message' => 'Case statuses updated successfully']);
@@ -552,6 +554,7 @@ $records = $query->get();
         return response()->json(['message' => 'An error occurred while updating the statuses'], 500);
     }
 }
+
 
 
     public function detailsView(){

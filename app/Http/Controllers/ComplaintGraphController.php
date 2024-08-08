@@ -202,33 +202,60 @@ class ComplaintGraphController extends Controller
         $endOfYear = "$year-12-31 +1 day";
 
         // Cases per day grouped by acknowledgement_no
-        $casesPerDayData = $collection->raw(function($collection) use ($year, $month, $day, $startDate, $endDate) {
-            $startDate = $day ? "$year-$month-$day" : "$year-$month-01";
-            $endDate = $day ? "$year-$month-$day +1 day" : "$year-$month-01 +1 month";
+        if($source == 'NCRP') {
+            $casesPerDayData = $collection->raw(function($collection) use ($year, $month, $day, $startDate, $endDate) {
+                $startDate = $day ? "$year-$month-$day" : "$year-$month-01";
+                $endDate = $day ? "$year-$month-$day +1 day" : "$year-$month-01 +1 month";
 
-            return $collection->aggregate([
-                ['$match' => [
-                    'created_at' => [
-                        '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startDate) * 1000),
-                        '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endDate) * 1000)
-                    ]
-                ]],
-                ['$group' => [
-                    '_id' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at']],
-                    'distinct_acknowledgements' => ['$addToSet' => '$acknowledgement_no']
-                ]],
-                ['$project' => [
-                    'cases' => ['$size' => '$distinct_acknowledgements']
-                ]],
-                ['$sort' => ['_id' => 1]]
-            ])->toArray();
-        });
+                return $collection->aggregate([
+                    ['$match' => [
+                        'created_at' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startDate) * 1000),
+                            '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endDate) * 1000)
+                        ]
+                    ]],
+                    ['$group' => [
+                        '_id' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at']],
+                        'distinct_acknowledgements' => ['$addToSet' => '$acknowledgement_no']
+                    ]],
+                    ['$project' => [
+                        'cases' => ['$size' => '$distinct_acknowledgements']
+                    ]],
+                    ['$sort' => ['_id' => 1]]
+                ])->toArray();
+            });
+
+        }else{
+            $casesPerDayData = $collection->raw(function($collection) use ($year, $month, $day, $startDate, $endDate) {
+                $startDate = $day ? "$year-$month-$day" : "$year-$month-01";
+                $endDate = $day ? "$year-$month-$day +1 day" : "$year-$month-01 +1 month";
+
+                return $collection->aggregate([
+                    ['$match' => [                                                                                                                      
+                        'created_at' => [
+                            '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startDate) * 1000),
+                            '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endDate) * 1000)
+                        ]
+                    ]],
+                    ['$group' => [
+                        '_id' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$created_at']],
+                        'distinct_acknowledgements' => ['$addToSet' => '$case_number']
+                    ]],
+                    ['$project' => [
+                        'cases' => ['$size' => '$distinct_acknowledgements']
+                    ]],
+                    ['$sort' => ['_id' => 1]]
+                ])->toArray();
+            });
+
+        }
 
         $casesPerDay = array_column($casesPerDayData, 'cases', '_id');
 
         // Cases per month grouped by acknowledgement_no
         if ($month) {
-            $casesPerMonthData = $collection->raw(function($collection) use ($year, $month, $startOfYear, $endOfYear) {
+            if($source == 'NCRP'){
+                $casesPerMonthData = $collection->raw(function($collection) use ($year, $month, $startOfYear, $endOfYear) {
                 $startDate = "$year-$month-01";
                 $endDate = "$year-$month-01 +1 month";
 
@@ -249,6 +276,30 @@ class ComplaintGraphController extends Controller
                     ['$sort' => ['_id' => 1]]
                 ])->toArray();
             });
+            }else{
+                $casesPerMonthData = $collection->raw(function($collection) use ($year, $month, $startOfYear, $endOfYear) {
+                    $startDate = "$year-$month-01";
+                    $endDate = "$year-$month-01 +1 month";
+
+                    return $collection->aggregate([
+                        ['$match' => [
+                            'created_at' => [
+                                '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startDate) * 1000),
+                                '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endDate) * 1000)
+                            ]
+                        ]],
+                        ['$group' => [
+                            '_id' => ['$dateToString' => ['format' => '%Y-%m', 'date' => '$created_at']],
+                            'distinct_acknowledgements' => ['$addToSet' => '$case_number']
+                        ]],
+                        ['$project' => [
+                            'cases' => ['$size' => '$distinct_acknowledgements']
+                        ]],
+                        ['$sort' => ['_id' => 1]]
+                    ])->toArray();
+                });
+            }
+
 
             $casesPerMonth = array_column($casesPerMonthData, 'cases', '_id');
         } else {
@@ -257,24 +308,48 @@ class ComplaintGraphController extends Controller
 
         // Cases per year grouped by acknowledgement_no
         if ($month) {
-            $casesPerYearData = $collection->raw(function($collection) use ($year, $startOfYear, $endOfYear) {
-                return $collection->aggregate([
-                    ['$match' => [
-                        'created_at' => [
-                            '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startOfYear) * 1000),
-                            '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endOfYear) * 1000)
-                        ]
-                    ]],
-                    ['$group' => [
-                        '_id' => ['$dateToString' => ['format' => '%Y', 'date' => '$created_at']],
-                        'distinct_acknowledgements' => ['$addToSet' => '$acknowledgement_no']
-                    ]],
-                    ['$project' => [
-                        'cases' => ['$size' => '$distinct_acknowledgements']
-                    ]],
-                    ['$sort' => ['_id' => 1]]
-                ])->toArray();
-            });
+            if($source =='Others'){
+                $casesPerYearData = $collection->raw(function($collection) use ($year, $startOfYear, $endOfYear) {
+                    return $collection->aggregate([
+                        ['$match' => [
+                            'created_at' => [
+                                '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startOfYear) * 1000),
+                                '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endOfYear) * 1000)
+                            ]
+                        ]],
+                        ['$group' => [
+                            '_id' => ['$dateToString' => ['format' => '%Y', 'date' => '$created_at']],
+                            'distinct_acknowledgements' => ['$addToSet' => '$case_number']
+                        ]],
+                        ['$project' => [
+                            'cases' => ['$size' => '$distinct_acknowledgements']
+                        ]],
+                        ['$sort' => ['_id' => 1]]
+                    ])->toArray();
+                });
+            }else{
+                $casesPerYearData = $collection->raw(function($collection) use ($year, $startOfYear, $endOfYear) {
+                    return $collection->aggregate([
+                        ['$match' => [
+                            'created_at' => [
+                                '$gte' => new MongoDB\BSON\UTCDateTime(strtotime($startOfYear) * 1000),
+                                '$lt' => new MongoDB\BSON\UTCDateTime(strtotime($endOfYear) * 1000)
+                            ]
+                        ]],
+                        ['$group' => [
+                            '_id' => ['$dateToString' => ['format' => '%Y', 'date' => '$created_at']],
+                            'distinct_acknowledgements' => ['$addToSet' => '$acknowledgement_no']
+                        ]],
+                        ['$project' => [
+                            'cases' => ['$size' => '$distinct_acknowledgements']
+                        ]],
+                        ['$sort' => ['_id' => 1]]
+                    ])->toArray();
+                });
+            }
+
+           // dd($casesPerYearData);
+
 
             $casesPerYear = array_column($casesPerYearData, 'cases', '_id');
         } else {

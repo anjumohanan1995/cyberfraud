@@ -207,7 +207,7 @@ $user = Auth::user();
             },
             success: function(response) {
                 // Handle success response here
-                console.log('Item deleted successfully');
+               // console.log('Item deleted successfully');
             },
             error: function(xhr, status, error) {
                 // Handle error response here

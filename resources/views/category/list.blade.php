@@ -56,12 +56,12 @@
                                         </a>
                                     </div>
                                 </div> --}}
-                              
+
 
                             </div>
 
                             <form >
-                                    
+
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -104,10 +104,10 @@
                                 </div>
                         </div>
 
-                    
+
                     </div>
 
-                    
+
 
                 </div>
             </div>
@@ -150,7 +150,7 @@ $(document).ready(function(){
 
         $.ajax({
             url: "{{ route('add.category') }}",
-            method: 'POST', 
+            method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
@@ -159,12 +159,12 @@ $(document).ready(function(){
                 status: status,
             },
             success: function(response) {
-                console.log(response);
+                //console.log(response);
                 $('#name').val('');
                 categoryTable.ajax.reload(null, false);
                 var successMessage = "{{ session('success') }}";
                 if (successMessage) {
-               
+
                     $('#success-message').html(successMessage); // Update message
                     $('#success-message').fadeIn(); // Show the message
                 }
@@ -186,7 +186,7 @@ $(document).on('click', '.delete-btn', function() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-            console.log(response);
+            //console.log(response);
             categoryTable.ajax.reload(null, false);
             alert('Category deleted successfully');
         },
@@ -196,7 +196,7 @@ $(document).on('click', '.delete-btn', function() {
         }
     });
 }
-}) 
+})
 
 });
 

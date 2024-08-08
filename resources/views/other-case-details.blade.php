@@ -91,7 +91,7 @@
                                 </table>
                             </div>
 
-                            
+
                         </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
 
 <script>
 
- 
+
         function confirmActivation(identifier) {
             var isChecked = $(identifier).prop('checked');
             var confirmationMessage = isChecked ? "Do you want to activate this?" :
@@ -120,10 +120,10 @@
         }
 
         function activateLink(identifier) {
-            
+
             var status = $(identifier).prop('checked') == true ? 1 : 0;
             var case_id = $(identifier).data('id');
-          
+
             $.ajax({
                 type: "GET",
                 dataType: "json",
@@ -133,7 +133,7 @@
                     'case_id': case_id
                 },
                 success: function(data) {
-                    console.log(data.status)
+                    //console.log(data.status)
                     toastr.success(data.status, 'Success!');
 
                 },

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Complaint;
+use App\Models\ComplaintOthers;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -55,31 +56,55 @@ public function getComplaintStats(Request $request)
 {
     $startDate = $request->query('start_date');
     $endDate = $request->query('end_date');
-    $userId = $request->query('user_id');
+    $source = $request->query('source');
 
-    $query = [];
-    // Log the query for debugging
-    \Log::info('MongoDB Query:', $query);
+    // Initialize query array
+    $query = $source == 'NCRP' ? Complaint::query() : ComplaintOthers::query();
 
-    // Fetch complaints with applied filters
-    $complaints = Complaint::where($query)->get();
-    if($startDate && $endDate){
-        $complaints = Complaint::whereBetween('status_changed',[Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay()])->get();
+    if ($startDate && $endDate) {
+        try {
+            // Apply date range filter
+            $query->whereBetween('status_changed', [$startDate, $endDate]);
+        } catch (\Exception $e) {
+            \Log::error('Date parsing error: ' . $e->getMessage());
+            return response()->json(['error' => 'Invalid date format'], 400);
+        }
     }
 
-    //dd($complaints);
+    // Fetch complaints with applied filters
+    $complaints = $query->get();
+
+    // Debug the complaints data
+    \Log::info('Complaints:', $complaints->toArray());
+
     // Fetch all users
     $users = User::all()->keyBy('_id');
 
     // Initialize an empty array to store results
     $result = [];
 
-    // Process each complaint
-    foreach ($complaints as $complaint) {
+    // Group complaints by acknowledgement_number or case_number based on source
+    $groupByField = $source == 'NCRP' ? 'acknowledgement_no' : 'case_number';
+
+    // Ensure the field exists in the complaints data
+    if ($complaints->isEmpty() || !isset($complaints->first()[$groupByField])) {
+        \Log::error("Field '{$groupByField}' does not exist in complaints data.");
+        return response()->json(['error' => "Field '{$groupByField}' does not exist in complaints data."], 400);
+    }
+
+    $groupedComplaints = $complaints->groupBy($groupByField);
+
+    // Debug grouped complaints
+    \Log::info('Grouped Complaints:', $groupedComplaints->map->toArray()->toArray());
+
+    // Process each group of complaints
+    foreach ($groupedComplaints as $key => $complaintsGroup) {
+        // Consider each group as a single case
+        $complaint = $complaintsGroup->first();
         $userId = (string) $complaint->assigned_to;
 
         // Initialize user data if not already present
-        if (!isset($result[$userId])) {
+        if (!isset($result[$userId]) && $userId) {
             $result[$userId] = [
                 'assigned_to' => $userId,
                 'user_name' => isset($users[$userId]) ? $users[$userId]->name : 'Unknown User',
@@ -109,6 +134,13 @@ public function getComplaintStats(Request $request)
     // Return the results as JSON
     return response()->json(array_values($result));
 }
+
+
+
+
+
+
+
 
 
 

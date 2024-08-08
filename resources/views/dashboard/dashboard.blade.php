@@ -1,16 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .card[disabled] {
-    opacity: 1; /* Reduce opacity to indicate disabled state */
-    pointer-events: none; /* Disable mouse events */
-    filter: grayscale(0%); /* Optionally desaturate/grayscale */
-    /* Add more styles as needed */
-}
-</style>
+    <style>
+        .card[disabled] {
+            opacity: 1;
+            /* Reduce opacity to indicate disabled state */
+            pointer-events: none;
+            /* Disable mouse events */
+            filter: grayscale(0%);
+            /* Optionally desaturate/grayscale */
+            /* Add more styles as needed */
+        }
+    </style>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css">
     <!-- container -->
     <div class="container-fluid">
         <!-- breadcrumb -->
@@ -89,82 +92,83 @@
                     </a>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                    <a href="{{url('case-data-others')}}">
-                    <div class="card overflow-hidden project-card">
-                        <div class="card-body">
-                            <div class="d-flex">
-                                <div class="my-auto">
-                                    <svg enable-background="new 0 0 438.891 438.891" class="mr-4 ht-60 wd-60 my-auto danger"
-                                        version="1.1" viewBox="0 0 438.89 438.89" xml:space="preserve"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M347.97,57.503h-39.706V39.74c0-5.747-6.269-8.359-12.016-8.359H265.424c-7.314-20.898-25.6-31.347-46.498-31.347
-                                            c-20.668-0.777-39.467,11.896-46.498,31.347h-30.302c-5.747,0-11.494,2.612-11.494,8.359v17.763H91.424
-                                            c-23.53,0.251-42.78,18.813-43.886,42.318v299.36c0,22.988,20.898,39.706,43.886,39.706h257.04c22.988,0,43.886-16.718,43.886-39.706
-                                            v-299.36C390.75,76.316,371.5,57.754,347.97,57.503z M151.53,52.279h28.735c5.016-0.612,9.045-4.428,9.927-9.404
-                                            c3.094-13.474,14.915-23.146,28.735-23.51c13.692,0.415,25.335,10.117,28.212,23.51c0.937,5.148,5.232,9.013,10.449,9.404h29.78
-                                            v41.796H151.53V52.279z M370.96,399.189c0,11.494-11.494,18.808-22.988,18.808h-257.04c-11.494,0-22.988-7.314-22.988-18.808v-299.36
-                                            c1.066-11.964,10.978-21.201,22.988-21.42h39.706v26.645c0.552,5.854,5.622,10.233,11.494,9.927h154.12
-                                            c5.98,0.327,11.209-3.992,12.016-9.927v-26.646h39.706c12.009,0.22,21.922,9.456,22.988,21.42V399.189z" />
-                                        <path
-                                            d="M219.445,182.007h-15.659v-15.659c0-6.279-5.103-11.382-11.382-11.382s-11.382,5.103-11.382,11.382v15.659h-15.659
-                                            c-6.279,0-11.382,5.103-11.382,11.382s5.103,11.382,11.382,11.382h15.659v15.659c0,6.279,5.103,11.382,11.382,11.382
-                                            s11.382-5.103,11.382-11.382v-15.659h15.659c6.279,0,11.382-5.103,11.382-11.382S225.724,182.007,219.445,182.007z" />
-                                    </svg>
+                    <a href="{{ url('case-data-others') }}">
+                        <div class="card overflow-hidden project-card">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="my-auto">
+                                        <svg enable-background="new 0 0 438.891 438.891"
+                                            class="mr-4 ht-60 wd-60 my-auto danger" version="1.1"
+                                            viewBox="0 0 438.89 438.89" xml:space="preserve"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M347.97,57.503h-39.706V39.74c0-5.747-6.269-8.359-12.016-8.359H265.424c-7.314-20.898-25.6-31.347-46.498-31.347
+                                                c-20.668-0.777-39.467,11.896-46.498,31.347h-30.302c-5.747,0-11.494,2.612-11.494,8.359v17.763H91.424
+                                                c-23.53,0.251-42.78,18.813-43.886,42.318v299.36c0,22.988,20.898,39.706,43.886,39.706h257.04c22.988,0,43.886-16.718,43.886-39.706
+                                                v-299.36C390.75,76.316,371.5,57.754,347.97,57.503z M151.53,52.279h28.735c5.016-0.612,9.045-4.428,9.927-9.404
+                                                c3.094-13.474,14.915-23.146,28.735-23.51c13.692,0.415,25.335,10.117,28.212,23.51c0.937,5.148,5.232,9.013,10.449,9.404h29.78
+                                                v41.796H151.53V52.279z M370.96,399.189c0,11.494-11.494,18.808-22.988,18.808h-257.04c-11.494,0-22.988-7.314-22.988-18.808v-299.36
+                                                c1.066-11.964,10.978-21.201,22.988-21.42h39.706v26.645c0.552,5.854,5.622,10.233,11.494,9.927h154.12
+                                                c5.98,0.327,11.209-3.992,12.016-9.927v-26.646h39.706c12.009,0.22,21.922,9.456,22.988,21.42V399.189z" />
+                                            <path
+                                                d="M219.445,182.007h-15.659v-15.659c0-6.279-5.103-11.382-11.382-11.382s-11.382,5.103-11.382,11.382v15.659h-15.659
+                                                c-6.279,0-11.382,5.103-11.382,11.382s5.103,11.382,11.382,11.382h15.659v15.659c0,6.279,5.103,11.382,11.382,11.382
+                                                s11.382-5.103,11.382-11.382v-15.659h15.659c6.279,0,11.382-5.103,11.382-11.382S225.724,182.007,219.445,182.007z" />
+                                        </svg>
 
-                                </div>
-                                <div class="project-content">
-                                    <h6>Total Other Cases</h6>
-                                    <ul>
-                                        <li>
-                                            <strong>Number Of Other Cases:</strong>
-                                            <span>{{ $totalOtherComplaints }}</span>
-                                        </li>
-                                        <li hidden>
-                                            <strong>Completed</strong>
-                                            <span>23</span>
-                                        </li>
-                                    </ul>
+                                    </div>
+                                    <div class="project-content">
+                                        <h6>Total Other Cases</h6>
+                                        <ul>
+                                            <li>
+                                                <strong>Number Of Other Cases:</strong>
+                                                <span>{{ $totalOtherComplaints }}</span>
+                                            </li>
+                                            <li hidden>
+                                                <strong>Completed</strong>
+                                                <span>23</span>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     </a>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                    <a href="{{url('muleaccount')}}">
-                    <div class="card overflow-hidden project-card">
-                        <div class="card-body">
-                            <div class="d-flex">
-                                <div class="my-auto">
-                                    <svg enable-background="new 0 0 469.682 469.682" version="1.1"
-                                        class="mr-4 ht-60 wd-60 my-auto primary" viewBox="0 0 469.68 469.68"
-                                        xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M234.84,0C105.151,0,0,105.151,0,234.84c0,129.69,105.151,234.84,234.84,234.84c129.69,0,234.84-105.151,234.84-234.84
-                                            C469.68,105.151,364.529,0,234.84,0z M347.748,331.639c-5.644,5.644-14.804,5.644-20.448,0l-77.528-77.528l-77.528,77.528
-                                            c-5.644,5.644-14.804,5.644-20.448,0c-5.644-5.644-5.644-14.804,0-20.448l77.528-77.528l-77.528-77.528
-                                            c-5.644-5.644-5.644-14.804,0-20.448s14.804-5.644,20.448,0l77.528,77.528l77.528-77.528c5.644-5.644,14.804-5.644,20.448,0
-                                            s5.644,14.804,0,20.448l-77.528,77.528l77.528,77.528C353.392,316.835,353.392,325.995,347.748,331.639z" />
-                                    </svg>
+                    <a href="{{ url('muleaccount') }}">
+                        <div class="card overflow-hidden project-card">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="my-auto">
+                                        <svg enable-background="new 0 0 469.682 469.682" version="1.1"
+                                            class="mr-4 ht-60 wd-60 my-auto primary" viewBox="0 0 469.68 469.68"
+                                            xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M234.84,0C105.151,0,0,105.151,0,234.84c0,129.69,105.151,234.84,234.84,234.84c129.69,0,234.84-105.151,234.84-234.84
+                                                C469.68,105.151,364.529,0,234.84,0z M347.748,331.639c-5.644,5.644-14.804,5.644-20.448,0l-77.528-77.528l-77.528,77.528
+                                                c-5.644,5.644-14.804,5.644-20.448,0c-5.644-5.644-5.644-14.804,0-20.448l77.528-77.528l-77.528-77.528
+                                                c-5.644-5.644-5.644-14.804,0-20.448s14.804-5.644,20.448,0l77.528,77.528l77.528-77.528c5.644-5.644,14.804-5.644,20.448,0
+                                                s5.644,14.804,0,20.448l-77.528,77.528l77.528,77.528C353.392,316.835,353.392,325.995,347.748,331.639z" />
+                                        </svg>
 
-                                </div>
-                                <div class="project-content">
-                                    <h6>Mule account</h6>
-                                    <ul>
-                                        <li>
-                                            <strong>Mule Account Count:</strong>
-                                            <span>{{ $muleAccountCount }}</span>
-                                        </li>
-                                        <li hidden>
-                                            <strong>Paid</strong>
-                                            <span>56</span>
-                                        </li>
-                                    </ul>
+                                    </div>
+                                    <div class="project-content">
+                                        <h6>Mule account</h6>
+                                        <ul>
+                                            <li>
+                                                <strong>Mule Account Count:</strong>
+                                                <span>{{ $muleAccountCount }}</span>
+                                            </li>
+                                            <li hidden>
+                                                <strong>Paid</strong>
+                                                <span>56</span>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     </a>
                 </div>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
@@ -176,10 +180,11 @@
                                         version="1.1" viewBox="0 0 512 512" xml:space="preserve"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M464,64H48C21.49,64,0,85.49,0,112v288c0,26.51,21.49,48,48,48h416c26.51,0,48-21.49,48-48V112
-                                        C512,85.49,490.51,64,464,64z M480,400c0,8.822-7.178,16-16,16H48c-8.822,0-16-7.178-16-16V112c0-8.822,7.178-16,16-16h416
-                                        c8.822,0,16,7.178,16,16V400z" />
-                                        <path d="M256,176c-44.112,0-80,35.888-80,80s35.888,80,80,80s80-35.888,80-80S300.112,176,256,176z M256,304
-                                        c-26.468,0-48-21.532-48-48s21.532-48,48-48s48,21.532,48,48S282.468,304,256,304z" />
+                                            C512,85.49,490.51,64,464,64z M480,400c0,8.822-7.178,16-16,16H48c-8.822,0-16-7.178-16-16V112c0-8.822,7.178-16,16-16h416
+                                            c8.822,0,16,7.178,16,16V400z" />
+                                        <path
+                                            d="M256,176c-44.112,0-80,35.888-80,80s35.888,80,80,80s80-35.888,80-80S300.112,176,256,176z M256,304
+                                            c-26.468,0-48-21.532-48-48s21.532-48,48-48s48,21.532,48,48S282.468,304,256,304z" />
                                         <path d="M112,128h32v32h-32V128z" />
                                         <path d="M368,128h32v32h-32V128z" />
                                         <path d="M112,352h32v32h-32V352z" />
@@ -187,14 +192,14 @@
                                         <rect x="144" y="192" width="224" height="32" />
                                         <rect x="144" y="288" width="224" height="32" />
                                         <path d="M464,84H48C28.8,84,16,96.8,16,116v280c0,19.2,12.8,32,32,32h416c19.2,0,32-12.8,32-32V116
-                                        C496,96.8,483.2,84,464,84z M480,396c0,8.8-7.2,16-16,16H48c-8.8,0-16-7.2-16-16V116c0-8.8,7.2-16,16-16h416
-                                        c8.8,0,16,7.2,16,16V396z" />
+                                            C496,96.8,483.2,84,464,84z M480,396c0,8.8-7.2,16-16,16H48c-8.8,0-16-7.2-16-16V116c0-8.8,7.2-16,16-16h416
+                                            c8.8,0,16,7.2,16,16V396z" />
                                         <path d="M400,216h-8v-8c0-4.4-3.6-8-8-8h-64c-4.4,0-8,3.6-8,8v8h-8c-4.4,0-8,3.6-8,8v64c0,4.4,3.6,8,8,8h8v8
-                                        c0,4.4,3.6,8,8,8h64c4.4,0,8-3.6,8-8v-8h8c4.4,0,8-3.6,8-8v-64C408,219.6,404.4,216,400,216z M344,272c-13.3,0-24-10.7-24-24
-                                        s10.7-24,24-24s24,10.7,24,24S357.3,272,344,272z" />
+                                            c0,4.4,3.6,8,8,8h64c4.4,0,8-3.6,8-8v-8h8c4.4,0,8-3.6,8-8v-64C408,219.6,404.4,216,400,216z M344,272c-13.3,0-24-10.7-24-24
+                                            s10.7-24,24-24s24,10.7,24,24S357.3,272,344,272z" />
                                         <path d="M192,216h-8v-8c0-4.4-3.6-8-8-8h-64c-4.4,0-8,3.6-8,8v8h-8c-4.4,0-8,3.6-8,8v64c0,4.4,3.6,8,8,8h8v8
-                                        c0,4.4,3.6,8,8,8h64c4.4,0,8-3.6,8-8v-8h8c4.4,0,8-3.6,8-8v-64C200,219.6,196.4,216,192,216z M136,272c-13.3,0-24-10.7-24-24
-                                        s10.7-24,24-24s24,10.7,24,24S149.3,272,136,272z" />
+                                            c0,4.4,3.6,8,8,8h64c4.4,0,8-3.6,8-8v-8h8c4.4,0,8-3.6,8-8v-64C200,219.6,196.4,216,192,216z M136,272c-13.3,0-24-10.7-24-24
+                                            s10.7-24,24-24s24,10.7,24,24S149.3,272,136,272z" />
                                     </svg>
 
                                 </div>
@@ -520,21 +525,35 @@
                     <div id="casesPerYearChart"></div>
                 </div>
                 <div class="row">
-                    <h6><b>Team Members Performance</b></h6>
+
                     <div class="col-md-12">
 
                         <div class="card">
-
+                            <div class="card-header">
+                              <h2><b>Team Members Performance</b></h2>
+                            </div>
                             <div class="card-body">
+                              <div class="row">
+                                 <div class="col-md-3"><label for="start_date">Start Date:</label>
+                                <input type="date" id="start_date"></div>
+                                 <div class="col-md-3"><label for="end_date">End Date:</label>
+                                <input type="date" id="end_date"></div>
+                                 <div class="col-md-3">
+                                <select id="sourceTeam" class="form-select"><option value="NCRP" selected>NCRP</option>
+                                 <option value="Others">Others</option>
+                             </select></div>
+                                 <div class="col-md-3"> <button onclick="fetchData()">Get Stats</button></div>
+                              </div>
 
-                                <input type="date" id="start_date">
-    <input type="date" id="end_date">
-    <button onclick="fetchData()">Get Stats</button>
-    <div class="loader-container" id="loader">
-    <div class="loader"></div>
-  </div>
 
-    <div id="team-chart"></div>
+
+
+
+                                <div class="loader-container" id="loader">
+                                    <div class="loader"></div>
+                                </div>
+
+                                <div id="team-chart"></div>
                             </div>
                         </div>
                     </div>
@@ -545,599 +564,392 @@
     </div>
     <!-- /container -->
 
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-            {{-- <script>
-                $(document).ready(function() {
-                    var currentYear = new Date().getFullYear();
-
-                    // Populate years dropdown
-                    for (var year = currentYear; year >= currentYear - 5; year--) {
-
-                        $('#yearSelect').append($('<option>', {
-                            value: year,
-                            text: year,
-                            selected: year == currentYear // Set current year as selected
-                        }));
-                    }
-
-                    // Populate months dropdown using Moment.js for month names
-                    for (var month = 1; month <= 12; month++) {
-                        $('#monthSelect').append($('<option>', {
-                            value: month,
-                            text: moment(month, 'MM').format('MMMM'),
-                            selected: month == new Date().getMonth() + 1 // Set current month as selected
-                        }));
-                    }
-
-                    // Function to populate days dropdown based on selected year and month
-                    function populateDaysDropdown() {
-                        var selectedYear = $('#yearSelect').val() || currentYear;
-                        var selectedMonth = $('#monthSelect').val() || new Date().getMonth() + 1;
-                        var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-                        $('#daySelect').empty();
-                        for (var day = 1; day <= daysInMonth; day++) {
-                            $('#daySelect').append($('<option>', {
-                                value: day,
-                                text: day,
-                                selected: day == new Date().getDate() // Set current day as selected
-                            }));
-                        }
-                    }
-
-                    // Initial population of days dropdown
-                    populateDaysDropdown();
-
-                    // Event listeners for month and year changes
-                    $('#monthSelect, #yearSelect').change(function() {
-                        populateDaysDropdown();
-                    });
-
-                    // Function to fetch data via AJAX and render charts
-                    function fetchData(year, month, day, source) {
-                        $.ajax({
-                            url: '{{ route("complaints.chart") }}', // Replace with your actual route
-                            method: 'GET',
-                            data: { year: year, month: month, day: day, source: source },
-                            success: function(data) {
-                                renderCharts($('#chartTypeSelect').val(), data);
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(error);
-                            }
-                        });
-                    }
-
-                    // Function to render charts based on selected parameters
-                    function renderCharts(chartType, data) {
-                        var casesPerDay = data.cases_per_day || {};
-                        var casesPerMonth = data.cases_per_month || {};
-                        var casesPerYear = data.cases_per_year || {};
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
-                        switch(chartType) {
-                            case 'bar':
-                                renderBarChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                                renderBarChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                                renderBarChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                                break;
-                            case 'line':
-                                renderLineChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                                renderLineChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                                renderLineChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                                break;
-                            case 'pie':
-                                renderPieChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                                renderPieChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                                renderPieChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                                break;
-                            default:
-                                console.error('Invalid chart type selected');
-                        }
-                    }
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const startDateInput = document.getElementById('start_date');
+          const endDateInput = document.getElementById('end_date');
 
-                    // Event listener for year, month, day, and source changes
-                    $('#yearSelect, #monthSelect, #daySelect, #sourceSelect').change(function() {
-                        var selectedYear = $('#yearSelect').val();
-                        var selectedMonth = $('#monthSelect').val();
-                        var selectedDay = $('#daySelect').val();
-                        var selectedSource = $('#sourceSelect').val();
-                        fetchData(selectedYear, selectedMonth, selectedDay, selectedSource);
-                    });
+          const today = new Date();
+          const endDate = today.toISOString().split('T')[0]; // Current date
+          today.setMonth(today.getMonth() - 1);
+          const startDate = today.toISOString().split('T')[0]; // Date one month ago
 
-                    // Initial loading with default values
-                    fetchData(currentYear, $('#monthSelect').val(), $('#daySelect').val(), 'NCRP');
+          startDateInput.value = startDate;
+          endDateInput.value = endDate;
+      });
 
-                    // Event listener for chart type change
-                    $('#chartTypeSelect').change(function() {
-                        fetchData($('#yearSelect').val(), $('#monthSelect').val(), $('#daySelect').val(), $('#sourceSelect').val());
-                    });
+      $(document).ready(function() {
+          var currentYear = new Date().getFullYear();
 
-                    // Function to render bar chart
-                    function renderBarChart(title, values, elementId) {
-                        var ctx = document.getElementById(elementId);
-                        window[elementId] = new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: Object.keys(values),
-                                datasets: [{
-                                    label: title,
-                                    data: Object.values(values),
-                                    backgroundColor: 'rgb(0, 143, 251)',
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                    }
+          // Populate years dropdown
+          for (var year = currentYear; year >= currentYear - 20; year--) {
+              $('#yearSelect').append($('<option>', {
+                  value: year,
+                  text: year,
+                  selected: year == currentYear // Set current year as selected
+              }));
+          }
 
-                    // Function to render line chart
-                    function renderLineChart(title, values, elementId) {
-                        var ctx = document.getElementById(elementId);
-                        window[elementId] = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: Object.keys(values),
-                                datasets: [{
-                                    label: title,
-                                    data: Object.values(values),
-                                    fill: false,
-                                    backgroundColor: 'rgb(0, 143, 251)',
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                    }
+          // Populate months dropdown using Moment.js for month names
+          for (var month = 1; month <= 12; month++) {
+              $('#monthSelect').append($('<option>', {
+                  value: month,
+                  text: moment(month, 'MM').format('MMMM'),
+                  selected: month == new Date().getMonth() + 1 // Set current month as selected
+              }));
+          }
 
-                    // Function to render pie chart
-                    function renderPieChart(title, values, elementId) {
-    var ctx = document.getElementById(elementId);
+          // Function to populate days dropdown based on selected year and month
+          function populateDaysDropdown() {
+              var selectedYear = $('#yearSelect').val() || currentYear;
+              var selectedMonth = $('#monthSelect').val() || new Date().getMonth() + 1;
+              var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+              $('#daySelect').empty();
+              for (var day = 1; day <= daysInMonth; day++) {
+                  $('#daySelect').append($('<option>', {
+                      value: day,
+                      text: day,
+                      selected: day == new Date().getDate() // Set current day as selected
+                  }));
+              }
+          }
 
-    window[elementId] = new Chart(ctx, {
-        type: 'doughnut', // You can use 'pie' if preferred
-        data: {
-            labels: Object.keys(values),
-            datasets: [{
-                label: title,
-                data: Object.values(values),
-                backgroundColor: [
-                    'rgb(255, 99, 132)', // Adjust colors as needed
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ],
-                hoverOffset: 50,
-                offset: new Array(Object.keys(values).length).fill(0) // Initialize offsets to 0
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: title
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            // Get the current dataset and data index
-                            const label = context.label || '';
-                            const value = context.raw || 0;
+          // Initial population of days dropdown
+          populateDaysDropdown();
 
-                            // Return the custom tooltip content
-                            return `${label}: ${value}`;
-                        }
-                    }
-                }
-            },
-            onClick: (event) => {
-                const slide = window[elementId].getElementsAtEventForMode(
-                    event,
-                    'nearest',
-                    { intersect: true },
-                    true
-                );
-                if (slide.length) {
-                    const pieSlide = slide[0];
+          // Event listeners for month and year changes
+          $('#monthSelect, #yearSelect').change(function() {
+              populateDaysDropdown();
+          });
 
-                    // Reset all offsets
-                    window[elementId].data.datasets[pieSlide.datasetIndex].offset =
-                        new Array(window[elementId].data.datasets[pieSlide.datasetIndex].data.length).fill(0);
+          // Function to fetch data via AJAX and render charts
+          function fetchData(year, month, day, source) {
+              $.ajax({
+                  url: '{{ route('complaints.chart') }}', // Replace with your actual route
+                  method: 'GET',
+                  data: {
+                      year: year,
+                      month: month,
+                      day: day,
+                      source: source
+                  },
+                  success: function(data) {
+                      renderCharts($('#chartTypeSelect').val(), data);
+                  },
+                  error: function(xhr, status, error) {
+                      console.error(error);
+                  }
+              });
+          }
 
-                    // Set the clicked segment offset
-                    window[elementId].data.datasets[pieSlide.datasetIndex].offset[pieSlide.index] = 50;
+          // Function to render charts based on selected parameters
+          function renderCharts(chartType, data) {
+              var casesPerDay = data.cases_per_day || {};
+              var casesPerMonth = data.cases_per_month || {};
+              var casesPerYear = data.cases_per_year || {};
 
-                    // Update the chart
-                    window[elementId].update();
-                }
-            },
-            layout: {
-                padding: 50
-            }
-        }
-    });
-}
+              switch (chartType) {
+                  case 'bar':
+                      renderBarChart('Cases per Day', casesPerDay, 'casesPerDayChart');
+                      renderBarChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
+                      renderBarChart('Cases per Year', casesPerYear, 'casesPerYearChart');
+                      break;
+                  case 'line':
+                      renderLineChart('Cases per Day', casesPerDay, 'casesPerDayChart');
+                      renderLineChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
+                      renderLineChart('Cases per Year', casesPerYear, 'casesPerYearChart');
+                      break;
+                  case 'pie':
+                      renderPieChart('Cases per Day', casesPerDay, 'casesPerDayChart');
+                      renderPieChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
+                      renderPieChart('Cases per Year', casesPerYear, 'casesPerYearChart');
+                      break;
+                  default:
+                      console.error('Invalid chart type selected');
+              }
+          }
 
+          // Event listener for year, month, day, and source changes
+          $('#yearSelect, #monthSelect, #daySelect, #sourceSelect').change(function() {
+              var selectedYear = $('#yearSelect').val();
+              var selectedMonth = $('#monthSelect').val();
+              var selectedDay = $('#daySelect').val();
+              var selectedSource = $('#sourceSelect').val();
+              fetchData(selectedYear, selectedMonth, selectedDay, selectedSource);
+          });
 
+          // Initial loading with default values
+          fetchData(currentYear, $('#monthSelect').val(), $('#daySelect').val(), 'NCRP');
 
-                });
-            </script> --}}
-            <script>
-                $(document).ready(function() {
-                    var currentYear = new Date().getFullYear();
+          // Event listener for chart type change
+          $('#chartTypeSelect').change(function() {
+              fetchData($('#yearSelect').val(), $('#monthSelect').val(), $('#daySelect').val(), $('#sourceSelect').val());
+          });
 
-                    // Populate years dropdown
-                    for (var year = currentYear; year >= currentYear - 5; year--) {
-                        $('#yearSelect').append($('<option>', {
-                            value: year,
-                            text: year,
-                            selected: year == currentYear // Set current year as selected
-                        }));
-                    }
+          // Function to render bar chart
+          function renderBarChart(title, values, elementId) {
+              var ctx = document.getElementById(elementId);
+              var years = Object.keys(values); // Assuming values is an object where keys are years
+              var dataValues = Object.values(values);
 
-                    // Populate months dropdown using Moment.js for month names
-                    for (var month = 1; month <= 12; month++) {
-                        $('#monthSelect').append($('<option>', {
-                            value: month,
-                            text: moment(month, 'MM').format('MMMM'),
-                            selected: month == new Date().getMonth() + 1 // Set current month as selected
-                        }));
-                    }
+              window[elementId] = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: years, // X-axis labels (years)
+                      datasets: [{
+                          label: title,
+                          data: dataValues,
+                          backgroundColor: 'rgb(0, 143, 251)',
+                          borderColor: 'rgba(54, 162, 235, 1)',
+                          borderWidth: 1
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          x: {
+                              ticks: {
+                                  autoSkip: false, // Ensure all labels are displayed
+                                  maxRotation: 45, // Rotate labels if necessary to fit
+                                  minRotation: 45,
+                                  callback: function(value) {
+                                      return Math.floor(value); // Ensure x-axis labels are integers
+                                  }
+                              }
+                          },
+                          y: {
+                              beginAtZero: true,
+                              ticks: {
+                                  callback: function(value) {
+                                      return Math.floor(value); // Ensure y-axis labels are integers
+                                  }
+                              }
+                          }
+                      }
+                  }
+              });
+          }
 
-                    // Function to populate days dropdown based on selected year and month
-                    function populateDaysDropdown() {
-                        var selectedYear = $('#yearSelect').val() || currentYear;
-                        var selectedMonth = $('#monthSelect').val() || new Date().getMonth() + 1;
-                        var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-                        $('#daySelect').empty();
-                        for (var day = 1; day <= daysInMonth; day++) {
-                            $('#daySelect').append($('<option>', {
-                                value: day,
-                                text: day,
-                                selected: day == new Date().getDate() // Set current day as selected
-                            }));
-                        }
-                    }
+          // Function to render line chart
+          function renderLineChart(title, values, elementId) {
+              var ctx = document.getElementById(elementId);
+              var periods = Object.keys(values); // Time periods (e.g., years, months)
+              var dataValues = Object.values(values); // Data values for each period
 
-                    // Initial population of days dropdown
-                    populateDaysDropdown();
+              window[elementId] = new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                      labels: periods, // X-axis labels (time periods)
+                      datasets: [{
+                          label: title,
+                          data: dataValues,
+                          fill: false,
+                          backgroundColor: 'rgb(0, 143, 251)', // Color of the line
+                          borderColor: 'rgba(54, 162, 235, 1)', // Color of the line
+                          borderWidth: 2, // Width of the line
+                          pointBackgroundColor: 'rgb(0, 143, 251)', // Color of data points
+                          pointBorderColor: 'rgba(54, 162, 235, 1)', // Border color of data points
+                          pointBorderWidth: 2, // Border width of data points
+                          pointRadius: 5, // Radius of data points
+                          pointHoverRadius: 7 // Radius when hovering over data points
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      scales: {
+                          x: {
+                              ticks: {
+                                  autoSkip: false, // Show all x-axis labels
+                                  maxRotation: 0, // No rotation for clear labels
+                                  minRotation: 0,
+                                  align: 'center', // Center align x-axis labels
+                                  callback: function(value) {
+                                      return Math.floor(value); // Ensure x-axis labels are integers
+                                  }
+                              },
+                              grid: {
+                                  display: false // Hide x-axis grid lines for better centering
+                              }
+                          },
+                          y: {
+                              beginAtZero: true,
+                              ticks: {
+                                  callback: function(value) {
+                                      return Math.floor(value); // Ensure y-axis labels are integers
+                                  }
+                              }
+                          }
+                      },
+                      plugins: {
+                          tooltip: {
+                              callbacks: {
+                                  label: function(context) {
+                                      // Customize tooltip to show the value
+                                      const label = context.label || '';
+                                      const value = context.raw || 0;
+                                      return `${label}: ${value}`;
+                                  }
+                              }
+                          },
+                          legend: {
+                              display: true
+                          },
+                          title: {
+                              display: true,
+                              text: title
+                          }
+                      }
+                  }
+              });
+          }
 
-                    // Event listeners for month and year changes
-                    $('#monthSelect, #yearSelect').change(function() {
-                        populateDaysDropdown();
-                    });
+          // Function to render pie chart
+          function renderPieChart(title, values, elementId) {
+              var ctx = document.getElementById(elementId);
 
-                    // Function to fetch data via AJAX and render charts
-                    function fetchData(year, month, day, source) {
-                        $.ajax({
-                            url: '{{ route("complaints.chart") }}', // Replace with your actual route
-                            method: 'GET',
-                            data: { year: year, month: month, day: day, source: source },
-                            success: function(data) {
-                                renderCharts($('#chartTypeSelect').val(), data);
-                            },
-                            error: function(xhr, status, error) {
-                                console.error(error);
-                            }
-                        });
-                    }
+              window[elementId] = new Chart(ctx, {
+                  type: 'doughnut', // Use 'doughnut' for a pie-like appearance
+                  data: {
+                      labels: Object.keys(values), // Labels for pie slices
+                      datasets: [{
+                          label: title,
+                          data: Object.values(values),
+                          backgroundColor: [
+                              'rgb(255, 99, 132)',
+                              'rgb(54, 162, 235)',
+                              'rgb(255, 205, 86)'
+                          ],
+                          hoverOffset: 50,
+                          offset: new Array(Object.keys(values).length).fill(0) // Initialize offsets to 0
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      plugins: {
+                          legend: {
+                              position: 'top',
+                          },
+                          title: {
+                              display: true,
+                              text: title
+                          },
+                          tooltip: {
+                              callbacks: {
+                                  label: function(context) {
+                                      const label = context.label || '';
+                                      const value = context.raw || 0;
+                                      return `${label}: ${value}`;
+                                  }
+                              }
+                          }
+                      }
+                  }
+              });
+          }
 
-                    // Function to render charts based on selected parameters
-                    function renderCharts(chartType, data) {
-                        var casesPerDay = data.cases_per_day || {};
-                        var casesPerMonth = data.cases_per_month || {};
-                        var casesPerYear = data.cases_per_year || {};
+      });
+  </script>
 
-                        switch(chartType) {
-                            case 'bar':
-                                renderBarChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                                renderBarChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                                renderBarChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                                break;
-                            case 'line':
-                                renderLineChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                                renderLineChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                                renderLineChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                                break;
-                            case 'pie':
-                                renderPieChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                                renderPieChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                                renderPieChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                                break;
-                            default:
-                                console.error('Invalid chart type selected');
-                        }
-                    }
+<script>
+   let chart; // Variable to store the chart instance
 
-                    // Event listener for year, month, day, and source changes
-                    $('#yearSelect, #monthSelect, #daySelect, #sourceSelect').change(function() {
-                        var selectedYear = $('#yearSelect').val();
-                        var selectedMonth = $('#monthSelect').val();
-                        var selectedDay = $('#daySelect').val();
-                        var selectedSource = $('#sourceSelect').val();
-                        fetchData(selectedYear, selectedMonth, selectedDay, selectedSource);
-                    });
+   function fetchData() {
+       const startDate = document.getElementById('start_date').value;
+       const endDate = document.getElementById('end_date').value;
+       const sourceType = document.getElementById('sourceTeam').value;
 
-                    // Initial loading with default values
-                    fetchData(currentYear, $('#monthSelect').val(), $('#daySelect').val(), 'NCRP');
+       axios.get('{{ route('complaint.stats') }}', {
+               params: {
+                   start_date: startDate,
+                   end_date: endDate,
+                   source: sourceType
+               }
+           })
+           .then(response => {
+               const data = response.data;
 
-                    // Event listener for chart type change
-                    $('#chartTypeSelect').change(function() {
-                        fetchData($('#yearSelect').val(), $('#monthSelect').val(), $('#daySelect').val(), $('#sourceSelect').val());
-                    });
+               //console.log('Fetched Data:', data);
 
-                    // Function to render bar chart
-                   // Function to render bar chart
-function renderBarChart(title, values, elementId) {
-    var ctx = document.getElementById(elementId);
-    var years = Object.keys(values); // Assuming values is an object where keys are years
-    var dataValues = Object.values(values);
+               const users = [];
+               const startedData = [];
+               const ongoingData = [];
+               const completedData = [];
 
-    window[elementId] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: years, // X-axis labels (years)
-            datasets: [{
-                label: title,
-                data: dataValues,
-                backgroundColor: 'rgb(0, 143, 251)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    ticks: {
-                        autoSkip: false, // Ensure all labels are displayed
-                        maxRotation: 45, // Rotate labels if necessary to fit
-                        minRotation: 45
-                    }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
+               data.forEach(user => {
+                   users.push(user.user_name);
+                   startedData.push(user.Started);
+                   ongoingData.push(user.Ongoing);
+                   completedData.push(user.Completed);
+               });
 
-// Function to render line chart
-// Function to render line chart
-// Function to render line chart
-function renderLineChart(title, values, elementId) {
-    var ctx = document.getElementById(elementId);
-    var periods = Object.keys(values); // Time periods (e.g., years, months)
-    var dataValues = Object.values(values); // Data values for each period
+               const options = {
+                   series: [{
+                           name: 'Started',
+                           data: startedData
+                       },
+                       {
+                           name: 'Ongoing',
+                           data: ongoingData
+                       },
+                       {
+                           name: 'Completed',
+                           data: completedData
+                       }
+                   ],
+                   chart: {
+                       type: 'bar',
+                       height: 350
+                   },
+                   plotOptions: {
+                       bar: {
+                           horizontal: false,
+                           columnWidth: '55%',
+                           endingShape: 'rounded'
+                       }
+                   },
+                   dataLabels: {
+                       enabled: false
+                   },
+                   xaxis: {
+                       categories: users
+                   },
+                   yaxis: {
+                       title: {
+                           text: 'Count'
+                       }
+                   },
+                   fill: {
+                       opacity: 1
+                   },
+                   tooltip: {
+                       y: {
+                           formatter: function(val) {
+                               return val;
+                           }
+                       }
+                   }
+               };
 
-    window[elementId] = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: periods, // X-axis labels (time periods)
-            datasets: [{
-                label: title,
-                data: dataValues,
-                fill: false,
-                backgroundColor: 'rgb(0, 143, 251)', // Color of the line
-                borderColor: 'rgba(54, 162, 235, 1)', // Color of the line
-                borderWidth: 2, // Width of the line
-                pointBackgroundColor: 'rgb(0, 143, 251)', // Color of data points
-                pointBorderColor: 'rgba(54, 162, 235, 1)', // Border color of data points
-                pointBorderWidth: 2, // Border width of data points
-                pointRadius: 5, // Radius of data points
-                pointHoverRadius: 7 // Radius when hovering over data points
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    ticks: {
-                        autoSkip: false, // Show all x-axis labels
-                        maxRotation: 0, // No rotation for clear labels
-                        minRotation: 0,
-                        align: 'center' // Center align x-axis labels
-                    },
-                    grid: {
-                        display: false // Hide x-axis grid lines for better centering
-                    }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            // Customize tooltip to show the value
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            return `${label}: ${value}`;
-                        }
-                    }
-                },
-                legend: {
-                    display: true
-                },
-                title: {
-                    display: true,
-                    text: title
-                }
-            }
-        }
-    });
-}
+               if (chart) {
+                   chart.destroy(); // Destroy existing chart instance
+               }
 
+               chart = new ApexCharts(document.querySelector("#team-chart"), options);
+               chart.render();
 
+           })
+           .catch(error => {
+               console.error('Error fetching data:', error);
+           });
+   }
 
+   window.onload = fetchData;
+</script>
 
-                    // Function to render pie chart
-                   // Function to render pie chart
-function renderPieChart(title, values, elementId) {
-    var ctx = document.getElementById(elementId);
-
-    window[elementId] = new Chart(ctx, {
-        type: 'doughnut', // Use 'doughnut' for a pie-like appearance
-        data: {
-            labels: Object.keys(values), // Labels for pie slices
-            datasets: [{
-                label: title,
-                data: Object.values(values),
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ],
-                hoverOffset: 50,
-                offset: new Array(Object.keys(values).length).fill(0) // Initialize offsets to 0
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: title
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            return `${label}: ${value}`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-                });
-                </script>
-
-          <script>
-            function fetchData() {
-                const startDate = document.getElementById('start_date').value;
-                const endDate = document.getElementById('end_date').value;
-
-                axios.get('{{ route('complaint.stats') }}', {
-                    params: {
-                        start_date: startDate,
-                        end_date: endDate
-                    }
-                })
-                .then(response => {
-                    const data = response.data;
-
-                    // Log data for debugging
-                    console.log('Fetched Data:', data);
-
-                    const users = [];
-                    const startedData = [];
-                    const ongoingData = [];
-                    const completedData = [];
-
-                    data.forEach(user => {
-                        users.push(user.user_name);
-                        startedData.push(user.Started);
-                        ongoingData.push(user.Ongoing);
-                        completedData.push(user.Completed);
-                    });
-
-                    const options = {
-                        series: [
-                            {
-                                name: 'Started',
-                                data: startedData
-                            },
-                            {
-                                name: 'Ongoing',
-                                data: ongoingData
-                            },
-                            {
-                                name: 'Completed',
-                                data: completedData
-                            }
-                        ],
-                        chart: {
-                            type: 'bar',
-                            height: 350
-                        },
-                        plotOptions: {
-                            bar: {
-                                horizontal: false,
-                                columnWidth: '55%',
-                                endingShape: 'rounded'
-                            }
-                        },
-                        dataLabels: {
-                            enabled: false
-                        },
-                        xaxis: {
-                            categories: users
-                        },
-                        yaxis: {
-                            title: {
-                                text: 'Count'
-                            }
-                        },
-                        fill: {
-                            opacity: 1
-                        },
-                        tooltip: {
-                            y: {
-                                formatter: function (val) {
-                                    return val;
-                                }
-                            }
-                        }
-                    };
-
-                    const chart = new ApexCharts(document.querySelector("#team-chart"), options);
-                    //chart.destroy();
-                    chart.render();
-
-
-
-
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-
-                });
-            }
-
-            // Fetch data on page load without filters
-            window.onload = fetchData;
-// ===========================================
-
-
-
-        </script>
 @endsection

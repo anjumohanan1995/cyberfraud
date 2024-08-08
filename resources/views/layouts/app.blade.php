@@ -60,16 +60,16 @@
 
     <meta http-equiv="imagetoolbar" content="no" />
 
-    <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
+    {{-- <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
         type="module" crossorigin="true"
         data-resources-url="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/"
-        data-namespace="ionicons"></script>
+        data-namespace="ionicons"></script> --}}
 </head>
 
 <body class="main-body app sidebar-mini">
     <!-- Loader -->
     <div id="global-loader" style="display: none">
-        <img src="img/loaders/loader-4.svg" class="loader-img" alt="Loader" />
+        <img src="{{ asset('img/loader.gif') }}" class="loader-img" alt="Loader" />
     </div>
     <!-- /Loader -->
 
@@ -142,11 +142,11 @@
 
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
-    <script src="{{ asset('js/ionicons.js') }}"></script>
+    {{-- <script src="{{ asset('js/ionicons.js') }}"></script> --}}
 
     <script src="{{ asset('js/Chart.bundle.min.js') }}"></script>
 
-    <script src="{{ asset('js/jquery.sparkline.min.js') }}"></script>
+    {{-- <script src="{{ asset('js/jquery.sparkline.min.js') }}"></script> --}}
 
     <script src="{{ asset('js/chart.flot.sampledata.js') }}"></script>
 
@@ -183,12 +183,12 @@
     <script src="{{ asset('js/custom.js') }}"></script>
 
     <script src="{{ asset('js/ckeditor/ckeditor.js')}}"></script>
-        <script type="text/javascript">
+        {{-- <script type="text/javascript">
             $(document).ready(function() {
                 $('.ckeditor').ckeditor();
             });
 
-        </script>
+        </script> --}}
 
     {{-- <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script> --}}
 

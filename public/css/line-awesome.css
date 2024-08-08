@@ -4406,12 +4406,12 @@ readers do not read off random characters that represent icons */
   font-family: 'Line Awesome Free';
   font-weight: 400; }
 @font-face {
-  font-family: 'Line Awesome Free';
+  /* font-family: 'Line Awesome Free';
   font-style: normal;
   font-weight: 900;
   font-display: auto;
   src: url("../webfonts/la-solid-900.eot");
-  src: url("../webfonts/la-solid-900.eot?#iefix") format("embedded-opentype"), url("../webfonts/la-solid-900.woff2") format("woff2"), url("../webfonts/la-solid-900.woff") format("woff"), url("../webfonts/la-solid-900.ttf") format("truetype"), url("../webfonts/la-solid-900.svg#lineawesome") format("svg"); }
+  src: url("../webfonts/la-solid-900.eot?#iefix") format("embedded-opentype"), url("../webfonts/la-solid-900.woff2") format("woff2"), url("../webfonts/la-solid-900.woff") format("woff"), url("../webfonts/la-solid-900.ttf") format("truetype"), url("../webfonts/la-solid-900.svg#lineawesome") format("svg"); } */
 
 .la,
 .las {

@@ -9,7 +9,7 @@
         .hydrated {
             visibility: inherit
         }
-      
+
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
@@ -40,16 +40,16 @@
 
     <meta http-equiv="imagetoolbar" content="no">
 
-    <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
+    {{-- <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
         type="module" crossorigin="true"
         data-resources-url="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/"
-        data-namespace="ionicons"></script>
+        data-namespace="ionicons"></script> --}}
 
 </head>
 
 <body class="main-body  dark-theme" style="overflow:hidden">
     <!-- Loader -->
-    <div id="global-loader" style="display: none;"><img src="img/loader-4.svg" class="loader-img" alt="Loader" />
+    <div id="global-loader" style="display: none;"><img src="{{ asset('img/loader.gif') }}" class="loader-img" alt="Loader" />
     </div>
     <!-- /Loader -->
     <!-- Start Switcher -->

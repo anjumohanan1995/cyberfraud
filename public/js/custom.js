@@ -1,10 +1,10 @@
 $(function() {
 	'use strict'
-	
+
 	// ______________LOADER
 	$("#global-loader").fadeOut("slow");
-	
-	
+
+
 	// This template is mobile first so active menu in navbar
 	// has submenu displayed by default but not in desktop
 	// so the code below will hide the active menu if it's in desktop
@@ -19,7 +19,7 @@ $(function() {
 		$(this).parent().siblings().removeClass('show');
 		$(this).find('.drop-flag').removeClass('show');
 	});
-	
+
 	// ______________Full screen
 	$(document).on("click", ".fullscreen-button", function toggleFullScreen() {
 		$('html').addClass('fullscreen-button');
@@ -58,9 +58,9 @@ $(function() {
 			targetFormElementSelector: '.rating-value'
 		}
 	};
-	$(".rating-stars").ratingStars(ratingOptions);
-	
-	
+	// $(".rating-stars").ratingStars(ratingOptions);
+
+
 	// ______________Cover Image
 	$(".cover-image").each(function() {
 		var attr = $(this).attr('data-image-src');
@@ -68,8 +68,8 @@ $(function() {
 			$(this).css('background', 'url(' + attr + ') center center');
 		}
 	});
-	
-	
+
+
 	// ______________Search
 	$('body, .main-header form[role="search"] button[type="reset"]').on('click keyup', function(event) {
 		if (event.which == 27 && $('.main-header form[role="search"]').hasClass('active') ||
@@ -98,11 +98,11 @@ $(function() {
 		$('#showSearchTerm').text($input.val());
 		closeSearch()
 	});
-	
-	
-	
+
+
+
 	/* ----------------------------------- */
-	
+
 	// Showing submenu in navbar while hiding previous open submenu
 	$('.main-navbar .with-sub').on('click', function(e) {
 		e.preventDefault();
@@ -186,7 +186,7 @@ $(function() {
 		e.preventDefault();
 		$('body').removeClass('main-header-menu-show');
 	})
-	
+
 	$(".card-header-right .card-option .fe fe-chevron-left").on("click", function() {
 		var a = $(this);
 		if (a.hasClass("icofont-simple-right")) {
@@ -200,8 +200,8 @@ $(function() {
 		}
 		$(this).toggleClass("fe fe-chevron-right").fadeIn("slow")
 	});
-	
-	 // ___________TOOLTIP	
+
+	 // ___________TOOLTIP
 	$('[data-toggle="tooltip"]').tooltip();
 	// colored tooltip
 	$('[data-toggle="tooltip-primary"]').tooltip({
@@ -210,7 +210,7 @@ $(function() {
 	$('[data-toggle="tooltip-secondary"]').tooltip({
 		template: '<div class="tooltip tooltip-secondary" role="tooltip"><div class="arrow"><\/div><div class="tooltip-inner"><\/div><\/div>'
 	});
-	
+
 	// __________POPOVER
 	$('[data-toggle="popover"]').popover();
 	$('[data-popover-color="head-primary"]').popover({
@@ -234,12 +234,12 @@ $(function() {
 			}
 		});
 	});
-	
-	
+
+
 	// Enable Eva-icons with SVG markup
 	eva.replace();
-	
-	
+
+
 	// ______________Horizontal-menu Active Class
 	$(document).ready(function() {
 		$(".horizontalMenu-list li a").each(function() {
@@ -252,8 +252,8 @@ $(function() {
 			}
 		});
 	});
-	
-	
+
+
 	// ______________Active Class
 	$(document).ready(function() {
 		$(".horizontalMenu-list li a").each(function() {
@@ -284,8 +284,8 @@ $(function() {
 			}
 		});
 	});
-	
-	
+
+
 	// ______________ Back to Top
 	$(window).on("scroll", function(e) {
 		if ($(this).scrollTop() > 0) {
@@ -300,11 +300,11 @@ $(function() {
 		}, 600);
 		return false;
 	});
-	
+
 	// ______________Switcher
-	
+
 	/*Horizontal Styles*/
-	$(document).on("click", '#myonoffswitch', function () {    
+	$(document).on("click", '#myonoffswitch', function () {
 		if (this.checked) {
 			$('body').addClass('headerstyle');
 			$('body').removeClass('leftmenu-light');
@@ -319,9 +319,9 @@ $(function() {
 			localStorage.setItem("headerstyle", "false");
 		}
 	});
-	
-	
-	$(document).on("click", '#myonoffswitch2', function () {    
+
+
+	$(document).on("click", '#myonoffswitch2', function () {
 		if (this.checked) {
 			$('body').addClass('headerstyle2');
 			$('body').removeClass('header-dark');
@@ -333,8 +333,8 @@ $(function() {
 			localStorage.setItem("headerstyle2", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch5', function () {    
+
+	$(document).on("click", '#myonoffswitch5', function () {
 		if (this.checked) {
 			$('body').addClass('header-dark');
 			$('body').removeClass('body-style1');
@@ -347,8 +347,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch6', function () {    
+
+	$(document).on("click", '#myonoffswitch6', function () {
 		if (this.checked) {
 			$('body').addClass('header-dark2');
 			$('body').removeClass('headerstyle');
@@ -361,8 +361,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch8', function () {    
+
+	$(document).on("click", '#myonoffswitch8', function () {
 		if (this.checked) {
 			$('body').addClass('header-dark3');
 			$('body').removeClass('header-dark2');
@@ -373,8 +373,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch7', function () {    
+
+	$(document).on("click", '#myonoffswitch7', function () {
 		if (this.checked) {
 			$('body').addClass('leftmenu-dark');
 			localStorage.setItem("body-default", "True");
@@ -384,8 +384,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch11', function () {    
+
+	$(document).on("click", '#myonoffswitch11', function () {
 		if (this.checked) {
 			$('body').addClass('leftmenu-light');
 			localStorage.setItem("body-default", "True");
@@ -395,8 +395,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch21', function () {    
+
+	$(document).on("click", '#myonoffswitch21', function () {
 		if (this.checked) {
 			$('body').addClass('header-dark');
 			$('body').removeClass('headerstyle2');
@@ -408,9 +408,9 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	
-	$(document).on("click", '#myonoffswitch22', function () {    
+
+
+	$(document).on("click", '#myonoffswitch22', function () {
 		if (this.checked) {
 			$('body').addClass('header-white');
 			$('body').removeClass('header-dark');
@@ -423,8 +423,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch23', function () {    
+
+	$(document).on("click", '#myonoffswitch23', function () {
 		if (this.checked) {
 			$('body').addClass('horizontal-dark');
 			$('body').removeClass('headerstyle2');
@@ -436,8 +436,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch24', function () {    
+
+	$(document).on("click", '#myonoffswitch24', function () {
 		if (this.checked) {
 			$('body').addClass('horizontal-gradient');
 			$('body').removeClass('headerstyle2');
@@ -449,8 +449,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch25', function () {    
+
+	$(document).on("click", '#myonoffswitch25', function () {
 		if (this.checked) {
 			$('body').addClass('horizontal-white');
 			$('body').removeClass('headerstyle2');
@@ -462,8 +462,8 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
-	$(document).on("click", '#myonoffswitch9', function () {    
+
+	$(document).on("click", '#myonoffswitch9', function () {
 		if (this.checked) {
 			$('body').addClass('reset');
 			$('body').removeClass('headerstyle');
@@ -483,6 +483,5 @@ $(function() {
 			localStorage.setItem("body-default", "false");
 		}
 	});
-	
+
 });
-	

@@ -38,16 +38,16 @@
                                     Add SubCategory
                                 </h4>
 
-                              
+
                                 <div id="success-message">
-                                
+
                                 </div>
-                             
-                             
+
+
                             </div>
 
                             <form >
-                                    
+
                                     <div class="row">
                                     <div class="col-md-4">
                                             <div class="form-group">
@@ -55,7 +55,7 @@
                                                 <select id="category" name="category" class="form-control" value="{{ old('category') }}">
                                                 <option value="">--select--</option>
                                                 @foreach($categories as $category)
-                                                 <option value="{{ $category->id }}"> {{ $category->name }} </option>   
+                                                 <option value="{{ $category->id }}"> {{ $category->name }} </option>
                                                 @endforeach
                                                 </select>
                                                 @error('name')
@@ -105,10 +105,10 @@
                                 </div>
                         </div>
 
-                    
+
                     </div>
 
-                    
+
 
                 </div>
             </div>
@@ -151,7 +151,7 @@ $(document).ready(function(){
 
         $.ajax({
             url: "{{ route('add.subcategory') }}",
-            method: 'POST', 
+            method: 'POST',
             headers:{
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
@@ -161,11 +161,11 @@ $(document).ready(function(){
                 status:status,
             },
             success: function(response) {
-                console.log(response);
+              //  console.log(response);
                 $('#category').val('');
                 $('#subcategory').val('');
                 subcategoryTable.ajax.reload(null, false);
-               
+
             },
             error: function(xhr, status, error){
                 console.error(xhr.responseText);
@@ -185,10 +185,10 @@ $(document).on('click', '.delete-btn', function(){
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-            console.log(response);
+           // console.log(response);
             subcategoryTable.ajax.reload(null, false);
             $('#success-message').html('<div id="success-message"  class="alert alert-success alert-dismissible fade show w-100" role="alert">'+response.success +' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-            
+
         },
         error: function(xhr, status, error) {
             console.error(xhr.responseText);
@@ -197,7 +197,7 @@ $(document).on('click', '.delete-btn', function(){
     });
    }
 
-}) 
+})
 
 });
 

@@ -467,7 +467,7 @@ $user = Auth::user();
                     'ack_id': ack_id
                 },
                 success: function(data) {
-                    console.log(data.status)
+                    //console.log(data.status)
                     toastr.success(data.status, 'Success!');
                     // $('#example').DataTable().ajax.reload();
                 }

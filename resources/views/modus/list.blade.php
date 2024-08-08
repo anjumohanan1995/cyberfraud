@@ -159,7 +159,7 @@ $(document).ready(function(){
                 status: status,
             },
             success: function(response) {
-                console.log(response);
+                //console.log(response);
                 $('#name').val('');
                 categoryTable.ajax.reload(null, false);
                 var successMessage = "{{ session('success') }}";
@@ -186,7 +186,7 @@ $(document).on('click', '.delete-btn', function() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-            console.log(response);
+           // console.log(response);
             categoryTable.ajax.reload(null, false);
             alert('Modus deleted successfully');
         },

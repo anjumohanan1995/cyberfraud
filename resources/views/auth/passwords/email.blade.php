@@ -41,16 +41,16 @@
 
     <meta http-equiv="imagetoolbar" content="no">
 
-    <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
+    {{-- <script src="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/ionicons.suuqn5vt.js"
         type="module" crossorigin="true"
         data-resources-url="https://www.spruko.com/demo/azira/Azira/assets/plugins/ionicons/ionicons/"
-        data-namespace="ionicons"></script>
+        data-namespace="ionicons"></script> --}}
 
 </head>
 
 <body class="main-body  dark-theme">
     <!-- Loader -->
-    <div id="global-loader" style="display: none;"><img src="img/loader-4.svg" class="loader-img" alt="Loader" />
+    <div id="global-loader" style="display: none;"><img src="{{ asset('img/loader.gif') }}" class="loader-img" alt="Loader" />
     </div>
     <!-- /Loader -->
     <!-- Start Switcher -->
@@ -93,12 +93,12 @@
                                 </div>
                             </form>
 
-                            
+
 
                         </div>
                         <div class="main-signin-footer mt-3 mg-t-5">
                             <p><a href="{{url('/')}}">Back</a></p>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
         </div>
     </div>
 
-    
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>

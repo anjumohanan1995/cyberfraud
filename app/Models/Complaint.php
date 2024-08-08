@@ -22,7 +22,9 @@ class Complaint extends Eloquent
 
         'entry_date' => 'datetime',
         'date_of_action' => 'datetime',
-        
+        'status_changed' => 'datetime',
+
+
     ];
     protected $fillable = [
         'source_type',
@@ -45,6 +47,7 @@ class Complaint extends Eloquent
         'com_status',
         'assigned_to',
         'case_status',
+        'status_changed'
     ];
 
         // Define the relationship with BankCasedata

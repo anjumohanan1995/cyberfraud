@@ -176,7 +176,7 @@ $(document).ready(function(){
                             sourcetype:sourcetype,sourcetype_id:source_type
                         },
                         success: function(response) {
-                            console.log(response);
+                            //console.log(response);
                             $("#case_number").val(response);
 
                         },
