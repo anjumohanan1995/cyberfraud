@@ -44,19 +44,46 @@ $query->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
         $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
     });
 
-// Filtered query for specific conditions
-$filteredQuery = $query->where(function ($q) {
-    $q->where('Layer', 1)
-        ->orWhere(function ($q) {
-            $q->whereIn('account_no_2', function ($subquery) {
-                $subquery->select('account_no_2')
-                    ->from('bank_casedata')
-                    ->groupBy('account_no_2')
-                    ->havingRaw('COUNT(*) >= 3');
-            });
-        });
-});
+    $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
+        return $collection->aggregate([
+            [
+                '$project' => [
+                    'sanitized_account_no_2' => [
+                        '$cond' => [
+                            'if' => ['$regexMatch' => ['input' => '$account_no_2', 'regex' => '\[ Reported \d+ times \]']],
+                            'then' => [
+                                '$substr' => [
+                                    '$account_no_2',
+                                    0,
+                                    ['$indexOfBytes' => ['$account_no_2', ' [ Reported ']]
+                                ]
+                            ],
+                            'else' => '$account_no_2'
+                        ]
+                    ]
+                ]
+            ],
+            [
+                '$group' => [
+                    '_id' => '$sanitized_account_no_2',
+                    'count' => ['$sum' => 1]
+                ]
+            ],
+            [
+                '$match' => [
+                    'count' => ['$gte' => 3]
+                ]
+            ]
+        ]);
+    })->pluck('_id')->toArray();
 
+    // Filtered query for specific conditions
+    $filteredQuery = $query->where(function ($q) use ($frequentAccountNumbers) {
+        $q->where('Layer', 1)
+            ->orWhereIn('account_no_2', $frequentAccountNumbers)
+            ->whereNotNull('account_no_2');
+    });
+    // dd($filteredQuery);
 // Group the filtered query by account_no_2
 $groupedQuery = $filteredQuery->groupBy('account_no_2')
     ->select('account_no_2', DB::raw('MAX(Layer) as Layer'));

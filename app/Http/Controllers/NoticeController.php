@@ -5,16 +5,27 @@ use App\Models\SourceType;
 use App\Models\EvidenceType;
 use App\Models\Evidence;
 use App\Models\Notice;
+use App\Models\User;
+use App\Models\Bank;
+use App\Models\Wallet;
+use App\Models\Merchant;
+use App\Models\Insurance;
+use App\Models\BankCasedata;
+use App\Models\Complaint;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use MongoDB;
+use Illuminate\Support\Facades\DB;
 
-use Illuminate\Http\Request;
+
 
 class NoticeController extends Controller
 {
@@ -325,224 +336,215 @@ class NoticeController extends Controller
 
     }
 
-
-//     public function generateNotice(Request $request)
-// {
-//     $data = $request->input('data');
-//     $noticeType = $request->input('notice_id');
-
-//     // Initialize an array to store notice data
-//     $allNotices = [];
-
-//     foreach ($data as $item) {
-//         $noticeData = []; // Initialize $noticeData for each item
-
-//         // Prepare notice data based on notice type
-//         switch ($noticeType) {
-//             case 'both_ncrp_website':
-//                 $noticeData = [
-//                     'sub' => "Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000",
-//                     'main_content' => "We are writing to bring your immediate attention regarding a complaint that has been registered in National Cyber Crime Reporting Portal (Acknowledgement No: {$item['ack_no']}) against the below-mentioned website, which is involved in financial fraud.",
-//                     'content_1' => "As stipulated by Section 79(3)(b) of the Information Technology Act of India, you are hereby directed to REMOVE/DISABLE and PRESERVE the below-mentioned website and domain, which is registered on your domain registrar service. Additionally, as per Section 94 of the Bharatiya Nagarik Suraksha Sanhita (BNSS), you are also directed to PROVIDE the details associated with the alleged website to this office within 48 hours.",
-//                     'content_2' =>  "As an intermediary, if you fail to remove or disable the unlawful contents immediately, the protection for intermediaries under Section 79 of the IT Act will not be applicable and you will be liable for abetment.",
-//                     'url_head' => "Alleged Website: ",
-//                     'url' => $item['url'],
-//                     'domain_name' => $item['domain'],
-//                     'domain_id' => $item['registry_details'],
-//                     'details_head' => "Details Required: ",
-//                     'details_content' => "1. Registration details of the aforementioned website.\n"
-//                                         . "2. Primary / alternate e-mail IDs and contact numbers associated with the aforementioned website.\n"
-//                                         . "3. Registration IP address at the time of creation and last login IP address.\n"
-//                                         . "4. Mode of payment details for registration.\n"
-//                                         . "5. Any other subdomains with the above registration email ID or mobile number.",
-//                     'footer_content' => "Urgent action and confirmation is solicited by return.\nContact us on: cyberops-fsm.pol@kerala.gov.in"
-//                 ];
-//                 break;
-
-//             case '79_ncrp_website':
-//                 $noticeData = [
-//                     'sub' => "Notice U/sec 79(3)(b) of IT Act",
-//                     'content' => "On detailed investigation, it has been found that this website operates as a scam under the guise of obtaining confidential banking user credentials and engages in online financial fraud, causing illegal financial loss to the public. As stipulated by Section 79(3)(b) of the Information Technology Act of India, you are hereby directed to REMOVE/DISABLE the below-mentioned website within 24 hours and PRESERVE the details for further investigation. As an intermediary, if you fail to remove or disable the unlawful content immediately, the protection for intermediaries under Section 79 of the IT Act will not be applicable and you will be liable for abetment.",
-//                     'number' => $item['ack_no'],
-//                     'url' => $item['url'],
-//                     'domain_name' => $item['domain'],
-//                     'domain_id' => $item['registry_details'],
-//                 ];
-//                 break;
-
-//             case '94_ncrp_website':
-//                 $noticeData = [
-//                     'sub' => "Notice U/Sec.94 BNSS Act 2023",
-//                     'content' => "As stipulated by U/s 94 Bharatiya Nagarik Suraksha Sanhita (BNSS) we direct you to PROVIDE the below mentioned details within 24 hrs for further investigation.",
-//                     'number' => $item['ack_no'],
-//                     'url' => $item['url'],
-//                     'domain_name' => $item['domain'],
-//                     'domain_id' => $item['registry_details'],
-//                 ];
-//                 break;
-
-//             // Add more cases as needed
-//         }
-
-//         // Generate HTML content
-//         $htmlContent = View::make('notices.notice', ['notices' => [$noticeData]])->render();
-
-//         // Save the notice content to MongoDB
-//         $allNotices[] = [
-//             'content' => $htmlContent,
-//             'user_id' => Auth::user()->id,
-//         ];
-//     }
-
-//     // Save all notices
-//     foreach ($allNotices as $notice) {
-//         Notice::updateOrCreate(
-//             [
-//                 'user_id' => $notice['user_id'],
-//                 // Add any additional unique fields if needed
-//             ],
-//             [
-//                 'content' => $notice['content']
-//             ]
-//         );
-//     }
-
-//     return redirect()->route('notices.index')->with('success', 'Notices generated and saved successfully.');
-// }
-
-
     public function generateNotice(Request $request)
-    {
-        $data = $request->input('data');
-        $noticeType = $request->input('notice_id');
-        // dd($data);
+{
+    $data = $request->input('data');
+    // dd($data);
+    $noticeType = $request->input('notice_id');
+    $source_type = $request->input('source_type');
 
-        // foreach ($data as $item) {
-        //     print_r($item['ack_no'].'<br>');
+
+    // Prepare notice data based on notice type
+    $noticeData = []; // Initialize an array to store notice data
+    $groupedData = [];
+
+    // Initialize an empty array to store counts of each evidence type
+$evidenceTypeCounts = [];
+
+    // Group data by ack_no
+    foreach ($data as $item) {
+        $ackNo = $source_type == "ncrp" ? $item['ack_no'] : $item['case_number'];
+        // dd($ackNo);
+        $evidenceType = $item['evidence_type'];
+
+
+        // if (!$ackNo || !$evidenceType) {
+        //     continue; // Skip items with missing data
         // }
-        // dd();
 
-              // Prepare notice data based on notice type
-              foreach ($data as $item) {
-                $noticeData = []; // Initialize $noticeData for each item
-
-                // Handle 'For All Notice Type' case
-                if ($noticeType == 'all_ncrp') {
-                    // Add your notice data for this case here
-                    $noticeData[] = [
-                        // Your data here
+        if ($evidenceType === 'website') {
+            if (in_array($noticeType, [
+                'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - website',
+                'Notice U/sec 79(3)(b) of IT Act - NCRP - website',
+                'Notice U/Sec.94 BNSS Act 2023 - NCRP - website',
+                'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - website',
+                'Notice U/sec 79(3)(b) of IT Act - Other - website',
+                'Notice U/Sec.94 BNSS Act 2023 - Other - website'
+            ])) {
+            $noticeData[] = [
+                'ack_no' => $ackNo,
+                'urls' => $item['url'] ?? '',
+                'domain_name' => $item['domain'] ?? '',
+                'domain_id' => $item['registry_details'] ?? ''
+            ];
+        }
+        } else if ($evidenceType !== "mobile" && $evidenceType !== "website") {
+            if (in_array($noticeType, [
+                'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - social media',
+                'Notice U/sec 79(3)(b) of IT Act - NCRP - social media',
+                'Notice U/Sec.94 BNSS Act 2023 - NCRP - social media',
+                'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - social media',
+                'Notice U/sec 79(3)(b) of IT Act - Other - social media',
+                'Notice U/Sec.94 BNSS Act 2023 - Other - social media'
+            ])) {
+                // Group data by ack_no and evidence_type
+                if (!isset($groupedData[$ackNo][$evidenceType])) {
+                    $groupedData[$ackNo][$evidenceType] = [
+                        'ack_no' => $ackNo,
+                        'evidence_type' => $evidenceType,
+                        'domains' => [],
+                        'categories' => [],
+                        'urls' => [],
                     ];
-                    // Repeat as needed
-                } else {
-                    // Handle other notice types individually
-                    switch ($noticeType) {
-                        case 'both_ncrp_social_media':
-                            // dd("on hold"); // Consider using logging instead
-                            $noticeData[] = [
-                                // Your data here
-                            ];
-                            break;
-
-                            case 'both_ncrp_website':
-                                $noticeData[] = [
-                                    'sub' => $item['sub'] ?? "Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000",
-                                    'main_content' => "We are writing to bring your immediate attention regarding a complaint that has been registered in National Cyber Crime Reporting Portal (Acknowledgement No: {$item['ack_no']}) against the below-mentioned website, which is involved in financial fraud.",
-                                    'content_1' => "As stipulated by Section 79(3)(b) of the Information Technology Act of India, you are hereby directed to REMOVE/DISABLE and PRESERVE the below-mentioned website and domain, which is registered on your domain registrar service. Additionally, as per Section 94 of the Bharatiya Nagarik Suraksha Sanhita (BNSS), you are also directed to PROVIDE the details associated with the alleged website to this office within 48 hours.",
-                                    'content_2' =>  "As an intermediary, if you fail to remove or disable the unlawful contents immediately, the protection for intermediaries under Section 79 of the IT Act will not be applicable and you will be liable for abetment.",
-                                    'url_head' => "Alleged Website: ",
-                                    'url' => $item['url'],
-                                    'domain_name' => $item['domain'],
-                                    'domain_id' => $item['registry_details'],
-                                    'details_head' => "Details Required: ",
-                                    'details_content' => "1. Registration details of the aforementioned website.\n"
-                                                        . "2. Primary / alternate e-mail IDs and contact numbers associated with the aforementioned website.\n"
-                                                        . "3. Registration IP address at the time of creation and last login IP address.\n"
-                                                        . "4. Mode of payment details for registration.\n"
-                                                        . "5. Any other subdomains with the above registration email ID or mobile number.",
-                                    'footer_content' => "Urgent action and confirmation is solicited by return.\nContact us on: cyberops-fsm.pol@kerala.gov.in"
-                                ];
-                                break;
-
-                        case '79_ncrp_social_media':
-                            // dd("on hold"); // Consider using logging instead
-                            $noticeData[] = [
-                                // Your data here
-                            ];
-                            break;
-
-                        case '79_ncrp_website':
-                            $noticeData[] = [
-                                'sub' => "Notice U/sec 79(3)(b) of IT Act",
-                                'content' => "On detailed investigation, it has been found that this website operates as a scam under the guise of obtaining confidential banking user credentials and engages in online financial fraud, causing illegal financial loss to the public. As stipulated by Section 79(3)(b) of the Information Technology Act of India, you are hereby directed to REMOVE/DISABLE the below-mentioned website within 24 hours and PRESERVE the details for further investigation. As an intermediary, if you fail to remove or disable the unlawful content immediately, the protection for intermediaries under Section 79 of the IT Act will not be applicable and you will be liable for abetment.",
-                                'number' => $item['ack_no'],
-                                'url' => $item['url'],
-                                'domain_name' => $item['domain'],
-                                'domain_id' => $item['registry_details'],
-                            ];
-                            break;
-
-                        case '94_ncrp_social_media':
-                            // dd("on hold"); // Consider using logging instead
-                            $noticeData[] = [
-                                // Your data here
-                            ];
-                            break;
-
-                        case '94_ncrp_website':
-                            $noticeData[] = [
-                                'sub' => "Notice U/Sec.94 BNSS Act 2023",
-                                'content' => "As stipulated by U/s 94 Bharatiya Nagarik Suraksha Sanhita (BNSS) we direct you to PROVIDE the below mentioned details within 24 hrs for further investigation.",
-                                'number' => $item['ack_no'],
-                                'url' => $item['url'],
-                                'domain_name' => $item['domain'],
-                                'domain_id' => $item['registry_details'],
-                            ];
-                            break;
-                    }
                 }
-// dd($noticeData);
-        // Generate HTML content for each notice
-        foreach ($noticeData as $notice) {
-            $htmlContent = View::make('notices.notice', ['notices' => [$notice]])->render();
 
-            // Save the notice content to MongoDB
-            Notice::updateOrCreate(
-                [
-                    'user_id' => Auth::user()->id,
-                    'ack_number' => $item['ack_no'],
-                    'url' => $item['url'],
-                    'sub' => $notice['sub'] ?? '', // Ensure 'sub' is available
-                ],
-                [
-                    'content' => $htmlContent,
-                    // 'main_content' => $notice['main_content'] ?? null,
-                    // 'content_1' => $notice['content_1'] ?? null,
-                    // 'content_2' => $notice['content_2'] ?? null,
-                    // 'url_head' => $notice['url_head'] ?? null,
-                    // 'domain_name' => $notice['domain_name'] ?? null,
-                    // 'domain_id' => $notice['domain_id'] ?? null,
-                    // 'details_head' => $notice['details_head'] ?? null,
-                    // 'details_content' => $notice['details_content'] ?? null,
-                    // 'footer_content' => $notice['footer_content'] ?? null,
-                ]
-            );
+                $groupedData[$ackNo][$evidenceType]['domains'][] = $item['domain'];
+                $groupedData[$ackNo][$evidenceType]['categories'][] = $source_type == "ncrp" ? $item['category'] : $item['ip'];
+                $groupedData[$ackNo][$evidenceType]['urls'][] = $item['url'];
+                // dd($categories);
+            }
         }
     }
+
+        // Create notice data with chunked URLs
+        foreach ($groupedData as $ackNoGroup) {
+            foreach ($ackNoGroup as $evidenceTypeGroup) {
+                $totalCount = count($evidenceTypeGroup['urls']);
+                $chunks = array_chunk($evidenceTypeGroup['urls'], 5);
+                $chunkCount = count($chunks);
+
+                for ($i = 0; $i < $chunkCount; $i++) {
+                    $noticeData[] = [
+                        'ack_no' => $evidenceTypeGroup['ack_no'],
+                        'evidence_type' => $evidenceTypeGroup['evidence_type'],
+                        'urls' => array_slice($chunks[$i], 0, 5),
+                        'domains' => array_slice($evidenceTypeGroup['domains'], $i * 5, 5),
+                        'categories' => array_slice($evidenceTypeGroup['categories'], $i * 5, 5),
+                    ];
+                }
+            }
+    }
+    // dd();
+    // Generate HTML content for each notice
+    foreach ($noticeData as $notice) {
+        // print_r($notice);
+
+        $combinedHtmlContent = '';
+
+        switch ($noticeType) {
+            case 'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - website':
+                $combinedHtmlContent = View::make('notices.both_ncrp_website', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/sec 79(3)(b) of IT Act - NCRP - website':
+                $combinedHtmlContent = View::make('notices.79_ncrp_website', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec.94 BNSS Act 2023 - NCRP - website':
+                $combinedHtmlContent = View::make('notices.94_ncrp_website', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - social media':
+                $combinedHtmlContent = View::make('notices.both_ncrp_social_media', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/sec 79(3)(b) of IT Act - NCRP - social media':
+                $combinedHtmlContent = View::make('notices.79_ncrp_social_media', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec.94 BNSS Act 2023 - NCRP - social media':
+                $combinedHtmlContent = View::make('notices.94_ncrp_social_media', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - website':
+                $combinedHtmlContent = View::make('notices.both_other_website', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/sec 79(3)(b) of IT Act - Other - website':
+                $combinedHtmlContent = View::make('notices.79_other_website', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec.94 BNSS Act 2023 - Other - website':
+                $combinedHtmlContent = View::make('notices.94_other_website', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - social media':
+                $combinedHtmlContent = View::make('notices.both_other_social_media', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/sec 79(3)(b) of IT Act - Other - social media':
+                $combinedHtmlContent = View::make('notices.79_other_social_media', ['notice' => $notice])->render();
+                break;
+
+            case 'Notice U/Sec.94 BNSS Act 2023 - Other - social media':
+                $combinedHtmlContent = View::make('notices.94_other_social_media', ['notice' => $notice])->render();
+                break;
+
+            default:
+                $combinedHtmlContent = '';
+                break;
+        }
+
+        // print_r($combinedHtmlContent);
+
+        // Build the criteria array based on the source_type
+        $criteria = [
+            'user_id' => Auth::user()->id,
+            'url' => $notice['urls'], // Store URLs as a comma-separated string
+            'notice_type' => $noticeType,
+        ];
+
+        // Add the conditionally required field
+        if ($source_type == "ncrp") {
+            $criteria['ack_number'] = $notice['ack_no'];
+        } else {
+            $criteria['case_number'] = $notice['ack_no'];
+        }
+// dd($criteria);
+
+        // Save the notice content to MongoDB
+        Notice::updateOrCreate(
+            $criteria,
+
+            [
+                'content' => $combinedHtmlContent,
+                // Add additional fields if needed
+            ]
+        );
+        // dd("sucess");
+    }
+    // dd();
+    // dd("sucess");
 
     return redirect()->route('notices.index')->with('success', 'Notices generated and saved successfully.');
 }
 
-    public function Notices()
-    {
-        $notices = Notice::all(); // Fetch all notices from MongoDB
-        // dd($notices);
-        return view('notices.index', compact('notices')); // Pass the data to the view
-    }
+
+
+public function Notices()
+{
+    $currentUserId = Auth::user()->id; // Get the current authenticated user's ID
+    // dd($currentUserId);
+
+    // Fetch notices based on the presence of `assing_by_user_id` field
+    $notices = Notice::where(function ($query) use ($currentUserId) {
+        // Show notices where `assing_by_user_id` matches the current user's ID or where it is not present
+        $query->where('assing_to_user_id', $currentUserId)
+              ->orWhereNull('assing_to_user_id');
+    })->get();
+    // dd($notices);
+
+    return view('notices.index', compact('notices')); // Pass the data to the view
+}
 
     public function showNotice($id)
     {
         $notice = Notice::findOrFail($id); // Retrieve the notice by ID
-        return view('notices.show', ['notice' => $notice]); // Pass the data to the view
+        $currentUserId = auth()->id(); // Get the current authenticated user's ID
+        // dd($currentUserId);
+        $users = User::where('_id', '!=', $currentUserId)->get();
+        // dd($users);
+        return view('notices.show', ['notice' => $notice,'users' => $users]); // Pass the data to the view
     }
 
 public function editNoticeView($id)
@@ -569,8 +571,355 @@ public function updateNotice(Request $request, $id)
     return redirect()->route('notices.show', $notice->id)->with('success', 'Notice updated successfully');
 }
 
+public function follow(Request $request, $id)
+{
+    // dd($request);
+    $notice = Notice::findOrFail($id); // Find the notice by ID
+    // dd($notice);
+
+    // Validate and update the notice with the selected user ID
+    $notice->assing_to_user_id = $request->input('user_id'); // Assuming 'followed_by_user_id' is the field to be updated
+
+    $notice->assing_by_user_id = Auth::user()->id;
+//   dd($notice);
+    $notice->save();
+
+    return response()->json(['success' => true]);
+}
+
+public function againstMuleAccount()
+{
+    $bank = Bank::get();
+    $wallet= Wallet::get();
+    $insurance=Insurance::get();
+    $merchant=Merchant::get();
+    return view('notice.muleaccount',compact('bank','wallet','insurance','merchant'));
+}
+
+    public function generateMuleNotice(Request $request)
+    {
+        try {
+            $sourceType = $request->input('source_type');
+            $fromDate = $request->input('from_date');
+            $toDate = $request->input('to_date');
+            $entityId = $request->input('entity_id');
+            $entityType = $request->input('entity_type'); // Get the entity type
+
+
+                $validator = Validator::make($request->all(), [
+                    'from_date' => 'required|date',
+                    'to_date' => 'required|date|after_or_equal:from_date',
+                    'entity_type' => 'required|in:bank,wallet,insurance,merchant',
+                    'entity_id' => 'required',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+                }
+            Log::info('Generate Mule Notice Request Data', [
+                'source_type' => $sourceType,
+                'from_date' => $fromDate,
+                'to_date' => $toDate,
+                'entity_id' => $entityId,
+                'entity_type' => $entityType,
+            ]);
+
+            // Convert fromDate and toDate to start and end of the day
+            $fromDateStart = Carbon::parse($fromDate)->startOfDay();
+            $toDateEnd = Carbon::parse($toDate)->endOfDay();
+
+            // Determine which model to use based on the entity type
+            switch ($entityType) {
+                case 'bank':
+                    $entity = Bank::find($entityId);
+                    break;
+                case 'wallet':
+                    $entity = Wallet::find($entityId);
+                    break;
+                case 'insurance':
+                    $entity = Insurance::find($entityId);
+                    break;
+                case 'merchant':
+                    $entity = Merchant::find($entityId);
+                    break;
+                default:
+                    return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+            }
+
+            if (!$entity) {
+                return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+            }
+
+            Log::info('Entity Details', ['entity' => $entity]);
+
+            // Retrieve acknowledgement_no values from complaints within the specified date range
+            $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+                ->pluck('acknowledgement_no')->toArray();
+
+            // Aggregation to sanitize account_no_2 and find account numbers with at least 3 occurrences
+            $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
+                return $collection->aggregate([
+                    [
+                        '$addFields' => [
+                            'sanitized_account_no_2' => [
+                                '$trim' => [
+                                    'input' => [
+                                        '$replaceAll' => [
+                                            'input' => '$account_no_2',
+                                            'find' => ' [ Reported',
+                                            'replacement' => ''
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    [
+                        '$match' => [
+                            'sanitized_account_no_2' => ['$ne' => ''],
+                            'sanitized_account_no_2' => ['$ne' => null]
+                        ]
+                    ],
+                    [
+                        '$group' => [
+                            '_id' => '$sanitized_account_no_2',
+                            'count' => ['$sum' => 1]
+                        ]
+                    ],
+                    [
+                        '$match' => [
+                            'count' => ['$gte' => 3]
+                        ]
+                    ]
+                ]);
+            })->pluck('_id')->toArray();
+
+            // Fetch cases based on the sanitized account numbers and acknowledgement_no
+            $cases = BankCasedata::where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant)
+                ->whereIn('acknowledgement_no', $acknowledgementNos)
+                ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+                ->where(function ($query) use ($frequentAccountNumbers) {
+                    $query->where('Layer', 1)
+                        ->orWhereIn('account_no_2', $frequentAccountNumbers);
+                })
+                ->get();
+
+            Log::info('Query Results', ['cases' => $cases]);
+
+            if ($cases->isEmpty()) {
+                return response()->json(['success' => false, 'message' => "No data found for the given criteria"], 400);
+            }
+
+            // Prepare notice data
+            $noticeData = [];
+
+            // Group cases by account_no_2
+            $groupedCases = $cases->groupBy('account_no_2');
+
+            foreach ($groupedCases as $accountNo => $group) {
+                $firstRecord = $group->first();
+                $cleanAccountNo = preg_replace('/\s+\[.*\]/', '', $accountNo);
+
+                $noticeData[] = [
+                    'acknowledgement_no' => $firstRecord->acknowledgement_no,
+                    'bank' => $firstRecord->bank,
+                    'account_no_2' => $cleanAccountNo,
+                    'state' => 'kerala',
+                    'Layer' => $firstRecord->Layer,
+                    'date' => now()->format('Y-m-d'),
+                    'action_taken_by_bank' => $firstRecord->action_taken_by_bank
+                    // Add other fields as necessary
+                ];
+            }
+
+            Log::info('noticeData Results', ['noticeData' => $noticeData]);
+
+            // Ensure that noticeData is not empty
+            if (empty($noticeData)) {
+                return response()->json(['success' => false, 'message' => "No valid case data found to generate notices."], 400);
+            }
+
+            // Generate HTML content for the notice
+            $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
+
+            Notice::Create(
+                [
+                    'user_id' => Auth::user()->id,
+                    'ack_number' => $noticeData[0]['acknowledgement_no'], // Corrected array access
+                    'notice_type' => 'Mule', // Assuming 'sourceType' is noticeType
+                    'content' => $htmlContent,
+                ]
+            );
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error generating notice: ' . $e->getMessage());
+
+            return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
+        }
+    }
 
 
 
+    // public function generateMuleNotice(Request $request)
+    // {
+    //     try {
+    //         $sourceType = $request->input('source_type');
+    //         $fromDate = $request->input('from_date');
+    //         $toDate = $request->input('to_date');
+    //         $entityId = $request->input('entity_id');
+    //         $entityType = $request->input('entity_type'); // Get the entity type
+
+    //         $request->validate([
+    //             'source_type' => 'required|string',
+    //             'from_date' => 'required|date',
+    //             'to_date' => 'required|date',
+    //             'entity_id' => 'required|exists:entities,_id', // Adjust as necessary
+    //             'entity_type' => 'required|string',
+    //             'status' => 'nullable|string'
+    //         ]);
+
+    //         Log::info('Generate Mule Notice Request Data', [
+    //             'source_type' => $sourceType,
+    //             'from_date' => $fromDate,
+    //             'to_date' => $toDate,
+    //             'entity_id' => $entityId,
+    //             'entity_type' => $entityType,
+    //         ]);
+
+    //         // Convert fromDate and toDate to start and end of the day
+    //         $fromDateStart = Carbon::parse($fromDate)->startOfDay();
+    //         $toDateEnd = Carbon::parse($toDate)->endOfDay();
+
+    //         // Determine which model to use based on the entity type
+    //         switch ($entityType) {
+    //             case 'bank':
+    //                 $entity = Bank::find($entityId);
+    //                 break;
+    //             case 'wallet':
+    //                 $entity = Wallet::find($entityId);
+    //                 break;
+    //             case 'insurance':
+    //                 $entity = Insurance::find($entityId);
+    //                 break;
+    //             case 'merchant':
+    //                 $entity = Merchant::find($entityId);
+    //                 break;
+    //             default:
+    //                 return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+    //         }
+
+    //         if (!$entity) {
+    //             return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+    //         }
+
+    //         Log::info('Entity Details', ['entity' => $entity]);
+
+    //         // Retrieve acknowledgement_no values from complaints within the specified date range
+    //         $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+    //             ->pluck('acknowledgement_no')->toArray();
+
+    //         // Aggregation to sanitize account_no_2 and find account numbers with at least 3 occurrences
+    //         $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
+    //             return $collection->aggregate([
+    //                 [
+    //                     '$addFields' => [
+    //                         'sanitized_account_no_2' => [
+    //                             '$trim' => [
+    //                                 'input' => [
+    //                                     '$replaceAll' => [
+    //                                         'input' => '$account_no_2',
+    //                                         'find' => ' [ Reported',
+    //                                         'replacement' => ''
+    //                                     ]
+    //                                 ]
+    //                             ]
+    //                         ]
+    //                     ]
+    //                 ],
+    //                 [
+    //                     '$match' => [
+    //                         'sanitized_account_no_2' => ['$ne' => ''],
+    //                         'sanitized_account_no_2' => ['$ne' => null]
+    //                     ]
+    //                 ],
+    //                 [
+    //                     '$group' => [
+    //                         '_id' => '$sanitized_account_no_2',
+    //                         'count' => ['$sum' => 1]
+    //                     ]
+    //                 ],
+    //                 [
+    //                     '$match' => [
+    //                         'count' => ['$gte' => 3]
+    //                     ]
+    //                 ]
+    //             ]);
+    //         })->pluck('_id')->toArray();
+
+    //         // Fetch cases based on the sanitized account numbers and acknowledgement_no
+    //         $cases = BankCasedata::where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant)
+    //             ->whereIn('acknowledgement_no', $acknowledgementNos)
+    //             ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    //             ->where(function ($query) use ($frequentAccountNumbers) {
+    //                 $query->where('Layer', 1)
+    //                     ->orWhereIn('account_no_2', $frequentAccountNumbers);
+    //             })
+    //             ->get();
+
+    //         Log::info('Query Results', ['cases' => $cases]);
+
+    //         if ($cases->isEmpty()) {
+    //             return response()->json(['success' => false, 'message' => "No data found for the given criteria"], 400);
+    //         }
+
+    //         // Prepare notice data
+    //         $noticeData = [];
+
+    //         // Group cases by account_no_2
+    //         $groupedCases = $cases->groupBy('account_no_2');
+
+    //         foreach ($groupedCases as $accountNo => $group) {
+    //             $firstRecord = $group->first();
+    //             $cleanAccountNo = preg_replace('/\s+\[.*\]/', '', $accountNo);
+
+    //             $noticeData[] = [
+    //                 'acknowledgement_no' => $firstRecord->acknowledgement_no,
+    //                 'bank' => $firstRecord->bank,
+    //                 'account_no_2' => $cleanAccountNo,
+    //                 'state' => 'kerala',
+    //                 'Layer' => $firstRecord->Layer,
+    //                 'date' => now()->format('Y-m-d'),
+    //                 'action_taken_by_bank' => $firstRecord->action_taken_by_bank
+    //                 // Add other fields as necessary
+    //             ];
+    //         }
+
+    //         Log::info('noticeData Results', ['noticeData' => $noticeData]);
+
+    //         // Ensure that noticeData is not empty
+    //         if (empty($noticeData)) {
+    //             return response()->json(['success' => false, 'message' => "No valid case data found to generate notices."], 400);
+    //         }
+
+    //         // Generate HTML content for the notice
+    //         $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
+
+    //         Notice::Create(
+    //             [
+    //                 'user_id' => Auth::user()->id,
+    //                 'ack_number' => $noticeData[0]['acknowledgement_no'], // Corrected array access
+    //                 'notice_type' => 'Mule', // Assuming 'sourceType' is noticeType
+    //                 'content' => $htmlContent,
+    //             ]
+    //         );
+
+    //         return response()->json(['success' => true]);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error generating notice: ' . $e->getMessage());
+
+    //         return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
+    //     }
+    // }
 
 }

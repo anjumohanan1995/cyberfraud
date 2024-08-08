@@ -19,9 +19,47 @@ $user = Auth::user();
 
 @endphp
 @section('content')
+<div class="container-fluid">
+    <!-- breadcrumb -->
+    <div class="breadcrumb-header justify-content-between">
+        <div>
+            <h4 class="content-title mb-2">Hi, welcome back!</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">Notice Management</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Generate Notice</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <!-- /breadcrumb -->
+
+    <!-- main-content-body -->
+    <div class="row row-sm">
+        <div class="col-md-12 col-xl-12">
+            <div class="card overflow-hidden review-project">
+                <div class="card-body">
+                    <div class="m-4 d-flex justify-content-between">
+                        <div id="alert_ajaxx" style="display:none"></div>
+                        @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        @endif
+                        <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </div>
 <div class="container mt-5">
+    <div id="error-message" style="display: none; color: red;"></div>
     <!-- Trigger the modal with a button -->
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Open Evidence Modal</button>
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Evidence</button>
+
 
     <!-- Modal -->
     <div id="evidenceModal" class="modal fade" role="dialog">
@@ -31,6 +69,7 @@ $user = Auth::user();
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Select Evidence</h4>
+                    <div class="invalid-feedback"></div>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -42,26 +81,31 @@ $user = Auth::user();
                                 <option value="ncrp">NCRP</option>
                                 <option value="other">Other</option>
                             </select>
+
                         </div>
 
                         <div class="form-group">
                             <label for="from_date">From Date:</label>
                             <input type="date" class="form-control" id="from_date" name="from_date">
+
                         </div>
 
                         <div class="form-group">
                             <label for="to_date">To Date:</label>
                             <input type="date" class="form-control" id="to_date" name="to_date">
+
                         </div>
 
                         <div class="form-group">
                             <label for="ack_no">Acknowledgement Number:</label>
                             <input type="text" class="form-control" id="ack_no" name="ack_no">
+
                         </div>
 
                         <div class="form-group">
                             <label for="case_no">Case Number:</label>
                             <input type="text" class="form-control" id="case_no" name="case_no">
+
                         </div>
 
                         <div class="form-group">
@@ -69,9 +113,12 @@ $user = Auth::user();
                             <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp">
                                 <option value="">--Select--</option>
                                 @foreach ($evidence_types as $et)
-                                    <option value="{{ $et->_id }}"> {{ $et->name }} </option>
+                                @if ($et->name != 'mobile')
+                                <option value="{{ $et->_id }}">{{ $et->name }}</option>
+                            @endif
                                 @endforeach
                             </select>
+
                         </div>
 
                         <div class="form-group">
@@ -82,6 +129,7 @@ $user = Auth::user();
                                     <option value="{{ $et->name }}"> {{ $et->name }} </option>
                                 @endforeach
                             </select>
+
                         </div>
 
                         <div class="form-group">
@@ -93,6 +141,7 @@ $user = Auth::user();
                                 <option value="inactive">Inactive</option>
                                 <option value="reported">Reported</option>
                             </select>
+
 
                         </div>
 
@@ -128,32 +177,32 @@ $user = Auth::user();
                     <tbody>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_ncrp_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="both_ncrp_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="79_ncrp_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-4" data-notice="79_ncrp_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-4" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-5" data-notice="94_ncrp_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-5" data-notice="Notice U/Sec.94 BNSS Act 2023 - NCRP - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="94_ncrp_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="Notice U/Sec.94 BNSS Act 2023 - NCRP - website">Generate Notice</button></td>
                         </tr>
-                        <tr>
+                        {{-- <tr>
                             <td>For All Notice Type Above</td>
                             <td><button class="btn btn-primary" id="generate-notice-6" data-notice="all_ncrp">Generate Notice</button></td>
-                        </tr>
+                        </tr> --}}
                     </tbody>
                 </table>
             </div>
@@ -183,27 +232,27 @@ $user = Auth::user();
                         <!-- Assign unique IDs to each button for handling clicks -->
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_other_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="both_other_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="79_other_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/sec 79(3)(b) of IT Act - Other - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-4" data-notice="79_other_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-4" data-notice="Notice U/sec 79(3)(b) of IT Act - Other - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-5" data-notice="94_other_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-5" data-notice="Notice U/Sec.94 BNSS Act 2023 - Other - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="94_other_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-6" data-notice="Notice U/Sec.94 BNSS Act 2023 - Other - website">Generate Notice</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -233,15 +282,15 @@ $user = Auth::user();
                     <tbody>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_ncrp_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_ncrp_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_ncrp_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/Sec.94 BNSS Act 2023 - NCRP - website">Generate Notice</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -273,15 +322,15 @@ $user = Auth::user();
                     <tbody>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_ncrp_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_ncrp_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social medi">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_ncrp_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/Sec.94 BNSS Act 2023 - NCRP - social media">Generate Notice</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -313,15 +362,15 @@ $user = Auth::user();
                     <tbody>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_other_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_other_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - Other - website">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
-                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_other_website">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/Sec.94 BNSS Act 2023 - Other - website">Generate Notice</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -353,15 +402,15 @@ $user = Auth::user();
                     <tbody>
                         <tr>
                             <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="both_other_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - Other - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="79_other_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - Other - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="94_other_social_media">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/Sec.94 BNSS Act 2023 - Other - social media">Generate Notice</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -374,13 +423,13 @@ $user = Auth::user();
 
 
 
-
-
+</div>
+</div>
+</div>
+</div>
+<!-- /row -->
 </div>
 
-
-
-</div>
 
 
 
@@ -414,8 +463,12 @@ $(document).ready(function(){
                 _token: "{{ csrf_token() }}"
             },
             success: function(response) {
-    // Handle success response
-    alert("Data submitted successfully");
+                if (response.success) {
+                    alert("Data submitted successfully");
+                    // Handle successful response and show modals based on conditions
+                    // Your existing logic to show modals based on the response
+
+            // },
 
     // Access the data from the response
     var data = response.data;
@@ -441,8 +494,33 @@ $(document).ready(function(){
     if (source_type == 'ncrp') {
         if (evidence_type_ncrp_name == 'website' && data) {
             $('#noticeTable_ncrp_website').modal('show'); // Show the website table
-        } else if (evidence_type_ncrp_name != 'website' && evidence_type_ncrp_name != null && data) {
-            $('#noticeTable_ncrp_social_media').modal('show'); // Show the social media table
+        } else if (evidence_type_ncrp_name != 'website' && data && evidence_type_ncrp_name != null) {
+            $('#noticeTable_ncrp_social_media').modal('show');
+            // if (evidence_type_ncrp_name == null) {
+            //     // Select the error message div and update its content
+            //     var errorMessageDiv = document.getElementById('error-message');
+            //     if (errorMessageDiv) { // Ensure the element is found
+            //         errorMessageDiv.innerText = 'No data available for selected evidence type';
+            //         errorMessageDiv.style.display = 'block'; // Show the error message
+            //                       // Show the error modal
+            //     $('#evidenceModal').modal({
+            //         show: true,
+            //         backdrop: 'static', // Disable closing on backdrop click
+            //         keyboard: false // Disable closing on keyboard press
+            //     });
+
+            //     // Remove the backdrop when hiding the modal
+            //     $('#evidenceModal').on('hidden.bs.modal', function () {
+            //         // Ensure the backdrop is hidden
+            //         $('.modal-backdrop').remove();
+            //     });
+            //     } else {
+            //         console.error('Error message div not found.');
+            //     }
+            // } else {
+            //     $('#noticeTable_ncrp_social_media').modal('show'); // Show the social media table
+            // }
+
         } else if (source_type == 'ncrp' && data) {
             $('#noticeTable_ncrp').modal('show'); // Show the general table
     }
@@ -451,8 +529,33 @@ $(document).ready(function(){
     if (source_type == 'other') {
         if (evidence_type_other == 'website'  && data) {
             $('#noticeTable_other_website').modal('show'); // Show the website table
-        } else if (evidence_type_other != 'website' && evidence_type_other != null  && data) {
-            $('#noticeTable_other_social_media').modal('show'); // Show the social media table
+        } else if (evidence_type_other != 'website' && data && evidence_type_other != null) {
+            // if (evidence_type_other == null) {
+            //     // Select the error message div and update its content
+            //     var errorMessageDiv = document.getElementById('error-message');
+            //     if (errorMessageDiv) { // Ensure the element is found
+            //         errorMessageDiv.innerText = 'No data available for selected evidence type';
+            //         errorMessageDiv.style.display = 'block'; // Show the error message
+            //                       // Show the error modal
+            //     $('#evidenceModal').modal({
+            //         show: true,
+            //         backdrop: 'static', // Disable closing on backdrop click
+            //         keyboard: false // Disable closing on keyboard press
+            //     });
+
+            //     // Remove the backdrop when hiding the modal
+            //     $('#evidenceModal').on('hidden.bs.modal', function () {
+            //         // Ensure the backdrop is hidden
+            //         $('.modal-backdrop').remove();
+            //     });
+            //     } else {
+            //         console.error('Error message div not found.');
+            //     }
+            // } else {
+            //     $('#noticeTable_other_social_media').modal('show');  // Show the social media table
+            // }
+            // Show the social media table
+            $('#noticeTable_other_social_media').modal('show');
         } else if (source_type == 'other' && data) {
             $('#noticeTable_other').modal('show'); // Show the general table
     }
@@ -462,47 +565,62 @@ $(document).ready(function(){
           $('#noticeTable_ncrp .btn').click(function(){
                     var noticeId = $(this).data('notice');
                     // alert(noticeId);// Get the notice ID from button data attribute
-                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                    generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
                           // Attach click event handlers to "Generate Notice" buttons
           $('#noticeTable_ncrp_social_media .btn').click(function(){
                     var noticeId = $(this).data('notice');
                     // alert(noticeId);// Get the notice ID from button data attribute
-                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                    generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
                           // Attach click event handlers to "Generate Notice" buttons
           $('#noticeTable_ncrp_website .btn').click(function(){
                     var noticeId = $(this).data('notice');
                     // alert(noticeId);// Get the notice ID from button data attribute
-                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                    generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
                           // Attach click event handlers to "Generate Notice" buttons
           $('#noticeTable_other .btn').click(function(){
                     var noticeId = $(this).data('notice');
                     // alert(noticeId);// Get the notice ID from button data attribute
-                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                    generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
                           // Attach click event handlers to "Generate Notice" buttons
           $('#noticeTable_other_social_media .btn').click(function(){
                     var noticeId = $(this).data('notice');
                     // alert(noticeId);// Get the notice ID from button data attribute
-                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                    generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
                           // Attach click event handlers to "Generate Notice" buttons
           $('#noticeTable_other_website .btn').click(function(){
                     var noticeId = $(this).data('notice');
                     // alert(noticeId);// Get the notice ID from button data attribute
-                    generateNotice(noticeId, data); // Call function to generate notice with ID and data
+                    generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
-},
+            } else {
+                    // Display error messages
+                    var errors = response.errors;
+                    // dd(errors);
+                    // if (errors) {
+                    //     for (var field in errors) {
+                    //         if (errors.hasOwnProperty(field)) {
+                    //             $('#' + field).addClass('is-invalid'); // Add Bootstrap class to highlight invalid fields
+                    //             $('#' + field).siblings('.invalid-feedback').remove(); // Remove any existing feedback
+                    //             $('#' + field).after('<div class="invalid-feedback">' + errors[field] + '</div>'); // Add error message
+                    //         }
+                    //     }
+                    // }
+                }
+            },
             error: function(xhr, status, error){
                 // Handle error response
                 alert("An error occurred");
             }
         });
     });
+
     // Function to generate notice
-    function generateNotice(noticeId, data) {
+    function generateNotice(noticeId, data, source_type) {
         // console.log(data)
         $.ajax({
             url: "{{ route('generate.notice') }}", // Replace with your route to generate notice
@@ -510,6 +628,7 @@ $(document).ready(function(){
             data: {
                 notice_id: noticeId,
                 data: data,
+                source_type: source_type,
                 _token: "{{ csrf_token() }}"
             },
             success: function(response) {

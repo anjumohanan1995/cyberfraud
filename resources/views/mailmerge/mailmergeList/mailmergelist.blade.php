@@ -30,6 +30,41 @@ $user = Auth::user();
         border-bottom: 3px solid #3858f9;
         color: #3858f9; /* Optional: Change color when active */
     }
+
+    /* Spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Button with spinner */
+.status_recheck {
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0; /* Adjust background color of the button */
+    padding: 10px 20px; /* Adjust padding for button size */
+    border: 1px solid #ccc; /* Button border */
+    color: #333; /* Button text color */
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.status_recheck .spinner {
+    position: absolute;
+    top: 30%; /* Position at the center vertically */
+    left: 40%; /* Position at the center horizontally */
+    transform: translate(-50%, -50%); /* Center the spinner precisely */
+    border: 3px solid rgba(0, 0, 0, 0.1); /* Adjust spinner border */
+    border-top-color: #007bff; /* Blue spinner color */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: none; /* Initially hidden */
+}
+
+.status_recheck.loading .spinner {
+    display: block; /* Show spinner when button is loading */
+}
 </style>
 
 <link rel="stylesheet" href="path_to_bootstrap_css">
@@ -84,7 +119,11 @@ $user = Auth::user();
                             <button id="statusBtn" class="btn btn-success" style="margin-left: 10px;">
                                 <i class="fas fa-envelope" data-toggle="tooltip" data-placement="top" title="Mail Merge"></i>
                             </button>
+
+                             <button class="btn btn-success btn-small status_recheck" style="margin-bottom:0px;margin-left:5px;font-size:smaller" 
+                             data-type="ncrp" data-ackno="{{ $ack_no }}" title="NCRP Recheck"> Recheck <i class="fa fa-sync" ></i></button>
                             {{-- <button id="portalBtn" class="btn btn-success" style="margin-left: 10px;">
+
                                 <i class="fas fa-link" data-toggle="tooltip" data-placement="top" title="Portal Link"></i>
                               </button> --}}
                             @endif
@@ -437,7 +476,80 @@ $user = Auth::user();
 
 
 
+<script>
 
+$(document).ready(function(){
+    $('.status_recheck').click(function(){
+
+     var type = $(this).data('type');
+     var ackno = $(this).data('ackno');
+    
+     var $button = $(this);
+     var buttonText = $button.text().trim();
+     $button.prop('disabled', true);
+     $button.addClass('loading');
+     var spinner = $('<div class="spinner"></div>');
+     $button.append(spinner);
+
+    $.ajax({
+    url: "{{ route('url_status_recheck') }}",
+    data:{type:type,ackno:ackno},
+    success:function(response){
+
+    $button.removeClass('loading');
+    $button.prop('disabled', false); // Re-enable button
+    spinner.remove(); // Remove spinner element
+
+    console.log(response);
+            if(response.success){
+
+            toastr.success(' url status updated!');
+            }
+            else{
+
+                toastr.error(' updation error!');
+            }
+            $('#ncrp').DataTable().ajax.reload();
+    }
+    });
+    })
+
+  $(document).on('click', '.check-status', function(e) {
+
+       e.preventDefault();
+       var url = $(this).data('url');
+       var type = $(this).data('type');
+
+       $.ajax({
+        url:"{{ route('get_url_status') }}",
+        data:{
+            url:url,
+            type:type
+        },
+        success:function(response){
+
+            console.log(response.statuscode);
+             var statuscode = response.statuscode !== null ? response.statuscode : 'Not updated.Recheck';
+             var statustext = response.statustext !== null ? response.statustext : 'Not updated.Recheck';
+             var htm = 'URL - ' +response.url + '<br> Status Code - '+statuscode+ '<br> Status - '+statustext+'';
+
+             $('.url-display').html(htm);
+             $('#showUrlStatus').modal('show');
+        },
+        error: function(xhr, status, error) {
+            // Handle AJAX errors here
+            console.error(xhr);
+            var errorMessage = "Error fetching URL status.Recheck";
+            $('.url-display').html(errorMessage);
+            $('#showUrlStatus').modal('show');
+        }
+       })
+
+
+     })
+})
+
+</script>
 
 
 

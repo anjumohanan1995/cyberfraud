@@ -16,24 +16,20 @@ class Notice extends Eloquent
         // 'notice_content', 'number', 'url', 'domain_name', 'domain_id', 'sub'
 
 
-        'sub',
+        'notice_type',
         'ack_number',
+        'case_number',
         'url',
         'content',
         'user_id'
-        // 'main_content',
-        // 'content_1',
-        // 'content_2',
-        // 'url_head',
-        // 'url',
-        // 'domain_name',
-        // 'domain_id',
-        // 'details_head',
-        // 'details_content',
-        // 'footer_content',
-        // 'user_id',
-        // 'content'
+
 
 
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     }
