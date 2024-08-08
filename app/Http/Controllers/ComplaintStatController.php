@@ -89,7 +89,7 @@ public function getComplaintStats(Request $request)
     // Ensure the field exists in the complaints data
     if ($complaints->isEmpty() || !isset($complaints->first()[$groupByField])) {
         \Log::error("Field '{$groupByField}' does not exist in complaints data.");
-        return response()->json(['error' => "Field '{$groupByField}' does not exist in complaints data."], 400);
+        return response()->json([], 200);
     }
 
     $groupedComplaints = $complaints->groupBy($groupByField);
