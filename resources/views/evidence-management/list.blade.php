@@ -530,7 +530,7 @@ $(document).ready(function() {
     $button.prop('disabled', false); // Re-enable button
     spinner.remove(); // Remove spinner element
 
-    console.log(response);
+    //console.log(response);
             if(response.success){
 
             toastr.success(' url status updated!');
@@ -557,7 +557,7 @@ $(document).ready(function() {
         },
         success:function(response){
 
-            console.log(response.statuscode);
+          // console.log(response.statuscode);
              var statuscode = response.statuscode !== null ? response.statuscode : 'Not updated.Recheck';
              var statustext = response.statustext !== null ? response.statustext : 'Not updated.Recheck';
              var htm = 'URL - ' +response.url + '<br> Status Code - '+statuscode+ '<br> Status - '+statustext+'';

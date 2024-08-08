@@ -363,7 +363,7 @@
                 var target = event.target;
                 if (target && target.classList.contains('evidence_type')) {
                     var option = target.value;
-                    console.log(option);
+                    //console.log(option);
                     var dynamicFields = target.closest('.evidence-fields').querySelector('.dynamicFields');
                     dynamicFields.innerHTML = ''; // Clear previous fields
 

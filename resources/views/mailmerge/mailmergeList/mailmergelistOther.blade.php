@@ -384,7 +384,7 @@ $user = Auth::user();
             },
             success: function(response) {
                 // Update UI or handle success response
-                console.log('Status updated successfully.');
+               // console.log('Status updated successfully.');
             },
             error: function(xhr, status, error) {
                 // Handle error
@@ -466,7 +466,7 @@ $(document).ready(function() {
 
      var type = $(this).data('type');
      var ackno = $(this).data('ackno');
-    
+
      var $button = $(this);
      var buttonText = $button.text().trim();
      $button.prop('disabled', true);

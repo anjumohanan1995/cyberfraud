@@ -479,7 +479,7 @@ $(document).ready(function(){
 
 
     // Process the data as needed
-    console.log(data);
+   // console.log(data);
 
     // Hide all modals first to ensure they are correctly toggled
     $('#evidenceModal').modal('hide');

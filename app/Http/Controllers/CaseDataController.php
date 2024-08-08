@@ -27,7 +27,6 @@ use App\exports\SampleExport;
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-use DateTime;
 use Illuminate\Support\Facades\Log;
 use DateTime;
 
@@ -535,7 +534,7 @@ public function updateStatus(Request $request)
     Log::info('Received update status request', ['ackno' => $ackno, 'status' => $status]);
 
     try {
-        
+
         // Update all complaints with the matching acknowledgement_no
         $affected = Complaint::where('acknowledgement_no', $ackno)
         ->update(['case_status' => $status, 'status_changed'=> $formated_date]);

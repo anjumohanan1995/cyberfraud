@@ -23,3 +23,11 @@ routes/web_my_bk.php
 routes/web_mycode.php
 resources/views/dashboard/dashboard.blade_mycode.php
 app/Http/Controllers/ComplaintStatController_mycode.php
+app/Http/Controllers/CaseDataController_bkfomerge.php
+app/Http/Controllers/CaseDataController_bkmerge.php
+public/img/loader.gif
+resources/views/dashboard/case-data-list/details.blade_bkformerge.php
+resources/views/evidence-management/list.blade_bkformerge.php
+resources/views/mailmerge/mailmergeList/mailmergelist.blade_bkformerge.php
+resources/views/mailmerge/mailmergeList/mailmergelistOther_bkformerge.blade.php
+resources/views/notice/evidence_bkformege.blade.php

@@ -448,7 +448,7 @@
 
                                     </div>
                                 @else
-                                    <table class="table table-bordered table-responsive " >
+                                    <table class="table table-bordered table-responsive">
                                         <thead>
                                             <tr>
                                                 <th >Account No./(Wallet/PG/PA) Id<br>
@@ -480,7 +480,7 @@
                                             <?php
                                            $date = new DateTime($bank_data['date_of_action']);
                                            $formattedDate = $date->format('l, F j, Y g:i A');
-                               
+
                                             $accountNumbers = $bank_data['account_no_1'];
                                             if($accountNumbers){
                                                 $accountNumbersArray = explode(' ', $accountNumbers);
@@ -523,7 +523,7 @@
                                                         <br><br>
                                                         <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
 
-                                                
+
 
                                                     <td>{{ @$bank_data['branch_location'] }}<br><br>
                                                         {{ @$bank_data['branch_manager_details'] }} </td>
@@ -607,7 +607,7 @@
                     'ackno':ackno
                 },
                 success: function(data) {
-                    console.log(data.status)
+                    //console.log(data.status)
                     if(data.success){
                     window.location.reload();
                     toastr.success(' status successfully updated!');

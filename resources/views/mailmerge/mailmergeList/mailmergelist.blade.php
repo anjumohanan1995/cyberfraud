@@ -120,7 +120,7 @@ $user = Auth::user();
                                 <i class="fas fa-envelope" data-toggle="tooltip" data-placement="top" title="Mail Merge"></i>
                             </button>
 
-                             <button class="btn btn-success btn-small status_recheck" style="margin-bottom:0px;margin-left:5px;font-size:smaller" 
+                             <button class="btn btn-success btn-small status_recheck" style="margin-bottom:0px;margin-left:5px;font-size:smaller"
                              data-type="ncrp" data-ackno="{{ $ack_no }}" title="NCRP Recheck"> Recheck <i class="fa fa-sync" ></i></button>
                             {{-- <button id="portalBtn" class="btn btn-success" style="margin-left: 10px;">
 
@@ -400,7 +400,7 @@ $user = Auth::user();
             },
             success: function(response) {
                 // Update UI or handle success response
-                console.log('Status updated successfully.');
+                //console.log('Status updated successfully.');
             },
             error: function(xhr, status, error) {
                 // Handle error
@@ -483,7 +483,7 @@ $(document).ready(function(){
 
      var type = $(this).data('type');
      var ackno = $(this).data('ackno');
-    
+
      var $button = $(this);
      var buttonText = $button.text().trim();
      $button.prop('disabled', true);
