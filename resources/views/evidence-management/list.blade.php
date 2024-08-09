@@ -214,7 +214,7 @@ $user = Auth::user();
                                                                             <th>Acknowledgement No</th>
                                                                             <th>Evidence Type</th>
                                                                             <th>URL</th>
-                                                                            <th>Mobile</th>
+                                                                            {{-- <th>Mobile</th> --}}
                                                                             <th>Domain</th>
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
@@ -423,7 +423,7 @@ $(document).ready(function() {
             { data: 'acknowledgement_no' },
             { data: 'evidence_type' },
             { data: 'url' },
-            { data: 'mobile' },
+            // { data: 'mobile' },
             { data: 'domain' },
             { data: 'ip' },
             { data: 'registrar' },

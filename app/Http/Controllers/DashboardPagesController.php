@@ -36,30 +36,44 @@ class DashboardPagesController extends Controller
     // dd($newComplaints);
 
 // Exclude specific values from action_taken_by_bank
-$filteredQuery = BankCasedata::whereNull('deleted_at')
-    ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-    ->where(function($query) {
-        $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
-    });
+// $filteredQuery = BankCasedata::whereNull('deleted_at')
+//     ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+//     ->where(function($query) {
+//         $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
+//     });
 
 // Get frequent account numbers
 $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
     return $collection->aggregate([
         [
-            '$project' => [
+            '$addFields' => [
                 'sanitized_account_no_2' => [
-                    '$cond' => [
-                        'if' => ['$regexMatch' => ['input' => '$account_no_2', 'regex' => '\[ Reported \d+ times \]']],
-                        'then' => [
-                            '$substr' => [
-                                '$account_no_2',
-                                0,
-                                ['$indexOfBytes' => ['$account_no_2', ' [ Reported ']]
-                            ]
-                        ],
-                        'else' => '$account_no_2'
+                    '$arrayElemAt' => [
+                        ['$split' => ['$account_no_2', ' [ Reported ']],
+                        0
                     ]
                 ]
+            ]
+        ],
+        [
+            '$addFields' => [
+                'reported_count' => [
+                    '$arrayElemAt' => [
+                        ['$split' => [
+                            ['$arrayElemAt' => [
+                                ['$split' => ['$account_no_2', ' [ Reported ']],
+                                1
+                            ]],
+                            ' times ]'
+                        ]],
+                        0
+                    ]
+                ]
+            ]
+        ],
+        [
+            '$addFields' => [
+                'reported_count' => ['$toInt' => '$reported_count']
             ]
         ],
         [
@@ -76,15 +90,32 @@ $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
     ]);
 })->pluck('_id')->toArray();
 
-// Get mule account count based on frequent account numbers
-$muleAccountCount = $filteredQuery->where(function ($query) use ($frequentAccountNumbers) {
-    $query->where('Layer', 1)
-        ->orWhereIn('account_no_2', $frequentAccountNumbers)
-        ->whereNotNull('account_no_2');
-})->groupBy('account_no_2')
-  ->pluck('account_no_2')
-  ->unique()
-  ->count();
+// Fetch cases where Layer is 1
+$layer1Cases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    ->where('Layer', 1)
+    ->whereNotNull('account_no_2')
+    ->where('account_no_2', '!=', '')
+    ->get();
+
+// Extract acknowledgement numbers from Layer 1 cases
+$layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+
+// Fetch cases where Layer is not 1 and account_no_2 is in frequentAccountNumbers
+$otherLayerCases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    ->where('Layer', '!=', 1)
+    ->whereIn('account_no_2', $frequentAccountNumbers)
+    ->whereNotNull('account_no_2')
+    ->where('account_no_2', '!=', '')
+    ->get();
+
+// Combine results
+$cases = $layer1Cases->merge($otherLayerCases);
+
+$muleAccountCount = $cases->count();
+
+
+
+            // dd($muleAccountCount);
 
     //pending amount calculation
     $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;

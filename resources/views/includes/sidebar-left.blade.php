@@ -289,8 +289,8 @@
                     </li>
                     @endif
                     @if ($hasNoticeViewPermission)
-                    <li class="slide">
-                        <a class="side-item" href="{{ url('notices') }}">View Notices</a>
+                    <li>
+                        <a class="slide-item" href="{{ url('notices') }}">View Notices</a>
                     </li>
                 @endif
                 </ul>
