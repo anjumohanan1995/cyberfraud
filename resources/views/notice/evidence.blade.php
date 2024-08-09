@@ -113,7 +113,7 @@ $user = Auth::user();
                             <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp">
                                 <option value="">--Select--</option>
                                 @foreach ($evidence_types as $et)
-                                @if ($et->name != 'mobile')
+                                @if ($et->name != 'mobile' && $et->name != 'whatsapp')
                                 <option value="{{ $et->_id }}">{{ $et->name }}</option>
                             @endif
                                 @endforeach
