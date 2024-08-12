@@ -226,7 +226,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                     }
                 },
                 error: function(xhr) {
-                    toastr.error("Invaild Datas For Generating Notice.");
+                    toastr.error("No data found for the given criteria.");
                 }
             });
         });
