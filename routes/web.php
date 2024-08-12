@@ -64,7 +64,7 @@ Route::get('/', function () {
 
 
 //login route starts here
-Route::post('/login', [AuthController::class, 'login'])->name("login")->middleware('ip_blocker');
+Route::post('/login', [AuthController::class, 'login'])->name("login");
 
 //logout route starts here.
 Route::get('logout', [LogoutController::class, 'logout']);
@@ -304,6 +304,8 @@ Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableF
 // mule account notice
 Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name('notice.mule.account');
 Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
+
+Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name('notice.bank');
 
 
 

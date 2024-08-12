@@ -9,14 +9,18 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SendOtpMail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 
 class AuthController extends Controller
 {
 
+    protected $maxAttempts = 3;
+    protected $lockoutTime = 60; // in minutes
+
     public function login(Request $request)
     {
-        // dd($request);
         // Validate the form data
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -24,23 +28,27 @@ class AuthController extends Controller
 
 
         ]);
-        // dd("hi");
 
-        $systemIp = $this->getSystemIp($request);
-        $cacheKey = 'password_attempts_' . $systemIp;
-        $attempts = Cache::get($cacheKey, 0);
+        $email = $request->input('email');
+        $cacheKey = $this->getFailedAttemptsCacheKey($email);
+        // dd($cacheKey);
 
-        if ($attempts >= 3) {
-            return redirect()->back()->withInput()->withErrors(['password' => 'Too many failed attempts. Your IP has been blocked for 1 hour.']);
+        Log::info('Cache Key:', ['key' => $cacheKey]);
+        Log::info('Failed Attempts:', ['attempts' => Cache::get($cacheKey)]);
+
+        if ($this->hasTooManyLoginAttempts($cacheKey)) {
+            $minutes = $this->getLockoutTimeRemaining($cacheKey);
+            return redirect()->back()->withInput()->withErrors(['email' => "Too many login attempts. Please try again in $minutes minutes."]);
         }
 
 
         // Attempt to authenticate the user
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            Cache::forget($cacheKey);
+        if (Auth::attempt($credentials)) {
             // Authentication passed
+            // Reset failed login attempts
+            $this->clearLoginAttempts($cacheKey);
            // $otp = Str::random(6);
-            $user = Auth::user();
+            // $user = Auth::user();
             //session(['otp' => $otp]);
            //$user_email = Auth::user()->email;
             // if(Mail::to($user_email)->send(new SendOtpMail($otp))){
@@ -53,64 +61,51 @@ class AuthController extends Controller
 
             return redirect()->intended('/dashboard'); // Redirect to dashboard or any desired page
         } else {
-            if (Auth::attempt(['email' => $request->email])) {
-                // Email exists but password is wrong
-                Cache::put($cacheKey, $attempts + 1, now()->addHour());
-                $attemptsLeft = 3 - ($attempts + 1);
-                $errorMessage = $attemptsLeft > 0
-                    ? "Invalid password. Attempts left: $attemptsLeft"
-                    : 'Too many failed attempts. Your IP has been blocked for 1 hour.';
-                return redirect()->back()->withInput()->withErrors(['password' => $errorMessage]);
-            } else {
-                // Email doesn't exist
-                return redirect()->back()->withInput()->withErrors(['email' => 'Invalid email address']);
-            }
+            // Authentication failed
+            $this->incrementLoginAttempts($cacheKey);
+            return redirect()->back()->withInput()->withErrors(['email' => 'Invalid Email']);
         }
     }
 
-    private function getSystemIp(Request $request)
+    protected function getFailedAttemptsCacheKey($email)
     {
-        // dd($request);
-        $ip = null;
-
-        // Check for IP address in the X-Forwarded-For header
-        if ($request->header('X-Forwarded-For')) {
-            $ipList = explode(',', $request->header('X-Forwarded-For'));
-            $ip = trim(end($ipList));
-        }
-
-        // If not found in X-Forwarded-For, check other common proxy headers
-        if (empty($ip)) {
-            $headers = [
-                'HTTP_CLIENT_IP',
-                'HTTP_X_FORWARDED',
-                'HTTP_X_CLUSTER_CLIENT_IP',
-                'HTTP_FORWARDED_FOR',
-                'HTTP_FORWARDED',
-                'REMOTE_ADDR'
-            ];
-
-            foreach ($headers as $header) {
-                if ($request->server($header)) {
-                    $ip = trim($request->server($header));
-                    break;
-                }
-            }
-        }
-
-        // If still not found, use the default method
-        if (empty($ip)) {
-            $ip = $request->ip();
-        }
-
-        // Validate the IP address
-        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-            // If the IP is not valid or is a private/reserved IP, fall back to the server's remote address
-            $ip = $_SERVER['REMOTE_ADDR'];
-        }
-
-        return $ip;
+        return 'login_attempts_' . md5($email);
     }
+
+    protected function hasTooManyLoginAttempts($cacheKey)
+    {
+        return Cache::has($cacheKey) && Cache::get($cacheKey)['attempts'] >= $this->maxAttempts;
+    }
+
+    protected function incrementLoginAttempts($cacheKey)
+    {
+        $failedAttempts = Cache::get($cacheKey, ['attempts' => 0, 'locked_at' => null]);
+        $failedAttempts['attempts'] += 1;
+
+        if ($failedAttempts['attempts'] >= $this->maxAttempts) {
+            $failedAttempts['locked_at'] = Carbon::now()->addMinutes($this->lockoutTime);
+        }
+
+        Cache::put($cacheKey, $failedAttempts, $this->lockoutTime);
+    }
+
+    protected function clearLoginAttempts($cacheKey)
+    {
+        Cache::forget($cacheKey);
+    }
+
+    protected function getLockoutTimeRemaining($cacheKey)
+    {
+        $failedAttempts = Cache::get($cacheKey);
+        if ($failedAttempts && $failedAttempts['locked_at']) {
+            $lockedAt = Carbon::parse($failedAttempts['locked_at']);
+            $remainingMinutes = max(0, $lockedAt->diffInMinutes(Carbon::now()));
+            return $remainingMinutes;
+        }
+
+        return 0;
+    }
+
     // public function verifyOtp(){
     //     return view('login.otp-modal');
     // }

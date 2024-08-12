@@ -235,15 +235,15 @@ class CaseDataController extends Controller
 
         // Filter conditions
         if ($com_status == "1"){
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1)->orderBy('entry_date', 'asc');
+            $query = Complaint::where('deleted_at', null)->where('com_status', 1);
         }
         elseif ($com_status == "0"){
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0)->orderBy('entry_date', 'asc');
+            $query = Complaint::where('deleted_at', null)->where('com_status', 0);
 
         }else{
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('entry_date', 'asc');
+            $query = Complaint::where('deleted_at', null);
         }
-
+// dd($query);
         // if (!empty($com_status)) {
         //     $query->where('com_status', (int)$com_status);
         // }
@@ -331,18 +331,29 @@ if ($fir_lodge == "0") {
     $query->whereNotIn('acknowledgement_no', $ackNumbersToFilter);
 }
 
+// Instead of grouping, let's use a subquery to get the latest entry for each acknowledgement_no
+$latestIds = Complaint::select('acknowledgement_no', DB::raw('MAX(id) as max_id'))
+    ->groupBy('acknowledgement_no');
 
-        // Total records count
-        $totalRecords = $query->get()->count();
+$query->joinSub($latestIds, 'latest_complaints', function ($join) {
+    $join->on('complaints.id', '=', 'latest_complaints.max_id');
+});
 
-            // Sort by entry_date first, then by dynamic column
-    $query // Ensure entry_date sorting is first
-    ->orderBy($columnName, $columnSortOrder)  // Apply dynamic column sorting
-    ->skip($start)
-    ->take($rowperpage);
+// Apply sorting
+$query->orderBy('entry_date', 'desc');
+    //   ->orderBy($columnName, $columnSortOrder);
 
-// Get results
-$records = $query->get();
+// Get total count before pagination
+$totalRecords = $query->count();
+
+// Apply pagination
+$records = $query->skip($start)->take($rowperpage)->get();
+// foreach ($records->take(5) as $record) {
+//     \Log::info("Full record: " . json_encode($record->toArray()));
+// }
+
+
+
 
 // dd($query);
 

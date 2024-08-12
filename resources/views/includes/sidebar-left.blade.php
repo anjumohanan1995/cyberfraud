@@ -279,7 +279,7 @@
                     @endif
                     @if($hasAgainstBankManagement)
                     <li>
-                        <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Bank</a>
+                        <a class="slide-item" href="{{ route('notice.bank') }}">Against Bank</a>
                     </li>
                     @endif
                     @if($hasAgainstMuleAccountManagement)

@@ -225,7 +225,7 @@ $user = Auth::user();
                                     </div>
                                     @if ($hasShowSubCategoryPermission)
 <div class="col-md-2">
-                                        <div class="form-group">
+                                        <div class="form-group" hidden>
                                             <label for="sub-category">Sub category:</label>
                                             <select class="form-control" id="sub-category" name="sub-category">
                                                 <option value="">--Select--</option>

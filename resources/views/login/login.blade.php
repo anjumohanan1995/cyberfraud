@@ -134,6 +134,7 @@
     }
 
     function validateForm() {
+        console.log("Form validation triggered");
         var password = document.getElementById("password").value;
         var passwordError = document.querySelector(".password");
 

@@ -816,4 +816,14 @@ public function follow(Request $request, $id)
                 return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
             }
         }
+
+        public function againstBankAccount()
+        {
+            $bank = Bank::get();
+            $wallet= Wallet::get();
+            $insurance=Insurance::get();
+            $merchant=Merchant::get();
+            return view('notice.bank',compact('bank','wallet','insurance','merchant'));
+        }
+
 }
