@@ -85,22 +85,35 @@
     flex: 1 1 auto;
     min-height: 1px;
     padding: 1.25rem;
-    height: 1000;
+    height: 1400px;
 }
+
 </style>
 
 <style>
     .custom-dropdown {
-        position: relative; /* Make sure dropdown container is relative */
+        position: relative;
         display: inline-block;
     }
 
+    .custom-dropdown-button {
+        background-color: #28a745; /* Bootstrap's success color */
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+    }
+
     .custom-dropdown-content {
-        display: none;
-        position: absolute; /* Absolute positioning to place dropdown relative to the parent */
+        display: none; /* Hidden by default */
+        position: absolute;
         background-color: #f9f9f9;
-        min-width: 160px;
+        min-width: 160px; /* Adjust the width as needed */
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+        max-height: 200px; /* Set a max height for the dropdown */
+        overflow-y: auto; /* Add vertical scrollbar if content overflows */
+        padding: 5px 0;
     }
 
     .custom-dropdown-content a {
@@ -117,11 +130,8 @@
     .custom-dropdown:hover .custom-dropdown-content {
         display: block; /* Show dropdown on hover */
     }
+    </style>
 
-    .custom-dropdown:hover .custom-dropdown-button {
-        background-color: #3e8e41;
-    }
-</style>
 
 <!-- Local Bootstrap CSS -->
 <link href="/path/to/bootstrap.min.css" rel="stylesheet">
@@ -180,10 +190,10 @@
                     <a href="#" class="btn btn-primary" onclick="downloadContent()">Download Content</a>
 
                     <div class="custom-dropdown">
-                        <button class="custom-dropdown-button btn btn-success">Follow</button>
+                        <button class="custom-dropdown-button btn btn-success">Follow Up</button>
                         <div class="custom-dropdown-content">
                             @foreach($users as $user)
-                                <a href="#" data-user-id="{{ $user->id }}">{{ $user->role }}</a>
+                                <a href="#" data-user-id="{{ $user->id }}">{{ $user->name }}</a>
                             @endforeach
                         </div>
                     </div>

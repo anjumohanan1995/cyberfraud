@@ -29,7 +29,7 @@ class ComplaintController extends Controller
     {
 
         $file = $request->file('complaint_file');
-        $source_type = $request->input('source_type');
+        $source_type = $request->input('source_type');//dd($file);
         if($source_type){
             if($source_type !== 'NCRP'){
 
@@ -58,7 +58,7 @@ class ComplaintController extends Controller
             else{
 
                 $request->validate([
-                    'complaint_file' => 'required'
+                    'complaint_file' => 'required|file|mimes:csv,txt|max:51200'
                 ]);
 
                 if ($file){

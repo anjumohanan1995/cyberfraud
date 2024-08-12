@@ -15,117 +15,118 @@ class MuleAccountController extends Controller
     public function muleaccountList(Request $request)
     {
         $draw = $request->get('draw');
-        $start = $request->get('start'); // Offset (starting row index) for pagination
-        $length = $request->get('length'); // Number of rows per page
+        $start = $request->get('start');
+        $length = $request->get('length');
 
         $order = $request->get('order');
         $columns = $request->get('columns');
         $search = $request->get('search');
 
-        $columnIndex = $order[0]['column']; // Column index
-        $columnName = $columns[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order[0]['dir']; // asc or desc
-        $searchValue = $search['value']; // Search value
+        $columnIndex = $order[0]['column'];
+        $columnName = $columns[$columnIndex]['data'];
+        $columnSortOrder = $order[0]['dir'];
+        $searchValue = $search['value'];
 
-        // Aggregate frequent account numbers
-        $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
-            return $collection->aggregate([
-                [
-                    '$addFields' => [
-                        'sanitized_account_no_2' => [
-                            '$arrayElemAt' => [
-                                ['$split' => ['$account_no_2', ' [ Reported ']],
-                                0
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    '$addFields' => [
-                        'reported_count' => [
-                            '$arrayElemAt' => [
-                                ['$split' => [
-                                    ['$arrayElemAt' => [
-                                        ['$split' => ['$account_no_2', ' [ Reported ']],
-                                        1
-                                    ]],
-                                    ' times ]'
-                                ]],
-                                0
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    '$addFields' => [
-                        'reported_count' => ['$toInt' => '$reported_count']
-                    ]
-                ],
-                [
-                    '$group' => [
-                        '_id' => '$sanitized_account_no_2',
-                        'count' => ['$sum' => 1]
-                    ]
-                ],
-                [
-                    '$match' => [
-                        'count' => ['$gte' => 3]
-                    ]
-                ]
-            ]);
-        })->pluck('_id')->toArray();
+        $documents = BankCasedata::where('account_no_2', '!=', null)->get();
 
-        // Fetch cases where Layer is 1
+        $accountNumbers = [];
+        foreach ($documents as $doc) {
+            if (isset($doc['account_no_2'])) {
+                preg_match('/(\d+)/', $doc['account_no_2'], $matches);
+                if (!empty($matches[1])) {
+                    $number = $matches[1];
+                    $accountNumbers[$number] = ($accountNumbers[$number] ?? 0) + 1;
+                }
+            }
+        }
+
+        $frequentAccountNumbers = array_filter($accountNumbers, function($count) {
+            return $count > 2;
+        });
+
+        $frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
+
         $layer1Cases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
             ->where('Layer', 1)
             ->whereNotNull('account_no_2')
             ->where('account_no_2', '!=', '')
             ->get();
 
-        // Extract acknowledgement numbers from Layer 1 cases
-        $layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+            $layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
 
-        // Fetch cases where Layer is not 1 and account_no_2 is in frequentAccountNumbers
+        $accountNumberPatterns = array_map(function($number) {
+            return "^$number\\b";
+        }, $frequentAccountNumbersKeys);
+
         $otherLayerCases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+        ->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos)
             ->where('Layer', '!=', 1)
-            ->whereIn('account_no_2', $frequentAccountNumbers)
+            ->where(function($query) use ($accountNumberPatterns) {
+                foreach ($accountNumberPatterns as $pattern) {
+                    $query->orWhere('account_no_2', 'regexp', $pattern);
+                }
+            })
             ->whereNotNull('account_no_2')
             ->where('account_no_2', '!=', '')
             ->get();
 
-        // Combine results
-        $cases = $layer1Cases->merge($otherLayerCases);
+        $filterDuplicates = function($cases) {
+            return $cases->unique(function($case) {
+                return $case->acknowledgement_no . '-' . $case->account_no_2;
+            });
+        };
 
-        // Apply search condition if there is a search value
+        $layer1Cases = $filterDuplicates($layer1Cases);
+        $otherLayerCases = $filterDuplicates($otherLayerCases);
+
+        $groupedOtherLayerCases = $otherLayerCases->groupBy(function($case) {
+            return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+        });
+
+        $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
+            return $group->pluck('acknowledgement_no')->unique()->count() > 1;
+        });
+
+        $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+
+        $groupedCases = $allCases->groupBy(function($case) {
+            return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+        });
+
+        $groupedCases->transform(function ($group) {
+            // Ensure each group has unique acknowledgement_no values
+            return $group->unique('acknowledgement_no');
+        });
+
         if (!empty($searchValue)) {
-            $cases = $cases->filter(function ($item) use ($searchValue) {
+            $allCases = $allCases->filter(function ($item) use ($searchValue) {
                 return stripos($item->account_no_2, $searchValue) !== false;
             });
         }
+        // dd($allCases);
 
-        // Apply ordering and pagination
-        $totalRecords = $cases->count();
-        $filteredCases = $cases->sortBy([$columnName => $columnSortOrder])
-            ->slice($start, $length);
+        $totalRecords = $allCases->count();
 
-        // Modify account_no_2 field to remove [ Reported x times ]
+        $sortedCases = $allCases->sortBy(function ($item) use ($columnName) {
+            return $item->$columnName;
+        }, SORT_REGULAR, $columnSortOrder === 'asc');
+
+        $filteredCases = $sortedCases->slice($start, $length);
+
         $filteredCases = $filteredCases->map(function ($item) {
             $item->account_no_2 = preg_replace('/\[ Reported \d+ times \]/', '', $item->account_no_2);
             return $item;
         });
 
-        // Prepare data for DataTables
         $data_arr = [];
-        $i = $start + 1; // Initialize $i with $start value + 1
-        foreach ($filteredCases as $record) {
+        foreach ($filteredCases as $index => $record) {
             $data_arr[] = [
-                'id' => $i++,
+                'id' => $start + $index + 1,
                 'account_no_2' => $record->account_no_2,
                 'Layer' => $record->Layer,
             ];
         }
 
-        // Response data for DataTables
         $response = [
             'draw' => intval($draw),
             'recordsTotal' => $totalRecords,

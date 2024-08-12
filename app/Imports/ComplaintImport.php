@@ -47,7 +47,7 @@ class ComplaintImport implements ToCollection, WithStartRow
      */
     public function collection(Collection $collection)
     {
-
+// dd($collection);
         $errors = [];
 
         $collection->transform(function ($row) {
@@ -67,7 +67,7 @@ class ComplaintImport implements ToCollection, WithStartRow
                 'entry_date'                => $row[10] ?? null,
                 'current_status'            =>$row[11] ?? null,
                 // 'date_of_action'            => $this->parseDate(@$row[12]),
-                'date_of_action'            => $row[12] ?? null,
+                'date_of_action'            => trim($row[12]) ?? null,
                 'action_taken_by_name'         => $row[13] ?? null,
                 'action_taken_by_designation'   => $row[14] ?? null,
                 'action_taken_by_mobile'         => $row[15] ?? null,
@@ -90,6 +90,12 @@ class ComplaintImport implements ToCollection, WithStartRow
         foreach ($rows as $index => $row){
             $rowIndex = $index + 2;
 
+            if($row['date_of_action'] === 'N/A'){
+                $date_of_action = $row['entry_date'];
+            }else{
+                $date_of_action = $row['date_of_action'] ?? null;
+            }
+
             $data = [
                 'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
                 'district' => $row['district'] ?? null,
@@ -99,7 +105,7 @@ class ComplaintImport implements ToCollection, WithStartRow
                 'transaction_id' => $row['transaction_id'] ?? null,
                 'bank_name' => $row['bank_name'] ?? null,
                 'amount' => $row['amount'] ?? null,
-                'date_of_action' => $row['date_of_action'] ?? null,
+                'date_of_action' => $date_of_action,
                 'entry_date' => $row['entry_date'] ?? null,
             ];
 
@@ -146,6 +152,12 @@ class ComplaintImport implements ToCollection, WithStartRow
 
         foreach ($filteredCollection as $collect){
 
+            if($collect['date_of_action'] === 'N/A'){
+                $date_of_action = $collect['entry_date'];
+            }else{
+                $date_of_action = $collect['date_of_action'] ?? null;
+            }
+
             $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
                                     ->where('transaction_id',(string)$collect['transaction_id'])
                                     ->first();
@@ -164,7 +176,7 @@ class ComplaintImport implements ToCollection, WithStartRow
 
                 $complaint->entry_date = $this->parseDate($collect['entry_date']);
                 $complaint->current_status = $collect['current_status'];
-                $complaint->date_of_action = $this->parseDate($collect['date_of_action']);
+                $complaint->date_of_action = $this->parseDate($date_of_action);
                 $complaint->action_taken_by_name = $collect['action_taken_by_name'];
                 $complaint->action_taken_by_designation = $collect['action_taken_by_designation'];
                 $complaint->action_taken_by_mobile = $collect['action_taken_by_mobile'];
@@ -188,7 +200,7 @@ class ComplaintImport implements ToCollection, WithStartRow
             // dd($collect['entry_date']);
             $complaint->entry_date = $this->parseDate($collect['entry_date']);
             $complaint->current_status = $collect['current_status'];
-            $complaint->date_of_action = $this->parseDate($collect['date_of_action']);
+            $complaint->date_of_action = $this->parseDate($date_of_action);
             $complaint->action_taken_by_name = $collect['action_taken_by_name'];
             $complaint->action_taken_by_designation = $collect['action_taken_by_designation'];
             $complaint->action_taken_by_mobile = $collect['action_taken_by_mobile'];
@@ -275,14 +287,23 @@ protected function formatErrorMessage($message, $index)
         'd-m-Y H:i:s A',
         'd/m/Y h:i:s A',
         'd-m-Y h:i:s A',
+        'd/m/Y H:i:s P',
+        'd-m-Y H:i:s P',
+        'd/m/Y h:i:s P',
+        'd-m-Y h:i:s P',
         'd/m/Y',
         'd-m-Y',
         'd/F/Y',
         'd-F-Y',
         'd/m/Y H:i',
         'd-m-Y H:i',
+        'd/m/y H:i',
         'd/M/Y',
-        'd-M-Y'
+        'd-M-Y',
+        'd-m-y, h:i:s A',
+        'd-m-y, h:i:s P',
+        'Y-m-d H:i:s',
+        'Y/m/d H:i:s'
     ];
 
     // Try each format to see if it matches
@@ -298,6 +319,7 @@ protected function formatErrorMessage($message, $index)
             return true;
         } catch (\Exception $e) {
             // Continue to next format
+            continue;
         }
     }
 

@@ -327,7 +327,7 @@ $user = Auth::user();
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social medi">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>

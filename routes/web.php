@@ -64,7 +64,7 @@ Route::get('/', function () {
 
 
 //login route starts here
-Route::post('/login', [AuthController::class, 'login'])->name("login");
+Route::post('/login', [AuthController::class, 'login'])->name("login")->middleware('ip_blocker');
 
 //logout route starts here.
 Route::get('logout', [LogoutController::class, 'logout']);

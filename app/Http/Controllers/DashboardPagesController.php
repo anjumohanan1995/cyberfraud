@@ -42,76 +42,69 @@ class DashboardPagesController extends Controller
 //         $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
 //     });
 
-// Get frequent account numbers
-$frequentAccountNumbers = BankCasedata::raw(function ($collection) {
-    return $collection->aggregate([
-        [
-            '$addFields' => [
-                'sanitized_account_no_2' => [
-                    '$arrayElemAt' => [
-                        ['$split' => ['$account_no_2', ' [ Reported ']],
-                        0
-                    ]
-                ]
-            ]
-        ],
-        [
-            '$addFields' => [
-                'reported_count' => [
-                    '$arrayElemAt' => [
-                        ['$split' => [
-                            ['$arrayElemAt' => [
-                                ['$split' => ['$account_no_2', ' [ Reported ']],
-                                1
-                            ]],
-                            ' times ]'
-                        ]],
-                        0
-                    ]
-                ]
-            ]
-        ],
-        [
-            '$addFields' => [
-                'reported_count' => ['$toInt' => '$reported_count']
-            ]
-        ],
-        [
-            '$group' => [
-                '_id' => '$sanitized_account_no_2',
-                'count' => ['$sum' => 1]
-            ]
-        ],
-        [
-            '$match' => [
-                'count' => ['$gte' => 3]
-            ]
-        ]
-    ]);
-})->pluck('_id')->toArray();
+$documents = BankCasedata::where('account_no_2', '!=', null)->get();
 
-// Fetch cases where Layer is 1
+$accountNumbers = [];
+foreach ($documents as $doc) {
+    if (isset($doc['account_no_2'])) {
+        preg_match('/(\d+)/', $doc['account_no_2'], $matches);
+        if (!empty($matches[1])) {
+            $number = $matches[1];
+            $accountNumbers[$number] = ($accountNumbers[$number] ?? 0) + 1;
+        }
+    }
+}
+
+$frequentAccountNumbers = array_filter($accountNumbers, function($count) {
+    return $count > 2;
+});
+
+$frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
+
 $layer1Cases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
     ->where('Layer', 1)
     ->whereNotNull('account_no_2')
     ->where('account_no_2', '!=', '')
     ->get();
 
-// Extract acknowledgement numbers from Layer 1 cases
-$layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+    $layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
 
-// Fetch cases where Layer is not 1 and account_no_2 is in frequentAccountNumbers
+$accountNumberPatterns = array_map(function($number) {
+    return "^$number\\b";
+}, $frequentAccountNumbersKeys);
+
 $otherLayerCases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos)
     ->where('Layer', '!=', 1)
-    ->whereIn('account_no_2', $frequentAccountNumbers)
+    ->where(function($query) use ($accountNumberPatterns) {
+        foreach ($accountNumberPatterns as $pattern) {
+            $query->orWhere('account_no_2', 'regexp', $pattern);
+        }
+    })
     ->whereNotNull('account_no_2')
     ->where('account_no_2', '!=', '')
     ->get();
 
-// Combine results
-$cases = $layer1Cases->merge($otherLayerCases);
+$filterDuplicates = function($cases) {
+    return $cases->unique(function($case) {
+        return $case->acknowledgement_no . '-' . $case->account_no_2;
+    });
+};
 
-$muleAccountCount = $cases->count();
+$layer1Cases = $filterDuplicates($layer1Cases);
+$otherLayerCases = $filterDuplicates($otherLayerCases);
+
+$groupedOtherLayerCases = $otherLayerCases->groupBy(function($case) {
+    return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+});
+
+$validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
+    return $group->pluck('acknowledgement_no')->unique()->count() > 1;
+});
+
+$allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+
+$muleAccountCount = $allCases->count();
 
 
 

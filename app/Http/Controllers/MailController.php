@@ -64,8 +64,9 @@ class MailController extends Controller
         // Format data for DataTable
         $data_arr = [];
         $i = $start;
-
+// dd($records);
         foreach ($records as $record) {
+            // print_r($record);
             $i++;
 
 
@@ -128,6 +129,7 @@ class MailController extends Controller
                 "status" => $status,
             ];
         }
+        // dd();
 
 
         // Prepare response for DataTable
