@@ -54,13 +54,46 @@
                                 <h4 class="card-title mg-b-10">
                                     All Professions
                                 </h4>
+                            </div>
+                                <div class="table-responsive mb-0">
+                                    <form action="{{ route('profession.store') }}" method="POST" id="professionForm">
+                                        @csrf
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="name">Name:</label>
+                                                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter Profession" value="{{ old('name') }}" required>
+                                                    @error('name')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="status">Status:</label>
+                                                    <select class="form-control" name="status" required>
+                                                        <option value="active">Active</option>
+                                                        <option value="inactive">Inactive</option>
+                                                    </select>
+                                                    @error('status')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+
+                                </div>
                                 <div class="col-md-1 col-6 text-center">
-                                    <div class="task-box primary  mb-0">
+
+                                    {{-- <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('profession.create') }}">
                                             <p class="mb-0 tx-12">Add </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
                                         </a>
-                                    </div>
+                                    </div> --}}
                                 </div>
                             </div>
 
@@ -89,7 +122,83 @@
         </div>
         <!-- /row -->
     </div>
-<script>
+
+    <script>
+        $(document).ready(function(){
+    var table = $('#example').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: "{{ route('get.profession') }}",
+            data: function (d) {
+                return $.extend({}, d, {});
+            }
+        },
+        columns: [
+            { data: 'id' },
+            { data: 'name' },
+            { data: 'edit' }
+        ],
+        order: [0, 'desc'],
+        ordering: true
+    });
+
+    // Handle form submission
+    $('#professionForm').submit(function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        $.ajax({
+            url: $(this).attr('action'),
+            method: $(this).attr('method'),
+            data: $(this).serialize(), // Serialize form data
+            success: function(response) {
+                // Show success message
+                $('.alert-success-one').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' + '<span aria-hidden="true">&times;</span>' + '</button>').show();
+
+                // Clear form fields
+                $('#professionForm')[0].reset();
+
+                // Redraw the DataTable to reflect the new data
+                table.ajax.reload();
+            },
+            error: function(xhr) {
+                // Handle error response
+                console.error(xhr.responseText);
+            }
+        });
+    });
+
+    // Handle delete button click
+    $(document).on('click', '.delete-btn', function() {
+        var Id = $(this).data('id');
+        if (confirm('Are you sure you want to delete this item?')) {
+            $.ajax({
+                url: '/profession/' + Id,
+                type: 'POST', // Use POST method
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    _method: 'DELETE' // Override method to DELETE
+                },
+                success: function(response) {
+                    // Show success message
+                    $('.alert-success-one').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' + '<span aria-hidden="true">&times;</span>' + '</button>').show();
+
+                    // Redraw the DataTable to reflect the deletion
+                    table.ajax.reload();
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+    });
+});
+
+    </script>
+{{-- <script>
     $(document).ready(function(){
      	var table = $('#example').DataTable({
             processing: true,
@@ -148,5 +257,5 @@
             });
         }
     });
-</script>
+</script> --}}
 @endsection

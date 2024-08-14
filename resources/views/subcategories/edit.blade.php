@@ -46,13 +46,13 @@
                                     </button>
                                 </div>
                                 @endif
-                             
+
                             </div>
 
                             <form action ="{{ route('subcategory.update',$subcategory->id ) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                    
+
                                     <div class="row">
                                     <div class="col-md-4">
                                             <div class="form-group">
@@ -60,7 +60,7 @@
                                                 <select id="category"  name="category" class="form-control" value="{{ old('category') }}">
                                                 <option value="">--select--</option>
                                                 @foreach($categories as $category)
-                                                 <option value="{{ $category->id }}" @if($subcategory->category_id == $category->id ) selected @endif > {{ $category->name }} </option>   
+                                                 <option value="{{ $category->id }}" @if($subcategory->category_id == $category->id ) selected @endif > {{ $category->name }} </option>
                                                 @endforeach
                                                 </select>
                                                 @error('name')
@@ -93,27 +93,13 @@
                                     </div>
                                     <button type="submit" id="submit" class="btn btn-primary">Submit</button>
                                 </form>
-                                <div class="table-responsive mb-0">
-                                    <table id="subcategorylist" style="width:100%" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
-                                    <thead>
-                                    <tr>
-                                    <th>Sl No</th>
-                                    <th>Category</th>
-                                    <th>Sub Category</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                    </table>
-                                </div>
+                             
                         </div>
 
-                    
+
                     </div>
 
-                    
+
 
                 </div>
             </div>

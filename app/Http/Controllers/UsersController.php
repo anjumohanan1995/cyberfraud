@@ -118,6 +118,10 @@ class UsersController extends Controller
         $data->last_name = $request->last_name;
         $data->email = $request->email;
         $data->role = $request->role;
+        // 'password' => Hash::make($request->password),
+
+        $data->password = Hash::make($request->password);
+
         // Update other attributes as needed
 
         // Save the updated permission

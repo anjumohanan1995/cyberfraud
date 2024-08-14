@@ -26,7 +26,7 @@ class SubCategoryController extends Controller
      */
     public function create()
     {
-        // 
+        //
            $categories = Category::whereNull('deleted_at')->get();
            return view('subcategories.list',compact('categories'));
 
@@ -85,7 +85,7 @@ class SubCategoryController extends Controller
             'status' => 'required',
         ]);
           if ($validate->fails()) {
-           
+
               return response()->json(['errors' => $validate->errors()], 422);
           }
         $subcategory = SubCategory::find($id);
@@ -107,20 +107,19 @@ class SubCategoryController extends Controller
     {
         //
         $subcategory = SubCategory::findOrFail($id);
-        
+
         if($subcategory->delete()){
             return response()->json(['success' => 'SubCategory Deleted successfully!'],200);
         }
         else{
             return response()->json(['error' => 'SubCategory Deleted failed!'], 400);
         }
-       
-    }
 
+    }
     public function getSubCategories(Request $request){
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); 
+        $rowperpage = $request->get("length");
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
@@ -129,24 +128,39 @@ class SubCategoryController extends Controller
 
         $columnIndex = $columnIndex_arr[0]['column'];
         $columnName = $columnName_arr[$columnIndex]['data'];
-        $columnSortOrder = $order_arr[0]['dir']; 
-        $searchValue = $search_arr['value']; 
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
+
+        $query = SubCategory::where('deleted_at', null);
+
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('subcategory', 'like', '%' . $searchValue . '%')
+                  ->orWhereHas('category', function ($q) use ($searchValue) {
+                      $q->where('name', 'like', '%' . $searchValue . '%');
+                  });
+            });
+        }
 
         $from_date="";$to_date="";
         $from_date = $request->from_date;
         $to_date = $request->to_date;
 
-        $items = SubCategory::where('deleted_at',null)->orderBy('_id', 'desc')
-                          ->orderBy($columnName, $columnSortOrder);
+        // Total records without filter
+        $totalRecords = SubCategory::where('deleted_at', null)->count();
 
-        $records = $items->skip($start)->take($rowperpage)->get();
-        $totalRecord = SubCategory::where('deleted_at',null)->orderBy('_id', 'desc');
-        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
-        $totalRecordswithFilter = $totalRecords;
+        // Total records with filter
+        $totalRecordswithFilter = $query->count();
 
+        // Fetch records with filter
+        $records = $query->orderBy('created_at','desc')
+                        ->skip($start)
+                        ->take($rowperpage)
+                        ->get();
+// dd($records);
         $data_arr = array();
         $i=$start;
-      
+
         foreach($records as $record){
             $i++;
             $id = $record->id;
@@ -174,8 +188,10 @@ class SubCategoryController extends Controller
         return response()->json($response);
     }
 
+
+
     public function addSubCategory(Request $request){
-        
+
           $validate = Validator::make($request->all(),
         [
             'category' => 'required',
@@ -183,16 +199,16 @@ class SubCategoryController extends Controller
             'status' => 'required',
         ]);
           if ($validate->fails()) {
-           
+
               return response()->json(['errors' => $validate->errors()], 422);
           }
-  
+
           SubCategory::create([
               'category_id' => $request->input('category'),
               'subcategory' => $request->input('subcategory'),
               'status' => $request->input('status'),
-              
-  
+
+
           ]);
           return response()->json(['success' => 'Sub Category Added successfully!'], 200);
     }
