@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'no-cache' => \App\Http\Middleware\NoCacheMiddleware::class,
         'verify-otp' => \App\Http\Middleware\VerifyOtp::class,
         'check.permission' => \App\Http\Middleware\CheckPermission::class,
+        'ip_blocker' => \App\Http\Middleware\IPBlocker::class,
     ];
 }

@@ -103,7 +103,7 @@ class EvidenceTypeController extends Controller
         $data = EvidenceType::findOrFail($id);
 
         // Update the role with the data from the request
-        $data->name = $request->name;
+        $data->name = strtolower($request->name);
         $data->status = $request->status;
 
         // Update other attributes as needed

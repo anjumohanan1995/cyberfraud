@@ -79,7 +79,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
     <div id="error-message" style="display: none; color: red;"></div>
 
     <!-- Trigger the modal with a button -->
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Mule Account</button>
+    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" >Bank Account</button>
 
     <!-- Modal -->
     <div id="evidenceModal" class="modal fade" role="dialog">

@@ -55,7 +55,7 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td> <!-- Display serial number -->
                                         <td>{{ $notice->notice_type }}</td>
-                                        <td>{{ $notice->user->role }}</td>
+                                        <td>{{ $notice->user->name }}</td>
                                         <td>
                                             <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-primary">View</a>
                                         </td>

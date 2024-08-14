@@ -56,7 +56,7 @@ $user = Auth::user();
                         </div>
                     </div>
 <div class="container mt-5">
-    <div id="error-message" style="display: none; color: red;"></div>
+    {{-- <div id="error-message" style="display: none; color: red;"></div> --}}
     <!-- Trigger the modal with a button -->
     <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Evidence</button>
 
@@ -70,7 +70,7 @@ $user = Auth::user();
                 <div class="modal-header">
                     <h4 class="modal-title">Select Evidence</h4>
                     <div class="invalid-feedback"></div>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="evidenceForm">
@@ -113,7 +113,7 @@ $user = Auth::user();
                             <select class="form-control" id="evidence_type_ncrp" name="evidence_type_ncrp">
                                 <option value="">--Select--</option>
                                 @foreach ($evidence_types as $et)
-                                @if ($et->name != 'mobile')
+                                @if ($et->name != 'mobile' && $et->name != 'whatsapp')
                                 <option value="{{ $et->_id }}">{{ $et->name }}</option>
                             @endif
                                 @endforeach
@@ -145,7 +145,8 @@ $user = Auth::user();
 
                         </div>
 
-                        <button type="button" class="btn btn-primary" id="submitEvidence">Submit</button>
+                        <button type="button" class="btn btn-primary" id="submitEvidence">Submit</button><br><br>
+                        <div id="errorDiv" style="display: none; color: red;"></div>
                     </form>
 
                 </div>
@@ -164,7 +165,7 @@ $user = Auth::user();
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Notice Table</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <table class="table">
@@ -218,7 +219,7 @@ $user = Auth::user();
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Notice Table</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <table class="table">
@@ -269,7 +270,7 @@ $user = Auth::user();
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Notice Table</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <table class="table">
@@ -309,7 +310,7 @@ $user = Auth::user();
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Notice Table</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <table class="table">
@@ -326,7 +327,7 @@ $user = Auth::user();
                         </tr>
                         <tr>
                             <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
-                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social medi">Generate Notice</button></td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social media">Generate Notice</button></td>
                         </tr>
                         <tr>
                             <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
@@ -349,7 +350,7 @@ $user = Auth::user();
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Notice Table</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <table class="table">
@@ -389,7 +390,7 @@ $user = Auth::user();
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Notice Table</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <table class="table">
@@ -448,6 +449,22 @@ $(document).ready(function(){
         var evidence_type_other = $('#evidence_type_other').val();
         var status = $('#status').val();
 
+                // Validate form data
+                var errors = [];
+        if (!source_type) errors.push('Source type is required.');
+        if (!from_date) errors.push('From date is required.');
+        if (!to_date) errors.push('To date is required.');
+        // Add more validation checks as needed
+
+        if (errors.length > 0) {
+            // Show errors
+            $('#errorDiv').html('<ul>' + errors.map(function(error) {
+                return '<li>' + error + '</li>';
+            }).join('') + '</ul>').show();
+            return; // Stop execution if there are validation errors
+        }
+
+
         $.ajax({
             url: "{{ route('evidenceStore') }}", // Replace with your route
             type: "POST",
@@ -463,7 +480,14 @@ $(document).ready(function(){
                 _token: "{{ csrf_token() }}"
             },
             success: function(response) {
-                if (response.success) {
+                // console.log(response);
+                // alert(response.error_messages);
+                if (response.error_messages && response.error_messages.length > 0) {
+                    // Show errors
+                    $('#errorDiv').html('<ul>' + response.error_messages.map(function(error) {
+                        return '<li>' + error + '</li>';
+                    }).join('') + '</ul>').show();
+                }  else  {
                     alert("Data submitted successfully");
                     // Handle successful response and show modals based on conditions
                     // Your existing logic to show modals based on the response
@@ -496,31 +520,6 @@ $(document).ready(function(){
             $('#noticeTable_ncrp_website').modal('show'); // Show the website table
         } else if (evidence_type_ncrp_name != 'website' && data && evidence_type_ncrp_name != null) {
             $('#noticeTable_ncrp_social_media').modal('show');
-            // if (evidence_type_ncrp_name == null) {
-            //     // Select the error message div and update its content
-            //     var errorMessageDiv = document.getElementById('error-message');
-            //     if (errorMessageDiv) { // Ensure the element is found
-            //         errorMessageDiv.innerText = 'No data available for selected evidence type';
-            //         errorMessageDiv.style.display = 'block'; // Show the error message
-            //                       // Show the error modal
-            //     $('#evidenceModal').modal({
-            //         show: true,
-            //         backdrop: 'static', // Disable closing on backdrop click
-            //         keyboard: false // Disable closing on keyboard press
-            //     });
-
-            //     // Remove the backdrop when hiding the modal
-            //     $('#evidenceModal').on('hidden.bs.modal', function () {
-            //         // Ensure the backdrop is hidden
-            //         $('.modal-backdrop').remove();
-            //     });
-            //     } else {
-            //         console.error('Error message div not found.');
-            //     }
-            // } else {
-            //     $('#noticeTable_ncrp_social_media').modal('show'); // Show the social media table
-            // }
-
         } else if (source_type == 'ncrp' && data) {
             $('#noticeTable_ncrp').modal('show'); // Show the general table
     }
@@ -530,31 +529,6 @@ $(document).ready(function(){
         if (evidence_type_other == 'website'  && data) {
             $('#noticeTable_other_website').modal('show'); // Show the website table
         } else if (evidence_type_other != 'website' && data && evidence_type_other != null) {
-            // if (evidence_type_other == null) {
-            //     // Select the error message div and update its content
-            //     var errorMessageDiv = document.getElementById('error-message');
-            //     if (errorMessageDiv) { // Ensure the element is found
-            //         errorMessageDiv.innerText = 'No data available for selected evidence type';
-            //         errorMessageDiv.style.display = 'block'; // Show the error message
-            //                       // Show the error modal
-            //     $('#evidenceModal').modal({
-            //         show: true,
-            //         backdrop: 'static', // Disable closing on backdrop click
-            //         keyboard: false // Disable closing on keyboard press
-            //     });
-
-            //     // Remove the backdrop when hiding the modal
-            //     $('#evidenceModal').on('hidden.bs.modal', function () {
-            //         // Ensure the backdrop is hidden
-            //         $('.modal-backdrop').remove();
-            //     });
-            //     } else {
-            //         console.error('Error message div not found.');
-            //     }
-            // } else {
-            //     $('#noticeTable_other_social_media').modal('show');  // Show the social media table
-            // }
-            // Show the social media table
             $('#noticeTable_other_social_media').modal('show');
         } else if (source_type == 'other' && data) {
             $('#noticeTable_other').modal('show'); // Show the general table
@@ -597,24 +571,18 @@ $(document).ready(function(){
                     // alert(noticeId);// Get the notice ID from button data attribute
                     generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
                 });
-            } else {
-                    // Display error messages
-                    var errors = response.errors;
-                    // dd(errors);
-                    // if (errors) {
-                    //     for (var field in errors) {
-                    //         if (errors.hasOwnProperty(field)) {
-                    //             $('#' + field).addClass('is-invalid'); // Add Bootstrap class to highlight invalid fields
-                    //             $('#' + field).siblings('.invalid-feedback').remove(); // Remove any existing feedback
-                    //             $('#' + field).after('<div class="invalid-feedback">' + errors[field] + '</div>'); // Add error message
-                    //         }
-                    //     }
-                    // }
-                }
+            }
             },
             error: function(xhr, status, error){
-                // Handle error response
-                alert("An error occurred");
+            // Clear previous errors
+            $('.text-danger').text('');
+
+            // Display new errors
+            if (xhr.responseJSON.errors) {
+                $.each(xhr.responseJSON.errors, function(key, error) {
+                    $('#'+key+'_error').text(error[0]);
+                });
+                }
             }
         });
     });
@@ -633,7 +601,7 @@ $(document).ready(function(){
             },
             success: function(response) {
                 alert("Notice generated successfully");
-                location.reload();
+                // location.reload();
                 // Process the response if needed
             },
             error: function(xhr, status, error) {
@@ -680,6 +648,12 @@ $(document).ready(function(){
         });
     });
     </script>
+
+<script>
+    function closeModal() {
+        location.reload();
+    }
+</script>
 
 
 

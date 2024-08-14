@@ -13,118 +13,129 @@ class MuleAccountController extends Controller
     }
 
     public function muleaccountList(Request $request)
-{
-    $draw = $request->get('draw');
-    $start = $request->get('start'); // Offset (starting row index) for pagination
-    $length = $request->get('length'); // Number of rows per page
+    {
+        $draw = $request->get('draw');
+        $start = $request->get('start');
+        $length = $request->get('length');
 
-    $columnIndex_arr = $request->get('order');
-    $columnName_arr = $request->get('columns');
-    $order_arr = $request->get('order');
-    $search_arr = $request->get('search');
+        $order = $request->get('order');
+        $columns = $request->get('columns');
+        $search = $request->get('search');
 
-    $columnIndex = $columnIndex_arr[0]['column']; // Column index
-    $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-    $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-    $searchValue = $search_arr['value']; // Search value
+        $columnIndex = $order[0]['column'];
+        $columnName = $columns[$columnIndex]['data'];
+        $columnSortOrder = $order[0]['dir'];
+        $searchValue = $search['value'];
 
-// Initialize base query with necessary conditions
-$query = BankCasedata::whereNull('deleted_at');
+        $documents = BankCasedata::where('account_no_2', '!=', null)->get();
 
-// Apply search condition if there is a search value
-if (!empty($searchValue)) {
-    $query->where(function ($q) use ($searchValue) {
-        $q->where('account_no_2', 'like', "%{$searchValue}%");
-    });
-}
+        $accountNumbers = [];
+        foreach ($documents as $doc) {
+            if (isset($doc['account_no_2'])) {
+                preg_match('/(\d+)/', $doc['account_no_2'], $matches);
+                if (!empty($matches[1])) {
+                    $number = $matches[1];
+                    $accountNumbers[$number] = ($accountNumbers[$number] ?? 0) + 1;
+                }
+            }
+        }
 
-// Exclude specific values from action_taken_by_bank
-$query->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-    ->where(function($query) {
-        $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
-    });
+        $frequentAccountNumbers = array_filter($accountNumbers, function($count) {
+            return $count > 2;
+        });
 
-    $frequentAccountNumbers = BankCasedata::raw(function ($collection) {
-        return $collection->aggregate([
-            [
-                '$project' => [
-                    'sanitized_account_no_2' => [
-                        '$cond' => [
-                            'if' => ['$regexMatch' => ['input' => '$account_no_2', 'regex' => '\[ Reported \d+ times \]']],
-                            'then' => [
-                                '$substr' => [
-                                    '$account_no_2',
-                                    0,
-                                    ['$indexOfBytes' => ['$account_no_2', ' [ Reported ']]
-                                ]
-                            ],
-                            'else' => '$account_no_2'
-                        ]
-                    ]
-                ]
-            ],
-            [
-                '$group' => [
-                    '_id' => '$sanitized_account_no_2',
-                    'count' => ['$sum' => 1]
-                ]
-            ],
-            [
-                '$match' => [
-                    'count' => ['$gte' => 3]
-                ]
-            ]
-        ]);
-    })->pluck('_id')->toArray();
+        $frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
 
-    // Filtered query for specific conditions
-    $filteredQuery = $query->where(function ($q) use ($frequentAccountNumbers) {
-        $q->where('Layer', 1)
-            ->orWhereIn('account_no_2', $frequentAccountNumbers)
-            ->whereNotNull('account_no_2');
-    });
-    // dd($filteredQuery);
-// Group the filtered query by account_no_2
-$groupedQuery = $filteredQuery->groupBy('account_no_2')
-    ->select('account_no_2', DB::raw('MAX(Layer) as Layer'));
+        $layer1Cases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+            ->where('Layer', 1)
+            ->whereNotNull('account_no_2')
+            ->where('account_no_2', '!=', '')
+            ->get();
 
-    $totalFilteredRecords = $groupedQuery->get()->count();
+            $layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
 
-// Apply ordering and pagination
-$groupedQuery->orderBy($columnName, $columnSortOrder)
-    ->skip($start)
-    ->take($length);
+        $accountNumberPatterns = array_map(function($number) {
+            return "^$number\\b";
+        }, $frequentAccountNumbersKeys);
 
-// Fetch the filtered and grouped records
-$filteredAccounts = $groupedQuery->get();
+        $otherLayerCases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+        ->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos)
+            ->where('Layer', '!=', 1)
+            ->where(function($query) use ($accountNumberPatterns) {
+                foreach ($accountNumberPatterns as $pattern) {
+                    $query->orWhere('account_no_2', 'regexp', $pattern);
+                }
+            })
+            ->whereNotNull('account_no_2')
+            ->where('account_no_2', '!=', '')
+            ->get();
 
-// Modify account_no_2 field to remove [ Reported x times ]
-$filteredAccounts->transform(function ($item) {
-    $item->account_no_2 = preg_replace('/\[ Reported \d+ times \]/', '', $item->account_no_2);
-    return $item;
-});
+        $filterDuplicates = function($cases) {
+            return $cases->unique(function($case) {
+                return $case->acknowledgement_no . '-' . $case->account_no_2;
+            });
+        };
 
-    // Prepare data for DataTables
-    $data_arr = [];
-    $i = $start; // Initialize $i with $start value
-    foreach ($filteredAccounts as $record) {
-        $data_arr[] = [
-            'id' => ++$i,
-            'account_no_2' => $record->account_no_2,
-            'Layer' => $record->Layer,
+        $layer1Cases = $filterDuplicates($layer1Cases);
+        $otherLayerCases = $filterDuplicates($otherLayerCases);
+
+        $groupedOtherLayerCases = $otherLayerCases->groupBy(function($case) {
+            return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+        });
+
+        $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
+            return $group->pluck('acknowledgement_no')->unique()->count() > 1;
+        });
+
+        $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+
+        $groupedCases = $allCases->groupBy(function($case) {
+            return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+        });
+
+        $groupedCases->transform(function ($group) {
+            // Ensure each group has unique acknowledgement_no values
+            return $group->unique('acknowledgement_no');
+        });
+
+        if (!empty($searchValue)) {
+            $allCases = $allCases->filter(function ($item) use ($searchValue) {
+                return stripos($item->account_no_2, $searchValue) !== false;
+            });
+        }
+        // dd($allCases);
+
+        $totalRecords = $allCases->count();
+
+        $sortedCases = $allCases->sortBy(function ($item) use ($columnName) {
+            return $item->$columnName;
+        }, SORT_REGULAR, $columnSortOrder === 'asc');
+
+        $filteredCases = $sortedCases->slice($start, $length);
+
+        $filteredCases = $filteredCases->map(function ($item) {
+            $item->account_no_2 = preg_replace('/\[ Reported \d+ times \]/', '', $item->account_no_2);
+            return $item;
+        });
+
+        $data_arr = [];
+        foreach ($filteredCases as $index => $record) {
+            $data_arr[] = [
+                'id' => $start + $index + 1,
+                'account_no_2' => $record->account_no_2,
+                'Layer' => $record->Layer,
+            ];
+        }
+
+        $response = [
+            'draw' => intval($draw),
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $totalRecords,
+            'data' => $data_arr,
         ];
+
+        return response()->json($response);
     }
-
-    // Response data for DataTables
-    $response = [
-        'draw' => intval($draw),
-        'recordsTotal' => $totalFilteredRecords,
-        'recordsFiltered' => $totalFilteredRecords,
-        'data' => $data_arr,
-    ];
-
-    return response()->json($response);
-}
 
 
 

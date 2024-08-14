@@ -225,7 +225,7 @@ $user = Auth::user();
                                     </div>
                                     @if ($hasShowSubCategoryPermission)
 <div class="col-md-2">
-                                        <div class="form-group">
+                                        <div class="form-group" hidden>
                                             <label for="sub-category">Sub category:</label>
                                             <select class="form-control" id="sub-category" name="sub-category">
                                                 <option value="">--Select--</option>
@@ -688,6 +688,21 @@ $user = Auth::user();
             fromDateElement.value = fromDateValue;
         }
     }
+</script>
+
+<script>
+          document.addEventListener('DOMContentLoaded', function () {
+          const startDateInput = document.getElementById('from-date');
+          const endDateInput = document.getElementById('to-date');
+
+          const today = new Date();
+          const endDate = today.toISOString().split('T')[0]; // Current date
+          today.setMonth(today.getMonth() - 1);
+          const startDate = today.toISOString().split('T')[0]; // Date one month ago
+
+          startDateInput.value = startDate;
+          endDateInput.value = endDate;
+      });
 </script>
 
 @endsection

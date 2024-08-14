@@ -64,17 +64,19 @@ class AppServiceProvider extends ServiceProvider
                 'd-M-Y',
                 'd-m-Y, h:i:s A',
                 'd/m/Y',
+                
                 'd-m-Y H:i:s A',
                 'Y-m-d H:i:s',
                 'd/m/Y G:i:s'
             ];
-            
 
-    
+
+
             foreach ($formats as $format){
               
                 try {
                     $date = Carbon::createFromFormat($format, $value);
+
 
                     // Adjust year if necessary
                     if (strlen($date->year) == 2) {
@@ -84,9 +86,11 @@ class AppServiceProvider extends ServiceProvider
                     return $date->format($format) === $value;
                 } catch (\Exception $e) {
 
+                    // Continue to the next format
                     continue;
                 }
             }
+       
 
             return false;
         }, 'The :attribute is not in a valid date format.');
@@ -131,32 +135,32 @@ class AppServiceProvider extends ServiceProvider
            foreach ($formats as $format){
 
             
-               try {
-                // $date = Carbon::createFromFormat($format, $value);
-                $date = Carbon::createFromFormat($format, $value);
-               
+            try {
+             // $date = Carbon::createFromFormat($format, $value);
+             $date = Carbon::createFromFormat($format, $value);
+            
 
-                 // Adjust year if necessary
-                 if (strlen($date->year) == 2) {
+              // Adjust year if necessary
+              if (strlen($date->year) == 2) {
 
-                     $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
+                  $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
 
-                 }
-               
-                return $date->format($format) == $value;
-               } catch (\Exception $e) {
+              }
+            
+             return $date->format($format) == $value;
+            } catch (\Exception $e) {
 
-                   continue;
-               }
-           }
-          
-           return false;
+                continue;
+            }
+        }
+       
+        return false;
 
-       }, 'The :attribute is not in a valid date format.');
+    }, 'The :attribute is not in a valid date format.');
 
 
 
-    }
+ }
 
     protected function excelSerialToDate($serial , $targetFormat = 'd-m-Y H:i:s')
     {

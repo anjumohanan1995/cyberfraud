@@ -95,12 +95,12 @@
                                 <div class="form-group">
                                     <label for="password">Password</label>
                                     <input id="password" name="password" class="form-control" placeholder="Enter your password" type="password">
-                                    <span class="text-danger password"></span> <!-- Error message for password -->
+                                    <span class="text-danger password"></span>
                                     @error('password')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <button onclick="validateForm()" class="btn btn-main-primary btn-block">Sign In</button>
+                                <button type="submit" class="btn btn-main-primary btn-block">Sign In</button>
                             </form>
 
 
@@ -121,31 +121,31 @@
 
 <script>
     function checkPassword(password) {
-        // Regular expressions for special characters, uppercase letters, lowercase letters, and numbers
         var specialCharPattern = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
         var uppercasePattern = /[A-Z]/;
         var lowercasePattern = /[a-z]/;
         var numberPattern = /[0-9]/;
 
-        // Check if the password meets all criteria
         return specialCharPattern.test(password) &&
             uppercasePattern.test(password) &&
             lowercasePattern.test(password) &&
-            numberPattern.test(password);
+            numberPattern.test(password) &&
+            password.length >= 8;
     }
 
     function validateForm() {
+        console.log("Form validation triggered");
         var password = document.getElementById("password").value;
+        var passwordError = document.querySelector(".password");
 
         if (!checkPassword(password)) {
-            var passwordError = document.querySelector(".password");
-            passwordError.innerHTML = "Password must contain:<br>- At least one special character<br>- One uppercase letter<br>- One lowercase letter<br>- One number.";
+            passwordError.textContent = "Password is invalid.";
             return false;
         }
 
+        passwordError.textContent = "";
         return true;
     }
-</script>
-
+    </script>
 
 </html>

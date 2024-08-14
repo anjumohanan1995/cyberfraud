@@ -342,6 +342,26 @@ if ($fir_lodge == "0") {
     $query->whereNotIn('acknowledgement_no', $ackNumbersToFilter);
 }
 
+// Instead of grouping, let's use a subquery to get the latest entry for each acknowledgement_no
+$latestIds = Complaint::select('acknowledgement_no', DB::raw('MAX(id) as max_id'))
+    ->groupBy('acknowledgement_no');
+
+$query->joinSub($latestIds, 'latest_complaints', function ($join) {
+    $join->on('complaints.id', '=', 'latest_complaints.max_id');
+});
+
+// Apply sorting
+$query->orderBy('entry_date', 'desc');
+    //   ->orderBy($columnName, $columnSortOrder);
+
+// Get total count before pagination
+$totalRecords = $query->count();
+
+// Apply pagination
+$records = $query->skip($start)->take($rowperpage)->get();
+// foreach ($records->take(5) as $record) {
+//     \Log::info("Full record: " . json_encode($record->toArray()));
+// }
 
 //         // Total records count
 //         $totalRecords = $query->get()->count();

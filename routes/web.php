@@ -305,6 +305,8 @@ Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableF
 Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name('notice.mule.account');
 Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
 
+Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name('notice.bank');
+
 
 
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\ComplaintOthers;
 use App\Models\CountryCode;
+use App\Models\Complaint;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use MongoDB;
@@ -63,16 +64,16 @@ class EvidenceController extends Controller
                 'registry_details.*' => 'nullable|string',
                 'ip.*' => 'nullable|ip',
                 'registrar.*' => 'nullable|string',
-                'pdf.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:2048',
-                'screenshots.*' => 'nullable|file|mimes:jpeg,bmp,png|max:2048',
-                'remarks.*' => 'nullable|string',
-                'ticket.*' => 'nullable|string',
-                'data_disclosure.*' => 'nullable|string',
-                'preservation.*' => 'nullable|string',
-                'category.*' => 'nullable|string|in:phishing,malware,fraud,other',
+                'pdf.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:2048',
+                'screenshots.*' => 'required|file|mimes:jpeg,bmp,png|max:2048',
+                'remarks.*' => 'required|string',
+                'ticket.*' => 'required|string',
+                'data_disclosure.*' => 'required|string',
+                'preservation.*' => 'required|string',
+                'category.*' => 'required|string|in:phishing,malware,fraud,other',
                 'mobile.*' => 'required_with:country_code.*', // Requires 'country_code' when 'mobile' is present
                 'country_code.*' => 'required_with:mobile.*', // Requires 'mobile' when 'country_code' is present
-                
+
             ], [
                 'evidence_type.*.required' => 'The evidence type field is required.',
                 'evidence_type_id.*.required' => 'The evidence type ID field is required.',
@@ -158,6 +159,7 @@ class EvidenceController extends Controller
                         $evidence->registrar = $request->registrar[$key];
                         break;
                         case 'mobile':
+                        case 'whatsapp':
                             $evidence->mobile = $request->mobile[$key];
                             $evidence->country_code = $request->country_code[$key];
                             break;
@@ -512,7 +514,7 @@ class EvidenceController extends Controller
         "acknowledgement_no" => $ack_no,
         "evidence_type" => $evidence_type,
         "url" => $url,
-        "mobile" => $mobile,
+        // "mobile" => $mobile,
         "domain" => $domain,
         "ip" => $ip,
         "registrar" => $registrar,
@@ -862,7 +864,7 @@ class EvidenceController extends Controller
                             $status_text = "Failed to determine status text.";
 
                         }
-                        $reported_status = $status_code === '200' ? 'reported' : 'inactive'; 
+                        $reported_status = $status_code === '200' ? 'reported' : 'inactive';
 
                     }
 
@@ -901,7 +903,7 @@ class EvidenceController extends Controller
                         $status_code = 400;
                         $status_text = 'Bad Request';
                         $reported_status = 'inactive';
-                        
+
                     }
                     else{
 
@@ -916,11 +918,11 @@ class EvidenceController extends Controller
                             $status_text = "Failed to determine status text.";
 
                         }
-                        $reported_status = $status_code === '200' ? 'reported' : 'inactive'; 
+                        $reported_status = $status_code === '200' ? 'reported' : 'inactive';
 
                     }
 
-                  
+
                         ComplaintOthers::where('case_number',$ackno)->where('url', $url)
                                    ->where('reported_status','reported')
                                    ->update(['url_status' => $status_code,
@@ -1011,20 +1013,15 @@ class EvidenceController extends Controller
     public function storeEvidence(Request $request)
     {
 
-            // Validate inputs
-    $validated = $request->validate([
-        'source_type' => 'nullable|string',
-        'from_date' => 'nullable|date',
-        'to_date' => 'nullable|date',
-        'ack_no' => 'nullable|string',
-        'case_no' => 'nullable|string',
-        'evidence_type_ncrp' => 'nullable|string',
-        'evidence_type_other' => 'nullable|string',
-        'status' => 'nullable|string',
+            // Define validation rules
+    $request->validate([
+        'source_type' => 'required|string|in:ncrp,other',
+        'from_date' => 'required|date',
+        'to_date' => 'required|date|after_or_equal:from_date',
     ]);
+        $errorMessages = [];
 
         $source_type = $request->input('source_type');
-        // dd($source_type);
         $from_date_input = $request->input('from_date');
         $to_date_input = $request->input('to_date');
         $ack_no = $request->input('ack_no');
@@ -1035,203 +1032,194 @@ class EvidenceController extends Controller
                                             ->pluck('evidence_type')
                                             ->unique()
                                             ->first();
-                                            // dd($evidence_type_ncrp_name);
-        // dd($evidence_type_ncrp);
         $evidence_type_other = $request->input('evidence_type_other');
-        // dd($evidence_type_other);
         $status = $request->input('status');
-        // dd($evidence_type);
 
-        // Convert dates to Carbon instances and then to MongoDB compatible date format
+        // Convert fromDate and toDate to start and end of the day
+        $fromDateStart = Carbon::parse($from_date_input)->startOfDay();
+        $toDateEnd = Carbon::parse($to_date_input)->endOfDay();
+
+                // Convert dates to Carbon instances and then to MongoDB compatible date format
         $from_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($from_date_input)->startOfDay());
         $to_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($to_date_input)->endOfDay());
 
-        // Initialize query
-        $query = null;
+        // Retrieve acknowledgement_no values from complaints within the specified date range
+        $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart,  $toDateEnd])
+                                        ->pluck('acknowledgement_no')
+                                        ->toArray();
 
-        // Retrieve data based on $source_type
+        // Convert the integers to strings
+        $acknowledgementNo = array_map('strval', $acknowledgementNos);
+
+        // Initialize query based on $source_type
         if ($source_type == "ncrp") {
             $query = Evidence::whereNull('deleted_at');
         } elseif ($source_type == "other") {
             $query = ComplaintOthers::whereNull('deleted_at');
+        } else {
+            $errorMessages[] = 'Invalid source type.';
+            return response()->json([
+                'message' => 'Invalid request',
+                'error_messages' => $errorMessages
+            ], 400);
         }
-
 
         // Apply date range filter
-        if ($from_date_input && $to_date_input) {
-            // dd("date");
+        if ($from_date_input && $to_date_input && $source_type == "ncrp") {
+            $query->whereIn('ack_no', $acknowledgementNo);
+        } elseif ($from_date_input && $to_date_input) {
             $query->whereBetween('created_at', [$from_date, $to_date]);
-
+        }elseif ($from_date_input || $to_date_input) {
+            $errorMessages[] = 'Both from date and to date must be provided for date range filtering.';
         }
 
+        // Apply date range filter
+        // if ($from_date_input && $to_date_input && $source_type == 'other') {
+        //     $query->whereBetween('created_at', [$from_date, $to_date]);
+        // } elseif ($from_date_input || $to_date_input) {
+        //     $errorMessages[] = 'Both from date and to date must be provided for date range filtering.';
+        // }
 
-        // Apply additional filters
+
+        // Apply additional filters step-by-step and check data after each step
         if ($ack_no) {
-            // dd("ack_no");
             $query->where('ack_no', $ack_no);
+            $data = $query->get();
+            if ($data->isEmpty()) {
+                $errorMessages[] = 'No records found for the provided acknowledgement number.';
+                return response()->json([
+                    'message' => 'Data received successfully',
+                    'data' => $data,
+                    'error_messages' => $errorMessages,
+                    'source_type' => $source_type,
+                    'from_date' => $from_date_input,
+                    'to_date' => $to_date_input,
+                    'ack_no' => $ack_no,
+                    'case_no' => $case_no,
+                    'evidence_type_ncrp' => $evidence_type_ncrp,
+                    'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+                    'evidence_type_other' => $evidence_type_other,
+                    'status' => $status
+                ]);
+            }
         }
 
         if ($case_no) {
-            // dd("case_no");
             $query->where('case_number', $case_no);
+            $data = $query->get();
+            if ($data->isEmpty()) {
+                $errorMessages[] = 'No records found for the provided case number.';
+                return response()->json([
+                    'message' => 'Data received successfully',
+                    'data' => $data,
+                    'error_messages' => $errorMessages,
+                    'source_type' => $source_type,
+                    'from_date' => $from_date_input,
+                    'to_date' => $to_date_input,
+                    'ack_no' => $ack_no,
+                    'case_no' => $case_no,
+                    'evidence_type_ncrp' => $evidence_type_ncrp,
+                    'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+                    'evidence_type_other' => $evidence_type_other,
+                    'status' => $status
+                ]);
+            }
         }
 
         if ($evidence_type_ncrp) {
-            // dd("evidence_type_ncrp");
             $query->where('evidence_type_id', $evidence_type_ncrp);
+            $data = $query->get();
+            if ($data->isEmpty()) {
+                $errorMessages[] = 'No records found for the provided evidence type (NCRP).';
+                return response()->json([
+                    'message' => 'Data received successfully',
+                    'data' => $data,
+                    'error_messages' => $errorMessages,
+                    'source_type' => $source_type,
+                    'from_date' => $from_date_input,
+                    'to_date' => $to_date_input,
+                    'ack_no' => $ack_no,
+                    'case_no' => $case_no,
+                    'evidence_type_ncrp' => $evidence_type_ncrp,
+                    'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+                    'evidence_type_other' => $evidence_type_other,
+                    'status' => $status
+                ]);
+            }
         }
 
         if ($evidence_type_other) {
-            // dd("evidence_type_other");
             $query->where('evidence_type', $evidence_type_other);
+            $data = $query->get();
+            if ($data->isEmpty()) {
+                $errorMessages[] = 'No records found for the provided evidence type (other).';
+                return response()->json([
+                    'message' => 'Data received successfully',
+                    'data' => $data,
+                    'error_messages' => $errorMessages,
+                    'source_type' => $source_type,
+                    'from_date' => $from_date_input,
+                    'to_date' => $to_date_input,
+                    'ack_no' => $ack_no,
+                    'case_no' => $case_no,
+                    'evidence_type_ncrp' => $evidence_type_ncrp,
+                    'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+                    'evidence_type_other' => $evidence_type_other,
+                    'status' => $status
+                ]);
+            }
         }
-
-        // dd($query->get());
 
         if ($status) {
-            // dd("status");
             $query->where('reported_status', $status);
+            $data = $query->get();
+            if ($data->isEmpty()) {
+                $errorMessages[] = 'No records found for the provided status.';
+                return response()->json([
+                    'message' => 'Data received successfully',
+                    'data' => $data,
+                    'error_messages' => $errorMessages,
+                    'source_type' => $source_type,
+                    'from_date' => $from_date_input,
+                    'to_date' => $to_date_input,
+                    'ack_no' => $ack_no,
+                    'case_no' => $case_no,
+                    'evidence_type_ncrp' => $evidence_type_ncrp,
+                    'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+                    'evidence_type_other' => $evidence_type_other,
+                    'status' => $status
+                ]);
+            }
         }
 
+        // Execute query and get final data
         $data = $query->get();
-        // dd($data);
 
-            // Check if data is empty and return error message
-    if ($data->isEmpty()) {
+        // dd($data, $errorMessages);
+        // dd($data);
+// dd($errorMessages);
+        // Check if final data is empty and return error message
+        if ($data->isEmpty()) {
+            $errorMessages[] = 'No records found for the provided criteria.';
+        }
+
+        // Return data to the view
         return response()->json([
-            'success' => false,
-            'message' => 'No data found for the given filters.',
-            'errors' => [
-                'source_type' => 'No matching records found',
-                'from_date' => 'No matching records found',
-                'to_date' => 'No matching records found',
-                'ack_no' => 'No matching records found',
-                'case_no' => 'No matching records found',
-                'evidence_type_ncrp' => 'No matching records found',
-                'evidence_type_other' => 'No matching records found',
-                'status' => 'No matching records found',
-            ],
+            'message' => 'Data received successfully',
+            'data' => $data,
+            'error_messages' => $errorMessages,
+            'source_type' => $source_type,
+            'from_date' => $from_date_input,
+            'to_date' => $to_date_input,
+            'ack_no' => $ack_no,
+            'case_no' => $case_no,
+            'evidence_type_ncrp' => $evidence_type_ncrp,
+            'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
+            'evidence_type_other' => $evidence_type_other,
+            'status' => $status
         ]);
     }
 
-        // Execute query and get data
 
-
-        // Your logic to handle the request
-        // For example, querying the database with the provided data
-
-            // Return data to the view
-    return response()->json([
-        'success' => true,
-        'data' => $data,
-        'source_type' => $source_type,
-        'from_date' => $from_date_input,
-        'to_date' => $to_date_input,
-        'ack_no' => $ack_no,
-        'case_no' => $case_no,
-        'evidence_type_ncrp' => $evidence_type_ncrp,
-        'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
-        'evidence_type_other' => $evidence_type_other,
-        'status' => $status
-    ]);
-
-    }
-
-    // public function storeEvidence(Request $request)
-    // {
-    //     $source_type = $request->input('source_type');
-    //     // dd($source_type);
-    //     $from_date_input = $request->input('from_date');
-    //     $to_date_input = $request->input('to_date');
-    //     $ack_no = $request->input('ack_no');
-    //     $case_no = $request->input('case_no');
-    //     $evidence_type_ncrp = $request->input('evidence_type_ncrp');
-    //     $evidence_type_ncrp_name = Evidence::whereNull('deleted_at')
-    //                                         ->where('evidence_type_id', $evidence_type_ncrp)
-    //                                         ->pluck('evidence_type')
-    //                                         ->unique()
-    //                                         ->first();
-    //                                         // dd($evidence_type_ncrp_name);
-    //     // dd($evidence_type_ncrp);
-    //     $evidence_type_other = $request->input('evidence_type_other');
-    //     // dd($evidence_type_other);
-    //     $status = $request->input('status');
-    //     // dd($evidence_type);
-
-    //     // Convert dates to Carbon instances and then to MongoDB compatible date format
-    //     $from_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($from_date_input)->startOfDay());
-    //     $to_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($to_date_input)->endOfDay());
-
-    //     // Initialize query
-    //     $query = null;
-
-    //     // Retrieve data based on $source_type
-    //     if ($source_type == "ncrp") {
-    //         $query = Evidence::whereNull('deleted_at');
-    //     } elseif ($source_type == "other") {
-    //         $query = ComplaintOthers::whereNull('deleted_at');
-    //     }
-
-
-    //     // Apply date range filter
-    //     if ($from_date_input && $to_date_input) {
-    //         // dd("date");
-    //         $query->whereBetween('created_at', [$from_date, $to_date]);
-    //     }
-
-
-    //     // Apply additional filters
-    //     if ($ack_no) {
-    //         // dd("ack_no");
-    //         $query->where('ack_no', $ack_no);
-    //     }
-
-    //     if ($case_no) {
-    //         // dd("case_no");
-    //         $query->where('case_number', $case_no);
-    //     }
-
-    //     if ($evidence_type_ncrp) {
-    //         // dd("evidence_type_ncrp");
-    //         $query->where('evidence_type_id', $evidence_type_ncrp);
-    //     }
-
-    //     if ($evidence_type_other) {
-    //         // dd("evidence_type_other");
-    //         $query->where('evidence_type', $evidence_type_other);
-    //     }
-
-    //     // dd($query->get());
-
-    //     if ($status) {
-    //         // dd("status");
-    //         $query->where('reported_status', $status);
-    //     }
-
-    //     $data = $query->get();
-    //     // dd($data);
-
-    //     // Execute query and get data
-
-
-    //     // Your logic to handle the request
-    //     // For example, querying the database with the provided data
-
-    //         // Return data to the view
-    // return response()->json([
-    //     'message' => 'Data received successfully',
-    //     'data' => $data,
-    //     'source_type' => $source_type,
-    //     'from_date' => $from_date_input,
-    //     'to_date' => $to_date_input,
-    //     'ack_no' => $ack_no,
-    //     'case_no' => $case_no,
-    //     'evidence_type_ncrp' => $evidence_type_ncrp,
-    //     'evidence_type_ncrp_name' => $evidence_type_ncrp_name,
-    //     'evidence_type_other' => $evidence_type_other,
-    //     'status' => $status
-    // ]);
-
-    // }
 
 }

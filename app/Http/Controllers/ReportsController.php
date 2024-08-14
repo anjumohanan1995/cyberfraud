@@ -658,6 +658,8 @@ public function getDatalistOthersourcetype(Request $request)
     $evidence_type_others = $request->get('evidence_type_others');
     $search_value_others = $request->get('search_value_others');
     // dd($evidence_type_others);
+    // $complaints = ComplaintOthers::all();
+    // dd($complaints);
 
     // Ensure $start and $rowperpage are integers and $rowperpage is positive
     $start = max(0, (int)$start);
@@ -772,7 +774,7 @@ public function getDatalistOthersourcetype(Request $request)
     $totalRecordswithFilter = $totalRecords;
 
     if ($format === 'others') {
-
+// dd($complaints);
     foreach($complaints as $record){
 
         $i++;

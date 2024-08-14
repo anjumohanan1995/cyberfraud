@@ -1,78 +1,78 @@
 <style>
-     .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            text-align: center;
-            margin: 20px 0;
-            margin-left:20px;
-             margin-right:20px;
-        }
-
-        .container img {
-            height: 200px;
-            width: 200px;
-        }
-
-        .text {
-            flex: 1;
-            text-align: center;
-        }
-
-        .left,
-        .right {
-            width: 150px;
-        }
-
-        .center {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-            text-align: right;
-            margin-right:10px;
-        }
-
-        .footer p {
-            font-size: 20px;
-            line-height: 1.5;
-            margin: 0;
-        }
-        .for{
-            display: flex;
-            justify-content: flex-end;
-            text-align: right;
-            margin-right:10px;
-        }
-        body{
-            margin-left:20px;
+    .container {
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           text-align: center;
+           margin: 20px 0;
+           margin-left:20px;
             margin-right:20px;
-            margin:10%;
-            color:red;
-        }
-        tbody{
-            font-size:18px;
-        }
+       }
+
+       .container img {
+           height: 200px;
+           width: 200px;
+       }
+
+       .text {
+           flex: 1;
+           text-align: center;
+       }
+
+       .left,
+       .right {
+           width: 150px;
+       }
+
+       .center {
+           flex: 1;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+       }
+
+       .footer {
+           display: flex;
+           justify-content: flex-end;
+           margin-top: 20px;
+           text-align: right;
+           margin-right:10px;
+       }
+
+       .footer p {
+           font-size: 20px;
+           line-height: 1.5;
+           margin: 0;
+       }
+       .for{
+           display: flex;
+           justify-content: flex-end;
+           text-align: right;
+           margin-right:10px;
+       }
+       body{
+           margin-left:20px;
+           margin-right:20px;
+           margin:10%;
+           
+       }
+       tbody{
+           font-size:18px;
+       }
 </style>
 
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4;  padding:20px; ">
     <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; margin-left:20px; margin-right:20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
         <div class="container">
             <div class="left text">
-                <h1>POLICE</h1>
+                <h3>POLICE</h1>
             </div>
             <div class="center">
                 <img src="{{ asset('images/logo.jfif') }}" alt="logo">
-                <h1>KERALA</h1>
+                <h3>KERALA</h1>
             </div>
             <div class="right text">
-                <h1>DEPARTMENT</h1>
+                <h3>DEPARTMENT</h1>
             </div>
         </div>
 

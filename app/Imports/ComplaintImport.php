@@ -138,6 +138,12 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 $date_of_action=$row['date_of_action'];
             }
 
+            if($row['date_of_action'] === 'N/A'){
+                $date_of_action = $row['entry_date'];
+            }else{
+                $date_of_action = $row['date_of_action'] ?? null;
+            }
+
             $data = [
                 'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
                 'district' => $row['district'] ?? null,
@@ -193,6 +199,12 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
 
 
         foreach ($filteredCollection as $collect){
+
+            if($collect['date_of_action'] === 'N/A'){
+                $date_of_action = $collect['entry_date'];
+            }else{
+                $date_of_action = $collect['date_of_action'] ?? null;
+            }
 
             $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
                                     ->where('transaction_id',(string)$collect['transaction_id'])
@@ -361,14 +373,23 @@ protected function formatErrorMessage($message, $index)
         'd-m-Y H:i:s A',
         'd/m/Y h:i:s A',
         'd-m-Y h:i:s A',
+        'd/m/Y H:i:s P',
+        'd-m-Y H:i:s P',
+        'd/m/Y h:i:s P',
+        'd-m-Y h:i:s P',
         'd/m/Y',
         'd-m-Y',
         'd/F/Y',
         'd-F-Y',
         'd/m/Y H:i',
         'd-m-Y H:i',
+        'd/m/y H:i',
         'd/M/Y',
-        'd-M-Y'
+        'd-M-Y',
+        'd-m-y, h:i:s A',
+        'd-m-y, h:i:s P',
+        'Y-m-d H:i:s',
+        'Y/m/d H:i:s'
     ];
 
     // Try each format to see if it matches
@@ -384,6 +405,7 @@ protected function formatErrorMessage($message, $index)
             return true;
         } catch (\Exception $e) {
             // Continue to next format
+            continue;
         }
     }
 
