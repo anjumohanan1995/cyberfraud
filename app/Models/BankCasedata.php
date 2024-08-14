@@ -19,7 +19,7 @@ class BankCasedata extends Eloquent
     protected $casts = [
 
         'transaction_date' => 'datetime',
-        'date_of_action' => 'datetime',
+        // 'date_of_action' => 'datetime',
         
     ];
 

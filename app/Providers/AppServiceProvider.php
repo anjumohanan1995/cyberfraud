@@ -35,7 +35,9 @@ class AppServiceProvider extends ServiceProvider
         $this->acknowledgementNos = array_unique($this->acknowledgementNos);
 
         Validator::extend('exists_in_acknowledgement_nos', function ($attribute, $value, $parameters, $validator) {
+            
             return in_array($value,  $this->acknowledgementNos);
+
         }, 'The :attribute is not a valid acknowledgement number.');
 
 
@@ -64,11 +66,13 @@ class AppServiceProvider extends ServiceProvider
                 'd/m/Y',
                 'd-m-Y H:i:s A',
                 'Y-m-d H:i:s',
+                'd/m/Y G:i:s'
             ];
             
 
     
             foreach ($formats as $format){
+              
                 try {
                     $date = Carbon::createFromFormat($format, $value);
 
@@ -80,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
                     return $date->format($format) === $value;
                 } catch (\Exception $e) {
 
-                    // Continue to the next format
+                    continue;
                 }
             }
 
@@ -89,34 +93,36 @@ class AppServiceProvider extends ServiceProvider
 
 
         Validator::extend('valid_date_format_entry_date', function ($attribute, $value, $parameters, $validator) {
+            
              if (is_numeric($value)) {
-                $value =  $this->excelSerialToDate($value);
+                return false;
             }
-
+          
             $value = str_replace(',', '', $value);
-                                
+            // if (strpos($value, '/') !== false) {
+            //  $value = str_replace('/', '-', $value);
+            
+            // }              
            
            $formats = [
-               'd-m-Y',
-               'd-m-y',
+             
                'd/m/Y H:i:s',
-               'd-m-Y H:i:s',
-               'd/m/Y h:i:s A',
-               'd-m-Y h:i:s A',
-               'd/F/Y',
-               'd-F-Y',
-               'd/m/Y H:i',
-               'd-m-Y H:i',
-               'd/m/Y',
-               'd-M-Y',
-               'd-m-Y, h:i:s A',
-               'd/m/y',
-               'd-m-Y H:i:s A',
-               'Y-m-d H:i:s',
-               'dd-mm-YYYY H:i:s',
-               'd/m/YYYY',
-               'dd/mm/YYYY',
-              
+                'd-m-Y H:i:s',
+                'd/m/Y h:i:s A',
+                'd-m-Y h:i:s A',
+                'd-m-Y',
+                'd/F/Y',
+                'd-F-Y',
+                'd/m/Y H:i',
+                'd-m-Y H:i',
+                'd/M/Y',
+                'd-M-Y',
+                'd-m-Y, h:i:s A',
+                'd/m/Y',
+                'd-m-Y H:i:s A',
+                'Y-m-d H:i:s',
+                'd/m/Y G:i:s'
+                     
               
            ];
      
@@ -124,10 +130,11 @@ class AppServiceProvider extends ServiceProvider
    
            foreach ($formats as $format){
 
-
+            
                try {
+                // $date = Carbon::createFromFormat($format, $value);
                 $date = Carbon::createFromFormat($format, $value);
-
+               
 
                  // Adjust year if necessary
                  if (strlen($date->year) == 2) {
@@ -135,11 +142,11 @@ class AppServiceProvider extends ServiceProvider
                      $date->year = $date->year + ($date->year < 30 ? 2000 : 1900);
 
                  }
-
-                 return $date->format($format) === $value;
+               
+                return $date->format($format) == $value;
                } catch (\Exception $e) {
 
-                   // Continue to the next format
+                   continue;
                }
            }
           
@@ -151,16 +158,20 @@ class AppServiceProvider extends ServiceProvider
 
     }
 
-    protected function excelSerialToDate($serial)
+    protected function excelSerialToDate($serial , $targetFormat = 'd-m-Y H:i:s')
     {
         // Convert Excel serial date to a Carbon date
         try {
-            $baseDate = Carbon::create(1899, 12, 30); // Excel starts from Dec 30, 1899
-            $date = $baseDate->addDays((int)$serial);
 
-            return $date->toDateTimeString(); // Return in 'Y-m-d H:i:s' format
-        } catch (\Exception $e) {
-            return null; // Return null if conversion fails
+            $baseDate = Carbon::create(1900, 1, 1);
+            if ($serial > 60) {
+                $serial--;
+            }
+            $date = $baseDate->addDays($serial);
+            return $date->format($targetFormat);
+        }
+         catch (\Exception $e) {
+            return false; // Return null if conversion fails
         }
     }
 }

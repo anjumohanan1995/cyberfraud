@@ -234,19 +234,30 @@ class CaseDataController extends Controller
         $account_id = $request->get('account_id');
 
         // Filter conditions
-        if ($com_status == "1"){
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1)->orderBy('entry_date', 'asc');
-        }
-        elseif ($com_status == "0"){
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0)->orderBy('entry_date', 'asc');
+        // $query = Complaint::groupBy('acknowledgement_no','entry_date')
+        // ->where('deleted_at', null)
+        // ->orderBy('entry_date', 'asc');
+        
+ // Filter conditions
+ if ($com_status == "1"){
+    $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1);
+}
+elseif ($com_status == "0"){
+    $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0);
 
-        }else{
-            $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->orderBy('entry_date', 'asc');
-        }
+}else{
+    
+    $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
+}
+// dd($query);
 
-        // if (!empty($com_status)) {
-        //     $query->where('com_status', (int)$com_status);
-        // }
+// if (!empty($com_status)) {
+//     $query->where('com_status', (int)$com_status);
+// }
+
+        if (!empty($com_status)) {
+            $query->where('com_status', (int)$com_status);
+        }
 
         if ($fromDate && $toDate) {
             $query->whereBetween('entry_date', [Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay()]);
@@ -332,20 +343,40 @@ if ($fir_lodge == "0") {
 }
 
 
-        // Total records count
-        $totalRecords = $query->get()->count();
+//         // Total records count
+//         $totalRecords = $query->get()->count();
 
-            // Sort by entry_date first, then by dynamic column
-    $query // Ensure entry_date sorting is first
-    ->orderBy($columnName, $columnSortOrder)  // Apply dynamic column sorting
-    ->skip($start)
-    ->take($rowperpage);
+//             // Sort by entry_date first, then by dynamic column
+//     $query // Ensure entry_date sorting is first
+//     ->orderBy($columnName, $columnSortOrder)  // Apply dynamic column sorting
+//     ->skip($start)
+//     ->take($rowperpage);
 
-// Get results
-$records = $query->get();
+// // Get results
+// $records = $query->get();
 
-// dd($query);
 
+// // dd($query);
+
+// Total records count
+$totalRecords = $query->get()->count();
+// dd($totalRecords);
+// Fetch records
+$records = $query->orderBy('entry_date', 'desc')
+                 ->orderBy($columnName, $columnSortOrder)
+                 ->skip($start)
+                 ->take($rowperpage)
+                 ->get();
+                //  ->map(function ($item) {
+                //     // Convert entry_date to Carbon instance
+                //     if (isset($item->entry_date)) {
+                //         $item->entry_date = Carbon::createFromFormat('d-m-Y, h:i A', $item->entry_date);
+                //     }
+                //     return $item;
+                // });
+
+
+//    dd($records);
 
 
 
@@ -369,7 +400,8 @@ $records = $query->get();
         // $totalRecordswithFilter =  $totalRecords;
 
         foreach ($records as $record){
-            $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
+            $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->orderBy('entry_date', 'desc')->take(10)->get();
+          
             $i++;
             $id = $record->id;
             $source_type = $record->source_type;
@@ -385,12 +417,17 @@ $records = $query->get();
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $date = new DateTime($com->entry_date);
-                $entry_date = $date->format('l, F j, Y g:i A');
+               
+                // $entry_date = new DateTime($com->entry_date);
+               
+                $entry_date = $com->entry_date;
+                $entry_date = $entry_date->format('d-m-Y H:i:s');
+                // $entry_date = $date->format('l, F j, Y g:i A');
                 $current_status = $com->current_status;
 
-                $date_of_action = new DateTime($com->date_of_action);
-                $date_of_action = $date_of_action->format('l, F j, Y g:i A');
+                // $date_of_action = new DateTime($com->date_of_action);
+                $date_of_action = $com->date_of_action;
+                // $date_of_action = $date_of_action->format('l, F j, Y g:i A');
 
                 $action_taken_by_name = $com->action_taken_by_name;
                 $action_taken_by_designation = $com->action_taken_by_designation;

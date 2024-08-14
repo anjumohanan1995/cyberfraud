@@ -11,6 +11,9 @@ use App\Imports\BankImport;
 use App\Imports\BankImports;
 use Exception;
 use App\Jobs\ImportBankAction;
+use App\Jobs\ImportBankActionJob;
+use SplFileObject;
+use Illuminate\Support\MessageBag;
 
 class BankCasedataController extends Controller
 {
@@ -25,53 +28,115 @@ class BankCasedataController extends Controller
 
     public function store(Request $request)
     {
-       
-        // Validate the uploaded file.
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,csv,txt,ods'
-        ],[
-    'file.mimes' => 'The uploaded file format is not supported. Please upload a file with one of the following formats: xlsx, csv, txt, ods.'
-]);
-
-        // Get the uploaded file.
         $file = $request->file('file');
-        //dd($file->getMimeType()); // Check the MIME type
+        if ($request->hasFile('file')){
+            $originalExtension = $file->getClientOriginalExtension(); 
+            // dd($originalExtension);
+            if($originalExtension == 'csv'){
+                if($file->getMimeType() == "application/octet-stream"){
+                   
+                    $filePath = $file->getRealPath();
 
-        // Check if a file was uploaded.
-        if ($file) {
+                    try {
+                        
+                        $contents = file_get_contents($filePath);
+                        $encoding = mb_detect_encoding($contents, mb_list_encodings(), true);
+                        Log::info('Detected encoding: ' . $encoding); // Log detected encoding
 
+                        $convertedContents = iconv($encoding, 'UTF-8//TRANSLIT', $contents);
+                       
+                        
+                        $tempFile = tempnam(sys_get_temp_dir(), 'csv'); 
+                        file_put_contents($tempFile, $convertedContents);
+
+                        try {
+                            Excel::import(new BankImports, $tempFile, null, \Maatwebsite\Excel\Excel::CSV);
+                            // $filePath = 'imports/temp_file.csv';
+                            // ImportBankActionJob::dispatch($filePath , $tempFile);
+                            unlink($tempFile);
+                            return redirect()->back()->with('success', 'File imported successfully!');
+                            Log::info('File imported successfully.');
+                        } catch (\Exception $e) { 
+                            // Log::error('Error importing file: ' . $e->getMessage()); 
+                           
+                            // // Redirect back with error messages
+                            // //return redirect()->back()->withErrors($errors)->withInput();
+                            // return redirect()->back()->withErrors($e->getMessage())->withInput();
+                            // //return redirect()->back()->with('error', 'Error importing file: ' . $e->getMessage());
+                            if ($e instanceof \Illuminate\Validation\ValidationException) {
+               
+                                $errors = $e->validator->getMessageBag()->all();
+                                 
+                                return redirect()->back()->withErrors($errors)->withInput();
+                             } else {
+                             
+                                 return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
+                             }
+                        }
+
+                       
+                    } 
+                    catch (\Exception $e) {
+                      
+                        Log::error('Error importing file: ' . $e->getMessage());
+                        return response()->json(['error' => 'Error reading CSV file'], 500);
+                    }
+
+           }
+           else{
             try {
 
-                // dd($file);
-
-                // Import data from the file.
                 Excel::import(new BankImports, $file);
-              // ImportBankAction::dispatch($file);
+                // $filePath = $request->file('file')->store('imports');
+                // ImportBankActionJob::dispatch($filePath , $file);
             
-           
-                // Provide feedback to the user.
                 return redirect()->back()->with('success', 'File imported successfully!');
             }  catch (\Exception $e){
                 if ($e instanceof \Illuminate\Validation\ValidationException) {
-                    // Retrieve the validation errors
-                    $errors = $e->validator->getMessageBag()->all();
+               
+                   $errors = $e->validator->getMessageBag()->all();
                     
-            
-                    // Redirect back with validation errors and input data
-                    return redirect()->back()->withErrors($errors)->withInput();
+                   return redirect()->back()->withErrors($errors)->withInput();
                 } else {
-                    // Handle other exceptions
+                
                     return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                 }
 
-                // return response()->json([
-                //     'error' => 'An error occurred during import',
-                //     'message' => $e->getMessage()
-                // ], 500);
             }
-        } 
-         else {
-            // No file uploaded.
+
+           }
+
+
+        }
+        else{
+            $request->validate([
+
+                'file' => 'required|file|mimes:xlsx,csv,txt,ods' 
+            ]);
+            try {
+
+                Excel::import(new BankImports, $file);
+        
+                return redirect()->back()->with('success', 'File imported successfully!');
+            }  catch (\Exception $e){
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+           
+                    $errors = $e->validator->getMessageBag()->all();
+                    
+                    return redirect()->back()->withErrors($errors)->withInput();
+                } else {
+           
+                    return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
+                }
+
+                
+            } 
+
+        }  
+            
+            
+        }
+        else{
             return redirect()->back()->with('error', 'No file uploaded. Please select a file to import.');
         }
     }

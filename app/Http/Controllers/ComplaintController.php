@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Validator;
 use Excel;
 use App\Imports\ComplaintImport;
 use App\Imports\ComplaintImportOthers;
+use App\Jobs\ImportComplaintsJob;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Excel as ExcelExcel;
 use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
 use Maatwebsite\Excel\Fakes\ExcelFake;
@@ -29,6 +32,7 @@ class ComplaintController extends Controller
     {
 
         $file = $request->file('complaint_file');
+      
         $source_type = $request->input('source_type');
         if($source_type){
             if($source_type !== 'NCRP'){
@@ -52,24 +56,32 @@ class ComplaintController extends Controller
 
                 }
 
-            Excel::import(new ComplaintImportOthers($source_type,$request->case_number,$fileName), $request->complaint_file);
+            FacadesExcel::import(new ComplaintImportOthers($source_type,$request->case_number,$fileName), $request->complaint_file);
             return redirect()->back()->with('success', 'Form submitted successfully!');
             }
             else{
 
                 $request->validate([
-                    'complaint_file' => 'required'
+                    'complaint_file' => 'required|file|mimes:xlsx,csv,txt,ods|max:100000' 
                 ]);
 
                 if ($file){
                     try {
-                        // Import data from the file
-                        Excel::import(new ComplaintImport($source_type), $file);
+                        
+                        FacadesExcel::import(new ComplaintImport($source_type), $file);
+
+                        // $filePath = $request->file('complaint_file')->store('imports');
+                        // ImportComplaintsJob::dispatch($filePath, $source_type);
+                       
                         return redirect()->back()->with('success', 'Form submitted successfully!');
                     } catch (\Illuminate\Validation\ValidationException $e) {
                         // Show all validation errors
+                       
                         return redirect()->back()->withErrors($e->errors())->withInput();
-                    } catch (\Exception $e) {
+                    } 
+                    catch (\Exception $e) {
+                        Log::error($e->getMessage());
+                      
                         return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                     }
                 } else {

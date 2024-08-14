@@ -478,8 +478,7 @@
                                             @foreach ($final_array as $bank_data)
 
                                             <?php
-                                           $date = new DateTime($bank_data['date_of_action']);
-                                           $formattedDate = $date->format('l, F j, Y g:i A');
+                                         
 
                                             $accountNumbers = $bank_data['account_no_1'];
                                             if($accountNumbers){
@@ -539,7 +538,7 @@
                                                         {{ @$bank_data['action_taken_email'] }}<br>
                                                         {{-- {{ @$bank_data['date_of_action'] }} --}}
 
-                                                        {{ @$formattedDate}}
+                                                        {{ @$bank_data['date_of_action']}}
                                                     </td>
                                                 </tr>
                                             @endforeach

@@ -16,9 +16,12 @@ use Auth;
 use Illuminate\Support\Facades\DB;
 use DateTime;
 use Carbon\Carbon;
+use App\Rules\IntegerWithoutDecimal;
+use App\Rules\TransactionIDFormat;
 
 class BankImports implements ToCollection, WithStartRow, WithChunkReading
 {
+    
     /**
      * @param Collection $collection
      */
@@ -41,16 +44,14 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     }
     public function collection(Collection $collection)
     {
-      
+     
         $errors = [];
         $acknowledgementNos = Complaint::pluck('acknowledgement_no')->toArray();
         $acknowledgementNos = array_unique($acknowledgementNos);
        
         $collection->transform(function ($values) {
              // Convert the 'entry_date' field
-             
-
-
+           
             return [
                 'sl_no' => $values[0] ?? null,
                 'acknowledgement_no' => $values[1] ?? null,
@@ -90,7 +91,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
         
         
         foreach ($rows as $index => $row){
-         
+        
             $rowIndex = $index + 2;
         
             $data = [
@@ -126,13 +127,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
             $validator = Validator::make($data, [
 
-                'acknowledgement_no' => 'required|numeric|exists_in_acknowledgement_nos',
-                'transaction_id_or_utr_no' => 'required|regex:/^[A-Za-z0-9\s]+$/',
-                'Layer' => 'required|numeric',
-                'account_no_1' => 'nullable',
+                'acknowledgement_no' => ['required',new IntegerWithoutDecimal( $rowIndex),'exists_in_acknowledgement_nos'],
+                'transaction_id_or_utr_no' => ['required',new TransactionIDFormat( $rowIndex)],
+                'Layer' => 'required',
+                'account_no_1' => ['required',new IntegerWithoutDecimal( $rowIndex)],
                 'action_taken_by_bank' => 'required',
                 'bank' => 'required',
-                'account_no_2' => 'nullable',
+                'account_no_2' => ['nullable',new IntegerWithoutDecimal( $rowIndex)],
                 'ifsc_code' => 'nullable',
                 'cheque_no' => 'nullable',
 
@@ -142,11 +143,11 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'merchant_name' => 'nullable',
                 'transaction_date' => 'required|valid_date_format',
 
-                'transaction_id_sec' => 'nullable',
+                'transaction_id_sec' => ['nullable',new TransactionIDFormat( $rowIndex)],
                 'transaction_amount' => 'required',
                 'reference_no' => 'nullable',
                 'remarks' => 'nullable',
-                'date_of_action' => 'required|valid_date_format',
+                'date_of_action' => 'required',
 
                 'action_taken_by_bank_sec' => 'nullable',
                 'action_taken_name' => 'nullable',
@@ -196,7 +197,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->acknowledgement_no = $collect['acknowledgement_no'];
                 $bank_data->transaction_id_or_utr_no = $this->convertAcknoToString($collect['transaction_id_or_utr_no']);
                 $bank_data->Layer = $collect['Layer'];
-                $bank_data->account_no_1 = $collect['account_no_1'];
+                $bank_data->account_no_1 = preg_replace('/[^\w]/', '', $this->convertAcknoToString($collect['account_no_1']));
                 $bank_data->action_taken_by_bank = trim(strtolower($collect['action_taken_by_bank']));
                 $bank_data->bank = $collect['bank'];
                 $bank_data->account_no_2 = trim($collect['account_no_2']);
@@ -213,7 +214,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->reference_no = $collect['reference_no'];
 
                 $bank_data->remarks = $collect['remarks'];
-                $bank_data->date_of_action = $this->parseDate($collect['date_of_action']);
+                $bank_data->date_of_action = $collect['date_of_action'];
                 $bank_data->action_taken_by_bank_sec = $collect['action_taken_by_bank_sec'];
                 $bank_data->action_taken_name = $collect['action_taken_name'];
                 $bank_data->action_taken_email = $collect['action_taken_email'];
@@ -264,11 +265,41 @@ protected function validationMessages($index)
         return is_numeric($acknowledgement_no) ? (string) $acknowledgement_no : $acknowledgement_no;
     }
 
-    function parseDate($dateString) {
+    function parseDate($dateString, $targetFormat = 'd-m-Y H:i:s') {
         // Define possible date formats with placeholders for two-digit years
-        if (is_numeric($dateString)) {
-            return $this->excelSerialToDate($dateString);
+        // if (is_numeric($dateString)) {
+        //     return $this->excelSerialToDate($dateString);
+        // }
+
+        $formats = [
+            'd/m/Y',
+            'm/d/Y',
+            'Y-m-d',
+            'd-m-Y',
+            'd M Y',
+            'Y/m/d',
+            'm-d-Y',
+            'F j, Y',
+            'Y-m-d H:i:s',
+            'd/m/Y H:i:s',
+            'm/d/Y H:i:s',
+           'd/m/Y G:i:s'
+            // Add more formats as needed
+        ];
+
+        foreach ($formats as $format) {
+            try {
+              
+                $carbonDate = Carbon::createFromFormat($format, $dateString);
+               
+                return $carbonDate->format($targetFormat);
+            } catch (\Exception $e) {
+              
+                continue;
+            }
         }
+  
+        throw new \Illuminate\Validation\ValidationException("Unable to parse date: '$dateString'");
      
     }
 
