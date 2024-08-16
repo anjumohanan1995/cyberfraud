@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use DateTime;
-
+use MongoDB\BSON\ObjectId;
 
 
 
@@ -237,7 +237,7 @@ class CaseDataController extends Controller
         // $query = Complaint::groupBy('acknowledgement_no','entry_date')
         // ->where('deleted_at', null)
         // ->orderBy('entry_date', 'asc');
-        
+
  // Filter conditions
  if ($com_status == "1"){
     $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1);
@@ -246,7 +246,7 @@ elseif ($com_status == "0"){
     $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0);
 
 }else{
-    
+
     $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
 }
 // dd($query);
@@ -421,7 +421,7 @@ $records = $query->orderBy('entry_date', 'desc')
 
         foreach ($records as $record){
             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->orderBy('entry_date', 'desc')->take(10)->get();
-          
+
             $i++;
             $id = $record->id;
             $source_type = $record->source_type;
@@ -437,9 +437,9 @@ $records = $query->orderBy('entry_date', 'desc')
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-               
+
                 // $entry_date = new DateTime($com->entry_date);
-               
+
                 $entry_date = $com->entry_date;
                 $entry_date = $entry_date->format('d-m-Y H:i:s');
                 // $entry_date = $date->format('l, F j, Y g:i A');
@@ -1086,7 +1086,8 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     }
 
     public function caseDataOthers(){
-       return view('dashboard.case-data-list.case-data-list-others');
+        $source=SourceType::get();
+       return view('dashboard.case-data-list.case-data-list-others', compact('source'));
     }
 
     public function getDatalistOthers(Request $request){
@@ -1104,164 +1105,163 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
         $searchValue = $search_arr['value']; // Search value.
-
+        // dd($searchValue);
         $source_types = SourceType::all();
         $casenumber = $request->casenumber;
         $domain = $request->domain;
         $url = $request->url;
         $registrar = $request->registrar;
         $ip = $request->ip;
-        //dd($casenumber);
-        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
+        $source_type = $request->source_type;
 
-            $pipeline = [
-                [
-                    '$group' => [
-                        '_id' => '$case_number',
-                        'source_type' => ['$addToSet' => '$source_type'],
-                        'url' => ['$addToSet' => '$url'],
-                        'domain' => ['$addToSet' => '$domain'],
-                        'registry_details' => ['$addToSet' => '$registry_details'],
-                        'ip' => ['$addToSet' => '$ip'],
-                        'registrar' => ['$addToSet' => '$registrar'],
-                        'remarks' => ['$addToSet' => '$remarks'],
-                        'assigned_to' => ['$first' => '$assigned_to'], // Include the assigned_to field
-                        'case_status' => ['$first' => '$case_status'],
-                    ]
-                ],
-                [
-                    '$sort' => [
-                        '_id' => 1,
-                ]
-                ],
-                [
-                    '$skip' => (int)$start
-                ],
-                [
-                    '$limit' => (int)$rowperpage
-                ]
+        // dd($source_type);
+        // dd($searchValue, $casenumber, $url, $domain, $registrar, $ip);
+        $pipeline = [];
+
+        // Build the $match stage for search filters
+        $matchStage = [];
+
+        if (!empty($searchValue)) {
+            $matchStage['$or'] = [
+                ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['remarks' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['source.name' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
             ];
+        }
 
-            if (isset($casenumber)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'case_number' => $casenumber
-                        ]
-                    ]
-                ], $pipeline);
-            }
+        // Add additional match conditions for filters
+        if (isset($casenumber)) {
+            $matchStage['case_number'] = $casenumber;
+        }
+        if (isset($url)) {
+            $matchStage['url'] = $url;
+        }
+        if (isset($domain)) {
+            $matchStage['domain'] = $domain;
+        }
+        if (isset($registrar)) {
+            $matchStage['registrar'] = $registrar;
+        }
+        if (isset($ip)) {
+            $matchStage['ip'] = $ip;
+        }
+        if (isset($source_type)) {
+            $matchStage['source_type'] = $source_type;
+        }
 
-            if (isset($url)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'url' => $url
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($registrar)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'registrar' => $registrar
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($ip)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ip' => $ip
-                        ]
-                    ]
-                ], $pipeline);
-            }
+        if (!empty($matchStage)) {
+            $pipeline[] = ['$match' => $matchStage];
+        }
 
+        // Add the $lookup stage to join sourcetype with complaint_others based on the source_type field
+        $pipeline[] = [
+            '$lookup' => [
+                'from' => 'sourcetype',  // Name of the sourcetype collection
+                'localField' => 'source_type',  // Field in complaint_others
+                'foreignField' => '_id',  // Field in sourcetype
+                'as' => 'source'
+            ]
+        ];
+
+        // Unwind the source array to flatten the results
+        $pipeline[] = [
+            '$unwind' => [
+                'path' => '$source',
+                'preserveNullAndEmptyArrays' => true
+            ]
+        ];
+
+        // Group the results by case_number and aggregate other fields
+        $pipeline[] = [
+            '$group' => [
+                '_id' => '$case_number',
+                'source_type' => ['$addToSet' => '$source_type'],
+                'source_name' => ['$first' => '$source.name'],  // Group source name from sourcetype
+                'url' => ['$addToSet' => '$url'],
+                'domain' => ['$addToSet' => '$domain'],
+                'registry_details' => ['$addToSet' => '$registry_details'],
+                'ip' => ['$addToSet' => '$ip'],
+                'registrar' => ['$addToSet' => '$registrar'],
+                'remarks' => ['$addToSet' => '$remarks'],
+                'assigned_to' => ['$first' => '$assigned_to'],
+                'case_status' => ['$first' => '$case_status'],
+            ]
+        ];
+
+        // Sort stage (optional)
+        $pipeline[] = ['$sort' => ['_id' => 1]];
+
+        // Pagination stages
+        $pipeline[] = ['$skip' => (int)$start];
+        $pipeline[] = ['$limit' => (int)$rowperpage];
+
+        // Execute the aggregation query
+        $complaints = ComplaintOthers::raw(function($collection) use ($pipeline) {
             return $collection->aggregate($pipeline);
         });
 
-        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain , $registrar) {
 
-            $pipeline = [
-                [
-                    '$group' => [
-                        '_id' => '$case_number'
-                    ]
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url, $domain, $registrar, $ip, $source_type) {
+            $pipeline = [];
+
+
+            // Build the $match stage
+            $matchStage = [];
+
+            if (!empty($casenumber)) {
+                $matchStage['case_number'] = $casenumber;
+            }
+            if (!empty($url)) {
+                $matchStage['url'] = $url;
+            }
+            if (!empty($domain)) {
+                $matchStage['domain'] = $domain;
+            }
+            if (!empty($registrar)) {
+                $matchStage['registrar'] = $registrar;
+            }
+            if (!empty($ip)) {
+                $matchStage['ip'] = $ip;
+            }
+            if (!empty($source_type)) {
+                $matchStage['source_type'] = $source_type;
+            }
+
+            if (!empty($matchStage)) {
+                $pipeline[] = ['$match' => $matchStage];
+            }
+
+            // Group by case_number
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => '$case_number'
                 ]
             ];
 
-            if (isset($casenumber)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'case_number' => $casenumber
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($url)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'url' => $url
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($registrar)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'registrar' => $registrar
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($ip)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ip' => $ip
-                        ]
-                    ]
-                ], $pipeline);
-            }
-
+            // Execute the aggregation pipeline
             return $collection->aggregate($pipeline);
         });
 
+
+
+        // dd($complaints);
+        //  dd($distinctCaseNumbers);
 
 
 
         $totalRecords = count($distinctCaseNumbers);
         $data_arr = array();
         $i = $start;
+        // dd($totalRecords);
 
 
         $totalRecordswithFilter =  $totalRecords;
         foreach($complaints as $record){
-
+        // dd($record);
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
 
@@ -1291,24 +1291,22 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             }
             $caseNo = $record->_id;
             //dd($caseNo);
-                        $CUser =Auth::user()->id;
+            $CUser =Auth::user()->id;
                     //dd($record);
-                        if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
-                           $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                               <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
-                           <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
-               </div>
-                           </div>';
-                        }elseif($record->assigned_to == $CUser){
+            if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
+                $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                            <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
+                            <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                            </div>
+                        </div>';
+            }elseif($record->assigned_to == $CUser){
 
-                           $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-
-                               <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
-
-                               </div>';
-                        } elseif($record->assigned_to == null) {
+                $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                    </div>';
+            } elseif($record->assigned_to == null) {
                             //dd($casenumber);
-                           $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                                <form action="" method="GET">
                                <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
                                </form>
@@ -1317,16 +1315,14 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                            $user = User::find($record->assigned_to);
                           // dd($user);
                            if($user != null){
-if($record->case_status != null){
-    $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
-}
+                        if($record->case_status != null){
+                            $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
+                        }
                            $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                            <p class="text-success">Assigned To: '. $user->name.'</p>
                            </div>';
-                       }
                         }
-
-
+                        }
 
             $data_arr[] = array(
                     "id" => $i,

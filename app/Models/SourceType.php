@@ -24,4 +24,9 @@ class SourceType extends Eloquent
         'status'
     ];
 
+    public function complaints() {
+        // Correct relationship: hasMany, where 'source_type' in complaints matches '_id' in sourcetype
+        return $this->hasMany(ComplaintOthers::class, 'source_type', '_id');
+    }
+
 }
