@@ -126,7 +126,9 @@ $user = Auth::user();
                             <select class="form-control" id="evidence_type_other" name="evidence_type_other">
                                 <option value="">--Select--</option>
                                 @foreach ($evidence_types as $et)
+                                @if ($et->name != 'mobile' && $et->name != 'whatsapp')
                                     <option value="{{ $et->name }}"> {{ $et->name }} </option>
+                                @endif
                                 @endforeach
                             </select>
 
