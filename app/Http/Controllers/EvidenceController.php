@@ -149,6 +149,7 @@ class EvidenceController extends Controller
                 $evidence->preservation = $request->preservation[$key];
                 $evidence->category = $request->category[$key];
                 $evidence->remarks = $request->remarks[$key];
+                $evidence->reported_status = "active";
                 switch ($type) {
                     case 'website':
                         // dd($evidence);
@@ -160,7 +161,7 @@ class EvidenceController extends Controller
                         break;
                         case 'mobile':
                         case 'whatsapp':
-                            $evidence->mobile = $request->mobile[$key];
+                            $evidence->url = $request->mobile[$key];
                             $evidence->country_code = $request->country_code[$key];
                             break;
                     default:
@@ -256,6 +257,11 @@ class EvidenceController extends Controller
         $from_date = $request->from_date;
         $to_date = $request->to_date;
         $current_date = $request->current_date;
+
+        // // Convert fromDate and toDate to start and end of the day
+        // $fromDateStart = $fromDate ? Carbon::parse($from_date)->startOfDay() : null;
+        // $toDateEnd = $toDate ? Carbon::parse($to_date)->endOfDay() : null;
+
         if($current_date){
             $from_date = Carbon::today('Asia/Kolkata')->toDateString();
             $to_date = $from_date;
@@ -315,17 +321,17 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
-            if (isset($url)) {
-                $matchStage = [
-                    '$match' => [
-                        '$or' => [
-                            ['url' => $url],
-                            ['mobile' => $url]
-                        ]
-                    ]
-                ];
-                $pipeline = array_merge([$matchStage], $pipeline);
-            }
+            // if (isset($url)) {
+            //     $matchStage = [
+            //         '$match' => [
+            //             '$or' => [
+            //                 ['url' => $url],
+            //                 ['mobile' => $url]
+            //             ]
+            //         ]
+            //     ];
+            //     $pipeline = array_merge([$matchStage], $pipeline);
+            // }
             if (isset($domain)){
                 $pipeline = array_merge([
                     [
@@ -348,8 +354,8 @@ class EvidenceController extends Controller
                 $pipeline = array_merge([
                     ['$match' => [
                         'created_at' => [
-                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
                         ]
                     ]]
                 ], $pipeline);
@@ -386,17 +392,17 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
-            if (isset($url)) {
-                $matchStage = [
-                    '$match' => [
-                        '$or' => [
-                            ['url' => $url],
-                            ['mobile' => $url]
-                        ]
-                    ]
-                ];
-                $pipeline = array_merge([$matchStage], $pipeline);
-            }
+            // if (isset($url)) {
+            //     $matchStage = [
+            //         '$match' => [
+            //             '$or' => [
+            //                 ['url' => $url],
+            //                 ['mobile' => $url]
+            //             ]
+            //         ]
+            //     ];
+            //     $pipeline = array_merge([$matchStage], $pipeline);
+            // }
             if (isset($domain)){
                 $pipeline = array_merge([
                     [
@@ -420,8 +426,8 @@ class EvidenceController extends Controller
                 $pipeline = array_merge([
                     ['$match' => [
                         'created_at' => [
-                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
                         ]
                     ]]
                 ], $pipeline);
@@ -668,8 +674,8 @@ class EvidenceController extends Controller
                 $pipeline = array_merge([
                     ['$match' => [
                         'created_at' => [
-                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
                         ]
                     ]]
                 ], $pipeline);
@@ -736,8 +742,8 @@ class EvidenceController extends Controller
                 $pipeline = array_merge([
                     ['$match' => [
                         'created_at' => [
-                            '$gte' => new MongoDB\BSON\UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new MongoDB\BSON\UTCDateTime($utcEndDate->timestamp * 1000)
+                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
+                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
                         ]
                     ]]
                 ], $pipeline);
@@ -1040,8 +1046,8 @@ class EvidenceController extends Controller
         $toDateEnd = Carbon::parse($to_date_input)->endOfDay();
 
                 // Convert dates to Carbon instances and then to MongoDB compatible date format
-        $from_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($from_date_input)->startOfDay());
-        $to_date = new \MongoDB\BSON\UTCDateTime(Carbon::parse($to_date_input)->endOfDay());
+        $from_date = new UTCDateTime(Carbon::parse($from_date_input)->startOfDay());
+        $to_date = new UTCDateTime(Carbon::parse($to_date_input)->endOfDay());
 
         // Retrieve acknowledgement_no values from complaints within the specified date range
         $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart,  $toDateEnd])

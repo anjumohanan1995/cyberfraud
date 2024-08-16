@@ -36,10 +36,21 @@
         max-height: 200px !important;
         overflow-y: auto !important;
         }
+        .disabledDownloadIcon {
+    pointer-events: none; /* Prevents clicking */
+    opacity: 0.5; /* Makes it look disabled */
+    cursor: not-allowed; /* Changes cursor to indicate it's disabled */
+}
 
 
     </style>
     <!-- container -->
+
+    @php
+    // Fetch additional data related to the complaint
+    $additionalData = App\Models\ComplaintAdditionalData::where('ack_no', (string)$complaint->acknowledgement_no)->first();
+@endphp
+
     <div class="container-fluid">
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
@@ -146,16 +157,21 @@
                                             </div>
                                         </div>
                                         <div class="col-2 px-1">
-                                            <div
-                                                class="task-box primary mb-0 d-flex align-items-center justify-content-center">
-                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
-                                                    href="{{ route('download.fir', ['ak_no' => $complaint->acknowledgement_no]) }}"
-                                                    data-toggle="tooltip" data-placement="top" title="Download FIR">
+                                            @if ($additionalData && $additionalData->fir_doc)
+                                            <!-- Show the button if conditions are not met -->
+                                            <div class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100" href="{{ route('download.fir', ['ak_no' => $complaint->acknowledgement_no]) }}" data-toggle="tooltip" data-placement="top" title="Download FIR">
+                                                    <i class="ti ti-download"></i>
+                                                </a>
+                                            </div>
+                                            @else
+                                            <div class="task-box primary mb-0 d-flex align-items-center justify-content-center">
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100  disabledDownloadIcon" href="{{ route('download.fir', ['ak_no' => $complaint->acknowledgement_no]) }}" data-toggle="tooltip" data-placement="top" title="Download FIR">
                                                     <i class="ti ti-download"></i>
                                                 </a>
                                             </div>
 
-
+                                            @endif
                                         </div>
                                         <div class="col-2 px-1">
                                             <div
@@ -478,7 +494,7 @@
                                             @foreach ($final_array as $bank_data)
 
                                             <?php
-                                         
+
 
                                             $accountNumbers = $bank_data['account_no_1'];
                                             if($accountNumbers){

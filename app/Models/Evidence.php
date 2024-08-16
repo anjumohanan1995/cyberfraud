@@ -25,6 +25,7 @@ class Evidence extends Eloquent
         'remarks',
         'category',
         'ticket',
+        'reported_status'
     ];
-   
+
 }

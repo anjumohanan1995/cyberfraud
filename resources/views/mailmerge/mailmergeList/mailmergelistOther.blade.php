@@ -205,7 +205,7 @@ $user = Auth::user();
                                     <th>SL No</th>
                                     {{-- <th>Case No</th> --}}
                                     <th>Evidence Type</th>
-                                    <th>URL</th>
+                                    <th>URL/Mobile</th>
                                     <th>Domain</th>
                                     <th>IP</th>
                                     <th>Registrar</th>

@@ -213,7 +213,7 @@ $user = Auth::user();
                                                                             <th>SL No</th>
                                                                             <th>Acknowledgement No</th>
                                                                             <th>Evidence Type</th>
-                                                                            <th>URL</th>
+                                                                            <th>URL/Mobile</th>
                                                                             {{-- <th>Mobile</th> --}}
                                                                             <th>Domain</th>
                                                                             <th>IP</th>
@@ -300,7 +300,7 @@ $user = Auth::user();
                                                                             <th>SL No</th>
                                                                             <th>Case No</th>
                                                                             <th>Evidence Type</th>
-                                                                            <th>URL</th>
+                                                                            <th>URL/Mobile</th>
                                                                             <th>Domain</th>
                                                                             <th>IP</th>
                                                                             <th>Registrar</th>
@@ -614,6 +614,36 @@ $(document).ready(function() {
             fromDateElement.value = fromDateValue;
         }
     }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const startDateInput = document.getElementById('from-date-others');
+    const endDateInput = document.getElementById('to-date-others');
+
+    const today = new Date();
+    const endDate = today.toISOString().split('T')[0]; // Current date
+    today.setMonth(today.getMonth() - 1);
+    const startDate = today.toISOString().split('T')[0]; // Date one month ago
+
+    startDateInput.value = startDate;
+    endDateInput.value = endDate;
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const startDateInput = document.getElementById('from-date-ncrp');
+    const endDateInput = document.getElementById('to-date-ncrp');
+
+    const today = new Date();
+    const endDate = today.toISOString().split('T')[0]; // Current date
+    today.setMonth(today.getMonth() - 1);
+    const startDate = today.toISOString().split('T')[0]; // Date one month ago
+
+    startDateInput.value = startDate;
+    endDateInput.value = endDate;
+});
 </script>
 
 @endsection
