@@ -110,71 +110,73 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-//      public function update(Request $request, $id)
-// {
-//     // Define custom validation messages
-//     $messages = [
-//         'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character. It must also be at least 8 characters long.',
-//     ];
+     public function update(Request $request, $id)
+{
+    // Define custom validation messages
+    // $messages = [
+    //     'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character. It must also be at least 8 characters long.',
+    // ];
 
-//     // Validate the incoming request data with custom messages
-//     $request->validate([
-//         'name' => 'required|string|max:255',
-//         'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/']
-//     ], $messages);
-
-//     // Find the user by its ID
-//     $data = User::findOrFail($id);
-
-//     // Update the user with the data from the request
-//     $data->name = $request->name;
-//     $data->last_name = $request->last_name;
-//     $data->email = $request->email;
-//     $data->role = $request->role;
-
-//     // Only update the password if a new password is provided
-//     if ($request->filled('password')) {
-//         $data->password = Hash::make($request->password);
-//     }
-
-//     // Save the updated user data
-//     $data->save();
-
-//     // Redirect back with success message
-//     return redirect()->route('users.index')->with('success', 'User updated successfully!');
-// }
+    // Validate the incoming request data with custom messages
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/']
+    ]);
+// ], $messages);
 
 
-    public function update(Request $request, $id)
-    {
-         // Validate the incoming request data
-         $request->validate([
-            'name' => 'required|string|max:255',
-            'password' => ['regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+    // Find the user by its ID
+    $data = User::findOrFail($id);
 
-            // Add more validation rules as needed
-        ]);
+    // Update the user with the data from the request
+    $data->name = $request->name;
+    $data->last_name = $request->last_name;
+    $data->email = $request->email;
+    $data->role = $request->role;
 
-        // Find the permission by its ID.
-        $data = User::findOrFail($id);
-
-        // Update the permission with the data from the request
-        $data->name = $request->name;
-        $data->last_name = $request->last_name;
-        $data->email = $request->email;
-        $data->role = $request->role;
-        // 'password' => Hash::make($request->password),
-
+    // Only update the password if a new password is provided
+    if ($request->filled('password')) {
         $data->password = Hash::make($request->password);
-
-        // Update other attributes as needed
-
-        // Save the updated permission
-        $data->save();
-
-        // Redirect back with success message
-        return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
+
+    // Save the updated user data
+    $data->save();
+
+    // Redirect back with success message
+    return redirect()->route('users.index')->with('success', 'User updated successfully!');
+}
+
+
+    // public function update(Request $request, $id)
+    // {
+    //      // Validate the incoming request data
+    //      $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'password' => ['regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+
+    //         // Add more validation rules as needed
+    //     ]);
+
+    //     // Find the permission by its ID.
+    //     $data = User::findOrFail($id);
+
+    //     // Update the permission with the data from the request
+    //     $data->name = $request->name;
+    //     $data->last_name = $request->last_name;
+    //     $data->email = $request->email;
+    //     $data->role = $request->role;
+    //     // 'password' => Hash::make($request->password),
+
+    //     $data->password = Hash::make($request->password);
+
+    //     // Update other attributes as needed
+
+    //     // Save the updated permission
+    //     $data->save();
+
+    //     // Redirect back with success message
+    //     return redirect()->route('users.index')->with('success', 'User updated successfully!');
+    // }
 
     /**
      * Remove the specified resource from storage.
