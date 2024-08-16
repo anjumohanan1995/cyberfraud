@@ -602,6 +602,7 @@ public function follow(Request $request, $id)
     public function generateMuleNotice(Request $request)
         {
         try {
+            // dd("hi");
             $sourceType = $request->input('source_type');
             $fromDate = $request->input('from_date');
             $toDate = $request->input('to_date');
