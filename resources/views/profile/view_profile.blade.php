@@ -49,6 +49,17 @@
                                                     <td>{{$user->hospital_name}}</td>
                                                 </tr>
                                                 @endif
+                                                @if (!empty($user->sign))
+                                                    <tr>
+                                                        <td>Signature</td>
+                                                        <td>:</td>
+                                                        <td>
+                                                            {{-- @if (File::exists(storage_path('public/' . $user->sign))) --}}
+                                                            <img src="{{ asset($user->sign) }}" alt="Signature" style="max-width: 200px; height: auto;">
+                                                            {{-- @endif --}}
+                                                        </td>
+                                                </tr>
+                                                @endif
                                             </tbody>
                                         </table>
                                     </center>

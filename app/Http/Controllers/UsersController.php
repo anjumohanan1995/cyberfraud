@@ -41,41 +41,43 @@ class UsersController extends Controller
      */
     public function store(Request $request)
     {
-        // $messages = [
-        // 'password.regex' => 'The password must contain at least one uppercase letter,
-        //                         one lowercase letter,
-        //                         one digit,
-        //                         and one special character.
-        //                         It must also be at least 8 characters long.',
-        // ];
-
         $validate = Validator::make($request->all(),
         [
-          'name' => 'required',
-          'email' => 'required|email|unique:users,deleted_at,NULL',
-          'password' => ['required', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
-          'role' => 'required' ,
+            'name' => 'required',
+            'email' => 'required|email|unique:users,deleted_at,NULL',
+            'password' => ['required', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+            'role' => 'required',
+            'sign' => 'image',
         ]);
 
-
-        // ], $messages);
         if ($validate->fails()) {
-            //dd($validate);
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
+        $imagePath = '';
+
+        if ($request->hasFile('sign')) {
+            // Store the image in the public/signatures directory
+            $file = $request->file('sign');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('signatures'), $filename);
+
+            // Save the relative path to the database
+            $imagePath = 'signatures/' . $filename;
+        }
+
         User::create([
-            'name' => @$request->name? $request->name:'',
-            'last_name' => @$request->lname?$request->lname:'',
-            'email' => @$request->email?$request->email:'',
+            'name' => $request->name ?: '',
+            'last_name' => $request->lname ?: '',
+            'email' => $request->email ?: '',
             'password' => Hash::make($request->password),
-            'role' => @$request->role?$request->role:''
+            'role' => $request->role ?: '',
+            'sign' => $imagePath
         ]);
 
-        return redirect()->route('users.index')->with('success','User Added successfully.');
-
-
+        return redirect()->route('users.index')->with('success', 'User Added successfully.');
     }
+
 
     /**
      * Display the specified resource.
@@ -109,6 +111,50 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    // public function update(Request $request, $id)
+    // {
+    //     // Validate the incoming request data
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+    //         'sign' => 'nullable|image' // Validate 'sign' if it's provided
+    //     ]);
+
+    //     // Find the user by its ID
+    //     $data = User::findOrFail($id);
+
+    //     // Update the user with the data from the request
+    //     $data->name = $request->name;
+    //     $data->last_name = $request->last_name;
+    //     $data->email = $request->email;
+    //     $data->role = $request->role;
+
+    //     // Only update the password if a new password is provided
+    //     if ($request->filled('password')) {
+    //         $data->password = Hash::make($request->password);
+    //     }
+
+    //     // Handle file upload for 'sign'
+    //     if ($request->hasFile('sign')) {
+    //         // Delete the old signature if it exists
+    //         if ($data->sign && file_exists(public_path($data->sign))) {
+    //             unlink(public_path($data->sign));
+    //         }
+
+    //         // Store the new signature directly in the public/signatures directory
+    //         $file = $request->file('sign');
+    //         $filename = time() . '_' . $file->getClientOriginalName();
+    //         $file->move(public_path('signatures'), $filename);
+    //         $data->sign = 'signatures/' . $filename;
+    //     }
+
+    //     // Save the updated user data
+    //     $data->save();
+
+    //     // Redirect back with success message
+    //     return redirect()->route('users.index')->with('success', 'User updated successfully!');
+    // }
+
 
      public function update(Request $request, $id)
 {
@@ -117,13 +163,12 @@ class UsersController extends Controller
     //     'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character. It must also be at least 8 characters long.',
     // ];
 
-    // Validate the incoming request data with custom messages
+    // Validate the incoming request data
     $request->validate([
         'name' => 'required|string|max:255',
-        'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/']
+        'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+        'sign' => 'nullable|image' // Validate 'sign' if it's provided
     ]);
-// ], $messages);
-
 
     // Find the user by its ID
     $data = User::findOrFail($id);
@@ -139,13 +184,25 @@ class UsersController extends Controller
         $data->password = Hash::make($request->password);
     }
 
+     // Handle file upload for 'sign'
+     if ($request->hasFile('sign')) {
+        // Delete the old signature if it exists
+        if ($data->sign && file_exists(public_path($data->sign))) {
+            unlink(public_path($data->sign));
+        }
+        // Store the new signature
+        $file = $request->file('sign');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('signatures'), $filename);
+            $data->sign = 'signatures/' . $filename;
+    }
+
     // Save the updated user data
     $data->save();
 
     // Redirect back with success message
     return redirect()->route('users.index')->with('success', 'User updated successfully!');
 }
-
 
     // public function update(Request $request, $id)
     // {

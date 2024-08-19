@@ -41,7 +41,7 @@
                             </div>
 
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('users.update', ['user' => $data->id]) }}" method="POST">
+                                <form action="{{ route('users.update', ['user' => $data->id]) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('put')
 
@@ -100,6 +100,17 @@
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                                 <small class="text-muted">Leave this field empty if you don't want to change the password.</small>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sign"> Signature:</label>
+                                                    <input type="file" id="sign" name="sign" class="form-control" placeholder="">
+                                                    @error('sign')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
 

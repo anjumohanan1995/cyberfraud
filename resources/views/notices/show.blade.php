@@ -116,7 +116,7 @@ Dated. 03-07-2024</p>
         <a href="{{ route('notices.index') }}" class="btn btn-secondary w-auto me-2">Back to List</a>
                     <a href="{{ route('notices.edit', $notice->id) }}" class="btn btn-success w-auto me-2">Update</a>
                     <a href="#" class="btn btn-primary w-auto me-2" onclick="downloadContent()">Download Content</a>
-
+                    {{-- <a href="#" class="btn btn-info w-auto me-2" onclick="approveContent()">Approve</a> --}}
 
                        <span class="custom-dropdown w-auto">  <button class="custom-dropdown-button btn btn-success w-auto">Follow Up</button>
                         <div class="custom-dropdown-content">
@@ -228,4 +228,43 @@ Dated. 03-07-2024</p>
 
 </script>
 
+{{-- <script>
+    function approveContent() {
+    // Fetch the user's signature
+    const signatureHtml = `<p><strong>Approved by:</strong></p><img src="{{ asset('storage/signatures/' . $user->sign) }}" alt="Signature" style="max-width: 200px;">`;
+
+    // Get the notice content element
+    const noticeContent = document.getElementById('notice-content');
+
+    // Append the signature inside the notice content
+    noticeContent.innerHTML += signatureHtml;
+
+    // Get the updated content as a string
+    const updatedContent = noticeContent.innerHTML;
+
+    // Send the updated content to the server via an AJAX request
+    fetch(`/notices/{{ $notice->id }}/approve`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ content: updatedContent })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Content approved and signature added successfully!');
+            location.reload(); // Reload the page to reflect the changes
+        } else {
+            alert('Failed to approve content.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+
+</script> --}}
 @endsection

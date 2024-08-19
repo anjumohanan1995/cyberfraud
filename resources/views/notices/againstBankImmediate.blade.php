@@ -63,34 +63,8 @@
 
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4;  padding:20px; ">
     <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; margin-left:20px; margin-right:20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-        {{-- <div class="container"> --}}
-            {{-- <div class="left text">
-                <h3>POLICE</h1>
-            </div>
-            <div class="center">
-                <img src="{{ asset('images/logo.jfif') }}" alt="logo">
-                <h3>KERALA</h1>
-            </div>
-            <div class="right text">
-                <h3>DEPARTMENT</h1>
-            </div>
-        </div>
-
-        <div class="footer">
-            <h5>
-                <u>No. IP(C4)-12442/2024/Cyb(18)</u><br>
-                Cyber Police Headquarters,<br>
-                Thiruvananthapuram<br>
-                Email: <a href="mailto:sptele.pol@kerala.gov.in" style="color: #1a0dab;">sptele.pol@kerala.gov.in</a><br>
-                Phone: 04712448707<br>
-                Dated: <strong>{{ $notice[0]['date'] }}</strong><br>
-                {{-- <strong>HARISANKAR IPS</strong><br>
-                Superintendent of Police (ic)<br> --}}
-            {{-- </h5>
-        </div> --}}
         <b>
-            <h2 style=" margin-top: 0; text-align: center;"><u>
-                NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023</u></h2>
+
 
 
         <h3 style="margin-top: 20px;">Subject: <u> Notice for immediate intervention to prevent cyber fraud</u></h3>
@@ -148,15 +122,12 @@
             </b>
         </p>
 
-        <p style="font-size: 19px; line-height: 1.5; margin-top: 20px;" class="for">
-            {{-- <strong>{{ $notice['reference_number'] }}</strong> <span style="float: right;">{{ $notice['unique_code'] }}</span><br> --}}
-            For Inspector General of Police (Cyber Operations)
-        </p>
+
 
         <p style="font-size: 19px; line-height: 1.5;" class="to">
             To: The Nodal Officer,  {{$notice[0]['bank']}}, Kerala.
         </p>
         <div id="signature-container" style="margin-top: 20px;"></div>
-
+        
     </div>
 </body>

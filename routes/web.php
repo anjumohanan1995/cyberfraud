@@ -306,7 +306,10 @@ Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name(
 Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
 
 Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name('notice.bank');
+Route::post('/generate/bankacc/notice', [NoticeController::class, 'generateBankAccNotice'])->name('generate.bank.acc.notice');
+Route::post('/generate/bankack/notice', [NoticeController::class, 'generateBankAckNotice'])->name('generate.bank.ack.notice');
 
+Route::post('/notices/{id}/approve', [NoticeController::class, 'approve'])->name('notices.approve');
 
 
 

@@ -41,7 +41,7 @@
                             </div>
 
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('users.store') }}" method="POST">
+                                <form action="{{ route('users.store') }}" method="POST"  enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
@@ -83,6 +83,17 @@
                                                     @endforeach
                                                 </select>
                                                 @error('role')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sign">Signature:</label>
+                                                <input type="file" id="sign" name="sign" class="form-control" placeholder="">
+                                                @error('sign')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>

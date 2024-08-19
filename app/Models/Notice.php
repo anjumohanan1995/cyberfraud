@@ -21,7 +21,8 @@ class Notice extends Eloquent
         'case_number',
         'url',
         'content',
-        'user_id'
+        'user_id',
+        'approve_id'
 
 
 
