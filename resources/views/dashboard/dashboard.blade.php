@@ -572,291 +572,317 @@
 
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-          const startDateInput = document.getElementById('start_date');
-          const endDateInput = document.getElementById('end_date');
+        document.addEventListener('DOMContentLoaded', function () {
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
 
-          const today = new Date();
-          const endDate = today.toISOString().split('T')[0]; // Current date
-          today.setMonth(today.getMonth() - 1);
-          const startDate = today.toISOString().split('T')[0]; // Date one month ago
+            const today = new Date();
+            const endDate = today.toISOString().split('T')[0]; // Current date
+            today.setMonth(today.getMonth() - 1);
+            const startDate = today.toISOString().split('T')[0]; // Date one month ago
 
-          startDateInput.value = startDate;
-          endDateInput.value = endDate;
-      });
+            startDateInput.value = startDate;
+            endDateInput.value = endDate;
+        });
 
-      $(document).ready(function() {
-          var currentYear = new Date().getFullYear();
+        $(document).ready(function() {
+            var currentYear = new Date().getFullYear();
 
-          // Populate years dropdown
-          for (var year = currentYear; year >= currentYear - 20; year--) {
-              $('#yearSelect').append($('<option>', {
-                  value: year,
-                  text: year,
-                  selected: year == currentYear // Set current year as selected
-              }));
-          }
+            // Populate years dropdown
+            for (var year = currentYear; year >= currentYear - 20; year--) {
+                $('#yearSelect').append($('<option>', {
+                    value: year,
+                    text: year,
+                    selected: year == currentYear // Set current year as selected
+                }));
+            }
 
-          // Populate months dropdown using Moment.js for month names
-          for (var month = 1; month <= 12; month++) {
-              $('#monthSelect').append($('<option>', {
-                  value: month,
-                  text: moment(month, 'MM').format('MMMM'),
-                  selected: month == new Date().getMonth() + 1 // Set current month as selected
-              }));
-          }
+            // Populate months dropdown using Moment.js for month names
+            for (var month = 1; month <= 12; month++) {
+                $('#monthSelect').append($('<option>', {
+                    value: month,
+                    text: moment(month, 'MM').format('MMMM'),
+                    selected: month == new Date().getMonth() + 1 // Set current month as selected
+                }));
+            }
 
-          // Function to populate days dropdown based on selected year and month
-          function populateDaysDropdown() {
-              var selectedYear = $('#yearSelect').val() || currentYear;
-              var selectedMonth = $('#monthSelect').val() || new Date().getMonth() + 1;
-              var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-              $('#daySelect').empty();
-              for (var day = 1; day <= daysInMonth; day++) {
-                  $('#daySelect').append($('<option>', {
-                      value: day,
-                      text: day,
-                      selected: day == new Date().getDate() // Set current day as selected
-                  }));
-              }
-          }
+            // Function to populate days dropdown based on selected year and month
+            function populateDaysDropdown() {
+                var selectedYear = $('#yearSelect').val() || currentYear;
+                var selectedMonth = $('#monthSelect').val() || new Date().getMonth() + 1;
+                var daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+                $('#daySelect').empty();
+                for (var day = 1; day <= daysInMonth; day++) {
+                    $('#daySelect').append($('<option>', {
+                        value: day,
+                        text: day,
+                        selected: day == new Date().getDate() // Set current day as selected
+                    }));
+                }
+            }
 
-          // Initial population of days dropdown
-          populateDaysDropdown();
+            // Initial population of days dropdown
+            populateDaysDropdown();
 
-          // Event listeners for month and year changes
-          $('#monthSelect, #yearSelect').change(function() {
-              populateDaysDropdown();
-          });
+            // Event listeners for month and year changes
+            $('#monthSelect, #yearSelect').change(function() {
+                populateDaysDropdown();
+            });
 
-          // Function to fetch data via AJAX and render charts
-          function fetchData(year, month, day, source) {
-              $.ajax({
-                  url: '{{ route('complaints.chart') }}', // Replace with your actual route
-                  method: 'GET',
-                  data: {
-                      year: year,
-                      month: month,
-                      day: day,
-                      source: source
-                  },
-                  success: function(data) {
-                      renderCharts($('#chartTypeSelect').val(), data);
-                  },
-                  error: function(xhr, status, error) {
-                      console.error(error);
-                  }
-              });
-          }
+            // Function to fetch data via AJAX and render charts
+            function fetchData(year, month, day, source) {
+                $.ajax({
+                    url: '{{ route('complaints.chart') }}', // Replace with your actual route
+                    method: 'GET',
+                    data: {
+                        year: year,
+                        month: month,
+                        day: day,
+                        source: source
+                    },
+                    success: function(data) {
+                        renderCharts($('#chartTypeSelect').val(), data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            }
 
-          // Function to render charts based on selected parameters
-          function renderCharts(chartType, data) {
-              var casesPerDay = data.cases_per_day || {};
-              var casesPerMonth = data.cases_per_month || {};
-              var casesPerYear = data.cases_per_year || {};
+            // Function to render charts based on selected parameters
+            function renderCharts(chartType, data) {
+                var casesPerDay = data.cases_per_day || {};
+                var casesPerMonth = data.cases_per_month || {};
+                var casesPerYear = data.cases_per_year || {};
 
-              switch (chartType) {
-                  case 'bar':
-                      renderBarChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                      renderBarChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                      renderBarChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                      break;
-                  case 'line':
-                      renderLineChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                      renderLineChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                      renderLineChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                      break;
-                  case 'pie':
-                      renderPieChart('Cases per Day', casesPerDay, 'casesPerDayChart');
-                      renderPieChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
-                      renderPieChart('Cases per Year', casesPerYear, 'casesPerYearChart');
-                      break;
-                  default:
-                      console.error('Invalid chart type selected');
-              }
-          }
+                // Clear existing charts
+                clearCharts();
 
-          // Event listener for year, month, day, and source changes
-          $('#yearSelect, #monthSelect, #daySelect, #sourceSelect').change(function() {
-              var selectedYear = $('#yearSelect').val();
-              var selectedMonth = $('#monthSelect').val();
-              var selectedDay = $('#daySelect').val();
-              var selectedSource = $('#sourceSelect').val();
-              fetchData(selectedYear, selectedMonth, selectedDay, selectedSource);
-          });
+                switch (chartType) {
+                    case 'bar':
+                        renderBarChart('Cases per Day', casesPerDay, 'casesPerDayChart');
+                        renderBarChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
+                        renderBarChart('Cases per Year', casesPerYear, 'casesPerYearChart');
+                        break;
+                    case 'line':
+                        renderLineChart('Cases per Day', casesPerDay, 'casesPerDayChart');
+                        renderLineChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
+                        renderLineChart('Cases per Year', casesPerYear, 'casesPerYearChart');
+                        break;
+                    case 'pie':
+                        renderPieChart('Cases per Day', casesPerDay, 'casesPerDayChart');
+                        renderPieChart('Cases per Month', casesPerMonth, 'casesPerMonthChart');
+                        renderPieChart('Cases per Year', casesPerYear, 'casesPerYearChart');
+                        break;
+                    default:
+                        console.error('Invalid chart type selected');
+                }
+            }
 
-          // Initial loading with default values
-          fetchData(currentYear, $('#monthSelect').val(), $('#daySelect').val(), 'NCRP');
+            // Function to clear existing charts to avoid overlay
+            function clearCharts() {
+                if (window.casesPerDayChart && typeof window.casesPerDayChart.destroy === 'function') {
+                    window.casesPerDayChart.destroy();
+                }
+                if (window.casesPerMonthChart && typeof window.casesPerMonthChart.destroy === 'function') {
+                    window.casesPerMonthChart.destroy();
+                }
+                if (window.casesPerYearChart && typeof window.casesPerYearChart.destroy === 'function') {
+                    window.casesPerYearChart.destroy();
+                }
+            }
 
-          // Event listener for chart type change
-          $('#chartTypeSelect').change(function() {
-              fetchData($('#yearSelect').val(), $('#monthSelect').val(), $('#daySelect').val(), $('#sourceSelect').val());
-          });
+            // Event listener for year, month, day, and source changes
+            $('#yearSelect, #monthSelect, #daySelect, #sourceSelect').change(function() {
+                var selectedYear = $('#yearSelect').val();
+                var selectedMonth = $('#monthSelect').val();
+                var selectedDay = $('#daySelect').val();
+                var selectedSource = $('#sourceSelect').val();
+                fetchData(selectedYear, selectedMonth, selectedDay, selectedSource);
+            });
 
-          // Function to render bar chart
-          function renderBarChart(title, values, elementId) {
-              var ctx = document.getElementById(elementId);
-              var years = Object.keys(values); // Assuming values is an object where keys are years
-              var dataValues = Object.values(values);
+            // Initial loading with default values
+            fetchData(currentYear, $('#monthSelect').val(), $('#daySelect').val(), 'NCRP');
 
-              window[elementId] = new Chart(ctx, {
-                  type: 'bar',
-                  data: {
-                      labels: years, // X-axis labels (years)
-                      datasets: [{
-                          label: title,
-                          data: dataValues,
-                          backgroundColor: 'rgb(0, 143, 251)',
-                          borderColor: 'rgba(54, 162, 235, 1)',
-                          borderWidth: 1
-                      }]
-                  },
-                  options: {
-                      scales: {
-                          x: {
-                              ticks: {
-                                  autoSkip: false, // Ensure all labels are displayed
-                                  maxRotation: 45, // Rotate labels if necessary to fit
-                                  minRotation: 45,
-                                  callback: function(value) {
-                                      return Math.floor(value); // Ensure x-axis labels are integers
-                                  }
-                              }
-                          },
-                          y: {
-                              beginAtZero: true,
-                              ticks: {
-                                  callback: function(value) {
-                                      return Math.floor(value); // Ensure y-axis labels are integers
-                                  }
-                              }
-                          }
-                      }
-                  }
-              });
-          }
+            // Event listener for chart type change
+            $('#chartTypeSelect').change(function() {
+                fetchData($('#yearSelect').val(), $('#monthSelect').val(), $('#daySelect').val(), $('#sourceSelect').val());
+            });
 
-          // Function to render line chart
-          function renderLineChart(title, values, elementId) {
-              var ctx = document.getElementById(elementId);
-              var periods = Object.keys(values); // Time periods (e.g., years, months)
-              var dataValues = Object.values(values); // Data values for each period
+            // Function to render bar chart
+            function renderBarChart(title, values, elementId) {
+                var ctx = document.getElementById(elementId);
+                var labels = Object.keys(values); // X-axis labels
+                var dataValues = Object.values(values); // Y-axis data values
 
-              window[elementId] = new Chart(ctx, {
-                  type: 'line',
-                  data: {
-                      labels: periods, // X-axis labels (time periods)
-                      datasets: [{
-                          label: title,
-                          data: dataValues,
-                          fill: false,
-                          backgroundColor: 'rgb(0, 143, 251)', // Color of the line
-                          borderColor: 'rgba(54, 162, 235, 1)', // Color of the line
-                          borderWidth: 2, // Width of the line
-                          pointBackgroundColor: 'rgb(0, 143, 251)', // Color of data points
-                          pointBorderColor: 'rgba(54, 162, 235, 1)', // Border color of data points
-                          pointBorderWidth: 2, // Border width of data points
-                          pointRadius: 5, // Radius of data points
-                          pointHoverRadius: 7 // Radius when hovering over data points
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      scales: {
-                          x: {
-                              ticks: {
-                                  autoSkip: false, // Show all x-axis labels
-                                  maxRotation: 0, // No rotation for clear labels
-                                  minRotation: 0,
-                                  align: 'center', // Center align x-axis labels
-                                  callback: function(value) {
-                                      return Math.floor(value); // Ensure x-axis labels are integers
-                                  }
-                              },
-                              grid: {
-                                  display: false // Hide x-axis grid lines for better centering
-                              }
-                          },
-                          y: {
-                              beginAtZero: true,
-                              ticks: {
-                                  callback: function(value) {
-                                      return Math.floor(value); // Ensure y-axis labels are integers
-                                  }
-                              }
-                          }
-                      },
-                      plugins: {
-                          tooltip: {
-                              callbacks: {
-                                  label: function(context) {
-                                      // Customize tooltip to show the value
-                                      const label = context.label || '';
-                                      const value = context.raw || 0;
-                                      return `${label}: ${value}`;
-                                  }
-                              }
-                          },
-                          legend: {
-                              display: true
-                          },
-                          title: {
-                              display: true,
-                              text: title
-                          }
-                      }
-                  }
-              });
-          }
+                window[elementId] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: title,
+                            data: dataValues,
+                            backgroundColor: 'rgb(0, 143, 251)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return Number.isInteger(value) ? value : ''; // Show only whole numbers
+                                    },
+                                    stepSize: 1 // Ensure step size is 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + Math.round(context.raw); // Show rounded values in tooltip
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: title
+                            },
+                            legend: {
+                                display: true
+                            }
+                        }
+                    }
+                });
+            }
 
-          // Function to render pie chart
-          function renderPieChart(title, values, elementId) {
-              var ctx = document.getElementById(elementId);
+            // Function to render line chart
+            function renderLineChart(title, values, elementId) {
+                var ctx = document.getElementById(elementId);
+                var periods = Object.keys(values); // Time periods (e.g., years, months)
+                var dataValues = Object.values(values); // Data values for each period
 
-              window[elementId] = new Chart(ctx, {
-                  type: 'doughnut', // Use 'doughnut' for a pie-like appearance
-                  data: {
-                      labels: Object.keys(values), // Labels for pie slices
-                      datasets: [{
-                          label: title,
-                          data: Object.values(values),
-                          backgroundColor: [
-                              'rgb(255, 99, 132)',
-                              'rgb(54, 162, 235)',
-                              'rgb(255, 205, 86)'
-                          ],
-                          hoverOffset: 50,
-                          offset: new Array(Object.keys(values).length).fill(0) // Initialize offsets to 0
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      plugins: {
-                          legend: {
-                              position: 'top',
-                          },
-                          title: {
-                              display: true,
-                              text: title
-                          },
-                          tooltip: {
-                              callbacks: {
-                                  label: function(context) {
-                                      const label = context.label || '';
-                                      const value = context.raw || 0;
-                                      return `${label}: ${value}`;
-                                  }
-                              }
-                          }
-                      }
-                  }
-              });
-          }
+                window[elementId] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: periods, // X-axis labels (time periods)
+                        datasets: [{
+                            label: title,
+                            data: dataValues,
+                            fill: false,
+                            backgroundColor: 'rgb(0, 143, 251)', // Color of the line
+                            borderColor: 'rgba(54, 162, 235, 1)', // Color of the line
+                            borderWidth: 2, // Width of the line
+                            pointBackgroundColor: 'rgb(0, 143, 251)', // Color of data points
+                            pointBorderColor: 'rgba(54, 162, 235, 1)', // Border color of data points
+                            pointBorderWidth: 2, // Border width of data points
+                            pointRadius: 5, // Radius of data points
+                            pointHoverRadius: 7 // Radius when hovering over data points
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                ticks: {
+                                    autoSkip: false, // Show all x-axis labels
+                                    maxRotation: 0, // No rotation for clear labels
+                                    minRotation: 0,
+                                    align: 'center', // Center align x-axis labels
+                                },
+                                grid: {
+                                    display: false // Hide x-axis grid lines for better centering
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 5, // Set step size to 1 to avoid decimals
+                                    callback: function(value) {
+                                        return Math.floor(value); // Ensure y-axis labels are integers
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        // Customize tooltip to show the value
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: ${value}`;
+                                    }
+                                }
+                            },
+                            legend: {
+                                display: true
+                            },
+                            title: {
+                                display: true,
+                                text: title
+                            }
+                        }
+                    }
+                });
+            }
 
-      });
-  </script>
+            // Function to render pie chart
+            function renderPieChart(title, values, elementId) {
+                var ctx = document.getElementById(elementId);
+                var labels = Object.keys(values); // Labels for each pie slice
+                var dataValues = Object.values(values); // Data values for each pie slice
 
-<script>
+                window[elementId] = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataValues,
+                            backgroundColor: ['rgb(0, 143, 251)', 'rgb(255, 99, 132)', 'rgb(255, 205, 86)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)', 'rgb(255, 159, 64)'], // Add more colors if needed
+                            hoverOffset: 4 // Offset when hovering over a pie slice
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: title
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: ${value}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+
+
+
+{{-- <script>
    let chart; // Variable to store the chart instance
 
    function fetchData() {
@@ -880,6 +906,7 @@
                const startedData = [];
                const ongoingData = [];
                const completedData = [];
+               const symbol = "%";
 
                data.forEach(user => {
                    users.push(user.user_name);
@@ -887,6 +914,8 @@
                    ongoingData.push(user.Ongoing);
                    completedData.push(user.Completed);
                });
+
+
 
                const options = {
                    series: [{
@@ -950,6 +979,108 @@
    }
 
    window.onload = fetchData;
+</script> --}}
+<script>
+    let chart; // Variable to store the chart instance
+
+function fetchData() {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const sourceType = document.getElementById('sourceTeam').value;
+
+    axios.get('{{ route('complaint.stats') }}', {
+            params: {
+                start_date: startDate,
+                end_date: endDate,
+                source: sourceType
+            }
+        })
+        .then(response => {
+            const data = response.data;
+
+            const users = [];
+            const startedData = [];
+            const ongoingData = [];
+            const completedData = [];
+
+            data.forEach(user => {
+                users.push(user.user_name);
+                startedData.push(user.Started);   // Assuming data is already a percentage value
+                ongoingData.push(user.Ongoing);   // Assuming data is already a percentage value
+                completedData.push(user.Completed); // Assuming data is already a percentage value
+            });
+
+            const options = {
+                series: [{
+                        name: 'Started',
+                        data: startedData
+                    },
+                    {
+                        name: 'Ongoing',
+                        data: ongoingData
+                    },
+                    {
+                        name: 'Completed',
+                        data: completedData
+                    }
+                ],
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '55%',
+                        endingShape: 'rounded'
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return val + "%"; // Append the % symbol to the data label
+                    }
+                },
+                xaxis: {
+                    categories: users
+                },
+                yaxis: {
+                    title: {
+                        text: 'Percentage'
+                    },
+                    labels: {
+                        formatter: function (val) {
+                            return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return val + "%"; // Append the % symbol to the tooltip values
+                        }
+                    }
+                }
+            };
+
+            if (chart) {
+                chart.destroy(); // Destroy existing chart instance
+            }
+
+            chart = new ApexCharts(document.querySelector("#team-chart"), options);
+            chart.render();
+
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+}
+
+window.onload = fetchData;
+
 </script>
 
 @endsection
