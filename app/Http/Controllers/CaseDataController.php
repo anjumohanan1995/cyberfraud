@@ -1269,6 +1269,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
     public function caseDataOthers(){
         $source=SourceType::get();
+        //dd($source);
        return view('dashboard.case-data-list.case-data-list-others', compact('source'));
     }
 
@@ -1319,6 +1320,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         if (isset($casenumber)) {
             $matchStage['case_number'] = $casenumber;
         }
+        //need to check status is 1
         if (isset($url)) {
             $matchStage['url'] = $url;
         }
@@ -1363,16 +1365,51 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 '_id' => '$case_number',
                 'source_type' => ['$addToSet' => '$source_type'],
                 'source_name' => ['$first' => '$source.name'],  // Group source name from sourcetype
-                'url' => ['$addToSet' => '$url'],
-                'domain' => ['$addToSet' => '$domain'],
+                'url' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$url',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'domain' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$domain',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'ip' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$ip',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'registrar' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$registrar',
+                            'else' => null
+                        ]
+                    ]
+                ],
                 'registry_details' => ['$addToSet' => '$registry_details'],
-                'ip' => ['$addToSet' => '$ip'],
-                'registrar' => ['$addToSet' => '$registrar'],
                 'remarks' => ['$addToSet' => '$remarks'],
                 'assigned_to' => ['$first' => '$assigned_to'],
                 'case_status' => ['$first' => '$case_status'],
+                'status' => ['$first' => '$status'],
             ]
         ];
+
+
 
         // Sort stage (optional)
         $pipeline[] = ['$sort' => ['_id' => 1]];
@@ -1430,7 +1467,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
 
 
-        // dd($complaints);
+        //dd($complaints);
         //  dd($distinctCaseNumbers);
 
 
@@ -1443,14 +1480,21 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         $totalRecordswithFilter =  $totalRecords;
         foreach($complaints as $record){
-        // dd($record);
+         //dd($record);
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
 
             $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
 
-            foreach ($record->url as $item) {
-                $url .= $item."<br>";
+            // foreach ($record->url as $item) {
+            //     $url .= $item."<br>";
+            // }
+//dd($record->status);
+            if($record->status === 1) { // Check if status is 1
+               // dd($record->url);
+                foreach ($record->url as $item) {
+                    $url .= $item."<br>";
+                }
             }
             foreach ($record->source_type as $item) {
                 foreach($source_types as $st){
@@ -1519,7 +1563,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                     );
 
         }
-
+//dd($data_arr);
         $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
