@@ -240,81 +240,156 @@ class CaseDataController extends Controller
             ['$match' => ['deleted_at' => null]]
         ];
 
-        // Apply conditions
-        if ($com_status == "1" || $com_status == "0") {
-            $pipeline[0]['$match']['com_status'] = (int)$com_status;
-        }
+            // Function to build filter conditions
+            $buildFilterConditions = function() use ($request, $fromDateStart, $toDateEnd) {
+                $conditions = [];
 
-        if ($fromDateStart && $toDateEnd) {
-            // $dump = var_dump(class_exists('MongoDB\BSON\UTCDateTime'));
-            //  dd($dump);
-            $pipeline[0]['$match']['entry_date'] = [
-                '$gte' => new UTCDateTime($fromDateStart->timestamp * 1000),
-                '$lte' => new UTCDateTime($toDateEnd->timestamp * 1000)
-            ];
-        }
+                // Apply conditions
+                if ($request->get('com_status') == "1" || $request->get('com_status') == "0") {
+                    $conditions[] = ['com_status' => (int)$request->get('com_status')];
+                    // $pipeline[0]['$match']['com_status'] = (int)$com_status;
+                }
 
-        if (!empty($mobile)) {
-            $pipeline[0]['$match']['complainant_mobile'] = (string)$mobile;
-        }
+                if ($fromDateStart && $toDateEnd) {
+                    $conditions[] = ['entry_date' => [
+                        '$gte' => new UTCDateTime($fromDateStart->timestamp * 1000),
+                        '$lte' => new UTCDateTime($toDateEnd->timestamp * 1000)
+                    ]];
+                    // $dump = var_dump(class_exists('MongoDB\BSON\UTCDateTime'));
+                    //  dd($dump);
+                    // $pipeline[0]['$match']['entry_date'] = [
+                    //     '$gte' => new UTCDateTime($fromDateStart->timestamp * 1000),
+                    //     '$lte' => new UTCDateTime($toDateEnd->timestamp * 1000)
+                    // ];
+                }
 
-        if (!empty($transaction_id)) {
-            $pipeline[0]['$match']['transaction_id'] = ['$in' => [(string)$transaction_id, (string)$transaction_id]];
-        }
+                if (!empty($request->get('mobile'))) {
+                    $conditions[] = ['complainant_mobile' => ['$in' => [(string)$request->get('mobile'), (int)$request->get('mobile')]]];
+                    // $pipeline[0]['$match']['complainant_mobile'] = (string)$mobile;
+                }
 
-        if (!empty($account_id)) {
-            $pipeline[0]['$match']['account_id'] = (string)$account_id;
-        }
+                if (!empty($request->get('transaction_id'))) {
+                    $conditions[] = ['transaction_id' => ['$in' => [(string)$request->get('transaction_id'), (int)$request->get('transaction_id')]]];
 
-        if (!empty($options) && $options != 'null') {
-            $pipeline[0]['$match']['bank_name'] = $options;
-        }
+                    // $pipeline[0]['$match']['transaction_id'] = ['$in' => [(string)$transaction_id, (string)$transaction_id]];
+                }
 
-        if (!empty($acknowledgement_no)) {
-            $pipeline[0]['$match']['acknowledgement_no'] = (int)$acknowledgement_no;
-        }
+                if (!empty($request->get('account_id'))) {
+                    $conditions[] = ['account_id' => ['$in' => [(string)$request->get('account_id'), (int)$request->get('account_id')]]];
+                    // $pipeline[0]['$match']['account_id'] = (string)$account_id;
+                }
 
-        if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
-            $pipeline[0]['$match']['entry_date'] = [
-                '$gte' => new UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
-                '$lte' => new UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
-            ];
-            $pipeline[0]['$match']['acknowledgement_no'] = [
-                '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
-                '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
-            ];
-        }
+                // if (!empty($options) && $options != 'null') {
+                //     $pipeline[0]['$match']['bank_name'] = $options;
+                // }
+                $options = $request->get('options');
+                if (!empty($options) && $options != 'null') {
+                    $conditions[] = ['bank_name' => $options];
+                }
 
-        if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
-            $pipeline[0]['$match']['acknowledgement_no'] = [
-                '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
-                '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
-            ];
-        }
+                // if (!empty($acknowledgement_no)) {
+                //     $pipeline[0]['$match']['acknowledgement_no'] = (int)$acknowledgement_no;
+                // }
+                $acknowledgement_no = $request->get('acknowledgement_no');
+                if (!empty($acknowledgement_no)) {
+                    $conditions[] = ['acknowledgement_no' => (int)$acknowledgement_no];
+                }
 
-        if (!empty($searchValue)) {
-            $pipeline[0]['$match']['$or'] = [
-                ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['district' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['police_station' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
-                ['amount' => (int)$searchValue],
-                // ['entry_date' => new UTCDateTime(new DateTime($searchValue))],
-                ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
-            ];
-        }
+                // if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
+                //     $pipeline[0]['$match']['entry_date'] = [
+                //         '$gte' => new UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
+                //         '$lte' => new UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
+                //     ];
+                //     $pipeline[0]['$match']['acknowledgement_no'] = [
+                //         '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
+                //         '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
+                //     ];
+                // }
+                $filled_by = $request->get('filled_by');
+                if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
+                    $conditions[] = ['entry_date' => [
+                        '$gte' => new UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
+                        '$lte' => new UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
+                    ]];
+                    $conditions[] = ['acknowledgement_no' => [
+                        '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
+                        '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
+                    ]];
+                }
 
-        // FIR Lodge filter
-        if ($fir_lodge == "1" || $fir_lodge == "0") {
-            $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
-            $pipeline[0]['$match']['acknowledgement_no'] = [
-                $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
-            ];
-        }
+                // if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
+                //     $pipeline[0]['$match']['acknowledgement_no'] = [
+                //         '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
+                //         '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
+                //     ];
+                // }
+                $filled_by_who = $request->get('filled_by_who');
+                if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
+                    $conditions[] = ['acknowledgement_no' => [
+                        '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
+                        '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
+                    ]];
+                }
+
+                      // FIR Lodge filter
+                    //   if ($fir_lodge == "1" || $fir_lodge == "0") {
+                    //     $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
+                    //     $pipeline[0]['$match']['acknowledgement_no'] = [
+                    //         $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
+                    //     ];
+                    // }
+
+                            // FIR Lodge filter
+                $fir_lodge = $request->get('fir_lodge');
+                if ($fir_lodge == "1" || $fir_lodge == "0") {
+                    $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
+                    $conditions[] = ['acknowledgement_no' => [
+                        $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
+                    ]];
+                }
+
+
+                // if (!empty($searchValue)) {
+                //     $pipeline[0]['$match']['$or'] = [
+                //         ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['district' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['police_station' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['amount' => (int)$searchValue],
+                //         // ['entry_date' => new UTCDateTime(new DateTime($searchValue))],
+                //         ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
+                //     ];
+                // }
+
+
+                return $conditions;
+            };
+
+                // Apply combined filters
+                $filterConditions = $buildFilterConditions();
+                if (!empty($filterConditions)) {
+                    $pipeline[] = ['$match' => ['$and' => $filterConditions]];
+                }
+
+                if (!empty($searchValue)) {
+                    $pipeline[0]['$match']['$or'] = [
+                        ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['district' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['police_station' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['amount' => ['$in' => [(string)$searchValue, (int)$searchValue]]],
+                        // ['entry_date' => new UTCDateTime(new DateTime($searchValue))],
+                        ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
+                    ];
+                }
 
         // Grouping and sorting
         $pipeline[] = [
@@ -970,21 +1045,21 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 ->where('action_taken_by_bank', 'money transfer to')
                 ->where('bank', '!=', 'Others')
                 ->get(['transaction_id_sec', 'bank', 'transaction_amount', 'desputed_amount']);
-    
+
             $next_layer = BankCasedata::where('acknowledgement_no', (int)$id)
                 ->where('Layer', $i + 1)
                 ->pluck('transaction_id_or_utr_no')
                 ->toArray();
-    
+
             $current_layer_utr = BankCasedata::where('acknowledgement_no', (int)$id)
                 ->where('Layer', $i)
                 ->pluck('transaction_id_or_utr_no')
                 ->toArray();
-    
+
             // Convert to a simple array of transaction numbers
             $next_layer_utr_array = $this->extractTransactionIds($next_layer);
             $current_layer_utr_array = $this->extractTransactionIds($current_layer_utr);
-    
+
             foreach ($current_layer as $transaction) {
                 if ($transaction->transaction_id_sec) {
                     if (!in_array($transaction->transaction_id_sec, $next_layer_utr_array) &&
@@ -1703,10 +1778,10 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Ticket Number','Evidence Type','Source' ],
-            ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','Instagram','Public'],
-            ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','Website','Public'],
-            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','Facebook','Open'],
+            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','TK0017','TK0018','Instagram','Public'],
+            ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','TK0024','TK0025','Website','Public'],
+            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','TK0053','TK0054','Facebook','Open'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');

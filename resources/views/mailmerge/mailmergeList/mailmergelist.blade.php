@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('content')
 @php
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ $user = Auth::user();
                 }
 
 @endphp
-@section('content')
+
 
 <style>
     .tabs-menu1 ul li a {
@@ -240,8 +241,13 @@ $user = Auth::user();
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="path_to_bootstrap_js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
+<script src="{{ asset('js/toastr.js') }}"></script>
 
 
 <script src="path_to_bootstrap_js"></script>
@@ -356,7 +362,7 @@ $user = Auth::user();
                 data: function(d) {
                     // d.website_id = $('#website_id').val();
                     d.ack_no = $('#ack_no').val();
-                }
+                },
             },
             columns: [
                 { data: 'id' },
@@ -370,7 +376,9 @@ $user = Auth::user();
                 { data: 'registry_details' },
                 { data: 'portal_link' },
                 { data: 'mail_status' },
-                @if($hasViewNCRPStatus){ data: 'status' },@endif
+                @if($hasViewNCRPStatus)
+                { data: 'status' },
+                @endif
             ],
             order: [0, 'desc'],
             ordering: true

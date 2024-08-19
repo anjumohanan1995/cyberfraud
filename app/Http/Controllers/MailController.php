@@ -10,6 +10,7 @@ use App\Models\Registrar;
 use App\Models\EvidenceType;
 use App\Models\ComplaintOthers;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\Regex;
 use Illuminate\Support\Facades\Session;
 
 class MailController extends Controller
@@ -36,7 +37,7 @@ class MailController extends Controller
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows per page
-        $searchValue = $request->get('search')['value']; // Search value
+        $searchValue = trim($request->get('search')['value']); // Search value
 
         // Build the query
         $query = Evidence::where('ack_no', $acknowledgement_no);
@@ -44,13 +45,14 @@ class MailController extends Controller
 
         // Apply search filter
         if (!empty($searchValue)) {
-            $query = $query->where(function($q) use ($searchValue) {
-                $q->where('url', 'like', '%'.$searchValue.'%')
-                  ->orWhere('domain', 'like', '%'.$searchValue.'%')
-                  ->orWhere('ip', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registrar', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registry_details', 'like', '%'.$searchValue.'%')
-                  ->orWhere('mobile', 'like', '%'.$searchValue.'%');
+            $regex = new Regex($searchValue, 'i');
+            $query = $query->where(function($q) use ($regex) {
+                $q->orWhere('evidence_type', $regex)
+                    ->orWhere('url', $regex)
+                    ->orWhere('domain', $regex)
+                    ->orWhere('ip', $regex)
+                    ->orWhere('registrar', $regex)
+                    ->orWhere('registry_details', $regex);
             });
         }
 
@@ -259,13 +261,14 @@ class MailController extends Controller
 
         // Apply search filter
         if (!empty($searchValue)) {
-            $query = $query->where(function($q) use ($searchValue) {
-                $q->where('url', 'like', '%'.$searchValue.'%')
-                  ->orWhere('domain', 'like', '%'.$searchValue.'%')
-                  ->orWhere('ip', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registrar', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registry_details', 'like', '%'.$searchValue.'%')
-                  ->orWhere('mobile', 'like', '%'.$searchValue.'%');
+            $regex = new Regex($searchValue, 'i');
+            $query = $query->where(function($q) use ($regex) {
+                $q->orWhere('evidence_type', $regex)
+                    ->orWhere('url', $regex)
+                    ->orWhere('domain', $regex)
+                    ->orWhere('ip', $regex)
+                    ->orWhere('registrar', $regex)
+                    ->orWhere('registry_details', $regex);
             });
         }
 

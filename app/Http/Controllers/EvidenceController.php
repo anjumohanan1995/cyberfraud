@@ -248,6 +248,7 @@ class EvidenceController extends Controller
         $ack_no="";
         $acknowledgement_no = $request->acknowledgement_no;
         $url = $request->url;
+        $ip = $request->ip;
         $domain = $request->domain;
         $evidence_type = $request->evidence_type;
         $evidence_name = $request->evidence_name;
@@ -261,21 +262,23 @@ class EvidenceController extends Controller
         // // Convert fromDate and toDate to start and end of the day
         // $fromDateStart = $fromDate ? Carbon::parse($from_date)->startOfDay() : null;
         // $toDateEnd = $toDate ? Carbon::parse($to_date)->endOfDay() : null;
+        $fromDateStart = Carbon::parse($from_date)->startOfDay();
+        $toDateEnd = Carbon::parse($to_date)->endOfDay();
+
 
         if($current_date){
-            $from_date = Carbon::today('Asia/Kolkata')->toDateString();
-            $to_date = $from_date;
+            $today = Carbon::today('Asia/Kolkata');
+            $fromDateStart = $today->copy()->startOfDay();
+            $toDateEnd = $today->copy()->endOfDay();
         }
 
-        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$domain ,$evidence_type , $evidence_type_text, $from_date , $to_date){
+        // First, get the acknowledgement numbers from the Complaints model based on date filters
+        $filteredAckNumbers = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+            ->pluck('acknowledgement_no')
+            ->toArray();
+            // dd($filteredAckNumbers);
 
-            if ($from_date && $to_date) {
-                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
-                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-
-                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
-                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
-            }
+        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$ip,$domain ,$evidence_type , $evidence_type_text, $filteredAckNumbers, $searchValue){
 
             $pipeline = [
 
@@ -312,67 +315,54 @@ class EvidenceController extends Controller
 
             ];
 
-            if (isset($acknowledgement_no)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ack_no' => $acknowledgement_no
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            // if (isset($url)) {
-            //     $matchStage = [
-            //         '$match' => [
-            //             '$or' => [
-            //                 ['url' => $url],
-            //                 ['mobile' => $url]
-            //             ]
-            //         ]
-            //     ];
-            //     $pipeline = array_merge([$matchStage], $pipeline);
-            // }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($evidence_type)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'evidence_type' => $evidence_type_text
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if ($from_date && $to_date){
-                $pipeline = array_merge([
-                    ['$match' => [
-                        'created_at' => [
-                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
-                        ]
-                    ]]
-                ], $pipeline);
-            }
+        // Apply filters
+        $matchConditions = [];
 
-            return $collection->aggregate($pipeline);
+        if (!empty($filteredAckNumbers)) {
+            $stringFilteredAckNumbers = array_map('strval', $filteredAckNumbers);
+            $matchConditions['ack_no'] = ['$in' => $stringFilteredAckNumbers];
+        }
+
+        if (isset($acknowledgement_no)) {
+            $matchConditions['ack_no'] = $acknowledgement_no;
+        }
+
+        if (isset($url)) {
+            $matchConditions['url'] = $url;
+        }
+
+        if (isset($domain)) {
+            $matchConditions['domain'] = $domain;
+        }
+
+        if (isset($ip)) {
+            $matchConditions['ip'] = $ip;
+        }
+
+        if (isset($evidence_type)) {
+            $matchConditions['evidence_type'] = $evidence_type_text;
+        }
+
+        if (!empty($searchValue)) {
+            $matchConditions['$or'] = [
+                ['ack_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]
+            ];
+        }
+
+        if (!empty($matchConditions)) {
+            array_unshift($pipeline, ['$match' => $matchConditions]);
+        }
+
+        return $collection->aggregate($pipeline);
         });
 
-        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ,$from_date , $to_date) {
-
-            if ($from_date && $to_date) {
-                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
-                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-
-                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
-                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
-            }
+        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url ,$ip, $domain ,$evidence_type , $evidence_type_text ,$filteredAckNumbers, $searchValue) {
 
             $pipeline = [
                 [
@@ -383,54 +373,47 @@ class EvidenceController extends Controller
                 ]
             ];
 
-            if (isset($acknowledgement_no)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ack_no' => $acknowledgement_no
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            // if (isset($url)) {
-            //     $matchStage = [
-            //         '$match' => [
-            //             '$or' => [
-            //                 ['url' => $url],
-            //                 ['mobile' => $url]
-            //             ]
-            //         ]
-            //     ];
-            //     $pipeline = array_merge([$matchStage], $pipeline);
-            // }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($evidence_type)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'evidence_type' => $evidence_type_text
-                        ]
-                    ]
-                ], $pipeline);
-            }
+                    // Apply the same filters as in the main query
+        $matchConditions = [];
 
-            if ($from_date && $to_date){
-                $pipeline = array_merge([
-                    ['$match' => [
-                        'created_at' => [
-                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
-                        ]
-                    ]]
-                ], $pipeline);
+        if (!empty($filteredAckNumbers)) {
+            $stringFilteredAckNumbers = array_map('strval', $filteredAckNumbers);
+            $matchConditions['ack_no'] = ['$in' => $stringFilteredAckNumbers];
+        }
+
+        if (isset($acknowledgement_no)) {
+            $matchConditions['ack_no'] = $acknowledgement_no;
+        }
+
+        if (isset($url)) {
+            $matchConditions['url'] = $url;
+        }
+
+        if (isset($domain)) {
+            $matchConditions['domain'] = $domain;
+        }
+
+        if (isset($ip)) {
+            $matchConditions['ip'] = $ip;
+        }
+
+        if (isset($evidence_type)) {
+            $matchConditions['evidence_type'] = $evidence_type_text;
+        }
+
+        if (!empty($searchValue)) {
+            $matchConditions['$or'] = [
+                ['ack_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]
+            ];
+        }
+            if (!empty($matchConditions)) {
+                array_unshift($pipeline, ['$match' => $matchConditions]);
             }
 
             return $collection->aggregate($pipeline);
@@ -582,6 +565,7 @@ class EvidenceController extends Controller
         $case_number = $request->case_number;
         $url = $request->url;
         $domain = $request->domain;
+        $ip = $request->ip;
         $evidence_type = $request->evidence_type;
         $evidence_type_text = $request->evidence_type_text;
         // dd($evidence_type_text);
@@ -593,7 +577,7 @@ class EvidenceController extends Controller
             $to_date = $from_date;
         }
 
-        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain, $evidence_type, $evidence_type_text, $from_date, $to_date) {
+        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain,$ip, $evidence_type, $evidence_type_text, $from_date, $to_date, $searchValue) {
 
 
             if ($from_date && $to_date) {
@@ -660,6 +644,16 @@ class EvidenceController extends Controller
                 ], $pipeline);
 
             }
+            if (isset($ip)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
+                        ]
+                    ]
+                ], $pipeline);
+
+            }
             if (isset($evidence_type)) {
                 $pipeline = array_merge([
                     [
@@ -681,10 +675,23 @@ class EvidenceController extends Controller
                 ], $pipeline);
             }
 
+            if (!empty($searchValue)) {
+                $matchStage['$or'] = [
+                    ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
+                ];
+                $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
+            }
+
             return $collection->aggregate($pipeline);
         });
 
-        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$evidence_type , $evidence_type_text , $from_date , $to_date ) {
+        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$ip, $evidence_type , $evidence_type_text , $from_date , $to_date,$searchValue ) {
 
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
@@ -729,6 +736,16 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
+            if (isset($ip)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
+                        ]
+                    ]
+                ], $pipeline);
+
+            }
             if (isset($evidence_type)){
                 $pipeline = array_merge([
                     [
@@ -747,6 +764,18 @@ class EvidenceController extends Controller
                         ]
                     ]]
                 ], $pipeline);
+            }
+            if (!empty($searchValue)) {
+                $matchStage['$or'] = [
+                    ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
+                ];
+                $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
             }
 
 

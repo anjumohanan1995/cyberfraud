@@ -71,6 +71,7 @@ $user = Auth::user();
 
 <link rel="stylesheet" href="path_to_bootstrap_css">
 <link rel="stylesheet" href="path_to_font_awesome">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container-fluid">
     <div class="breadcrumb-header justify-content-between">

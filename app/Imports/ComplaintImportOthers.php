@@ -18,6 +18,8 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
      * @param Collection $collection
      */
     protected $source_type;
+    protected $caseNumber;
+    protected $filename;
 
     public function __construct($source_type,$caseNumber,$filename)
     {
@@ -34,35 +36,70 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
         return 1;
     }
     /**
-     * @param array $row
+     * Handle the collection of rows from the Excel file.
      *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @param Collection $rows
      */
     public function collection(Collection $rows)
     {
-        // dd($rows);
+        foreach ($rows as $row) {
 
 
-       foreach($rows as $row){
-        $data = [
-                'case_number' => $this->caseNumber,
-                'source_type' => $this->source_type,
-                'file_name'   => $this->filename,
-                'url'        => $row['url'],
-                'domain'     => $row['domain'],
-                'ip'=> $row['ip'],
-                'registrar'=> $row['registrar'],
-                'registry_details'=> $row['registry_details'],
-                'remarks'=> $row['remarks'],
-                'ticket_number'=> $row['ticket_number'],
-                'evidence_type' => strtolower($row['evidence_type']),
-                'source' => $row['source'],
-                'status' => 1
-        ];
-        ComplaintOthers::create($data);
-       }
+            // Convert URL to string
+            $url = $this->convertUrlToString($row['url']);
+
+
+            // Check for duplicates
+            $exists = ComplaintOthers::where('url', $url)
+                ->where('domain', $row['domain'])
+                ->where('ip', $row['ip'])
+                ->exists();
+
+            if (!$exists) {
+                $data = [
+                    'case_number' => $this->caseNumber,
+                    'source_type' => $this->source_type,
+                    'file_name'   => $this->filename,
+                    'url'         => $url,
+                    'domain'      => $row['domain'],
+                    'ip'          => $row['ip'],
+                    'registrar'   => $row['registrar'],
+                    'registry_details' => $row['registry_details'],
+                    'remarks'     => $row['remarks'],
+                    'content_removal_ticket' => $row['content_removal_ticket'],
+                    'data_disclosure_ticket' => $row['data_disclosure_ticket'],
+                    'preservation_ticket' => $row['preservation_ticket'],
+                    'evidence_type' => strtolower($row['evidence_type']),
+                    'source'       => $row['source'],
+                    'status'       => 1
+                ];
+
+
+
+                ComplaintOthers::create($data);
+            }
+        }
 
     }
+
+        /**
+     * Convert URL or mobile to string.
+     *
+     * @param mixed $urlormobile
+     * @return string
+     */
+
+    protected function convertUrlToString($urlormobile)
+    {
+
+        return is_numeric($urlormobile) ? (string) $urlormobile : $urlormobile;
+    }
+
+        /**
+     * Define validation rules for the import.
+     *
+     * @return array
+     */
 
     public function rules(): array
     {
@@ -71,7 +108,7 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
         ->pluck('name')
         ->toArray();
 
-        $uniqueItems = array_unique($evidenceTypes);
+        $uniqueItems = array_unique(array_map('strtolower', $evidenceTypes));
 
         return[
             'url' => 'required',
@@ -86,6 +123,8 @@ class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValida
             ],
 
         ];
+
+
     }
 
 }

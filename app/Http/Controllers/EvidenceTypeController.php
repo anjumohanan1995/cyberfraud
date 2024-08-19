@@ -5,6 +5,7 @@ use App\Models\EvidenceType;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Redirect;
 
 class EvidenceTypeController extends Controller
 {
@@ -47,10 +48,16 @@ class EvidenceTypeController extends Controller
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
-        EvidenceType::create([
-            'name' => isset($request->name) ? strtolower($request->name) : '',
-            'status' => $request->input('status'),
+        $name = strtolower($request->name);
 
+        // Check if the name already exists in the database
+        if (EvidenceType::where('name', $name)->exists()) {
+            return Redirect::back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
+        }
+
+        EvidenceType::create([
+            'name' => $name,
+            'status' => $request->input('status'),
         ]);
 
         return redirect()->route('evidencetype.index')->with('success','Evidence Type Added successfully.');
@@ -102,12 +109,19 @@ class EvidenceTypeController extends Controller
         // Find the role by its ID.
         $data = EvidenceType::findOrFail($id);
 
-        // Update the role with the data from the request
-        $data->name = strtolower($request->name);
+        $newName = strtolower($request->name);
+
+        // Check if the new name already exists for a different record
+        if (EvidenceType::where('name', $newName)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
+        }
+
+        // Update the evidence type with the data from the request
+        $data->name = $newName;
         $data->status = $request->status;
 
         // Update other attributes as needed
-        // Save the updated role
+        // Save the updated evidence type
         $data->save();
 
         // Redirect back with success message

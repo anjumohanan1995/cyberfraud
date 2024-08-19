@@ -140,19 +140,19 @@ $user = Auth::user();
                                                         <div class="tab-pane active" id="tabNew">
                                                             <form id="complaint-form-ncrp">
                                                                 <div class="row">
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="from-date-new">From Date:</label>
                                                                             <input type="date" class="form-control" id="from-date-ncrp" name="from_date">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="to-date-new">To Date:</label>
                                                                             <input type="date" class="form-control" id="to-date-ncrp" name="to_date" onchange="setFromDatencrp()">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="current_date">Today:</label>
                                                                             <select class="form-control" id="current_date" name="current_date">
@@ -163,7 +163,7 @@ $user = Auth::user();
                                                                     </div>
 
 
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         @if($hasShowNCRPETFilter)
                                                                         <div class="form-group">
                                                                             <label for="evidence_type_ncrp">Evidence Type:</label>
@@ -191,11 +191,15 @@ $user = Auth::user();
                                                                     <label for="evidence_type_ncrp">Domain:</label>
                                                                         <input type="text" name="domain" id="domain" class="form-control">
                                                                     </div>
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
+                                                                        <label for="evidence_type_ncrp">IP:</label>
+                                                                            <input type="text" name="ip" id="ip" class="form-control">
+                                                                        </div>
+                                                                    <div class="col-md-3">
                                                                      <label for="evidence_type_ncrp">Acknowledgement No:</label>
                                                                     <input type="text" name="acknowledgement_no" id="acknowledgement_no" class="form-control">
                                                                     </div>
-                                                                </div>
+                                                                </div><br>
                                                                 <div class="row">
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -203,11 +207,11 @@ $user = Auth::user();
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
-                                                
+
                                                             <a class="d-flex align-items-center justify-content-center w-100 h-100"
                                                             data-toggle="tooltip" data-placement="top" title="View Evidence"
                                                             href="{{ route('evidence.bulk.import')}}">
-                                                            <i class="ti ti-upload"></i> Bulk Upload </a> 
+                                                            <i class="ti ti-upload"></i> Bulk Upload </a>
 
                                                                 <table id="ncrp" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
 
@@ -237,19 +241,19 @@ $user = Auth::user();
                                                         <div class="tab-pane" id="tabReturned">
                                                             <form id="complaint-form-others">
                                                                 <div class="row">
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="from-date-new">From Date:</label>
                                                                             <input type="date" class="form-control" id="from-date-others" name="from_date">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="to-date-new">To Date:</label>
                                                                             <input type="date" class="form-control" id="to-date-others" name="to_date" onchange="setFromDateothers()">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="current_date">Today:</label>
                                                                             <select class="form-control" id="current_date_others" name="current_date">
@@ -260,7 +264,7 @@ $user = Auth::user();
                                                                     </div>
 
                                                                     @if($hasShowOtherETFilter)
-                                                                    <div class="col-md-2">
+                                                                    <div class="col-md-3">
                                                                         <div class="form-group">
                                                                             <label for="evidence_type_ncrp">Evidence Type:</label>
                                                                             <select class="form-control" id="evidence_type_others" name="evidence_type_ncrp" onchange="showTextBox('evidence_type_ncrp')">
@@ -280,17 +284,21 @@ $user = Auth::user();
                                                                 <div class="row">
                                                                      <div class="col-md-3">
                                                                     <label for="evidence_type_ncrp">URL:</label>
-                                                                    <input type="text" name="url" id="url-others" class="form-control">
+                                                                    <input type="text" name="url-others" id="url-others" class="form-control">
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                <label for="evidence_type_ncrp">Domain:</label>
+                                                                    <input type="text" name="domain-others" id="domain-others" class="form-control">
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <label for="evidence_type_ncrp">IP:</label>
+                                                                        <input type="text" name="ip-others" id="ip-others" class="form-control">
                                                                     </div>
                                                                     <div class="col-md-3">
-                                                                    <label for="evidence_type_ncrp">Domain:</label>
-                                                                        <input type="text" name="domain-others" id="domain" class="form-control">
-                                                                    </div>
-                                                                    <div class="col-md-2">
                                                                      <label for="evidence_type_ncrp">Case No:</label>
                                                                     <input type="text" name="case_number" id="case_number" class="form-control">
                                                                     </div>
-                                                                </div>
+                                                                </div><br>
                                                                 <div class="row">
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -417,6 +425,7 @@ $(document).ready(function() {
                     acknowledgement_no: $('#acknowledgement_no').val(),
                     url: $('#url').val(),
                     domain: $('#domain').val(),
+                    ip: $('#ip').val(),
                     evidence_type: $("#evidence_type_ncrp").val(),
                     evidence_type_text: $("#evidence_type_ncrp option:selected").text(),
 
@@ -455,6 +464,7 @@ $(document).ready(function() {
                     case_number: $('#case_number').val(),
                     url: $('#url-others').val(),
                     domain: $('#domain-others').val(),
+                    ip: $('#ip-others').val(),
                     evidence_type: $("#evidence_type_others").val(),
                     evidence_type_text: $("#evidence_type_others option:selected").text(),
                 });
