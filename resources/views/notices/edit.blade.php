@@ -61,7 +61,6 @@
                                     {!! $notice->content !!}
                                 </textarea>
                             </div>
-
                             <div class="footer">
                                 <button type="submit" class="btn btn-success">Update</button>
                                 @if (!$notice->approve_id)

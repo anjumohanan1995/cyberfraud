@@ -22,7 +22,7 @@ class Notice extends Eloquent
         'url',
         'content',
         'user_id',
-        'approve_id'
+        'approve_id',
 
 
 

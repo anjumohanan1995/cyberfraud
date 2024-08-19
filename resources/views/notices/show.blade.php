@@ -191,7 +191,6 @@ Dated. 03-07-2024</p>
                 document.head.removeChild(style);
             }
         }
-
         // Apply temporary font size
         setTempFontSize();
 

@@ -91,7 +91,6 @@
                                                 @enderror
                                             </div>
                                         </div> --}}
-
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="password">New Password:</label>

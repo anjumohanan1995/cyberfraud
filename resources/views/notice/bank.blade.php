@@ -159,7 +159,6 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                                                 </select>
                                                 <br>
                                             </div>
-
                                             <button type="button" class="btn btn-primary" id="submitBank">Submit</button>
                                         </form>
 

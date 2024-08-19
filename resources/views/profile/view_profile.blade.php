@@ -83,7 +83,6 @@
         </div>
     </div>
 </div>
-
 <script>
     jQuery('.validatedForm').validate({
         rules: {

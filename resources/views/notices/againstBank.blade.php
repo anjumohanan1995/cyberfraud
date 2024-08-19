@@ -113,8 +113,7 @@
             3. Net banking Login access IP details with time stamp from <b>{{ $from_date }} </b>to <b>{{ $to_date }} </b>of the above mentioned bank accounts with date and time
             <br>
             4. IP details with time stamp of NEFT/IMPS transactions of above mentioned
-            period.
-            <br>
+            period.<br>
             5. Any other relevant information about account or account holder.
 </pre>
 @endforeach

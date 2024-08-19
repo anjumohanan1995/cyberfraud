@@ -157,6 +157,5 @@
             To: The Nodal Officer,  {{$notice[0]['bank']}}, Kerala.
         </p>
         <div id="signature-container" style="margin-top: 20px;"></div>
-
     </div>
 </body>

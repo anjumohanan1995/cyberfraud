@@ -15,7 +15,6 @@
         </div>
     </div>
     <!-- /breadcrumb -->
-
     <!-- main-content-body -->
     <div class="row row-sm">
         <div class="col-md-12 col-xl-12">

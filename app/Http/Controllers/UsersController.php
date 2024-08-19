@@ -78,7 +78,6 @@ class UsersController extends Controller
         return redirect()->route('users.index')->with('success', 'User Added successfully.');
     }
 
-
     /**
      * Display the specified resource.
      *

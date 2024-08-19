@@ -1038,7 +1038,6 @@ public function follow(Request $request, $id)
     }
 }
 
-
         public function generateBankAckNotice(Request $request)
         {
         try {
