@@ -989,9 +989,16 @@ class EvidenceController extends Controller
         return response()->json(['message' => 'Status updated successfully']);
     }
 
-    public function evidenceBulkUpload(Request $request, $ackno){
+    // public function evidenceBulkUpload(Request $request){
 
-        return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
+    //     // return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
+    //     return view('dashboard.bank-case-data.evidence.bulkUpload');
+    // }
+
+    public function evidenceBulkImport(Request $request){
+
+        // return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
+        return view('dashboard.bank-case-data.evidence.bulkUpload');
     }
 
     public function evidenceBulkUploadFile(Request $request){

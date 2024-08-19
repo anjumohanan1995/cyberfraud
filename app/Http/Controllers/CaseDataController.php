@@ -781,59 +781,41 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
        // $transaction_numbers_layer1 = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->get();
         $layers = BankCasedata::where('acknowledgement_no',(int)$id)->groupBy('Layer')->pluck('Layer');
         $pending_banks_array = [];
-        for($i=1;$i<=count($layers);$i++){
-
-            // $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->where('com_status',1)->pluck('transaction_id_or_utr_no');
-
-            $transaction_numbers_right_side="";$transaction_numbers_left_side="";$transaction_numbers_left_side_array="";
-            $transaction_numbers_left_side_array_final="";
-
-            $transaction_numbers_right_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->where('com_status',1)
-                                                            ->where('action_taken_by_bank','money transfer to')
-                                                            ->where('bank','!=','Others')->get();
-
-            ++$i;
-
-            $transaction_numbers_left_side = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$i)->pluck('transaction_id_or_utr_no');
-             //dd($transaction_numbers_left_side);
-
-            $transaction_numbers_left_side_array = explode(" ",$transaction_numbers_left_side);
-
-            $mergedArray = [];
-
-            foreach ($transaction_numbers_left_side_array as $item) {
-
-                $values = explode(',', trim($item, '[]'));
-                $values = array_map('trim', $values);
-                $mergedArray = array_merge($mergedArray, $values);
-            }
-
-            $transaction_numbers_left_side_array_final = [];
-
-            foreach ($mergedArray as $value) {
-                $cleanedValue = trim($value, '"');
-                $transaction_numbers_left_side_array_final[] = $cleanedValue;
-            }
-
-            foreach ($transaction_numbers_right_side as $tn){
-                if($tn->transaction_id_sec){
-                    if (!in_array($tn->transaction_id_sec, $transaction_numbers_left_side_array_final)) {
-                        $j=$i-1;
-                        $pending_banks_array[] = array(
-                            "pending_banks" => $tn->bank,
-                            "transaction_id" => $tn->transaction_id_sec,
-                            "transaction_amount" => $tn->transaction_amount,
-                            "desputed_amount" => $tn->desputed_amount
-                        );
-
-                     }
-
-
+        for ($i = 1; $i <= count($layers); $i++) {
+            $current_layer = BankCasedata::where('acknowledgement_no', (int)$id)
+                ->where('Layer', $i)
+                ->where('com_status', 1)
+                ->where('action_taken_by_bank', 'money transfer to')
+                ->where('bank', '!=', 'Others')
+                ->get(['transaction_id_sec', 'bank', 'transaction_amount', 'desputed_amount']);
+    
+            $next_layer = BankCasedata::where('acknowledgement_no', (int)$id)
+                ->where('Layer', $i + 1)
+                ->pluck('transaction_id_or_utr_no')
+                ->toArray();
+    
+            $current_layer_utr = BankCasedata::where('acknowledgement_no', (int)$id)
+                ->where('Layer', $i)
+                ->pluck('transaction_id_or_utr_no')
+                ->toArray();
+    
+            // Convert to a simple array of transaction numbers
+            $next_layer_utr_array = $this->extractTransactionIds($next_layer);
+            $current_layer_utr_array = $this->extractTransactionIds($current_layer_utr);
+    
+            foreach ($current_layer as $transaction) {
+                if ($transaction->transaction_id_sec) {
+                    if (!in_array($transaction->transaction_id_sec, $next_layer_utr_array) &&
+                        !in_array($transaction->transaction_id_sec, $current_layer_utr_array)) {
+                        $pending_banks_array[] = [
+                            "pending_banks" => $transaction->bank,
+                            "transaction_id" => $transaction->transaction_id_sec,
+                            "transaction_amount" => $transaction->transaction_amount,
+                            "desputed_amount" => $transaction->desputed_amount
+                        ];
+                    }
                 }
-
-
-             }
-             --$i;
+            }
         }
 
      $groupedData = [];
@@ -873,7 +855,13 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         return view('dashboard.case-data-list.details',compact('complaint','complaints','final_array','sum_amount','additional','professions','modus','finalData_pending_banks','hold_amount','lost_amount','pending_amount','transaction_date'));
     }
-
+    private function extractTransactionIds($transactions){
+        $transaction_ids = [];
+        foreach ($transactions as $transaction) {
+            $transaction_ids = array_merge($transaction_ids, array_map('trim', explode(',', trim($transaction, '[]'))));
+        }
+        return array_map('trim', $transaction_ids);
+    }
     public function updateTransactionAmount(Request $request)
     {
         // Get the input values
@@ -901,11 +889,8 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         $main_array = [];
 
-
         foreach ($first_rows as $first_row) {
-
-
-            if($first_row['transaction_id_sec']!=null){
+            if ($first_row['transaction_id_sec'] != null) {
                 if (in_array($first_row['transaction_id_sec'], $processed_ids)) {
                     continue; // Skip processing if already processed
                 }
@@ -913,23 +898,36 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
             // Add current transaction_id_sec to processed list
             $processed_ids[] = $first_row['transaction_id_sec'];
-            //dd($processed_ids);
 
             // Add current first row to main array
             $main_array[] = $first_row;
 
-            $next_layer_rows = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',$layer)->where('transaction_id_or_utr_no','like','%'.$first_row['transaction_id_sec'])->get()->toArray();
+            $next_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
+                ->where('Layer', $layer)
+                ->where('transaction_id_or_utr_no', 'like', '%' . $first_row['transaction_id_sec'] . '%')
+                ->get()
+                ->toArray();
+
+            $same_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
+                ->where('Layer', $layer - 1)
+                ->where('transaction_id_or_utr_no', 'like', '%' . $first_row['transaction_id_sec'] . '%')
+                ->get()
+                ->toArray();
 
             if (!empty($next_layer_rows)) {
-
                 if ($first_row['transaction_id_sec'] === null) {
                     continue;
                 }
 
                 $nested_results = $this->checkifempty($layer, $next_layer_rows, $id, $processed_ids);
-
                 $main_array = array_merge($main_array, $nested_results);
+            } elseif (!empty($same_layer_rows)) {
+                if ($first_row['transaction_id_sec'] === null) {
+                    continue;
+                }
 
+                $nested_results = $this->checkifempty($layer - 1, $same_layer_rows, $id, $processed_ids);
+                $main_array = array_merge($main_array, $nested_results);
             }
         }
 
