@@ -54,7 +54,7 @@
            margin-left:20px;
            margin-right:20px;
            margin:10%;
-           
+
        }
        tbody{
            font-size:18px;
@@ -63,8 +63,8 @@
 
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4;  padding:20px; ">
     <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; margin-left:20px; margin-right:20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px;">
-        <div class="container">
-            <div class="left text">
+        {{-- <div class="container"> --}}
+            {{-- <div class="left text">
                 <h3>POLICE</h1>
             </div>
             <div class="center">
@@ -86,8 +86,8 @@
                 Dated: <strong>{{ $notice[0]['date'] }}</strong><br>
                 {{-- <strong>HARISANKAR IPS</strong><br>
                 Superintendent of Police (ic)<br> --}}
-            </h5>
-        </div>
+            {{-- </h5>
+        </div> --}}
         <b>
             <h2 style=" margin-top: 0; text-align: center;"><u>
                 NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023</u></h2>

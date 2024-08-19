@@ -66,7 +66,6 @@
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
@@ -81,6 +80,29 @@
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                        </div>
+
+                                        {{-- <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="password">Password:</label>
+                                                <input type="password" id="password" name="password" class="form-control" placeholder="" value="{{ old('password') ?: $data->password }}">
+                                                @error('password')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div> --}}
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="password">New Password:</label>
+                                                <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password">
+                                                @error('password')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                                <small class="text-muted">Leave this field empty if you don't want to change the password.</small>
+                                            </div>
+                                        </div>
+
                                         </div>
                                     </div>
 

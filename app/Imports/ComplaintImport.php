@@ -25,7 +25,7 @@ use DateTime;
 class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
 {
 
-    
+
     /**
      * @param Collection $collection
      */
@@ -65,15 +65,15 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
      */
     public function collection(Collection $collection)
     {
-       
+
         $errors = [];
 
-        $chunkStartRow = $this->currentChunkIndex * $this->chunkSize() + $this->startRow(); 
-        $this->currentChunkIndex++; 
-        
-        
+        $chunkStartRow = $this->currentChunkIndex * $this->chunkSize() + $this->startRow();
+        $this->currentChunkIndex++;
+
+
         $collection->transform(function ($row){
-            
+
             return [
                 'sl_no'                     => $row[0] ?? null ,
                 'acknowledgement_no'        => $row[1] ?? null,
@@ -85,10 +85,10 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 'bank_name'                 => $row[7] ?? null,
                 'account_id'                => $row[8] ?? null,
                 'amount'                    => $row[9] ?? null,
-              
+
                 'entry_date'                => $row[10] ?? null,
                 'current_status'            =>$row[11] ?? null,
-            
+
                 'date_of_action'            => $row[12] ?? null,
                 'action_taken_by_name'         => $row[13] ?? null,
                 'action_taken_by_designation'   => $row[14] ?? null,
@@ -109,9 +109,9 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
 
 
         $rows = $filteredCollection;
-      
+
         foreach ($rows as $index => $row){
-        
+
             $parts = explode(' ', $row['entry_date']);
             if (count($parts) == 2) {
                 list($datePart, $timePart) = $parts;
@@ -127,10 +127,10 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                     $row['entry_date'] = "{$datePart} {$formattedTimePart}";
                 }
             }
-        
- 
+
+
             $rowIndex = $chunkStartRow + $index;
-        
+
             if($row['date_of_action'] === 'N/A'){
                 $date_of_action=$row['entry_date'];
             }
@@ -182,15 +182,15 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 // Create a validator with accumulated errors to throw ValidationException
                 $dummyValidator = Validator::make([], []);
                 foreach ($errors as $rowIndex => $messages) {
-                    
+
                     foreach ($messages as $message) {
                         $dummyValidator->errors()->add('row_' . $rowIndex, $message);
                     }
                 }
 
-            }           
+            }
 
-          
+
 
         }
         if($errors){
@@ -217,7 +217,7 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 $date_of_action=$collect['date_of_action'];
             }
 
-          
+
 
             if($complaint){
                 $complaint->source_type = $this->source_type;
@@ -225,10 +225,10 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 $complaint->district = $collect['district'];
                 $complaint->police_station = $collect['police_station'];
                 $complaint->complainant_name = $collect['complainant_name'];
-                $complaint->complainant_mobile = $collect['complainant_mobile'];
+                $complaint->complainant_mobile = $this->convertAcknoToString($collect['complainant_mobile']);
                 $complaint->transaction_id = $this->convertAcknoToString($collect['transaction_id']);
                 $complaint->bank_name = $collect['bank_name'];
-                $complaint->account_id = $collect['account_id'];
+                $complaint->account_id = $this->convertAcknoToString($collect['account_id']);
                 $complaint->amount = $collect['amount'];
 
                 $complaint->entry_date = $this->parseDate($collect['entry_date']);
@@ -308,9 +308,9 @@ protected function formatErrorMessage($message, $index)
     }
 
     function parseDate($dateString, $targetFormat = 'd-m-Y H:i:s') {
-       
+
         // Define possible date formats with placeholders for two-digit years
-       
+
         // if (is_numeric($dateString)) {
         //     dd("number");
         //     return $this->excelSerialToDate($dateString);
@@ -330,23 +330,23 @@ protected function formatErrorMessage($message, $index)
             'm/d/Y H:i:s',
             'd-m-Y, h:i:s A',
             'd/m/Y G:i:s'
-           
+
         ];
 
         foreach ($formats as $format) {
             try {
-              
+
                 $carbonDate = Carbon::createFromFormat($format, $dateString);
-               
+
                 return $carbonDate->format($targetFormat);
             } catch (\Exception $e) {
-              
+
                 continue;
             }
         }
-  
+
         //throw new \Illuminate\Validation\ValidationException("Unable to parse date: '$dateString'");
-     
+
     }
 
     function excelSerialToDate($serial){

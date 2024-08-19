@@ -218,8 +218,8 @@ $user = Auth::user();
                                     <th>SL No</th>
                                     {{-- <th>Acknowledgement No</th> --}}
                                     <th>Evidence Type</th>
-                                    <th>URL</th>
-                                    <th>Mobile</th>
+                                    <th>URL/Mobile</th>
+                                    {{-- <th>Mobile</th> --}}
                                     <th>Domain</th>
                                     <th>IP</th>
                                     <th>Registrar</th>
@@ -363,7 +363,7 @@ $user = Auth::user();
                 // { data: 'acknowledgement_no' },
                 { data: 'evidence_type' },
                 { data: 'url' },
-                { data: 'mobile' },
+                //{ data: 'mobile' },
                 { data: 'domain' },
                 { data: 'ip' },
                 { data: 'registrar' },

@@ -3,94 +3,6 @@
 @section('content')
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        line-height: 1.6;
-    }
-    .container-fluid {
-        padding: 20px;
-    }
-    .notice-header {
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
-    .section {
-        margin-bottom: 20px;
-    }
-    .section-title {
-        font-weight: bold;
-        margin-bottom: 10px;
-        font-size: 1.25rem;
-    }
-    .details-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    .details-table td {
-        padding: 8px;
-        border: 1px solid #ddd;
-    }
-    .details-table th {
-        padding: 8px;
-        border: 1px solid #ddd;
-        text-align: left;
-        background-color: #f8f9fa;
-    }
-    .footer {
-        margin-top: 20px;
-        text-align: center;
-    }
-    .footer p {
-        margin: 5px 0;
-    }
-    .btn {
-        display: inline-block;
-        padding: 10px 20px;
-        font-size: 16px;
-        font-weight: bold;
-        text-align: center;
-        text-decoration: none;
-        color: #fff;
-        background-color: #007bff;
-        border-radius: 5px;
-        border: none;
-        cursor: pointer;
-    }
-    .btn-secondary {
-        background-color: #6c757d;
-    }
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
-    .btn-success {
-        background-color: #28a745;
-    }
-    .btn-success:hover {
-        background-color: #218838;
-    }
-    .signature {
-        margin-top: 20px;
-        text-align: center;
-    }
-    .signature img {
-        max-width: 100%;
-        height: auto;
-    }
-    .card-body {
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
-    min-height: 1px;
-    padding: 1.25rem;
-    height: 1400px;
-}
-
-</style>
-
-<style>
     .custom-dropdown {
         position: relative;
         display: inline-block;
@@ -161,11 +73,7 @@
 
     <!-- main-content-body -->
     <div class="row row-sm">
-        <div class="col-md-12 col-xl-12">
-            <div class="card overflow-hidden review-project">
-                <div class="card-body">
-                    <div class="m-4 d-flex justify-content-between">
-                        <div id="alert_ajaxx" style="display:none"></div>
+    <div id="alert_ajaxx" style="display:none"></div>
                         @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                             {{ session('success') }}
@@ -179,29 +87,44 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
+        <div class="col-md-12 col-xl-12" id="pdf_sec">
+            <div class="card overflow-hidden review-project">
+                <div class="card-body p-5">
+                    <div class="m-4 d-flex justify-content-between">
+                   <div class="text-center w-100">
+                        <img src="../img/newlogo.jpg" class="logo-11" />
+                       <p><b> No. IP(C4)-12442/2024/Cyb(18)
+Cyber Police Headquarters,
+Thiruvananthapuram<br></b>
+sptele.pol@kerala.gov.in<br>
+04712448707<br>
+Dated. 03-07-2024</p>
                     </div>
 
-                    <div class="notice-content" id="notice-content">
+                    </div>
+
+                    <div class="notice-content ps-5 pe-5" id="notice-content">
                         {!! htmlspecialchars_decode($notice->content) !!}
                     </div>
 
-                    <a href="{{ route('notices.index') }}" class="btn btn-secondary">Back to List</a>
-                    <a href="{{ route('notices.edit', $notice->id) }}" class="btn btn-success">Update</a>
-                    <a href="#" class="btn btn-primary" onclick="downloadContent()">Download Content</a>
 
-                    <div class="custom-dropdown">
-                        <button class="custom-dropdown-button btn btn-success">Follow Up</button>
-                        <div class="custom-dropdown-content">
-                            @foreach($users as $user)
-                                <a href="#" data-user-id="{{ $user->id }}">{{ $user->name }}</a>
-                            @endforeach
-                        </div>
-                    </div>
 
 
                 </div>
             </div>
         </div>
+        <a href="{{ route('notices.index') }}" class="btn btn-secondary w-auto me-2">Back to List</a>
+                    <a href="{{ route('notices.edit', $notice->id) }}" class="btn btn-success w-auto me-2">Update</a>
+                    <a href="#" class="btn btn-primary w-auto me-2" onclick="downloadContent()">Download Content</a>
+
+
+                       <span class="custom-dropdown w-auto">  <button class="custom-dropdown-button btn btn-success w-auto">Follow Up</button>
+                        <div class="custom-dropdown-content">
+                            @foreach($users as $user)
+                                <a href="#" data-user-id="{{ $user->id }}">{{ $user->name }}</a>
+                            @endforeach
+                        </div>
+</span>
     </div>
     <!-- /row -->
 </div>
@@ -247,8 +170,34 @@
     function downloadContent() {
     const { jsPDF } = window.jspdf;
 
+            // Function to temporarily add CSS for h5 elements
+            function setTempFontSize() {
+            // Create a <style> element
+            const style = document.createElement('style');
+            style.id = 'temp-font-size-style'; // Add an ID for easy removal
+            style.innerHTML = `
+                .notice-content h5 {
+                    font-size: 30px !important;
+                }
+            `;
+            // Append the <style> element to the <head>
+            document.head.appendChild(style);
+        }
+
+        // Function to remove the temporary CSS
+        function removeTempFontSize() {
+            const style = document.getElementById('temp-font-size-style');
+            if (style) {
+                document.head.removeChild(style);
+            }
+        }
+
+        // Apply temporary font size
+        setTempFontSize();
+
     // Capture the HTML content with html2canvas
-    html2canvas(document.getElementById('notice-content')).then(canvas => {
+    html2canvas(document.getElementById('pdf_sec')).then(canvas => {
+        // alert("hi");
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const imgWidth = 210; // A4 width in mm
@@ -270,6 +219,10 @@
         }
 
         pdf.save('notice-content.pdf');
+
+
+            // Remove the temporary font size style
+            removeTempFontSize();
     });
 }
 

@@ -167,8 +167,35 @@
         </div>
         <!-- /row -->
     </div>
+    <script>
+        $(document).ready(function() {
+            function display_notice_list() {
+                if ($.fn.DataTable.isDataTable('#notice')) {
+                    $('#notice').DataTable().destroy();
+                }
+                var tableNew = $('#notice').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: "{{ route('get_muleaccount_list') }}",
+                        data: function(d) {
+                            return $.extend({}, d, {});
+                        }
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'account_no_2' },
+                    ],
+                    order: [0, 'asc'], // Sorting by SL No in ascending order
+                    ordering: true
+                });
+            }
 
-<script>
+            display_notice_list();
+        });
+    </script>
+
+{{-- <script>
     $(document).ready(function() {
         function display_notice_list(){
 
@@ -199,7 +226,7 @@
 
    display_notice_list();
     });
-</script>
+</script> --}}
 
 
 @endsection

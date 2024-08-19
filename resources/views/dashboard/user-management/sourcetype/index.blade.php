@@ -142,7 +142,7 @@ $user = Auth::user();
                             </div>
 
 
-                            <div class="table-responsive mb-0">
+                            {{-- <div class="table-responsive mb-0">
                                 <table id="example"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                     <thead>
@@ -156,7 +156,7 @@ $user = Auth::user();
                                     <tbody>
                                     </tbody>
                                 </table>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -168,63 +168,63 @@ $user = Auth::user();
         <!-- /row -->
     </div>
 <script>
-    $(document).ready(function(){
-     	var table = $('#example').DataTable({
-            processing: true,
-            serverSide: true,
-	        buttons: [
-	            'copyHtml5',
-	            'excelHtml5',
-	            'csvHtml5',
-	            'pdfHtml5'
-	        ],
-             "ajax": {
+    // $(document).ready(function(){
+    //  	var table = $('#example').DataTable({
+    //         processing: true,
+    //         serverSide: true,
+	//         buttons: [
+	//             'copyHtml5',
+	//             'excelHtml5',
+	//             'csvHtml5',
+	//             'pdfHtml5'
+	//         ],
+    //          "ajax": {
 
-			       	"url": "{{ route('get.sourcetype') }}",
-			       	"data": function ( d ) {
-			        	return $.extend( {}, d, {
+	// 		       	"url": "{{ route('get.sourcetype') }}",
+	// 		       	"data": function ( d ) {
+	// 		        	return $.extend( {}, d, {
 
-			          	});
-       				}
-       			},
+	// 		          	});
+    //    				}
+    //    			},
 
-            columns: [
-                { data: 'id' },
-                { data: 'name' },
-               @if($hasEditSTPermission || $hasDeleteSTPermission) { data: 'edit' } @endif
-			],
-            "order": [0, 'desc'],
-            'ordering': true
-        });
-      	table.draw();
-    });
-    $(document).on('click', '.delete-btn', function() {
-        var Id = $(this).data('id');
-        if (confirm('Are you sure you want to delete this item?')) {
-            $.ajax({
-                url: '/sourcetype/' + Id,
-                type: 'POST', // Use POST method
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: {
-                    _method: 'DELETE' // Override method to DELETE
-                },
-                success: function(response) {
-                    // Handle success response
-                    // Reload the page
-                    $('.alert-success-one').html(response.success +'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +'<span aria-hidden="true">&times;</span>' +'</button>').show();
+    //         columns: [
+    //             { data: 'id' },
+    //             { data: 'name' },
+    //            @if($hasEditSTPermission || $hasDeleteSTPermission) { data: 'edit' } @endif
+	// 		],
+    //         "order": [0, 'desc'],
+    //         'ordering': true
+    //     });
+    //   	table.draw();
+    // });
+    // $(document).on('click', '.delete-btn', function() {
+    //     var Id = $(this).data('id');
+    //     if (confirm('Are you sure you want to delete this item?')) {
+    //         $.ajax({
+    //             url: '/sourcetype/' + Id,
+    //             type: 'POST', // Use POST method
+    //             headers: {
+    //                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //             },
+    //             data: {
+    //                 _method: 'DELETE' // Override method to DELETE
+    //             },
+    //             success: function(response) {
+    //                 // Handle success response
+    //                 // Reload the page
+    //                 $('.alert-success-one').html(response.success +'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +'<span aria-hidden="true">&times;</span>' +'</button>').show();
 
-      	            //table.draw();
+    //   	            //table.draw();
 
-                    location.reload();
-                },
-                error: function(xhr, status, error) {
-                    // Handle error response
-                    console.error(xhr.responseText)
-                }
-            });
-        }
-    });
+    //                 location.reload();
+    //             },
+    //             error: function(xhr, status, error) {
+    //                 // Handle error response
+    //                 console.error(xhr.responseText)
+    //             }
+    //         });
+    //     }
+    // });
 </script>
 @endsection

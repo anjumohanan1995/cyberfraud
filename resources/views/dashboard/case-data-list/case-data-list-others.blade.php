@@ -78,44 +78,57 @@ $user = Auth::user();
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="from-date">Case Number</label>
+                                            <label for="caseNumber">Case Number</label>
                                             <input type="text" class="form-control" id="caseNumber" name="casenumber">
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="to-date">Url</label>
+                                            <label for="url">Url\Mobile</label>
                                             <input type="text" class="form-control" id="url" name="url">
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="mobile">Domain</label>
+                                            <label for="domain">Domain\Post\Profile</label>
                                             <input type="text" class="form-control" id="domain" name="domain">
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="mobile">Registrar</label>
+                                            <label for="registrar">Registrar</label>
                                             <input type="text" class="form-control" id="registrar" name="registrar">
                                         </div>
                                     </div>
-
-                            </div>
-                            <div class="row">
-                            <div class="col-md-3">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="mobile">IP</label>
+                                            <label for="ip">IP\Modus Keyword</label>
                                             <input type="text" class="form-control" id="ip" name="ip">
                                         </div>
                                     </div>
-                            </div>
-                            <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="source_type">Source Type</label>
+                                            <select id="source_type" name="source_type" class="form-control">
+                                                <option value="">Select Source Type</option>
+                                                @foreach($source as $sources)
+                                                    <option value="{{ $sources->_id }}">{{ $sources->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
                                     <div class="col-md-12 text-right">
-                                        <button type="button" id="filter" class="btn btn-primary">Submit</button>
+                                        <button type="submit" id="filter" class="btn btn-primary">Submit</button> <!-- Make sure this is submit -->
                                     </div>
                                 </div>
                             </form>
+
+
 
                             <div class="table-responsive mb-0">
                                 <table id="complaints"
@@ -125,9 +138,9 @@ $user = Auth::user();
                                             <th>SL No</th>
                                             <th>Source type</th>
                                             <th>Case Number</th>
-                                            <th>URL</th>
-                                            <th>Domain</th>
-                                            <th>IP</th>
+                                            <th>URL\ Mobile</th>
+                                            <th>Domain\ Post\ Profile</th>
+                                            <th>IP\ Modus Keyword</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
                                            @if($hasOthersSelfAssign) <th>Actions</th>@endif
@@ -292,84 +305,90 @@ $user = Auth::user();
 
 // self Assign code end
 
+    $(document).ready(function() {
+    // Initialize the DataTable first if not already done
+    var table = $('#complaints').DataTable();
+
+    // Bind the submit event handler to the form
+    $('#complaint-form').on('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Get form values
+        var casenumber = $("#caseNumber").val();
+        var urlValue = $("#url").val(); // Rename variable to avoid conflict
+        var domain = $("#domain").val();
+        var registrar = $("#registrar").val();
+        var ip = $("#ip").val();
+        var source_type = $("#source_type").val();
+
+        // Construct the URL with query parameters
+        var requestUrl = "{{ route('get.datalist.others') }}?casenumber=" + casenumber +
+                         "&url=" + urlValue + "&domain=" + domain +
+                         "&registrar=" + registrar + "&ip=" + ip + "&source_type=" + source_type;
+
+        // Reload DataTable with new data based on selected filters
+        table.ajax.url(requestUrl).load(function(json) {
+            console.log("Data loaded!"); // Confirm DataTable load
+        });
+    });
+});
 
 
 
+// $("#filter").click(function() {
 
-$(document).ready(function(){
+// var casenumber = $('#caseNumber').val();
+// var url = $('#url').val();
+// var domain = $('#domain').val();
+// var registrar = $('#registrar').val();
+// var ip = $('#ip').val();
 
-    $("#filter").click(function(){
+// // if ($.fn.DataTable.isDataTable('#complaints')) {
+// //         $('#complaints').DataTable().destroy(); // Destroy old instance
+// //     }
 
-        var casenumber = $('#caseNumber').val();
-        var url = $('#url').val();
-        var domain = $('#domain').val();
-        var registrar = $('#registrar').val();
-        var ip = $('#ip').val();
+// // Check if DataTable is already initialized
+// // if ($.fn.DataTable.isDataTable('#complaints')) {
+// //     $('#complaints').DataTable().destroy(); // Destroy old instance
+// //     $('#complaints').empty(); // Clear table content to avoid data duplication
+// // }
 
+// var table = $('#complaints').DataTable({
+//     processing: true,
+//     serverSide: true,
+//     buttons: [
+//         'copyHtml5',
+//         'excelHtml5',
+//         'csvHtml5',
+//         'pdfHtml5'
+//     ],
+//     ajax: {
+//         url: "{{ route('get.datalist.others') }}",
+//         data: function(d) {
+//             return $.extend({}, d, {
+//                 "casenumber": casenumber,
+//                 "url": url,
+//                 "domain": domain,
+//                 "registrar": registrar,
+//                 "ip": ip
+//             });
+//         }
+//     },
+//     columns: [
+//         { data: 'id' },
+//         { data: 'source_type' },
+//         { data: 'case_number' },
+//         { data: 'url' },
+//         { data: 'domain' },
+//         { data: 'ip' },
+//         { data: 'registrar' },
+//         { data: 'remarks' }
+//     ],
+//     order: [[0, 'desc']], // Ensure the correct syntax for ordering
+//     ordering: true
+// });
+// });
 
-        if ($.fn.DataTable.isDataTable('#complaints')){
-          $('#complaints').DataTable().destroy();
-        }
-          var table = $('#complaints').DataTable({
-                processing: true,
-                serverSide: true,
-
-                buttons: [
-                    'copyHtml5',
-                    'excelHtml5',
-                    'csvHtml5',
-                    'pdfHtml5'
-                ],
-                "ajax": {
-                    "url": "{{ route('get.datalist.others')}}",
-                    "data": function(d) {
-                        return $.extend({}, d, {
-                            "casenumber":casenumber,
-                            "url":url,
-                            "domain":domain,
-                            "registrar":registrar,
-                            "ip":ip
-                        });
-                    }
-                },
-                columns: [{
-                        data: 'id'
-                    },
-
-                    {
-                        data: 'source_type'
-                    },
-                    {
-                        data: 'case_number'
-                    },
-
-                    {
-                        data: 'url'
-                    },
-
-                    {
-                        data: 'domain'
-                    },
-                    {
-                        data: 'ip'
-                    },
-                    {
-                        data:'registrar'
-                    },
-                    {
-                        data: 'remarks'
-                    }
-
-                ],
-                "order": [0, 'desc'],
-                'ordering': true
-            });
-
-
-
-
-    })
-})
 </script>
 
 

@@ -107,7 +107,7 @@ class CategoryController extends Controller
         $category->status = $request->status;
         $category->update();
         return redirect()->route('category.index')->with('success', 'Category Updated successfully!');
-        
+
     }
 
     /**
@@ -117,8 +117,8 @@ class CategoryController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {       
-            
+    {
+
             $category = Category::findOrFail($id);
             $category->delete();
             return response()->json(['success' => 'Category Deleted successfully!'], 200);
@@ -128,7 +128,7 @@ class CategoryController extends Controller
 
         $draw = $request->get('draw');
         $start = $request->get("start");
-        $rowperpage = $request->get("length"); 
+        $rowperpage = $request->get("length");
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
@@ -137,20 +137,40 @@ class CategoryController extends Controller
 
         $columnIndex = $columnIndex_arr[0]['column'];
         $columnName = $columnName_arr[$columnIndex]['data'];
-        $columnSortOrder = $order_arr[0]['dir']; 
-        $searchValue = $search_arr['value']; 
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
+
+        $query = Category::where('deleted_at', null);
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('name', 'like', '%' . $searchValue . '%');
+            });
+        }
 
         $from_date="";$to_date="";
         $from_date = $request->from_date;
         $to_date = $request->to_date;
 
-        $items = Category::where('deleted_at',null)->orderBy('_id', 'desc')
-                          ->orderBy($columnName, $columnSortOrder);
+        // $items = Category::where('deleted_at',null)->orderBy('_id', 'desc')
+        //                   ->orderBy($columnName, $columnSortOrder);
 
-        $records = $items->skip($start)->take($rowperpage)->get();
-        $totalRecord = Category::where('deleted_at',null)->orderBy('_id', 'desc');
-        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
-        $totalRecordswithFilter = $totalRecords;
+        // $records = $items->skip($start)->take($rowperpage)->get();
+        // $totalRecord = Category::where('deleted_at',null)->orderBy('_id', 'desc');
+        // $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        // $totalRecordswithFilter = $totalRecords;
+
+        $totalRecords = Category::where('deleted_at', null)->count();
+
+        // Total records with filter
+        $totalRecordswithFilter = $query->count();
+
+        // Fetch records with filter
+        $records = $query->orderBy('created_at','desc')
+            ->skip($start)
+            ->take($rowperpage)
+            ->get();
 
         $data_arr = array();
         $i=$start;
@@ -183,14 +203,14 @@ class CategoryController extends Controller
 
     public function addCategory(Request $request){
 
-       
+
         $validate = Validator::make($request->all(),
         [
           'name' => 'required',
           'status' => 'required',
         ]);
         if ($validate->fails()) {
-         
+
             return response()->json(['errors' => $validate->errors()], 422);
         }
 

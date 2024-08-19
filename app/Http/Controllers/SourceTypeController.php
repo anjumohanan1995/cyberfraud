@@ -55,7 +55,7 @@ class SourceTypeController extends Controller
 
         ]);
 
-        return redirect()->route('sourcetype.index')->with('success','Source Type Added successfully.');
+        return redirect()->route('sourcetype.create')->with('success','Source Type Added successfully.');
 
 
     }
@@ -113,7 +113,7 @@ class SourceTypeController extends Controller
         $data->save();
 
         // Redirect back with success message
-        return redirect()->route('sourcetype.index')->with('success', 'Source Type updated successfully!');
+        return redirect()->route('sourcetype.create')->with('success', 'Source Type updated successfully!');
     }
 
     /**
@@ -151,17 +151,38 @@ class SourceTypeController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-            // Total records
-            $totalRecord = SourceType::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+
+        $query = SourceType::where('deleted_at', null);
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('name', 'like', '%' . $searchValue . '%');
+            });
+        }
+
+            // // Total records
+            // $totalRecord = SourceType::where('deleted_at',null)->orderBy('created_at','desc');
+            // $totalRecords = $totalRecord->select('count(*) as allcount')->count();
 
 
-            $totalRecordswithFilte = SourceType::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+            // $totalRecordswithFilte = SourceType::where('deleted_at',null)->orderBy('created_at','desc');
+            // $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
 
-            // Fetch records
-            $items = SourceType::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
+            // // Fetch records
+            // $items = SourceType::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
+            // $records = $items->skip($start)->take($rowperpage)->get();
+
+            $totalRecords = SourceType::where('deleted_at', null)->count();
+
+        // Total records with filter
+        $totalRecordswithFilter = $query->count();
+
+        // Fetch records with filter
+        $records = $query->orderBy('created_at','desc')
+            ->skip($start)
+            ->take($rowperpage)
+            ->get();
 
             $data_arr = array();
             $i=$start;

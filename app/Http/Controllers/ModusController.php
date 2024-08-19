@@ -140,17 +140,30 @@ class ModusController extends Controller
         $columnSortOrder = $order_arr[0]['dir'];
         $searchValue = $search_arr['value'];
 
+        $query = Modus::where('deleted_at', null);
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('name', 'like', '%' . $searchValue . '%');
+            });
+        }
+
         $from_date="";$to_date="";
         $from_date = $request->from_date;
         $to_date = $request->to_date;
 
-        $items = Modus::where('deleted_at',null)->orderBy('_id', 'desc')
-                          ->orderBy($columnName, $columnSortOrder);
+        // $items = Modus::where('deleted_at',null)->orderBy('_id', 'desc')
+        //                   ->orderBy($columnName, $columnSortOrder);
 
-        $records = $items->skip($start)->take($rowperpage)->get();
-        $totalRecord = Modus::where('deleted_at',null)->orderBy('_id', 'desc');
-        $totalRecords = $totalRecord->select('count(*) as allcount')->count();
-        $totalRecordswithFilter = $totalRecords;
+        $totalRecords = Modus::where('deleted_at', null)->orderBy('created_at','desc')->count();
+        $totalRecordswithFilter = $query->count();
+
+        // Fetch records with filter
+        $records = $query->orderBy('created_at','desc')
+            ->skip($start)
+            ->take($rowperpage)
+            ->get();
 
         $data_arr = array();
         $i=$start;

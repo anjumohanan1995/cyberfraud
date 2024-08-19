@@ -119,7 +119,7 @@ class MailController extends Controller
                 // "acknowledgement_no" => $record->ack_no,
                 "evidence_type" => $record->evidence_type,
                 "url" => $record->url,
-                "mobile" => $record->mobile,
+                // "mobile" => $record->mobile,
                 "domain" => $record->domain,
                 "ip" => $record->ip,
                 "registrar" => $record->registrar,
@@ -151,7 +151,7 @@ class MailController extends Controller
         $editButton = '
         <div class="d-flex align-items-center">
             <div>
-                <a class="btn btn-primary" href="' . route('get-portal-link', ['registrar' => $record->registrar]) . '">
+                <a class="btn btn-primary" href="' . route('get-portal-link', ['registrar' => $record->registrar]) . '"  target="_blank">
                     <small>
                         <i class="fas fa-link" data-toggle="tooltip" data-placement="top" title="Portal Link"></i>
                     </small>

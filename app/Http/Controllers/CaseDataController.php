@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use DateTime;
-
+use MongoDB\BSON\ObjectId;
 
 
 
@@ -206,10 +206,10 @@ class CaseDataController extends Controller
 
     public function getDatalist(Request $request)
     {
-        // Initialize variables
+        // Initialize variables (this part remains largely unchanged)
         $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length");
+        $start = (int)$request->get("start");
+        $rowperpage = (int)$request->get("length");
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
@@ -221,320 +221,502 @@ class CaseDataController extends Controller
         $fromDate = $request->get('from_date');
         $toDate = $request->get('to_date');
         $mobile = $request->get('mobile');
-        $acknowledgement_no= $request->get('acknowledgement_no');
+        $acknowledgement_no = $request->get('acknowledgement_no');
         $filled_by = $request->get('filled_by');
         $search_by = $request->get('search_by');
         $options = $request->get('options');
         $com_status = $request->get('com_status');
-        // dd($com_status);
         $fir_lodge = $request->get('fir_lodge');
         $filled_by_who = $request->get('filled_by_who');
         $transaction_id = $request->get('transaction_id');
-        // dd($transaction_id);
         $account_id = $request->get('account_id');
 
-        // Filter conditions
-        // $query = Complaint::groupBy('acknowledgement_no','entry_date')
-        // ->where('deleted_at', null)
-        // ->orderBy('entry_date', 'asc');
-        
- // Filter conditions
- if ($com_status == "1"){
-    $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 1);
-}
-elseif ($com_status == "0"){
-    $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null)->where('com_status', 0);
+        // Convert fromDate and toDate to start and end of the day
+        $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+        $toDateEnd = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
 
-}else{
-    
-    $query = Complaint::groupBy('acknowledgement_no')->where('deleted_at', null);
-}
-// dd($query);
+        // Base pipeline
+        $pipeline = [
+            ['$match' => ['deleted_at' => null]]
+        ];
 
-// if (!empty($com_status)) {
-//     $query->where('com_status', (int)$com_status);
-// }
-
-        if (!empty($com_status)) {
-            $query->where('com_status', (int)$com_status);
+        // Apply conditions
+        if ($com_status == "1" || $com_status == "0") {
+            $pipeline[0]['$match']['com_status'] = (int)$com_status;
         }
 
-        if ($fromDate && $toDate) {
-            $query->whereBetween('entry_date', [Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay(), Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay()]);
+        if ($fromDateStart && $toDateEnd) {
+            // $dump = var_dump(class_exists('MongoDB\BSON\UTCDateTime'));
+            //  dd($dump);
+            $pipeline[0]['$match']['entry_date'] = [
+                '$gte' => new UTCDateTime($fromDateStart->timestamp * 1000),
+                '$lte' => new UTCDateTime($toDateEnd->timestamp * 1000)
+            ];
         }
 
         if (!empty($mobile)) {
-            $query->where('complainant_mobile', (int)$mobile);
+            $pipeline[0]['$match']['complainant_mobile'] = (string)$mobile;
         }
 
         if (!empty($transaction_id)) {
-            $query->whereIn('transaction_id', [(int)$transaction_id, (string)$transaction_id]);
+            $pipeline[0]['$match']['transaction_id'] = ['$in' => [(string)$transaction_id, (string)$transaction_id]];
         }
 
         if (!empty($account_id)) {
-            $query->where('account_id', (int)$account_id);
+            $pipeline[0]['$match']['account_id'] = (string)$account_id;
         }
 
         if (!empty($options) && $options != 'null') {
-            $query->where('bank_name', $options);
+            $pipeline[0]['$match']['bank_name'] = $options;
         }
 
         if (!empty($acknowledgement_no)) {
-            $query->where('acknowledgement_no', (int)$acknowledgement_no);
+            $pipeline[0]['$match']['acknowledgement_no'] = (int)$acknowledgement_no;
         }
 
         if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
-            $query->where('entry_date', '>=', Carbon::now()->subDay()->startOfDay()->timestamp * 1000)
-                  ->where('entry_date', '<=', Carbon::now()->endOfDay()->timestamp * 1000)
-                  ->whereBetween('acknowledgement_no', [$filled_by === 'citizen' ? 21500000000000 : 31500000000000, $filled_by === 'citizen' ? 21599999999999 : 31599999999999]);
+            $pipeline[0]['$match']['entry_date'] = [
+                '$gte' => new UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
+                '$lte' => new UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
+            ];
+            $pipeline[0]['$match']['acknowledgement_no'] = [
+                '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
+                '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
+            ];
         }
 
         if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
-            $query->whereBetween('acknowledgement_no', [$filled_by_who === 'citizen' ? 21500000000000 : 31500000000000, $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999]);
+            $pipeline[0]['$match']['acknowledgement_no'] = [
+                '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
+                '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
+            ];
         }
 
         if (!empty($searchValue)) {
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
-                  ->orWhere('district', 'like', '%' . $searchValue . '%')
-                  ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
-                  ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
-                  ->orWhere('police_station', 'like', '%' . $searchValue . '%');
-            });
+            $pipeline[0]['$match']['$or'] = [
+                ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['district' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['police_station' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['amount' => (int)$searchValue],
+                // ['entry_date' => new UTCDateTime(new DateTime($searchValue))],
+                ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
+            ];
         }
 
-// Check if FIR Lodge filter is enabled
-if ($fir_lodge == "1") {
-    // Retrieve acknowledgment numbers where fir_doc is not null
-    $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
-    // Initialize an empty array to store all acknowledgment numbers
-    $ackNumbersToFilter = [];
+        // FIR Lodge filter
+        if ($fir_lodge == "1" || $fir_lodge == "0") {
+            $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
+            $pipeline[0]['$match']['acknowledgement_no'] = [
+                $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
+            ];
+        }
 
-    // Loop through each acknowledgment number
-    foreach ($ackNumbers as $ackNumber) {
-        // Count the occurrences of the acknowledgment number in the Complaint table
-        $acknumbers = Complaint::where('acknowledgement_no', (int)$ackNumber)->pluck('acknowledgement_no');
+        // Grouping and sorting
+        $pipeline[] = [
+            '$group' => [
+                '_id' => '$acknowledgement_no',
+                'latest_entry_date' => ['$max' => '$entry_date'],
+                'doc' => ['$first' => '$$ROOT']
+            ]
+        ];
+        $pipeline[] = ['$replaceRoot' => ['newRoot' => '$doc']];
+        $pipeline[] = ['$sort' => [$columnName => $columnSortOrder === 'desc' ? 1 : -1]];
 
-        // Merge acknowledgment numbers into the array
-        $ackNumbersToFilter = array_merge($ackNumbersToFilter, $acknumbers->toArray());
-    }
-    // dd($ackNumbersToFilter);
+        // Count total records
+        $countPipeline = $pipeline;
+        $countPipeline[] = ['$count' => 'total'];
+        $totalRecords = Complaint::raw(function($collection) use ($countPipeline) {
+            return $collection->aggregate($countPipeline);
+        })->first()['total'] ?? 0;
 
-    // Apply the FIR Lodge filter to the main query
-    $query->whereIn('acknowledgement_no', $ackNumbersToFilter);
-}
+        // Apply pagination
+        $pipeline[] = ['$skip' => $start];
+        $pipeline[] = ['$limit' => $rowperpage];
 
-// Check if FIR Lodge filter is enabled
-if ($fir_lodge == "0") {
-    // Retrieve acknowledgment numbers where fir_doc is not null
-    $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no');
+        // Execute the main query
+        $records = Complaint::raw(function($collection) use ($pipeline) {
+            return $collection->aggregate($pipeline);
+        });
 
-    // Initialize an empty array to store all acknowledgment numbers
-    $ackNumbersToFilter = [];
+        // Fetch user permissions
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+        $hasShowSelfAssignPermission = $user->role == 'Super Admin' || in_array('Self Assign', $sub_permissions);
+        $hasShowActivatePermission = $user->role == 'Super Admin' || in_array('Activate / Deactivate', $sub_permissions);
 
-    // Loop through each acknowledgment number
-    foreach ($ackNumbers as $ackNumber) {
-        // Add acknowledgment number to the array
-        $ackNumbersToFilter[] = (int)$ackNumber;
-    }
+        $data_arr = [];
+        foreach ($records as $record) {
+            $com = Complaint::where('acknowledgement_no', $record['acknowledgement_no'])->take(10)->get();
 
-    // Apply the FIR Lodge filter to the main query
-    $query->whereNotIn('acknowledgement_no', $ackNumbersToFilter);
-}
-
-// Instead of grouping, let's use a subquery to get the latest entry for each acknowledgement_no
-$latestIds = Complaint::select('acknowledgement_no', DB::raw('MAX(id) as max_id'))
-    ->groupBy('acknowledgement_no');
-
-$query->joinSub($latestIds, 'latest_complaints', function ($join) {
-    $join->on('complaints.id', '=', 'latest_complaints.max_id');
-});
-
-// Apply sorting
-$query->orderBy('entry_date', 'desc');
-    //   ->orderBy($columnName, $columnSortOrder);
-
-// Get total count before pagination
-$totalRecords = $query->count();
-
-// Apply pagination
-$records = $query->skip($start)->take($rowperpage)->get();
-// foreach ($records->take(5) as $record) {
-//     \Log::info("Full record: " . json_encode($record->toArray()));
-// }
-
-//         // Total records count
-//         $totalRecords = $query->get()->count();
-
-//             // Sort by entry_date first, then by dynamic column
-//     $query // Ensure entry_date sorting is first
-//     ->orderBy($columnName, $columnSortOrder)  // Apply dynamic column sorting
-//     ->skip($start)
-//     ->take($rowperpage);
-
-// // Get results
-// $records = $query->get();
-
-
-// // dd($query);
-
-// Total records count
-$totalRecords = $query->get()->count();
-// dd($totalRecords);
-// Fetch records
-$records = $query->orderBy('entry_date', 'desc')
-                 ->orderBy($columnName, $columnSortOrder)
-                 ->skip($start)
-                 ->take($rowperpage)
-                 ->get();
-                //  ->map(function ($item) {
-                //     // Convert entry_date to Carbon instance
-                //     if (isset($item->entry_date)) {
-                //         $item->entry_date = Carbon::createFromFormat('d-m-Y, h:i A', $item->entry_date);
-                //     }
-                //     return $item;
-                // });
-
-
-//    dd($records);
-
-
-
-
-                         $user = Auth::user();
-                                     $role = $user->role;
-                                     $permission = RolePermission::where('role', $role)->first();
-                                     $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
-                                     $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
-                                     if ($sub_permissions || $user->role == 'Super Admin') {
-                                         $hasShowSelfAssignPermission = in_array('Self Assign', $sub_permissions);
-                                         $hasShowActivatePermission = in_array('Activate / Deactivate', $sub_permissions);
-                                     } else{
-                                             $hasShowSelfAssignPermission = $hasShowActivatePermission = false;
-                                         }
-
-
-        $data_arr = array();
-        $i = $start;
-
-        // $totalRecordswithFilter =  $totalRecords;
-
-        foreach ($records as $record){
-            $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->orderBy('entry_date', 'desc')->take(10)->get();
-          
-            $i++;
-            $id = $record->id;
-            $source_type = $record->source_type;
-            $acknowledgement_no = $record->acknowledgement_no;
-
-            $transaction_id="";$amount="";$bank_name="";
-            foreach($com as $com){
-                $transaction_id .= $com->transaction_id."<br>";
-                $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
-                $bank_name .= $com->bank_name."<br>";
-                $complainant_name = $com->complainant_name;
-                $complainant_mobile = $com->complainant_mobile;
-                $district = $com->district;
-                $police_station = $com->police_station;
-                $account_id = $com->account_id;
-               
-                // $entry_date = new DateTime($com->entry_date);
-               
-                $entry_date = $com->entry_date;
-                $entry_date = $entry_date->format('d-m-Y H:i:s');
-                // $entry_date = $date->format('l, F j, Y g:i A');
-                $current_status = $com->current_status;
-
-                // $date_of_action = new DateTime($com->date_of_action);
-                $date_of_action = $com->date_of_action;
-                // $date_of_action = $date_of_action->format('l, F j, Y g:i A');
-
-                $action_taken_by_name = $com->action_taken_by_name;
-                $action_taken_by_designation = $com->action_taken_by_designation;
-                $action_taken_by_mobile = $com->action_taken_by_mobile;
-                $action_taken_by_email = $com->action_taken_by_email;
-                $action_taken_by_bank = $com->action_taken_by_bank;
+            $transaction_id = $amount = $bank_name = "";
+            foreach ($com as $c) {
+                $transaction_id .= $c->transaction_id . "<br>";
+                $amount .= '<span class="editable" data-ackno="' . $record['acknowledgement_no'] . '" data-transaction="' . $c->transaction_id . '" >' . $c->amount . "</span><br>";
+                $bank_name .= $c->bank_name . "<br>";
             }
-            // $ack_no ='<form action="' . route('case-data.view') . '" method="POST">' .
-            // '<input type="hidden" name="_token" value="' . csrf_token() . '">' . // Add CSRF token
-            // '<input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '">' . // Hidden field for the acknowledgment number
-            // '<button class="btn btn-outline-success" type="submit">' . $acknowledgement_no . '</button>' . // Submit button with the acknowledgment number as text
-            // '</form>';
-            $id = Crypt::encrypt($acknowledgement_no);
-            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
-           // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
-            // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
+
+            $id = Crypt::encrypt($record['acknowledgement_no']);
+            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $record['acknowledgement_no'] . '</a>';
+
+            $edit = '';
             if ($hasShowActivatePermission) {
-            $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-            <input
-                data-id="' . $acknowledgement_no . '"
-                onchange="confirmActivation(this)"
-                class="form-check-input"
-                type="checkbox"
-                id="SwitchCheckSizesm' . $com->id . '"
-                ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
-         </div>';
+                $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    <input
+                        data-id="' . $record['acknowledgement_no'] . '"
+                        onchange="confirmActivation(this)"
+                        class="form-check-input"
+                        type="checkbox"
+                        id="SwitchCheckSizesm' . $record['_id'] . '"
+                        ' . ($record['com_status'] == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
+                 </div>';
             }
-         //dd($com);
-         $CUser =Auth::user()->id;
-            if($hasShowSelfAssignPermission) {
-         if(($com->assigned_to == $CUser) && ($com->case_status != null)) {
-            $edit.='<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                <div><p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
-            <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
-</div>
-            </div>';
-         }elseif($com->assigned_to == $CUser){
-            $edit.='
-            <div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
 
-                <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
+            if ($hasShowSelfAssignPermission) {
+                $CUser = Auth::id();
+                if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
+                    $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                        <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                        </div>
+                    </div>';
+                } elseif ($record['assigned_to'] == $CUser) {
+                    $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                    </div>';
+                } elseif ($record['assigned_to'] == null) {
+                    $edit .= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <form action="" method="GET">
+                        <button data-id="' . $record['acknowledgement_no'] . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                        </form>
+                    </div>';
+                } else {
+                    $user = User::find($record['assigned_to']);
+                    if ($user != null) {
+                        $edit .= '<p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                        <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <p class="text-success">Assigned To: ' . $user->name . '</p>
+                        </div>';
+                    }
+                }
+            }
 
-                </div>';
-         } elseif($com->assigned_to == null) {
-            $edit.= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                <form action="" method="GET">
-                <button data-id="' . $acknowledgement_no . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
-                </form>
-                </div>';
-         } else {
-            $user = User::find($com->assigned_to);
-           // dd($user);
-            if($user != null){
-            $edit.= '<p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
-            <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-            <p class="text-success">Assigned To: '. $user->name.'</p>
-            </div>';
-        }
-         }
-        }
-
-            $data_arr[] = array(
-                "id" => $i,
+            $data_arr[] = [
+                "id" => $start + 1,
                 "acknowledgement_no" => $ack_no,
-                "district" => $district."<br>".$police_station,
-                "complainant_name" => $complainant_name."<br>".$complainant_mobile,
+                "district" => $record['district'] . "<br>" . $record['police_station'],
+                "complainant_name" => $record['complainant_name'] . "<br>" . $record['complainant_mobile'],
                 "transaction_id" => $transaction_id,
                 "bank_name" => $bank_name,
-                "account_id" => $account_id,
+                "account_id" => $record['account_id'],
                 "amount" => $amount,
-                "entry_date" => $entry_date, // Use the formatted entry_date array here
-                "current_status" => $current_status,
-                "date_of_action" => $date_of_action,
-                "action_taken_by_name" => $action_taken_by_name,
+                "entry_date" => $record['entry_date']->toDateTime()->format('d-m-Y H:i:s'),
+                "current_status" => $record['current_status'],
+                "date_of_action" => $record['date_of_action'],
+                "action_taken_by_name" => $record['action_taken_by_name'],
                 "edit" => $edit
-            );
+            ];
+
+            $start++;
         }
 
-        $response = array(
+        $response = [
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
             "iTotalDisplayRecords" => $totalRecords,
             "aaData" => $data_arr
-        );
+        ];
 
         return response()->json($response);
     }
+
+    //     public function getDatalist(Request $request)
+    //     {
+    //         // Initialize variables
+    //         $draw = $request->get('draw');
+    //         $start = $request->get("start");
+    //         $rowperpage = $request->get("length");
+    //         $columnIndex_arr = $request->get('order');
+    //         $columnName_arr = $request->get('columns');
+    //         $order_arr = $request->get('order');
+    //         $search_arr = $request->get('search');
+    //         $columnIndex = $columnIndex_arr[0]['column'];
+    //         $columnName = $columnName_arr[$columnIndex]['data'];
+    //         $columnSortOrder = $order_arr[0]['dir'];
+    //         $searchValue = $search_arr['value'];
+    //         $fromDate = $request->get('from_date');
+    //         $toDate = $request->get('to_date');
+    //         $mobile = $request->get('mobile');
+    //         $acknowledgement_no= $request->get('acknowledgement_no');
+    //         $filled_by = $request->get('filled_by');
+    //         $search_by = $request->get('search_by');
+    //         $options = $request->get('options');
+    //         $com_status = $request->get('com_status');
+    //         // dd($com_status);
+    //         $fir_lodge = $request->get('fir_lodge');
+    //         $filled_by_who = $request->get('filled_by_who');
+    //         $transaction_id = $request->get('transaction_id');
+    //         // dd($transaction_id);
+    //         $account_id = $request->get('account_id');
+
+    //     // Convert fromDate and toDate to start and end of the day
+    //     $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+    //     $toDateEnd = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
+
+    //     // Base query
+    //     $query = Complaint::raw(function($collection) use (
+    //         $com_status, $fromDateStart, $toDateEnd, $mobile, $transaction_id, $account_id,
+    //         $options, $acknowledgement_no, $filled_by, $filled_by_who, $searchValue,
+    //         $fir_lodge, $columnName, $columnSortOrder
+    //     ) {
+    //         $pipeline = [
+    //             ['$match' => ['deleted_at' => null]]
+    //         ];
+
+    //         // Apply conditions
+    //         if ($com_status == "1") {
+    //             $pipeline[0]['$match']['com_status'] = 1;
+    //         } elseif ($com_status == "0") {
+    //             $pipeline[0]['$match']['com_status'] = 0;
+    //         }
+
+    //         if ($fromDateStart && $toDateEnd) {
+    //             $pipeline[0]['$match']['entry_date'] = [
+    //                 '$gte' => new MongoDB\BSON\UTCDateTime($fromDateStart->timestamp * 1000),
+    //                 '$lte' => new MongoDB\BSON\UTCDateTime($toDateEnd->timestamp * 1000)
+    //             ];
+    //         }
+
+    //         if (!empty($mobile)) {
+    //             $pipeline[0]['$match']['complainant_mobile'] = (int)$mobile;
+    //         }
+
+    //         if (!empty($transaction_id)) {
+    //             $pipeline[0]['$match']['transaction_id'] = ['$in' => [(int)$transaction_id, (string)$transaction_id]];
+    //         }
+
+    //         if (!empty($account_id)) {
+    //             $pipeline[0]['$match']['account_id'] = (int)$account_id;
+    //         }
+
+    //         if (!empty($options) && $options != 'null') {
+    //             $pipeline[0]['$match']['bank_name'] = $options;
+    //         }
+
+    //         if (!empty($acknowledgement_no)) {
+    //             $pipeline[0]['$match']['acknowledgement_no'] = (int)$acknowledgement_no;
+    //         }
+
+    //         if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
+    //             $pipeline[0]['$match']['entry_date'] = [
+    //                 '$gte' => new MongoDB\BSON\UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
+    //                 '$lte' => new MongoDB\BSON\UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
+    //             ];
+    //             $pipeline[0]['$match']['acknowledgement_no'] = [
+    //                 '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
+    //                 '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
+    //             ];
+    //         }
+
+    //         if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
+    //             $pipeline[0]['$match']['acknowledgement_no'] = [
+    //                 '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
+    //                 '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
+    //             ];
+    //         }
+
+    //         if (!empty($searchValue)) {
+    //             $pipeline[0]['$match']['$or'] = [
+    //                 ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
+    //                 ['district' => ['$regex' => $searchValue, '$options' => 'i']],
+    //                 ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
+    //                 ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
+    //                 ['police_station' => ['$regex' => $searchValue, '$options' => 'i']]
+    //             ];
+    //         }
+
+    //         // FIR Lodge filter
+    //         if ($fir_lodge == "1" || $fir_lodge == "0") {
+    //             $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
+    //             $pipeline[0]['$match']['acknowledgement_no'] = [
+    //                 $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
+    //             ];
+    //         }
+
+    //         // Grouping and sorting
+    //         $pipeline[] = [
+    //             '$group' => [
+    //                 '_id' => '$acknowledgement_no',
+    //                 'latest_entry_date' => ['$max' => '$entry_date'],
+    //                 'doc' => ['$first' => '$$ROOT']
+    //             ]
+    //         ];
+    //         $pipeline[] = ['$replaceRoot' => ['newRoot' => '$doc']];
+    //         $pipeline[] = ['$sort' => [$columnName => $columnSortOrder === 'asc' ? 1 : -1]];
+
+    //         return $pipeline;
+    //     });
+
+    //     // Total records count
+    //     $totalRecords = $query->count();
+
+    //     // Fetch records
+    //     $records = $query->skip($start)->take($rowperpage)->get();
+    //                 //  ->map(function ($item) {
+    //                 //     // Convert entry_date to Carbon instance
+    //                 //     if (isset($item->entry_date)) {
+    //                 //         $item->entry_date = Carbon::createFromFormat('d-m-Y, h:i A', $item->entry_date);
+    //                 //     }
+    //                 //     return $item;
+    //                 // });
+
+
+    // //    dd($records);
+
+
+
+
+    //                          $user = Auth::user();
+    //                                      $role = $user->role;
+    //                                      $permission = RolePermission::where('role', $role)->first();
+    //                                      $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+    //                                      $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+    //                                      if ($sub_permissions || $user->role == 'Super Admin') {
+    //                                          $hasShowSelfAssignPermission = in_array('Self Assign', $sub_permissions);
+    //                                          $hasShowActivatePermission = in_array('Activate / Deactivate', $sub_permissions);
+    //                                      } else{
+    //                                              $hasShowSelfAssignPermission = $hasShowActivatePermission = false;
+    //                                          }
+
+
+    //         $data_arr = array();
+    //         $i = $start;
+
+    //         // $totalRecordswithFilter =  $totalRecords;
+
+    //         foreach ($records as $record){
+    //             $com = Complaint::where('acknowledgement_no',$record->acknowledgement_no)->take(10)->get();
+
+    //             $i++;
+    //             $id = $record->id;
+    //             $source_type = $record->source_type;
+    //             $acknowledgement_no = $record->acknowledgement_no;
+
+    //             $transaction_id="";$amount="";$bank_name="";
+    //             foreach($com as $com){
+    //                 $transaction_id .= $com->transaction_id."<br>";
+    //                 $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
+    //                 $bank_name .= $com->bank_name."<br>";
+    //                 $complainant_name = $com->complainant_name;
+    //                 $complainant_mobile = $com->complainant_mobile;
+    //                 $district = $com->district;
+    //                 $police_station = $com->police_station;
+    //                 $account_id = $com->account_id;
+
+    //                 // $entry_date = new DateTime($com->entry_date);
+
+    //                 $entry_date = $com->entry_date;
+    //                 $entry_date = $entry_date->format('d-m-Y H:i:s');
+    //                 // $entry_date = $date->format('l, F j, Y g:i A');
+    //                 $current_status = $com->current_status;
+
+    //                 // $date_of_action = new DateTime($com->date_of_action);
+    //                 $date_of_action = $com->date_of_action;
+    //                 // $date_of_action = $date_of_action->format('l, F j, Y g:i A');
+
+    //                 $action_taken_by_name = $com->action_taken_by_name;
+    //                 $action_taken_by_designation = $com->action_taken_by_designation;
+    //                 $action_taken_by_mobile = $com->action_taken_by_mobile;
+    //                 $action_taken_by_email = $com->action_taken_by_email;
+    //                 $action_taken_by_bank = $com->action_taken_by_bank;
+    //             }
+    //             // $ack_no ='<form action="' . route('case-data.view') . '" method="POST">' .
+    //             // '<input type="hidden" name="_token" value="' . csrf_token() . '">' . // Add CSRF token
+    //             // '<input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '">' . // Hidden field for the acknowledgment number
+    //             // '<button class="btn btn-outline-success" type="submit">' . $acknowledgement_no . '</button>' . // Submit button with the acknowledgment number as text
+    //             // '</form>';
+    //             $id = Crypt::encrypt($acknowledgement_no);
+    //             $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
+    //            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
+    //             // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
+    //             if ($hasShowActivatePermission) {
+    //             $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+    //             <input
+    //                 data-id="' . $acknowledgement_no . '"
+    //                 onchange="confirmActivation(this)"
+    //                 class="form-check-input"
+    //                 type="checkbox"
+    //                 id="SwitchCheckSizesm' . $com->id . '"
+    //                 ' . ($com->com_status == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
+    //          </div>';
+    //             }
+    //          //dd($com);
+    //          $CUser =Auth::user()->id;
+    //             if($hasShowSelfAssignPermission) {
+    //          if(($com->assigned_to == $CUser) && ($com->case_status != null)) {
+    //             $edit.='<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+    //                 <div><p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
+    //             <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
+    // </div>
+    //             </div>';
+    //          }elseif($com->assigned_to == $CUser){
+    //             $edit.='
+    //             <div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+
+    //                 <button  class="btn btn-success"  data-id="' . $acknowledgement_no . '" onClick="upStatus(this)" type="button">Update Status</button>
+
+    //                 </div>';
+    //          } elseif($com->assigned_to == null) {
+    //             $edit.= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+    //                 <form action="" method="GET">
+    //                 <button data-id="' . $acknowledgement_no . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+    //                 </form>
+    //                 </div>';
+    //          } else {
+    //             $user = User::find($com->assigned_to);
+    //            // dd($user);
+    //             if($user != null){
+    //             $edit.= '<p class="text-success"><strong>Case Status: '.$com->case_status.'</strong></p>
+    //             <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+    //             <p class="text-success">Assigned To: '. $user->name.'</p>
+    //             </div>';
+    //         }
+    //          }
+    //         }
+
+    //             $data_arr[] = array(
+    //                 "id" => $i,
+    //                 "acknowledgement_no" => $ack_no,
+    //                 "district" => $district."<br>".$police_station,
+    //                 "complainant_name" => $complainant_name."<br>".$complainant_mobile,
+    //                 "transaction_id" => $transaction_id,
+    //                 "bank_name" => $bank_name,
+    //                 "account_id" => $account_id,
+    //                 "amount" => $amount,
+    //                 "entry_date" => $entry_date, // Use the formatted entry_date array here
+    //                 "current_status" => $current_status,
+    //                 "date_of_action" => $date_of_action,
+    //                 "action_taken_by_name" => $action_taken_by_name,
+    //                 "edit" => $edit
+    //             );
+    //         }
+
+    //         $response = array(
+    //             "draw" => intval($draw),
+    //             "iTotalRecords" => $totalRecords,
+    //             "iTotalDisplayRecords" => $totalRecords,
+    //             "aaData" => $data_arr
+    //         );
+
+    //         return response()->json($response);
+    //     }
     public function updateStatusOthers(Request $request)
 {
     // Validate the incoming request
@@ -1084,7 +1266,8 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     }
 
     public function caseDataOthers(){
-       return view('dashboard.case-data-list.case-data-list-others');
+        $source=SourceType::get();
+       return view('dashboard.case-data-list.case-data-list-others', compact('source'));
     }
 
     public function getDatalistOthers(Request $request){
@@ -1102,164 +1285,163 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
         $searchValue = $search_arr['value']; // Search value.
-
+        // dd($searchValue);
         $source_types = SourceType::all();
         $casenumber = $request->casenumber;
         $domain = $request->domain;
         $url = $request->url;
         $registrar = $request->registrar;
         $ip = $request->ip;
-        //dd($casenumber);
-        $complaints = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $casenumber, $url, $domain , $registrar , $ip) {
+        $source_type = $request->source_type;
 
-            $pipeline = [
-                [
-                    '$group' => [
-                        '_id' => '$case_number',
-                        'source_type' => ['$addToSet' => '$source_type'],
-                        'url' => ['$addToSet' => '$url'],
-                        'domain' => ['$addToSet' => '$domain'],
-                        'registry_details' => ['$addToSet' => '$registry_details'],
-                        'ip' => ['$addToSet' => '$ip'],
-                        'registrar' => ['$addToSet' => '$registrar'],
-                        'remarks' => ['$addToSet' => '$remarks'],
-                        'assigned_to' => ['$first' => '$assigned_to'], // Include the assigned_to field
-                        'case_status' => ['$first' => '$case_status'],
-                    ]
-                ],
-                [
-                    '$sort' => [
-                        '_id' => 1,
-                ]
-                ],
-                [
-                    '$skip' => (int)$start
-                ],
-                [
-                    '$limit' => (int)$rowperpage
-                ]
+        // dd($source_type);
+        // dd($searchValue, $casenumber, $url, $domain, $registrar, $ip);
+        $pipeline = [];
+
+        // Build the $match stage for search filters
+        $matchStage = [];
+
+        if (!empty($searchValue)) {
+            $matchStage['$or'] = [
+                ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['remarks' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['source.name' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
             ];
+        }
 
-            if (isset($casenumber)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'case_number' => $casenumber
-                        ]
-                    ]
-                ], $pipeline);
-            }
+        // Add additional match conditions for filters
+        if (isset($casenumber)) {
+            $matchStage['case_number'] = $casenumber;
+        }
+        if (isset($url)) {
+            $matchStage['url'] = $url;
+        }
+        if (isset($domain)) {
+            $matchStage['domain'] = $domain;
+        }
+        if (isset($registrar)) {
+            $matchStage['registrar'] = $registrar;
+        }
+        if (isset($ip)) {
+            $matchStage['ip'] = $ip;
+        }
+        if (isset($source_type)) {
+            $matchStage['source_type'] = $source_type;
+        }
 
-            if (isset($url)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'url' => $url
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($registrar)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'registrar' => $registrar
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($ip)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ip' => $ip
-                        ]
-                    ]
-                ], $pipeline);
-            }
+        if (!empty($matchStage)) {
+            $pipeline[] = ['$match' => $matchStage];
+        }
 
+        // Add the $lookup stage to join sourcetype with complaint_others based on the source_type field
+        $pipeline[] = [
+            '$lookup' => [
+                'from' => 'sourcetype',  // Name of the sourcetype collection
+                'localField' => 'source_type',  // Field in complaint_others
+                'foreignField' => '_id',  // Field in sourcetype
+                'as' => 'source'
+            ]
+        ];
+
+        // Unwind the source array to flatten the results
+        $pipeline[] = [
+            '$unwind' => [
+                'path' => '$source',
+                'preserveNullAndEmptyArrays' => true
+            ]
+        ];
+
+        // Group the results by case_number and aggregate other fields
+        $pipeline[] = [
+            '$group' => [
+                '_id' => '$case_number',
+                'source_type' => ['$addToSet' => '$source_type'],
+                'source_name' => ['$first' => '$source.name'],  // Group source name from sourcetype
+                'url' => ['$addToSet' => '$url'],
+                'domain' => ['$addToSet' => '$domain'],
+                'registry_details' => ['$addToSet' => '$registry_details'],
+                'ip' => ['$addToSet' => '$ip'],
+                'registrar' => ['$addToSet' => '$registrar'],
+                'remarks' => ['$addToSet' => '$remarks'],
+                'assigned_to' => ['$first' => '$assigned_to'],
+                'case_status' => ['$first' => '$case_status'],
+            ]
+        ];
+
+        // Sort stage (optional)
+        $pipeline[] = ['$sort' => ['_id' => 1]];
+
+        // Pagination stages
+        $pipeline[] = ['$skip' => (int)$start];
+        $pipeline[] = ['$limit' => (int)$rowperpage];
+
+        // Execute the aggregation query
+        $complaints = ComplaintOthers::raw(function($collection) use ($pipeline) {
             return $collection->aggregate($pipeline);
         });
 
-        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url , $domain , $registrar) {
 
-            $pipeline = [
-                [
-                    '$group' => [
-                        '_id' => '$case_number'
-                    ]
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url, $domain, $registrar, $ip, $source_type) {
+            $pipeline = [];
+
+
+            // Build the $match stage
+            $matchStage = [];
+
+            if (!empty($casenumber)) {
+                $matchStage['case_number'] = $casenumber;
+            }
+            if (!empty($url)) {
+                $matchStage['url'] = $url;
+            }
+            if (!empty($domain)) {
+                $matchStage['domain'] = $domain;
+            }
+            if (!empty($registrar)) {
+                $matchStage['registrar'] = $registrar;
+            }
+            if (!empty($ip)) {
+                $matchStage['ip'] = $ip;
+            }
+            if (!empty($source_type)) {
+                $matchStage['source_type'] = $source_type;
+            }
+
+            if (!empty($matchStage)) {
+                $pipeline[] = ['$match' => $matchStage];
+            }
+
+            // Group by case_number
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => '$case_number'
                 ]
             ];
 
-            if (isset($casenumber)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'case_number' => $casenumber
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($url)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'url' => $url
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($registrar)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'registrar' => $registrar
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($ip)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ip' => $ip
-                        ]
-                    ]
-                ], $pipeline);
-            }
-
+            // Execute the aggregation pipeline
             return $collection->aggregate($pipeline);
         });
 
+
+
+        // dd($complaints);
+        //  dd($distinctCaseNumbers);
 
 
 
         $totalRecords = count($distinctCaseNumbers);
         $data_arr = array();
         $i = $start;
+        // dd($totalRecords);
 
 
         $totalRecordswithFilter =  $totalRecords;
         foreach($complaints as $record){
-
+        // dd($record);
             $i++;
             $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
 
@@ -1289,24 +1471,22 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             }
             $caseNo = $record->_id;
             //dd($caseNo);
-                        $CUser =Auth::user()->id;
+            $CUser =Auth::user()->id;
                     //dd($record);
-                        if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
-                           $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                               <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
-                           <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
-               </div>
-                           </div>';
-                        }elseif($record->assigned_to == $CUser){
+            if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
+                $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                            <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
+                            <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                            </div>
+                        </div>';
+            }elseif($record->assigned_to == $CUser){
 
-                           $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-
-                               <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
-
-                               </div>';
-                        } elseif($record->assigned_to == null) {
+                $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                    </div>';
+            } elseif($record->assigned_to == null) {
                             //dd($casenumber);
-                           $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                                <form action="" method="GET">
                                <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
                                </form>
@@ -1315,16 +1495,14 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                            $user = User::find($record->assigned_to);
                           // dd($user);
                            if($user != null){
-if($record->case_status != null){
-    $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
-}
+                        if($record->case_status != null){
+                            $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
+                        }
                            $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                            <p class="text-success">Assigned To: '. $user->name.'</p>
                            </div>';
-                       }
                         }
-
-
+                        }
 
             $data_arr[] = array(
                     "id" => $i,
