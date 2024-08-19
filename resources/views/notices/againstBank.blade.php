@@ -97,12 +97,14 @@
                         <td style="border: 1px solid #ddd; padding: 8px;">{{ $account['account_no_2'] }}</td>
                         <td style="border: 1px solid #ddd; padding: 8px;">Kerala</td>
                     </tr>
+                @endforeach
+
             </tbody>
         </table>
 
         <p style="font-size: 19px; line-height: 1.5; margin-top: 20px;">
             {{-- <pre> --}}
-        Details Required:
+            Details Required:
         <br>
             1. KYC details, including Adhaar, PAN, primary or alternate mobile contact
             number,email, etc., of the account holder
@@ -115,10 +117,8 @@
             4. IP details with time stamp of NEFT/IMPS transactions of above mentioned
             period.<br>
             5. Any other relevant information about account or account holder.
-</pre>
-@endforeach
-
-    </p>
+{{-- </pre> --}}
+        </p>
 
         <p style="font-size: 19px; line-height: 2; text-align:center;">
             Urgent action and confirmation is solicited by return.<br>
