@@ -32,6 +32,39 @@ $user = Auth::user();
             pointer-events: none; 
             opacity: 0.5; 
         }
+
+#loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    background-color: #fff;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
        
 </style>
 
@@ -80,12 +113,34 @@ $user = Auth::user();
                                     </ul>
                                 </div>
                             @endif
+                            
+                            <div class="alert alert-danger alert-dismissible fade show w-100" role="alert"  style="display:none" id="erroralert">
+                                    <ul id="errors">
+                                      
+                                    </ul>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="alert alert-success alert-dismissible fade show w-100" id="sucessalert" style="display:none" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
 
-
+                                @if (session()->has('upload_id'))
+                                <input type="hidden" id="upload_id" value="{{ session('upload_id') }}">
+                               
+                                @endif
 
                                 @if (session('success'))
-                                    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
-                                        {{ session('success') }}
+                                    <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert" role="alert">
+                                        {{ session('success') }}<div id="loader" class="d-none">
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        </div>
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -131,7 +186,7 @@ $user = Auth::user();
 
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" id="submit" class="btn btn-primary">Submit</button>
                                 </form>
 
                             </div>
@@ -191,3 +246,42 @@ $(document).ready(function(){
             document.body.classList.remove('blur-background');
         });
     </script>
+
+<script>
+$(document).ready(function() {
+
+    @if (session('redirected'))
+ 
+    <?php session()->forget('redirected'); ?>
+    function executeAjaxCall() {
+        var uploadId = $("#upload_id").val();
+        
+        $.ajax({
+            url: '/show-upload-errors/' + uploadId,
+            method: 'GET',
+            success: function(data){
+                $('#errors').html('');
+                
+                if (data.errors.length > 0) {
+                    $('#erroralert').show();
+                    $("#success-alert").hide();
+                    $('#loader').addClass('d-none');
+                    data.errors.forEach(error => {
+                        $('#errors').append('<li>' + error.error + '</li>');
+                    });
+                } else {
+                    $('#erroralert').hide();
+                    $("#success-alert").show();
+                    $('#loader').removeClass('d-none');
+                }
+            }
+        });
+    }
+
+    // Call executeAjaxCall function every 5 seconds
+    setInterval(executeAjaxCall, 2000); 
+    @endif
+})
+
+</script>
+

@@ -266,7 +266,9 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('/update-reported-statusother/{id}', [EvidenceController::class, 'updateReportedStatusOther']);
 
     //evidence bulk upload ncrp
-    Route::get('evidence/bulkUpload/{acknowledgement_no}', [EvidenceController::class, 'evidenceBulkUpload'])->name('evidence.bulkUpload');
+
+    // Route::get('evidence.evidenceBulkUploadImport', [EvidenceController::class, 'evidenceBulkUploadImport']);
+    Route::get('/evidence/bulkimport',[EvidenceController::class, 'evidenceBulkImport'])->name('evidence.bulk.import');
     Route::post('evidence/bulk-upload',[EvidenceController::class, 'evidenceBulkUploadFile'])->name('evidence.bulk-upload');
 
     Route::get('/get-portal-link/{registrar}', [MailController::class, 'getPortalLink'])->name('get-portal-link');
@@ -310,6 +312,10 @@ Route::post('/generate/bankacc/notice', [NoticeController::class, 'generateBankA
 Route::post('/generate/bankack/notice', [NoticeController::class, 'generateBankAckNotice'])->name('generate.bank.ack.notice');
 
 Route::post('/notices/{id}/approve', [NoticeController::class, 'approve'])->name('notices.approve');
+
+Route::get('/show-upload-errors/{uploadId}',[ComplaintController::class, 'showUploadErrors']);
+Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErrors']);
+
 
 
 

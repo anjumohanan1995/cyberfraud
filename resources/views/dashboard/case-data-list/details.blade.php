@@ -208,10 +208,15 @@
                                         <div class="col-4 px-1 mt-3">
                                             <div
                                                 class="task-box primary mb-0 d-flex align-items-center justify-content-center">
-                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                {{-- <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
                                                     data-toggle="tooltip" data-placement="top" title="View Evidence"
                                                     href="{{ route('evidence.bulkUpload', ['acknowledgement_no' => @$id]) }}">
                                                     <i class="ti ti-upload"></i> Bulk Upload
+                                                </a> --}}
+                                                <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
+                                                    data-toggle="tooltip" data-placement="top" title="View Evidence" href="{{ route('bank-case-data.index') }}">
+                                                    
+                                                    <span style="font-size:smaller"><i class="ti ti-plus"></i> Upload<br> Bank Action </span>
                                                 </a>
                                             </div>
                                         </div>

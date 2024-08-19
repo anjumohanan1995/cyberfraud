@@ -127,97 +127,100 @@ class PermissionController extends Controller
     }
     public function getPermissions(Request $request)
     {
-    //    // Fetch permissions from the database with pagination
-    //    $permissions = Permission::paginate(2); // Assuming you want 10 permissions per page
+        # Read value
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows display per page
 
-    //    // Return permissions data along with pagination links in JSON format
-    //    return response()->json([
-    //        'data' => $permissions->items(), // Permissions data for the current page
-    //        'links' => $permissions->links()->toHtml(), // Pagination links HTML
-    //    ]);
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
 
+        $columnIndex = $columnIndex_arr[0]['column']; // Column index
+        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+        $searchValue = $search_arr['value']; // Search value
 
-       # Read value
-       $draw = $request->get('draw');
-       $start = $request->get("start");
-       $rowperpage = $request->get("length"); // Rows display per page
+        // Total records without filtering
+        $totalRecords = Permission::where('deleted_at', null)->count();
 
-       $columnIndex_arr = $request->get('order');
-       $columnName_arr = $request->get('columns');
-       $order_arr = $request->get('order');
-       $search_arr = $request->get('search');
+        // Total records with filtering based on search
+        $totalRecordswithFilter = Permission::where('deleted_at', null)
+            ->when($searchValue, function ($query, $searchValue) {
+                return $query->where(function ($q) use ($searchValue) {
+                    $q->where('name', 'like', '%' . $searchValue . '%')
+                      ->orWhere('description', 'like', '%' . $searchValue . '%');
+                });
+            })
+            ->count();
 
-       $columnIndex = $columnIndex_arr[0]['column']; // Column index
-       $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-       $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-       $searchValue = $search_arr['value']; // Search value
+        // Fetch records with filtering, sorting, and pagination
+        $records = Permission::where('deleted_at', null)
+            ->when($searchValue, function ($query, $searchValue) {
+                return $query->where(function ($q) use ($searchValue) {
+                    $q->where('name', 'like', '%' . $searchValue . '%')
+                      ->orWhere('description', 'like', '%' . $searchValue . '%');
+                });
+            })
+            ->orderBy($columnName, $columnSortOrder)
+            ->skip($start)
+            ->take($rowperpage)
+            ->get();
 
-           // Total records
-           $totalRecord = Permission::where('deleted_at',null)->orderBy('created_at','desc');
-           $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
 
-
-           $totalRecordswithFilte = Permission::where('deleted_at',null)->orderBy('created_at','desc');
-           $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
-
-           // Fetch records
-           $items = Permission::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-           $records = $items->skip($start)->take($rowperpage)->get();
-           $user = Auth::user();
-           $role = $user->role;
-           $permission = RolePermission::where('role', $role)->first();
-           $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
-           $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
-           if ($sub_permissions || $user->role == 'Super Admin') {
+        if ($sub_permissions || $user->role == 'Super Admin') {
             $hasEditPermissionPermission = in_array('Edit Permission', $sub_permissions) || $user->role == 'Super Admin';
-               $hasDeletePermissionPermission = in_array('Delete Permission', $sub_permissions) || $user->role == 'Super Admin';
-               $hasShowSubpermissionsPermission = in_array('Show Subpermissions', $sub_permissions) || $user->role == 'Super Admin';
+            $hasDeletePermissionPermission = in_array('Delete Permission', $sub_permissions) || $user->role == 'Super Admin';
+            $hasShowSubpermissionsPermission = in_array('Show Subpermissions', $sub_permissions) || $user->role == 'Super Admin';
+        } else {
+            $hasEditPermissionPermission = $hasDeletePermissionPermission = $hasShowSubpermissionsPermission = false;
+        }
 
-               } else{
-                   $hasEditRolePermission = $hasDeleteRolePermission = $hasShowPermissionsPermission = false;
-               }
-           $data_arr = array();
-           $i=$start;
+        $data_arr = [];
+        $i = $start;
 
-           foreach($records as $record){
-               $i++;
-               $id = $record->id;
-               $name = $record->name;
-               $edit = '';
-               if ($hasEditPermissionPermission || $user->role == 'Super Admin') {
-                    $edit .= '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
-               }
+        foreach ($records as $record) {
+            $i++;
+            $id = $record->id;
+            $name = $record->name;
+            $edit = '';
 
-               if ($hasDeletePermissionPermission || $user->role == 'Super Admin') {
-                    $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;';
-               }
+            if ($hasEditPermissionPermission || $user->role == 'Super Admin') {
+                $edit .= '<a href="' . url('permissions/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+            }
 
-               if ($hasShowSubpermissionsPermission || $user->role == 'Super Admin') {
-                    $edit .= '<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
-               }
-               //$edit = '<a  href="' . url('permissions/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>&nbsp;&nbsp;<a  href="' . url('subpermissions/'.$id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
+            if ($hasDeletePermissionPermission || $user->role == 'Super Admin') {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>&nbsp;&nbsp;';
+            }
 
-               $data_arr[] = array(
-                   "id" => $i,
-                   "name" => $name,
+            if ($hasShowSubpermissionsPermission || $user->role == 'Super Admin') {
+                $edit .= '<a href="' . url('subpermissions/' . $id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';
+            }
 
-                   "edit" => $edit
-               );
-           }
+            $data_arr[] = [
+                "id" => $i,
+                "name" => $name,
+                "edit" => $edit,
+            ];
+        }
 
-           $response = array(
-           "draw" => intval($draw),
-           "iTotalRecords" => $totalRecords,
-           "iTotalDisplayRecords" => $totalRecordswithFilter,
-           "aaData" => $data_arr
-           );
+        $response = [
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr,
+        ];
 
-           return response()->json($response);
-
-
-
-
+        return response()->json($response);
     }
+
+
 
     public function addSubpermission(Request $request,$id)
     {

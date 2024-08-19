@@ -69,7 +69,7 @@ $user = Auth::user();
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
             <div>
-                <h4 class="content-title mb-2">Hi, welcome back!</h4>
+                <h4 class="content-title mb-2">Hi, welcome back !</h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="#">Reports</a></li>
@@ -203,7 +203,7 @@ $user = Auth::user();
                                                                             <th>Account ID</th>
                                                                             <th>Amount</th>
                                                                             <th>Entry Date</th>
-                                                                            <th>Current Status</th>
+                                                                            {{-- <th>Current Status</th> --}}
                                                                             <th>Date of Action</th>
                                                                             <th>Action Taken By Bank</th>
                                                                             <th>Action Taken By Name</th>
@@ -295,9 +295,9 @@ $user = Auth::user();
                                                                             <th>Source type</th>
                                                                             <th>Case Number</th>
                                                                             <th>Evidence Type</th>
-                                                                            <th>URL</th>
-                                                                            <th>Domain</th>
-                                                                            <th>IP</th>
+                                                                            <th>URL / Mobile No.</th>
+                                                                            <th>Domain / Post / Profile</th>
+                                                                            <th>IP / Modus Keyword</th>
                                                                             <th>Registrar</th>
                                                                             <th>Remarks</th>
                                                                         </tr>
@@ -390,7 +390,7 @@ $user = Auth::user();
                 { data: 'account_id' },
                 { data: 'amount' },
                 { data: 'entry_date' },
-                { data: 'current_status' },
+                // { data: 'current_status' },
                 { data: 'date_of_action' },
                 { data: 'action_taken_by_bank' },
                 { data: 'action_taken_by_name' },

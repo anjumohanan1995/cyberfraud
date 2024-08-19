@@ -342,7 +342,7 @@ if (empty($bankCaseData)) {
         'recordsTotal' => 0,
         'recordsFiltered' => 0,
         'data' => [],
-        'error' => 'No bank case data found for the specified criteria'
+        //'error' => 'No bank case data found for the specified criteria'
     ]);
 }
         $acknowledgementNos = array_column($bankCaseData, '_id');
@@ -681,7 +681,7 @@ $filteredResults[$ackNo]['modus'] = $modus_name;
                 'recordsTotal' => 0,
                 'recordsFiltered' => 0,
                 'data' => [],
-                'error' => 'No bank case data found for the specified criteria'
+               // 'error' => 'No bank case data found for the specified criteria'
             ]);
         }
 
