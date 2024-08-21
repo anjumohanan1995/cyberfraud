@@ -2,129 +2,136 @@
 
 namespace App\Imports;
 
-use App\Models\Complaint;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
-use Illuminate\Support\Facades\Validator;
 use App\Models\ComplaintOthers;
 use App\Models\EvidenceType;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
-class ComplaintImportOthers implements ToCollection, WithHeadingRow , WithValidation
+class ComplaintImportOthers implements ToCollection, WithStartRow
 {
-    /**
-     * @param Collection $collection
-     */
+    public $newRecordsInserted = false;
     protected $source_type;
     protected $caseNumber;
     protected $filename;
+    protected $uniqueEvidenceTypes;
 
-    public function __construct($source_type,$caseNumber,$filename)
+    public function __construct($source_type, $caseNumber, $filename)
     {
         $this->source_type = $source_type;
         $this->caseNumber = $caseNumber;
         $this->filename = $filename;
+        $this->uniqueEvidenceTypes = $this->getUniqueEvidenceTypes();
     }
 
-    /**
-     * @return int
-     */
     public function startRow(): int
     {
-        return 1;
+        return 2;
     }
-    /**
-     * Handle the collection of rows from the Excel file.
-     *
-     * @param Collection $rows
-     */
-    public function collection(Collection $rows)
+
+    public function collection(Collection $collection)
     {
-        foreach ($rows as $row) {
+        $errors = [];
+        // dd($collection);
+        foreach ($collection as $index => $row) {
+            $data = [
+                'url_mobile' => $row[1],
+                'domain_post_profile' => $row[2],
+                'evidence_type' => $row[10],
+                // Add other fields as needed
+            ];
 
+            try {
+                $this->validateRow($data, $index + $this->startRow());
 
-            // Convert URL to string
-            $url = $this->convertUrlToString($row['url']);
-
-
-            // Check for duplicates
-            $exists = ComplaintOthers::where('url', $url)
-                ->where('domain', $row['domain'])
-                ->where('ip', $row['ip'])
-                ->exists();
-
-            if (!$exists) {
-                $data = [
+                $complaintData = [
                     'case_number' => $this->caseNumber,
                     'source_type' => $this->source_type,
                     'file_name'   => $this->filename,
-                    'url'         => $url,
-                    'domain'      => $row['domain'],
-                    'ip'          => $row['ip'],
-                    'registrar'   => $row['registrar'],
-                    'registry_details' => $row['registry_details'],
-                    'remarks'     => $row['remarks'],
-                    'content_removal_ticket' => $row['content_removal_ticket'],
-                    'data_disclosure_ticket' => $row['data_disclosure_ticket'],
-                    'preservation_ticket' => $row['preservation_ticket'],
-                    'evidence_type' => strtolower($row['evidence_type']),
-                    'source'       => $row['source'],
-                    'status'       => 1
+                    'url'         => $this->convertUrlToString($data['url_mobile']),
+                    'domain'      => $data['domain_post_profile'],
+                    'ip'          => $row[3],
+                    'registrar'   => $row[4],
+                    'registry_details' => $row[5],
+                    'remarks'     => $row[6],
+                    'content_removal_ticket' => $row[7],
+                    'data_disclosure_ticket' => $row[8],
+                    'preservation_ticket' => $row[9],
+                    'evidence_type' => strtolower($data['evidence_type']),
+                    'source'       => $row[11],
+                    'status'       => 1,
+                    'reported_status' => 'active'
                 ];
 
 
-
-                ComplaintOthers::create($data);
+                if (!$this->isDuplicate($complaintData)) {
+                    ComplaintOthers::create($complaintData);
+                    $this->newRecordsInserted = true;
+                }
+            } catch (ValidationException $e) {
+                // dd($e);
+                // Collect validation errors for this row
+                $errors[$index + $this->startRow()] = $e->errors();
+            } catch (\Exception $e) {
+                // Log the error and throw a generic error with row number
+                \Illuminate\Support\Facades\Log::error('Error processing row ' . ($index + $this->startRow()) . ': ' . $e->getMessage());
+                throw new \Exception("Error processing row " . ($index + $this->startRow()) . ": " . $e->getMessage());
             }
         }
 
+        if (!empty($errors)) {
+            // Prepare a dummy validator to throw a validation exception with collected errors
+            $dummyValidator = Validator::make([], []);
+            foreach ($errors as $rowIndex => $errorMessages) {
+                $dummyValidator->errors()->add($rowIndex, $errorMessages);
+            }
+            throw new ValidationException($dummyValidator);
+        }
     }
 
-        /**
-     * Convert URL or mobile to string.
-     *
-     * @param mixed $urlormobile
-     * @return string
-     */
-
-    protected function convertUrlToString($urlormobile)
+    protected function validateRow($data, $rowIndex)
     {
-
-        return is_numeric($urlormobile) ? (string) $urlormobile : $urlormobile;
-    }
-
-        /**
-     * Define validation rules for the import.
-     *
-     * @return array
-     */
-
-    public function rules(): array
-    {
-        $evidenceTypes = EvidenceType::where('status', 'active')
-        ->whereNull('deleted_at')
-        ->pluck('name')
-        ->toArray();
-
-        $uniqueItems = array_unique(array_map('strtolower', $evidenceTypes));
-
-        return[
-            'url' => 'required',
-            'domain' => 'required',
+        $validator = Validator::make($data, [
+            'url_mobile' => 'required',
+            'domain_post_profile' => 'required',
             'evidence_type' => [
                 'required',
-                function ($attribute, $value, $fail) use ($uniqueItems) {
-                    if (!in_array(strtolower($value), $uniqueItems)) {
+                function ($attribute, $value, $fail) {
+                    if (!in_array(strtolower($value), $this->uniqueEvidenceTypes)) {
                         $fail("The selected {$attribute} is invalid.");
                     }
                 },
             ],
+        ]);
 
-        ];
-
-
+        if ($validator->fails()) {
+            // dd("hi");
+            throw new ValidationException($validator, "Validation failed for row {$rowIndex}: " . json_encode($validator->errors()));
+        }
     }
 
+    protected function convertUrlToString($urlormobile)
+    {
+        return is_numeric($urlormobile) ? (string) $urlormobile : $urlormobile;
+    }
+
+    protected function isDuplicate($data)
+    {
+        return ComplaintOthers::where('url', $data['url'])
+            ->where('domain', $data['domain'])
+            ->where('ip', $data['ip'])
+            ->exists();
+    }
+
+    protected function getUniqueEvidenceTypes()
+    {
+        $evidenceTypes = EvidenceType::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->pluck('name')
+            ->toArray();
+
+        return array_unique(array_map('strtolower', $evidenceTypes));
+    }
 }

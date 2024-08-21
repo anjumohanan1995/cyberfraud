@@ -35,7 +35,7 @@ class ComplaintController extends Controller
     {
 
         $file = $request->file('complaint_file');
-      
+
         $source_type = $request->input('source_type');
         if($source_type){
             if($source_type !== 'NCRP'){
@@ -58,39 +58,66 @@ class ComplaintController extends Controller
                    $path = $file->storeAs('uploads/complaints/others/', $fileName);
 
                 }
-
+                try {
             FacadesExcel::import(new ComplaintImportOthers($source_type,$request->case_number,$fileName), $request->complaint_file);
             return redirect()->back()->with('success', 'Form submitted successfully!');
-            }
+        } catch (ValidationException $e) {
+            // dd("1");
+            // Catch and display validation errors
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            // if ($e instanceof \Illuminate\Validation\ValidationException) {
+            //     // Retrieve the validation errors
+            //     $errors = $e->validator->getMessageBag();
+            //     // dd($errors);
+
+            //     // Redirect back with validation errors and input data
+            //     return redirect()->back()->withErrors($errors)->withInput();
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                // Flatten the validation errors into a simple array
+                $errors = $e->validator->errors()->all();
+
+                // Redirect back with validation errors and input data
+                return redirect()->back()->withErrors($errors)->withInput();
+
+            } else {
+            // dd("2");
+            // Log the error and show a generic message
+            \Illuminate\Support\Facades\Log::error('File import failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while processing the file. Please try again.')->withInput();
+                    }
+        }
+    }
+
             else{
 
                 $request->validate([
-                    'complaint_file' => 'required|file|mimes:xlsx,csv,txt,ods|max:100000' 
+                    'complaint_file' => 'required|file|mimes:xlsx,csv,txt,ods|max:100000'
                 ]);
 
                 if ($file){
                     try {
-                        
+
                         // FacadesExcel::import(new ComplaintImport($source_type), $file);
                         $userId = Auth::user()->id;
-                        $uploadId = (string) Str::uuid(); 
+                        $uploadId = (string) Str::uuid();
                         session()->forget('upload_id');
                         session()->put('upload_id', $uploadId);
                         $filePath = $request->file('complaint_file')->store('imports');
                         ImportComplaintsJob::dispatch($filePath, $source_type , $userId , $uploadId);
-                       
+
                         return redirect()->back()->with('success', 'Uploading...')->with('redirected', true);
-                        
+
                         //UploadErrors::where('upload_id', $uploadId)->delete();
-                        
+
                     } catch (\Illuminate\Validation\ValidationException $e){
                         // Show all validation errors
-                       
+
                         return redirect()->back()->withErrors($e->errors())->withInput();
-                    } 
+                    }
                     catch (\Exception $e) {
                         Log::error($e->getMessage());
-                      
+
                         return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                     }
                 } else{
@@ -106,9 +133,9 @@ class ComplaintController extends Controller
 }
 
     public function showUploadErrors($uploadId){
-      
+
         $errors = UploadErrors::where('user_id', auth()->id())->where('upload_id', $uploadId)->get();
-        
+
         return response()->json(['errors' => $errors]);
     }
 

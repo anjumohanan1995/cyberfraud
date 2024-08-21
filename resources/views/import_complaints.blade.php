@@ -20,17 +20,17 @@ $user = Auth::user();
         .spinner-container {
             position: fixed;
             top: 40%;
-            left: 50%;                         
-            z-index: 9999; 
+            left: 50%;
+            z-index: 9999;
             display: none;
         }
         .spinner-active {
-            display: block !important; 
+            display: block !important;
         }
         .blur-background {
-            
-            pointer-events: none; 
-            opacity: 0.5; 
+
+            pointer-events: none;
+            opacity: 0.5;
         }
 
 #loader {
@@ -65,7 +65,7 @@ $user = Auth::user();
         opacity: 1;
     }
 }
-       
+
 </style>
 
 @section('content')
@@ -113,10 +113,10 @@ $user = Auth::user();
                                     </ul>
                                 </div>
                             @endif
-                            
+
                             <div class="alert alert-danger alert-dismissible fade show w-100" role="alert"  style="display:none" id="erroralert">
                                     <ul id="errors">
-                                      
+
                                     </ul>
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
@@ -131,7 +131,7 @@ $user = Auth::user();
 
                                 @if (session()->has('upload_id'))
                                 <input type="hidden" id="upload_id" value="{{ session('upload_id') }}">
-                               
+
                                 @endif
 
                                 @if (session('success'))
@@ -232,16 +232,16 @@ $(document).ready(function(){
         function showSpinner() {
             var spinnerContainer = document.getElementById('spinnerContainer');
             spinnerContainer.classList.add('spinner-active'); // Show spinner
-            
+
             // Blur the background
             document.body.classList.add('blur-background');
         }
-        
+
         // Hide spinner when page loaded
         window.addEventListener('load', function() {
             var spinnerContainer = document.getElementById('spinnerContainer');
             spinnerContainer.classList.remove('spinner-active'); // Hide spinner after page loaded
-            
+
             // Unblur the background
             document.body.classList.remove('blur-background');
         });
@@ -251,17 +251,17 @@ $(document).ready(function(){
 $(document).ready(function() {
 
     @if (session('redirected'))
- 
+
     <?php session()->forget('redirected'); ?>
     function executeAjaxCall() {
         var uploadId = $("#upload_id").val();
-        
+
         $.ajax({
             url: '/show-upload-errors/' + uploadId,
             method: 'GET',
             success: function(data){
                 $('#errors').html('');
-                
+
                 if (data.errors.length > 0) {
                     $('#erroralert').show();
                     $("#success-alert").hide();
@@ -279,7 +279,7 @@ $(document).ready(function() {
     }
 
     // Call executeAjaxCall function every 5 seconds
-    setInterval(executeAjaxCall, 2000); 
+    setInterval(executeAjaxCall, 2000);
     @endif
 })
 

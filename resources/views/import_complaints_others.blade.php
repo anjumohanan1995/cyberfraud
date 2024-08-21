@@ -59,15 +59,22 @@ $user = Auth::user();
                                     </div>
                                 @endif
                                 @if ($errors->any())
-                                    <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-                                       @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                        @endforeach
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                @endif
+                                <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
+                                    @foreach ($errors->all() as $error)
+                                        @if (is_array($error))
+                                            @foreach ($error as $e)
+                                                <li>{{ $e }}</li>
+                                            @endforeach
+                                        @else
+                                            <li>{{ $error }}</li>
+                                        @endif
+                                    @endforeach
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
                             </div>
                             @if ($hasUploadOtherPermission)
 <div class=" m-4 d-flex justify-content-between">
