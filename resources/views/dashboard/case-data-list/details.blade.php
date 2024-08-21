@@ -2,6 +2,9 @@
 
 @section('content')
     <style>
+    .main-header-left{
+    	display:none;
+    }
         aside.main-sidebar{
             display:none;
         }
@@ -273,11 +276,14 @@
                                                     <label for="profession">Modus:</label>
                                                     <select class="form-control" id="modus" name="modus">
                                                         <option value="">--select--</option>
-                                                        @foreach($modus as $modus)
-                                                            <option value="{{ $modus->id }}" {{ (isset($additional->modus) && $additional->modus== $modus->id) ? 'selected' : '' }}>
-                                                                {{ $modus->name }}
-                                                            </option>
-                                                        @endforeach
+                                                        @if ($modus)
+                                                            @foreach($modus as $modus)
+                                                                <option value="{{ $modus->id }}" {{ (isset($additional->modus) && $additional->modus== $modus->id) ? 'selected' : '' }}>
+                                                                    {{ $modus->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+
                                                     </select>
                                                     @error('modus')
                                                         <div class="text-danger">{{ $message }}</div>
