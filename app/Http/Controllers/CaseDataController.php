@@ -439,7 +439,7 @@ class CaseDataController extends Controller
             }
 
             $id = Crypt::encrypt($record['acknowledgement_no']);
-            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $record['acknowledgement_no'] . '</a>';
+            $ack_no = '<a class="btn btn-outline-primary" target="_blank" href="' . route('case-data.view', ['id' => $id]) . '">' . $record['acknowledgement_no'] . '</a>';
 
             $edit = '';
             if ($hasShowActivatePermission) {

@@ -2,6 +2,12 @@
 
 @section('content')
     <style>
+        aside.main-sidebar{
+            display:none;
+        }
+        .main-content{
+            margin-left: 0%;
+        }
         .table {
             width: 100%;
             overflow-x: scroll;
@@ -215,7 +221,7 @@
                                                 </a> --}}
                                                 <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
                                                     data-toggle="tooltip" data-placement="top" title="View Evidence" href="{{ route('bank-case-data.index') }}">
-                                                    
+
                                                     <span style="font-size:smaller"><i class="ti ti-plus"></i> Upload<br> Bank Action </span>
                                                 </a>
                                             </div>
@@ -469,25 +475,26 @@
 
                                     </div>
                                 @else
-                                    <table class="table table-bordered table-responsive">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped" style="table-layout:fixed">
                                         <thead>
                                             <tr>
-                                                <th >Account No./(Wallet/PG/PA) Id<br>
+                                                <th style="width: 140px;">Account No./(Wallet/PG/PA) Id<br>
                                                     <hr> Transaction ID / UTR Number
                                                 </th>
-                                                <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
-                                                <th>Bank<br>
+                                                <th style="width: 120px;">Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
+                                                <th style="width: 105px;">Bank<br>
                                                     <hr>(Wallet/PG/PA)<br>
                                                     <hr> Merchant<br>
                                                     <hr>Insurance
                                                 </th>
-                                                <th>Account Details</th>
-                                                <th>Transaction Details</th>
-                                                <th>Branch Location<br>
+                                                <th style="width: 115px;">Account Details</th>
+                                                <th style="width: 150px;">Transaction Details</th>
+                                                <th style="width: 135px;">Branch Location<br>
                                                     <hr>Branch Manager Name & Contact Details
                                                 </th>
-                                                <th>Reference No / Remarks</th>
-                                                <th>ATM ID<br>
+                                                <th style="width: 250px;">Reference No / Remarks</th>
+                                                <th style="width: 140px;">ATM ID<br>
                                                     <hr>Place / Location of ATM
                                                 </th>
                                                 <th>Action Taken By<br>
@@ -565,6 +572,7 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                            </div>
                                 @endif
                             </div>
 
