@@ -214,13 +214,17 @@ if ($evidence_type_ncrp || $search_value_ncrp) {
 //     }
 // }
 
-
 if (!empty($searchValue)) {
     $query->where(function ($q) use ($searchValue) {
         // Check if the search value is numeric
-        $q->orWhere('acknowledgement_no', (int)$searchValue)
-          ->orWhere('amount', (int)$searchValue)
-          ->orWhere('district', 'like', '%' . $searchValue . '%')
+        if (is_numeric($searchValue)) {
+            $numericValue = $searchValue + 0; // Converts to int or float automatically
+            $q->orWhere('acknowledgement_no', (int)$numericValue)
+              ->orWhere('amount', $numericValue);
+        }
+
+        // String-based searches
+        $q->orWhere('district', 'like', '%' . $searchValue . '%')
           ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
           ->orWhere('complainant_mobile', 'like', '%' . $searchValue . '%')
           ->orWhere('transaction_id', 'like', '%' . $searchValue . '%')
@@ -265,7 +269,7 @@ if (!empty($searchValue)) {
             foreach($com as $com){
                 $transaction_id .= $com->transaction_id."<br>";
                 // $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
-                $amount .= $com->amount;
+                $amount .= $com->amount . "<br>";
                 $bank_name .= $com->bank_name."<br>";
                 $complainant_name = $com->complainant_name;
                 $complainant_mobile = $com->complainant_mobile;
