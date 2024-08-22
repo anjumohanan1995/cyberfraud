@@ -149,8 +149,7 @@ class PermissionController extends Controller
         $totalRecordswithFilter = Permission::where('deleted_at', null)
             ->when($searchValue, function ($query, $searchValue) {
                 return $query->where(function ($q) use ($searchValue) {
-                    $q->where('name', 'like', '%' . $searchValue . '%')
-                      ->orWhere('description', 'like', '%' . $searchValue . '%');
+                    $q->where('name', 'like', '%' . $searchValue . '%');
                 });
             })
             ->count();
@@ -159,8 +158,7 @@ class PermissionController extends Controller
         $records = Permission::where('deleted_at', null)
             ->when($searchValue, function ($query, $searchValue) {
                 return $query->where(function ($q) use ($searchValue) {
-                    $q->where('name', 'like', '%' . $searchValue . '%')
-                      ->orWhere('description', 'like', '%' . $searchValue . '%');
+                    $q->where('name', 'like', '%' . $searchValue . '%');
                 });
             })
             ->orderBy($columnName, $columnSortOrder)

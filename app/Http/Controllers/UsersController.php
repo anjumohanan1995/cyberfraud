@@ -269,17 +269,25 @@ class UsersController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-            // Total records
-            $totalRecord = User::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $query = User::where('deleted_at', null);
 
+        // Search
+        if(!empty($searchValue)) {
+            $query->where(function($q) use ($searchValue) {
+                $q->where('name', 'like', '%' . $searchValue . '%')
+                  ->orWhere('email', 'like', '%' . $searchValue . '%')
+                  ->orWhere('role', 'like', '%' . $searchValue . '%');
+            });
+        }
 
-            $totalRecordswithFilte = User::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        // Total records
+        $totalRecords = $query->count();
 
-            // Fetch records
-            $items = User::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
+        // Sort
+        $query->orderBy($columnName, $columnSortOrder);
+
+        // Pagination
+        $records = $query->skip($start)->take($rowperpage)->get();
 
             $user = Auth::user();
             $role = $user->role;
@@ -324,7 +332,7 @@ class UsersController extends Controller
             $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "iTotalDisplayRecords" => $totalRecords,
             "aaData" => $data_arr
             );
 

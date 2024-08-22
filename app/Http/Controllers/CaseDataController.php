@@ -1778,7 +1778,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['Sl.no', 'URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
             ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','TK0017','TK0018','Instagram','Public'],
             ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','TK0024','TK0025','Website','Public'],
             ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','TK0053','TK0054','Facebook','Open'],

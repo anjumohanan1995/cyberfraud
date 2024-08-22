@@ -279,7 +279,17 @@ class EvidenceController extends Controller
             ->toArray();
             // dd($filteredAckNumbers);
 
-        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$ip,$domain ,$evidence_type , $evidence_type_text, $filteredAckNumbers, $searchValue){
+            $sortableFields = [
+                'acknowledgement_no' => '_id',
+                'evidence_type' => 'evidence_type',
+                'url' => 'url',
+                'domain' => 'domain',
+                'ip' => 'ip',
+                'registrar' => 'registrar',
+                'registry_details' => 'registry_details'
+            ];
+
+        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$ip,$domain ,$evidence_type , $evidence_type_text, $filteredAckNumbers, $searchValue, $columnName, $columnSortOrder, $sortableFields){
 
             $pipeline = [
 
@@ -301,18 +311,7 @@ class EvidenceController extends Controller
                         'registrar' => ['$push' => '$registrar'],
 
                     ]
-                ],
-                [
-                    '$sort' => [
-                        '_id' => 1,
                 ]
-                ],
-                [
-                    '$skip' => (int)$start
-                ],
-                [
-                    '$limit' => (int)$rowperpage
-                ],
 
             ];
 
@@ -359,6 +358,21 @@ class EvidenceController extends Controller
         if (!empty($matchConditions)) {
             array_unshift($pipeline, ['$match' => $matchConditions]);
         }
+
+        // Add dynamic sort stage
+        if (isset($sortableFields[$columnName])) {
+            $sortField = $sortableFields[$columnName];
+            $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
+            $pipeline[] = [
+                '$sort' => [
+                    $sortField => $sortDirection
+                ]
+            ];
+        }
+
+        // Add skip and limit stages
+        $pipeline[] = ['$skip' => (int)$start];
+        $pipeline[] = ['$limit' => (int)$rowperpage];
 
         return $collection->aggregate($pipeline);
         });
@@ -578,7 +592,17 @@ class EvidenceController extends Controller
             $to_date = $from_date;
         }
 
-        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain,$ip, $evidence_type, $evidence_type_text, $from_date, $to_date, $searchValue) {
+        $sortableFields = [
+            'case_number' => '_id',
+            'evidence_type' => 'evidence_type',
+            'url' => 'url',
+            'domain' => 'domain',
+            'ip' => 'ip',
+            'registrar' => 'registrar',
+            'registry_details' => 'registry_details'
+        ];
+
+        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain,$ip, $evidence_type, $evidence_type_text, $from_date, $to_date, $searchValue, $columnName, $columnSortOrder, $sortableFields) {
 
 
             if ($from_date && $to_date) {
@@ -601,18 +625,7 @@ class EvidenceController extends Controller
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
                     ]
-                ],
-                [
-                    '$sort' => [
-                        '_id' => 1,
-                    ]
-                ],
-                [
-                    '$skip' => (int)$start
-                ],
-                [
-                    '$limit' => (int)$rowperpage
-                ],
+                ]
             ];
 
 
@@ -688,6 +701,28 @@ class EvidenceController extends Controller
                 ];
                 $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
             }
+
+            // Add dynamic sort stage
+            if (isset($sortableFields[$columnName])) {
+                $sortField = $sortableFields[$columnName];
+                $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
+                $pipeline[] = [
+                    '$sort' => [
+                        $sortField => $sortDirection
+                    ]
+                ];
+            } else {
+                // Default sort if column is not sortable
+                $pipeline[] = [
+                    '$sort' => [
+                        '_id' => 1
+                    ]
+                ];
+            }
+
+            // Add skip and limit stages
+            $pipeline[] = ['$skip' => (int)$start];
+            $pipeline[] = ['$limit' => (int)$rowperpage];
 
             return $collection->aggregate($pipeline);
         });

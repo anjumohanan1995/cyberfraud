@@ -249,10 +249,10 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
             $complaint->district = $collect['district'];
             $complaint->police_station = $collect['police_station'];
             $complaint->complainant_name = $collect['complainant_name'];
-            $complaint->complainant_mobile = $collect['complainant_mobile'];
+            $complaint->complainant_mobile = $this->convertAcknoToString($collect['complainant_mobile']);
             $complaint->transaction_id = $this->convertAcknoToString($collect['transaction_id']);
             $complaint->bank_name = $collect['bank_name'];
-            $complaint->account_id = $collect['account_id'];
+            $complaint->account_id = $this->convertAcknoToString($collect['account_id']);
             $complaint->amount = $collect['amount'];
             // dd($collect['entry_date']);
             $complaint->entry_date = $this->parseDate($collect['entry_date']);

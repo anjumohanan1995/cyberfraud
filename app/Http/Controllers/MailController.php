@@ -39,6 +39,11 @@ class MailController extends Controller
         $rowperpage = $request->get("length"); // Rows per page
         $searchValue = trim($request->get('search')['value']); // Search value
 
+        // Get column index for sorting
+        $columnIndex = $request->get('order')[0]['column'] ?? 1; // Default to the second column if not specified
+        $columnName = $request->get('columns')[$columnIndex]['data'] ?? 'evidence_type'; // Default to 'evidence_type' if not specified
+        $columnSortOrder = $request->get('order')[0]['dir'] ?? 'asc'; // Default to ascending if not specified
+
         // Build the query
         $query = Evidence::where('ack_no', $acknowledgement_no);
                         //  dd($query);
@@ -55,6 +60,8 @@ class MailController extends Controller
                     ->orWhere('registry_details', $regex);
             });
         }
+
+        $query = $query->orderBy($columnName, $columnSortOrder);
 
         // Total records count
         $totalRecords = $query->count();
@@ -255,6 +262,11 @@ class MailController extends Controller
         $rowperpage = $request->get("length"); // Rows per page
         $searchValue = $request->get('search')['value']; // Search value
 
+        // Get column index for sorting
+        $columnIndex = $request->get('order')[0]['column'] ?? 1; // Default to the second column if not specified
+        $columnName = $request->get('columns')[$columnIndex]['data'] ?? 'evidence_type'; // Default to 'evidence_type' if not specified
+        $columnSortOrder = $request->get('order')[0]['dir'] ?? 'asc'; // Default to ascending if not specified
+
         // Build the query
         $query = ComplaintOthers::where('case_number', $case_no);
                         //  dd($query);
@@ -271,6 +283,8 @@ class MailController extends Controller
                     ->orWhere('registry_details', $regex);
             });
         }
+
+        $query = $query->orderBy($columnName, $columnSortOrder);
 
         // Total records count
         $totalRecords = $query->count();
