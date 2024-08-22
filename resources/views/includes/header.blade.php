@@ -19,19 +19,19 @@
                         </div>
                         <div class="responsive-logo">
                             <a href="index.html">
-                                <img src="img/logo-white.png" class="logo-1" />
+                                <img src="{{ asset('img/logo-white.png') }}" class="logo-1" />
                             </a>
                             <a href="index.html">
-                                <img src="img/logo.png" class="logo-11" />
+                                <img src="{{ asset('img/logo.png') }}" class="logo-11" />
                             </a>
                             <a href="index.html">
-                                <img src="img/favicon-white.png" class="logo-2" />
+                                <img src="{{ asset('img/favicon-white.png') }}" class="logo-2" />
                             </a>
                             <a href="index.html">
-                                <img src="img/favicon.png" class="logo-12" />
+                                <img src="{{ asset('img/favicon.png') }}" class="logo-12" />
                             </a>
                         </div>
-                        <ul class="header-megamenu-dropdown nav">
+                        <ul class="header-megamenu-dropdown nav" hidden>
                             <li class="nav-item">
                                 <div class="btn-group dropdown">
                                     <button aria-expanded="false" aria-haspopup="true"
@@ -487,7 +487,7 @@
                             </div> --}}
                             <div class="dropdown main-profile-menu nav nav-item nav-link">
                                 <a class="profile-user d-flex" href="">
-                                    <img src="img/user.jpg" alt="user-img" class="rounded-circle mCS_img_loaded" />
+                                    <img src="{{ asset("img/user.jpg")}}" alt="user-img" class="rounded-circle mCS_img_loaded" />
                                     <span> </span>
                                 </a>
                                 <div class="dropdown-menu">

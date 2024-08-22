@@ -205,12 +205,12 @@
                                 </div>
                                 <div class="project-content">
                                     {{-- <h6>Amount Retrived</h6> --}}
-                                    <h6>Amount Pending</h6>
+                                    <h6>Amount Hold</h6>
                                     <ul>
                                         <li>
                                             {{-- <strong>Total Amount Retrived:</strong> --}}
-                                            <strong>Total Amount Pending:</strong>
-                                            <span>{{ $pending_amount }}</span>
+                                            <strong>Total Amount Hold:</strong>
+                                            <span>{{ $hold_amount }}</span>
                                         </li>
                                         <li hidden>
                                             <strong>Expensive</strong>

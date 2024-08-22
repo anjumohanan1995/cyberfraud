@@ -40,22 +40,21 @@
         $hasUploadBankActionPermission = false;
     }
 
-
     @endphp
 
 <aside class="main-sidebar app-sidebar sidebar-scroll ps ps--active-y">
     <div class="main-sidebar-header active">
-        <a class="desktop-logo logo-light active" href="index.html">
-            <img src="/img/logo.png" class="main-logo" />
+        <a class="desktop-logo logo-light active">
+            <img src="{{ asset('/img/logo.png') }}" class="main-logo" />
         </a>
-        <a class="desktop-logo icon-logo active" href="index.html">
-            <img src="img/favicon.png" class="logo-icon" />
+        <a class="desktop-logo icon-logo active">
+            <img src="{{ asset('/img/favicon.png') }}" class="logo-icon" />
         </a>
-        <a class="desktop-logo logo-dark active" href="index.html">
-            <img src="/img/logo-white.png" class="main-logo dark-theme" alt="logo" />
+        <a class="desktop-logo logo-dark active">
+            <img src="{{ asset('/img/logo-white.png') }}" class="main-logo dark-theme" alt="logo" />
         </a>
-        <a class="logo-icon mobile-logo icon-dark active" href="index.html">
-            <img src="img/favicon-white.png" class="logo-icon dark-theme" alt="logo" />
+        <a class="logo-icon mobile-logo icon-dark active">
+            <img src="{{ asset('img/favicon-white.png') }}" class="logo-icon dark-theme" alt="logo" />
         </a>
     </div>
     <!-- /logo -->

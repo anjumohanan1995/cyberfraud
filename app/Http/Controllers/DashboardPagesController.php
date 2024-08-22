@@ -43,7 +43,15 @@ class DashboardPagesController extends Controller
 //     });
 
 // Retrieve all documents with non-null account_no_2
-$documents = BankCasedata::whereNotNull('account_no_2')->get();
+$documents = BankCasedata::whereNotNull('account_no_2')
+->where(function($query) {
+    $query->whereRaw([
+        'acknowledgement_no' => [
+            '$in' => Complaint::pluck('acknowledgement_no')->toArray()
+        ]
+    ]);
+})
+->get();
 
 $accountNumbers = [];
 foreach ($documents as $doc) {
@@ -147,7 +155,7 @@ $muleAccountCount = $uniqueCases->count();
                                 ->sum('transaction_amount');
     $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
-        return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','pending_amount'));
+        return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','hold_amount'));
     }
 
 }
