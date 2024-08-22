@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\EvidenceBulkImport;
+use App\exports\SampleExport;
 
 class EvidenceController extends Controller
 {
@@ -1036,21 +1037,46 @@ class EvidenceController extends Controller
         return view('dashboard.bank-case-data.evidence.bulkUpload');
     }
 
-    public function evidenceBulkUploadFile(Request $request){
+    public function evidenceBulkUploadFile(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:csv,xlsx,xls,ods'
+    ]);
 
-        $request->validate([
-            'file' => 'required|mimes:csv,xlsx,xls,ods'
-        ]);
+    if ($request->hasFile('file')) {
+        $file = $request->file('file');
+        $import = new EvidenceBulkImport;
+        Excel::import($import, $file); // Run the import process
 
-        if ($request->hasFile('file')){
-            $file = $request->file('file');
-            Excel::import(new EvidenceBulkImport, $file);
-            return redirect()->route('evidence.bulkUpload',$request->ackno)->with('success', 'File uploaded successfully.');
+        if (!empty($import->getErrors())) {
+            // Redirect with errors
+            return redirect()->route('evidence.bulk.import', $request->ackno)
+                ->with('errors', $import->getErrors());
         }
-        return redirect('evidence.bulkUpload',$request->ackno)->with('error', 'File upload failed.');
 
-
+        return redirect()->route('evidence.bulk.import', $request->ackno)
+            ->with('success', 'File uploaded successfully.');
     }
+
+    return redirect()->route('evidence.bulk.import', $request->ackno)
+        ->with('error', 'File upload failed.');
+}
+
+    // public function evidenceBulkUploadFile(Request $request){
+
+    //     $request->validate([
+    //         'file' => 'required|mimes:csv,xlsx,xls,ods'
+    //     ]);
+
+    //     if ($request->hasFile('file')){
+    //         $file = $request->file('file');
+    //         Excel::import(new EvidenceBulkImport, $file);
+    //         return redirect()->route('evidence.bulk.import',$request->ackno)->with('success', 'File uploaded successfully.');
+    //     }
+    //     return redirect('evidence.bulk.import',$request->ackno)->with('error', 'File upload failed.');
+
+
+    // }
 
     public function storeEvidence(Request $request)
     {
@@ -1260,6 +1286,32 @@ class EvidenceController extends Controller
             'evidence_type_other' => $evidence_type_other,
             'status' => $status
         ]);
+    }
+
+    public function createEvidenceDownloadTemplate()
+    {
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            [ 'Acknowledgement No','URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['1212120', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','TK0017','TK0018','Instagram','Phishing'],
+            ['1215212', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','TK0024','TK0025','Website','Malware'],
+            ['1216212', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','TK0053','TK0054','Facebook','Fraud'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
     }
 
 

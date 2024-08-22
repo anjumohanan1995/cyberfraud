@@ -1034,7 +1034,7 @@ public function follow(Request $request, $id)
         return response()->json(['success' => true, 'message' => 'Notice generated successfully.']);
     } catch (\Exception $e) {
         Log::error('Error generating Bank Acc Notice', ['error' => $e->getMessage()]);
-        return response()->json(['success' => false, 'message' => 'An error occurred while generating the notice.'], 500);
+        return response()->json(['success' => false, 'message' => 'No valid case data found to generate notices.'], 500);
     }
 }
 

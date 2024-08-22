@@ -201,7 +201,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 //evidence
-    Route::resource('evidence', EvidenceController::class);
+    // Route::resource('evidence', EvidenceController::class);
     Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
     Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
     Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
@@ -315,6 +315,10 @@ Route::post('/notices/{id}/approve', [NoticeController::class, 'approve'])->name
 
 Route::get('/show-upload-errors/{uploadId}',[ComplaintController::class, 'showUploadErrors']);
 Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErrors']);
+
+//bulkuploadevidence
+
+Route::get('template', [EvidenceController::class, 'createEvidenceDownloadTemplate'])->name("create-download-evidence-template");
 
 
 

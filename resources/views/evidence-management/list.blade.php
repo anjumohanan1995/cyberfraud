@@ -208,7 +208,7 @@ $user = Auth::user();
                                                             </form>
                                                             <div class="table-responsive">
 
-                                                            <a class="d-flex align-items-center justify-content-center w-100 h-100"
+                                                            <a class="align-items-center justify-content-center btn btn-primary m-5"
                                                             data-toggle="tooltip" data-placement="top" title="View Evidence"
                                                             href="{{ route('evidence.bulk.import')}}">
                                                             <i class="ti ti-upload"></i> Bulk Upload </a>
