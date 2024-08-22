@@ -69,29 +69,7 @@ $user = Auth::user();
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
-
-                                {{-- @if ($errors->any())
-                                   <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <ul>
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
-                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    </div>
-                                @endif --}}
-
-                                {{-- @if (session('success'))
-                                    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
-                                        {{ session('success') }}
-                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                @endif --}}
-                                @if(session('errors'))
+                                 {{-- @if(session('errors'))
                                     <div class="alert alert-danger">
                                         <ul>
                                             @foreach(session('errors') as $error)
@@ -115,8 +93,48 @@ $user = Auth::user();
                                         {{ session('error') }}
                                     </div>
                                 @endif
-
                             </div>
+                            @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif --}}
+
+                        <div class="m-4 d-flex justify-content-between">
+                            @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
+                            @if(session('success'))
+                                <div class="alert alert-success">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            @if(session('error'))
+                                <div class="alert alert-danger">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+
+
 
 
 <div class=" m-4 d-flex justify-content-between">
@@ -136,18 +154,28 @@ $user = Auth::user();
                                             <div class="form-group">
                                                 {{-- <label for="source_type">Upload Excel/CSV:</label> --}}
                                                 {{-- <input type="file" name="file" id="file" name="file"> --}}
-                                                {{-- @error('file')
-                                                <div class="text-danger">{{ $message }}</div>
+                                                {{-- @error('file')--}}
+                                                {{-- <div class="text-danger">{{ $message }}</div>
                                                 @enderror --}}
                                             </div>
                                             <div class="row">
-                                                <div class="col-md-4">
+                                                {{-- <div class="col-md-4">
                                                     <div class="form-group">
                                                         <label for="place">File:</label>
                                                         <input type="file" id="file" name="file" class="form-control">
 
                                                     </div>
+                                                </div> --}}
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="file">File:</label>
+                                                        <input type="file" id="file" name="file" class="form-control">
+                                                        {{-- @error('file')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror --}}
+                                                    </div>
                                                 </div>
+
                                                 <div class="col-md-2 justify-content-center align-self-center">
                                                     <a href="{{ route('create-download-evidence-template')  }}"><button type="button" class="btn btn-primary btn-sm">Template <br>
                                                     <i class="fa fa-download"></i></button>

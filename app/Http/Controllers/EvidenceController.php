@@ -1073,29 +1073,37 @@ class EvidenceController extends Controller
     }
 
     public function evidenceBulkUploadFile(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:csv,xlsx,xls,ods'
-    ]);
+    {
+        // Validate the file input
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls,ods'
+        ]);
 
-    if ($request->hasFile('file')) {
-        $file = $request->file('file');
-        $import = new EvidenceBulkImport;
-        Excel::import($import, $file); // Run the import process
+        // Check if a file is present in the request
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $import = new EvidenceBulkImport;
 
-        if (!empty($import->getErrors())) {
-            // Redirect with errors
+            // Run the import process
+            Excel::import($import, $file);
+
+            // Check if there are any custom errors from the import process
+            if (!empty($import->getErrors())) {
+                // Redirect with errors using withErrors
+                return redirect()->route('evidence.bulk.import', $request->ackno)
+                    ->withErrors($import->getErrors()) // Ensure this is an array of error messages
+                    ->withInput();
+            }
+
+            // Redirect on successful import
             return redirect()->route('evidence.bulk.import', $request->ackno)
-                ->with('errors', $import->getErrors());
+                ->with('success', 'File uploaded successfully.');
         }
 
-        return redirect()->route('evidence.bulk.import', $request->ackno)
-            ->with('success', 'File uploaded successfully.');
+        // Redirect back with validation errors
+        return redirect()->back()->withErrors(['file' => 'File upload failed.'])->withInput();
     }
 
-    return redirect()->route('evidence.bulk.import', $request->ackno)
-        ->with('error', 'File upload failed.');
-}
 
     // public function evidenceBulkUploadFile(Request $request){
 
