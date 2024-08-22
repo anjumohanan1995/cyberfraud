@@ -447,6 +447,7 @@
                     </div>
                 </div>
             </div>
+@if (Auth::user()->name == "Super Admin")
             <div class="container mt-5">
                 <div class="row mb-4">
                     <div class="col-md-4">
@@ -559,6 +560,7 @@
                     </div>
                 </div>
             </div>
+@endif
         </div>
         <!-- /row -->
     </div>
@@ -1037,33 +1039,33 @@ function fetchData() {
                 },
                 dataLabels: {
                     enabled: true,
-                    formatter: function (val) {
-                        return val + "%"; // Append the % symbol to the data label
-                    }
+                    // formatter: function (val) {
+                    //     return val + "%"; // Append the % symbol to the data label
+                    // }
                 },
                 xaxis: {
                     categories: users
                 },
                 yaxis: {
                     title: {
-                        text: 'Percentage'
+                        text: 'scale'
                     },
-                    labels: {
-                        formatter: function (val) {
-                            return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
-                        }
-                    }
+                    // labels: {
+                    //     formatter: function (val) {
+                    //         return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
+                    //     }
+                    // }
                 },
                 fill: {
                     opacity: 1
                 },
-                tooltip: {
-                    y: {
-                        formatter: function (val) {
-                            return val + "%"; // Append the % symbol to the tooltip values
-                        }
-                    }
-                }
+                // tooltip: {
+                //     y: {
+                //         formatter: function (val) {
+                //             return val + "%"; // Append the % symbol to the tooltip values
+                //         }
+                //     }
+                // }
             };
 
             if (chart) {

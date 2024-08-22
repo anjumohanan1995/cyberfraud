@@ -133,10 +133,10 @@ public function getComplaintStats(Request $request)
 // $result[$userId]['Started'] = ($result[$userId]['Started'] / $complaints->count() ) * 100;
 //         $result[$userId]['Ongoing'] = ($result[$userId]['Ongoing'] / $complaints->count())  * 100;
 //         $result[$userId]['Completed'] = ($result[$userId]['Completed'] / $complaints->count())* 100;
-$total = $result[$userId]['Started'] + $result[$userId]['Ongoing'] + $result[$userId]['Completed'];
-        $result[$userId]['Started'] = round(($result[$userId]['Started'] * 100) / $total,2);
-        $result[$userId]['Ongoing'] = round(($result[$userId]['Ongoing'] * 100) / $total,2);
-        $result[$userId]['Completed'] = round(($result[$userId]['Completed'] * 100) / $total,2);
+// $total = $result[$userId]['Started'] + $result[$userId]['Ongoing'] + $result[$userId]['Completed'];
+//         $result[$userId]['Started'] = round(($result[$userId]['Started'] * 100) / $total,2);
+//         $result[$userId]['Ongoing'] = round(($result[$userId]['Ongoing'] * 100) / $total,2);
+//         $result[$userId]['Completed'] = round(($result[$userId]['Completed'] * 100) / $total,2);
 
 
     // Log the processed results
