@@ -439,7 +439,7 @@ class CaseDataController extends Controller
             }
 
             $id = Crypt::encrypt($record['acknowledgement_no']);
-            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $record['acknowledgement_no'] . '</a>';
+            $ack_no = '<a class="btn btn-outline-primary" target="_blank" href="' . route('case-data.view', ['id' => $id]) . '">' . $record['acknowledgement_no'] . '</a>';
 
             $edit = '';
             if ($hasShowActivatePermission) {
@@ -1563,12 +1563,12 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             //     $url .= $item."<br>";
             // }
 //dd($record->status);
-            if($record->status === 1) { // Check if status is 1
+           // if($record->status === 1) { // Check if status is 1
                // dd($record->url);
                 foreach ($record->url as $item) {
                     $url .= $item."<br>";
                 }
-            }
+          //  }
             foreach ($record->source_type as $item) {
                 foreach($source_types as $st){
                     if($st->_id == $item){

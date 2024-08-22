@@ -178,11 +178,12 @@ class SourceTypeController extends Controller
         // Total records with filter
         $totalRecordswithFilter = $query->count();
 
-        // Fetch records with filter
-        $records = $query->orderBy('created_at','desc')
-            ->skip($start)
-            ->take($rowperpage)
-            ->get();
+    // Fetch records with filter and sorting
+    $records = $query->orderBy($columnName, $columnSortOrder) // Apply sorting here
+        ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
+        ->skip($start)
+        ->take($rowperpage)
+        ->get();
 
             $data_arr = array();
             $i=$start;
@@ -230,19 +231,28 @@ class SourceTypeController extends Controller
 
         if ($file) {
             try {
+                // dd('hi');
                 // Import data from the file
                 Excel::import(new RegistrarImport(), $file);
 
                 // Provide feedback to the user
                 return redirect()->back()->with('success', 'Form submitted successfully!');
+            } catch (ValidationException $e) {
+                // dd("1");
+                return redirect()->back()->withErrors($e->errors())->withInput();
             } catch (\Exception $e) {
+
+                // return redirect()->back()->withErrors($e->errors())->withInput();
                 if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    // dd($e);
                     // Retrieve the validation errors
                     $errors = $e->validator->getMessageBag()->all();
+                    // dd($errors);
 
                     // Redirect back with validation errors and input data
-                    return redirect()->back()->withErrors($validator)->withInput();
+                    return redirect()->back()->withErrors($errors)->withInput();
                 } else {
+                    // dd("3");
                     // Handle other exceptions
                     return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());
                 }

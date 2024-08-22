@@ -32,6 +32,7 @@ class ReportsController extends Controller
         $getevidencename = ComplaintOthers::select('evidence_type')
                              ->groupBy('evidence_type')
                              ->get();
+
         $lowercaseEvidences = $getevidencename->map(function ($item) {
             return strtolower($item->evidence_type);
         });
@@ -214,12 +215,16 @@ if ($evidence_type_ncrp || $search_value_ncrp) {
 // }
 
 
-
 if (!empty($searchValue)) {
     $query->where(function ($q) use ($searchValue) {
-        $q->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
+        // Check if the search value is numeric
+        $q->orWhere('acknowledgement_no', (int)$searchValue)
+          ->orWhere('amount', (int)$searchValue)
           ->orWhere('district', 'like', '%' . $searchValue . '%')
           ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+          ->orWhere('complainant_mobile', 'like', '%' . $searchValue . '%')
+          ->orWhere('transaction_id', 'like', '%' . $searchValue . '%')
+          ->orWhere('account_id', 'like', '%' . $searchValue . '%')
           ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
           ->orWhere('police_station', 'like', '%' . $searchValue . '%');
     });
@@ -696,24 +701,24 @@ public function getDatalistOthersourcetype(Request $request)
             '$limit' => (int)$rowperpage
         ]
     ];
-    if (!empty($searchValue)) {
-        $pipeline = array_merge([
-            [
-                '$match' => [
-                    '$or' => [
-                        ['source_type' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['url' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['remarks' => ['$regex' => $searchValue, '$options' => 'i']],
-                    ]
-                ]
+
+    // Add search filtering to the pipeline if $searchValue is not empty
+if (!empty($searchValue)) {
+    array_unshift($pipeline, [
+        '$match' => [
+            '$or' => [
+                ['source_type' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['case_number' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['url' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['domain' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['evidence_type' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['ip' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['registrar' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['remarks' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]]
             ]
-        ], $pipeline);
-    }
+        ]
+    ]);
+}
 
     // Conditional pipeline stages
     if ($current_value === 'today') {
@@ -728,12 +733,16 @@ public function getDatalistOthersourcetype(Request $request)
     if ($fromDate && $toDate) {
         array_unshift($pipeline, [
             '$match' => [
-                'created_at' => ['$gte' => new UTCDateTime(strtotime($fromDate) * 1000), '$lte' => new UTCDateTime(strtotime($toDate) * 1000)]
+                'created_at' => [
+                    '$gte' => new UTCDateTime((new DateTime($fromDate))->getTimestamp() * 1000),
+                    '$lte' => new UTCDateTime((new DateTime($toDate))->getTimestamp() * 1000)
+                ]
             ]
         ]);
     }
 
-    if ($evidence_type_others && $search_value_others) {
+
+    if ($evidence_type_others || $search_value_others) {
         array_unshift($pipeline, [
             '$match' => [
                 'evidence_type' => ['$regex' => new \MongoDB\BSON\Regex($evidence_type_others, 'i')],

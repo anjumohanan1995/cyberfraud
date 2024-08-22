@@ -159,11 +159,15 @@ class ModusController extends Controller
         $totalRecords = Modus::where('deleted_at', null)->orderBy('created_at','desc')->count();
         $totalRecordswithFilter = $query->count();
 
-        // Fetch records with filter
-        $records = $query->orderBy('created_at','desc')
+
+            // Fetch records with filter and sorting
+        $records = $query->orderBy($columnName, $columnSortOrder) // Apply sorting here
+            ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
             ->skip($start)
             ->take($rowperpage)
             ->get();
+
+
 
         $data_arr = array();
         $i=$start;
