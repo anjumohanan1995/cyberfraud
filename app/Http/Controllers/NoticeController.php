@@ -378,7 +378,7 @@ $evidenceTypeCounts = [];
                 'domain_id' => $item['registry_details'] ?? ''
             ];
         }
-        } else if ($evidenceType !== "mobile" && $evidenceType !== "website") {
+        } else if ($evidenceType !== "mobile" && $evidenceType !== "website" && $evidenceType !== "whatsapp") {
             if (in_array($noticeType, [
                 'Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - social media',
                 'Notice U/sec 79(3)(b) of IT Act - NCRP - social media',

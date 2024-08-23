@@ -51,14 +51,15 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                     break;
 
                 case 'website':
-                    $data['domain'] = $row[2];
-                    $data['ip'] = $row[3];
+                    $data['domain/post/profile'] = $row[2];
+                    $data['ip/ModusKeyword'] = $row[3];
                     $data['registrar'] = $row[4];
                     $data['registry_details'] = $row[5];
                     break;
 
                 default:
-                    $data['domain'] = $row[2];
+                    $data['domain/post/profile'] = $row[2];
+                    $data['ip/ModusKeyword'] = $row[3];
                     break;
             }
 
@@ -81,12 +82,13 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                 ];
 
                 if ($evidenceType === 'website') {
-                    $complaintData['domain'] = $data['domain'];
-                    $complaintData['ip'] = $data['ip'];
+                    $complaintData['domain'] = $data['domain/post/profile'];
+                    $complaintData['ip'] = $this->convertUrlToString($data['ip/ModusKeyword']);
                     $complaintData['registrar'] = $data['registrar'];
                     $complaintData['registry_details'] = $data['registry_details'];
                 } elseif ($evidenceType !== 'mobile' && $evidenceType !== 'whatsapp') {
-                    $complaintData['domain'] = $data['domain'];
+                    $complaintData['domain'] = $data['domain/post/profile'];
+                    $complaintData['ip'] = $this->convertUrlToString($data['ip/ModusKeyword']);
                 }
 
                 $validData[] = $complaintData;
@@ -124,11 +126,12 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
         ];
 
         if ($data['evidencetype'] === 'website') {
-            $rules['domain'] = 'required';
-            $rules['ip'] = 'required';
+            $rules['domain/post/profile'] = 'required';
+            $rules['ip/ModusKeyword'] = 'required';
             $rules['registrar'] = 'required';
         } elseif ($data['evidencetype'] !== 'mobile' && $data['evidencetype'] !== 'whatsapp') {
-            $rules['domain'] = 'required';
+            $rules['domain/post/profile'] = 'required';
+            $rules['ip/ModusKeyword'] = 'required';
         }
 
         $validator = Validator::make($data, $rules);
