@@ -7,7 +7,7 @@
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    Other Case Data !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -87,7 +87,7 @@
                                             <input type="text" value="{{ $complaint_others_by_id->domain }}" class="form-control" name="domain" id="domain">
                                             </div>
                                             </div>
-                                            
+
                                             <div class="col-md-4">
                                             <div class="form-group">
                                             <label for="from-date">IP</label>
@@ -100,7 +100,7 @@
                                             <label for="from-date">Registry Details</label>
                                             <input type="text" value="{{ $complaint_others_by_id->registry_details }}" class="form-control" name="registry_details" id="registry_details" >
                                             </div>
-                                            </div> 
+                                            </div>
 
                                             <div class="col-md-6">
                                             <div class="form-group">

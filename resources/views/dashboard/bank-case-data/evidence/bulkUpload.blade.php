@@ -42,7 +42,7 @@ $user = Auth::user();
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    Evidence Management !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">

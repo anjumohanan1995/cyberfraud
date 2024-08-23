@@ -814,6 +814,7 @@ public function follow(Request $request, $id)
                     'user_id' => Auth::user()->id,
                     'ack_number' => $noticeData[0]['acknowledgement_no'],
                     'notice_type' => 'NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023',
+                    'type'=>'Mule',
                     'content' => $htmlContent,
                 ]);
 
@@ -1028,6 +1029,7 @@ public function follow(Request $request, $id)
                         'user_id' => Auth::user()->id,
                         'ack_number' => $noticeData[0]['acknowledgement_no'],
                         'notice_type' => 'Notice U/s 94 of Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS)',
+                        'type'=>'Bank',
                         'content' => $htmlContent,
                     ]);
 
@@ -1267,6 +1269,7 @@ public function follow(Request $request, $id)
                     'user_id' => Auth::user()->id,
                     'ack_number' => $noticeData[0]['acknowledgement_no'],
                     'notice_type' => ' Notice for immediate intervention to prevent cyber fraud ',
+                    'type'=>'Bank',
                     'content' => $htmlContent,
                 ]);
 

@@ -312,6 +312,17 @@ class EvidenceController extends Controller
 
                     ]
                 ]
+                 // [
+                //     '$sort' => [
+                //         '_id' => 1,
+                // ]
+                // ],
+                // [
+                //     '$skip' => (int)$start
+                // ],
+                // [
+                //     '$limit' => (int)$rowperpage
+                // ],
 
             ];
 
@@ -626,6 +637,17 @@ class EvidenceController extends Controller
                         'registrar' => ['$push' => '$registrar'],
                     ]
                 ]
+                // [
+                //     '$sort' => [
+                //         '_id' => 1,
+                //     ]
+                // ],
+                // [
+                //     '$skip' => (int)$start
+                // ],
+                // [
+                //     '$limit' => (int)$rowperpage
+                // ],
             ];
 
 
