@@ -51,7 +51,7 @@ class EvidenceTypeController extends Controller
         $name = strtolower($request->name);
 
         // Check if the name already exists in the database
-        if (EvidenceType::where('name', $name)->exists()) {
+        if (EvidenceType::where('deleted_at', null)->where('name', $name)->exists()) {
             return Redirect::back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
         }
 
@@ -112,7 +112,7 @@ class EvidenceTypeController extends Controller
         $newName = strtolower($request->name);
 
         // Check if the new name already exists for a different record
-        if (EvidenceType::where('name', $newName)->where('id', '!=', $id)->exists()) {
+        if (EvidenceType::where('deleted_at', null)->where('name', $newName)->where('id', '!=', $id)->exists()) {
             return redirect()->back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
         }
 
