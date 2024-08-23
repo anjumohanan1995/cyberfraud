@@ -20,26 +20,22 @@
                     </ol>
                 </nav>
             </div>
-
         </div>
         <!-- /breadcrumb -->
         <!-- main-content-body -->
         <div class="main-content-body">
-
             <!-- row -->
             <div class="row row-sm">
                 <div class="col-md-12 col-xl-12">
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
-                            <div class=" m-4 d-flex justify-content-between">
+                            <div class="m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add User!
                                 </h4>
-
                             </div>
-
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('users.store') }}" method="POST"  enctype="multipart/form-data">
+                                <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
@@ -86,7 +82,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" id="signature-field">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="sign">Signature:</label>
@@ -99,16 +95,37 @@
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /row -->
-
-
         </div>
         <!-- /row -->
     </div>
+
+    @section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const roleSelect = document.getElementById('role');
+            const signatureField = document.getElementById('signature-field');
+
+            // Function to toggle the visibility of the signature field
+            function toggleSignatureField() {
+                if (roleSelect.value === 'Super Admin') {
+                    signatureField.style.display = 'block';
+                } else {
+                    signatureField.style.display = 'none';
+                }
+            }
+
+            // Initial check
+            toggleSignatureField();
+
+            // Add event listener to role select dropdown
+            roleSelect.addEventListener('change', toggleSignatureField);
+        });
+    </script>
+    @endsection
 @endsection

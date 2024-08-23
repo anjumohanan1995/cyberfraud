@@ -29,8 +29,10 @@ class UsersController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
+        $role = $user->role;
         $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view("dashboard.user-management.users.create",compact('roles'));
+        return view("dashboard.user-management.users.create",compact('roles','role'));
     }
 
     /**
@@ -98,9 +100,11 @@ class UsersController extends Controller
     public function edit($id)
     {
         $data = User::findOrFail($id);
+        $user = Auth::user();
+        $role = $user->role;
 
         $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$roles]);
+        return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$roles, 'role'=>$role]);
     }
 
     /**

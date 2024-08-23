@@ -1346,7 +1346,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     }
 
     public function caseDataOthers(){
-        $source=SourceType::get();
+        $source=SourceType::where('status', 'active')->whereNull('deleted_at')->where('name', '!=', 'NCRP')->get();
         //dd($source);
        return view('dashboard.case-data-list.case-data-list-others', compact('source'));
     }

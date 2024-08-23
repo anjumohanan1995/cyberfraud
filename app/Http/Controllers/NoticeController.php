@@ -556,9 +556,10 @@ public function editNoticeView($id)
     $currentUserId = auth()->id(); // Get the current authenticated user's ID
     $users = User::where('_id', '!=', $currentUserId)->get();
     $user_sign= User::where('_id', $currentUserId)->get();
-
+    $user = Auth::user();
+    $role = $user->role;
     // dd($user_sign);
-    return view('notices.edit', compact('notice','users','user_sign'));
+    return view('notices.edit', compact('notice','users','user_sign'. 'role'));
 }
 
     public function updateNotice(Request $request, $id)

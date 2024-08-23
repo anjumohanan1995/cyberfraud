@@ -63,12 +63,14 @@
                             </div>
                             <div class="footer">
                                 <button type="submit" class="btn btn-success">Update</button>
-                                @if (!$notice->approve_id)
-                                    <a href="#" id="approve-button" class="btn btn-info w-auto me-2" onclick="approveContent(event)">Approve</a>
-                                @else
-                                    <a href="#" class="btn btn-success w-auto me-2" disabled>Approved</a>
+                                 @if($role=='Super Admin')
+                                    @if (!$notice->approve_id)
+                                        <a href="#" id="approve-button" class="btn btn-info w-auto me-2" onclick="approveContent(event)">Approve</a>
+                                    @else
+                                        <a href="#" class="btn btn-success w-auto me-2" disabled>Approved</a>
+                                    @endif
+                                    <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-secondary">Cancel</a>
                                 @endif
-                                <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
