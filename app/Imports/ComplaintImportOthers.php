@@ -17,7 +17,6 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
     protected $caseNumber;
     protected $filename;
     protected $uniqueEvidenceTypes;
-    protected $errors = [];
 
     public function __construct($source_type, $caseNumber, $filename)
     {
@@ -34,12 +33,15 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
 
     public function collection(Collection $collection)
     {
+
         foreach ($collection as $index => $row) {
             $rowIndex = $index + $this->startRow();
             $data = [
-                'url_mobile' => $row[1],
-                'domain_post_profile' => $row[2],
-                'evidence_type' => $row[10],
+                'url/mobile' => $row[1],
+                'domain/post/profile' => $row[2],
+                'evidencetype' => $row[10],
+                'ip/modus' => $row[3],
+                'registrar' => $row[4],
                 // Add other fields as needed
             ];
 
@@ -50,16 +52,16 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                     'case_number' => $this->caseNumber,
                     'source_type' => $this->source_type,
                     'file_name'   => $this->filename,
-                    'url'         => $this->convertUrlToString($data['url_mobile']),
-                    'domain'      => $data['domain_post_profile'],
-                    'ip'          => $row[3],
-                    'registrar'   => $row[4],
+                    'url'         => $this->convertUrlToString($data['url/mobile']),
+                    'domain'      => $data['domain/post/profile'],
+                    'ip'          => $data['ip/modus'],
+                    'registrar'   => $data['registrar'],
                     'registry_details' => $row[5],
                     'remarks'     => $row[6],
                     'content_removal_ticket' => $row[7],
                     'data_disclosure_ticket' => $row[8],
                     'preservation_ticket' => $row[9],
-                    'evidence_type' => strtolower($data['evidence_type']),
+                    'evidence_type' => strtolower($data['evidencetype']),
                     'source'       => $row[11],
                     'status'       => 1,
                     'reported_status' => 'active'
@@ -71,24 +73,26 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                     $this->newRecordsInserted = true;
                 }
             } catch (ValidationException $e) {
-                $this->errors["Row {$rowIndex}"] = $e->errors();
-            } catch (\Exception $e) {
-                $this->errors["Row {$rowIndex}"] = ["General Error" => $e->getMessage()];
-                \Illuminate\Support\Facades\Log::error("Error processing row {$rowIndex}: " . $e->getMessage());
+                $errors[$rowIndex] = $e->errors();
             }
         }
 
-        if (!empty($this->errors)) {
-            throw new \Exception("Validation errors occurred during import.");
-        }
+
+    if (!empty($errors)) {
+        throw new \Exception(json_encode($errors));
+    }
+
+
     }
 
     protected function validateRow($data, $rowIndex)
     {
         $validator = Validator::make($data, [
-            'url_mobile' => 'required',
-            'domain_post_profile' => 'required',
-            'evidence_type' => [
+            'url/mobile' => 'required',
+            'domain/post/profile' => 'required',
+            'ip/modus' => 'required',
+            'registrar' => 'required',
+            'evidencetype' => [
                 'required',
                 function ($attribute, $value, $fail) {
                     if (!in_array(strtolower($value), $this->uniqueEvidenceTypes)) {
@@ -99,8 +103,10 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
         ]);
 
         if ($validator->fails()) {
-            throw new ValidationException($validator);
+            throw ValidationException::withMessages($validator->errors()->toArray());
         }
+
+
     }
 
     protected function convertUrlToString($urlormobile)
@@ -126,13 +132,5 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
         return array_unique(array_map('strtolower', $evidenceTypes));
     }
 
-        /**
-     * Get all errors encountered during the import process.
-     *
-     * @return array
-     */
-    public function getErrors()
-    {
-        return $this->errors;
-    }
+
 }
