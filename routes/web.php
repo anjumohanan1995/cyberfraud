@@ -315,6 +315,9 @@ Route::post('/notices/{id}/approve', [NoticeController::class, 'approve'])->name
 
 Route::get('/show-upload-errors/{uploadId}',[ComplaintController::class, 'showUploadErrors']);
 Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErrors']);
+
+//bulkuploadevidence
+
 Route::get('evidence/template', [EvidenceController::class, 'createEvidenceDownloadTemplate'])->name("create-download-evidence-template");
 
 

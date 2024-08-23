@@ -1162,6 +1162,7 @@ class EvidenceController extends Controller
         $evidence_type_ncrp = $request->input('evidence_type_ncrp');
         $evidence_type_ncrp_name = Evidence::whereNull('deleted_at')
                                             ->where('evidence_type_id', $evidence_type_ncrp)
+                                            ->whereNotIn('evidence_type', ['mobile', 'whatsapp'])
                                             ->pluck('evidence_type')
                                             ->unique()
                                             ->first();

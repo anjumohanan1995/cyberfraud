@@ -377,7 +377,6 @@ class CaseDataController extends Controller
 
                 if (!empty($searchValue)) {
                     $pipeline[0]['$match']['$or'] = [
-                        ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
                         ['district' => ['$regex' => $searchValue, '$options' => 'i']],
                         ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
                         ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
@@ -385,11 +384,17 @@ class CaseDataController extends Controller
                         ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
                         ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
                         ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['amount' => ['$in' => [(string)$searchValue, (int)$searchValue]]],
-                        // ['entry_date' => new UTCDateTime(new DateTime($searchValue))],
                         ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
                     ];
+
+                    // Handle numeric fields (acknowledgement_no and amount)
+                    if (is_numeric($searchValue)) {
+                        $numericValue = $searchValue + 0; // Convert to int or float based on the value
+                        $pipeline[0]['$match']['$or'][] = ['acknowledgement_no' => (int)$numericValue];
+                        $pipeline[0]['$match']['$or'][] = ['amount' => $numericValue];
+                    }
                 }
+
 
         // Grouping and sorting
         $pipeline[] = [

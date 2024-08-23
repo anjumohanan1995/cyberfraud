@@ -17,6 +17,7 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
     protected $caseNumber;
     protected $filename;
     protected $uniqueEvidenceTypes;
+    protected $errors = [];
 
     public function __construct($source_type, $caseNumber, $filename)
     {
@@ -33,9 +34,8 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
 
     public function collection(Collection $collection)
     {
-        $errors = [];
-        // dd($collection);
         foreach ($collection as $index => $row) {
+            $rowIndex = $index + $this->startRow();
             $data = [
                 'url_mobile' => $row[1],
                 'domain_post_profile' => $row[2],
@@ -44,7 +44,7 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
             ];
 
             try {
-                $this->validateRow($data, $index + $this->startRow());
+                $this->validateRow($data, $rowIndex);
 
                 $complaintData = [
                     'case_number' => $this->caseNumber,
@@ -71,23 +71,15 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                     $this->newRecordsInserted = true;
                 }
             } catch (ValidationException $e) {
-                // dd($e);
-                // Collect validation errors for this row
-                $errors[$index + $this->startRow()] = $e->errors();
+                $this->errors["Row {$rowIndex}"] = $e->errors();
             } catch (\Exception $e) {
-                // Log the error and throw a generic error with row number
-                \Illuminate\Support\Facades\Log::error('Error processing row ' . ($index + $this->startRow()) . ': ' . $e->getMessage());
-                throw new \Exception("Error processing row " . ($index + $this->startRow()) . ": " . $e->getMessage());
+                $this->errors["Row {$rowIndex}"] = ["General Error" => $e->getMessage()];
+                \Illuminate\Support\Facades\Log::error("Error processing row {$rowIndex}: " . $e->getMessage());
             }
         }
 
-        if (!empty($errors)) {
-            // Prepare a dummy validator to throw a validation exception with collected errors
-            $dummyValidator = Validator::make([], []);
-            foreach ($errors as $rowIndex => $errorMessages) {
-                $dummyValidator->errors()->add($rowIndex, $errorMessages);
-            }
-            throw new ValidationException($dummyValidator);
+        if (!empty($this->errors)) {
+            throw new \Exception("Validation errors occurred during import.");
         }
     }
 
@@ -107,8 +99,7 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
         ]);
 
         if ($validator->fails()) {
-            // dd("hi");
-            throw new ValidationException($validator, "Validation failed for row {$rowIndex}: " . json_encode($validator->errors()));
+            throw new ValidationException($validator);
         }
     }
 
@@ -133,5 +124,15 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
             ->toArray();
 
         return array_unique(array_map('strtolower', $evidenceTypes));
+    }
+
+        /**
+     * Get all errors encountered during the import process.
+     *
+     * @return array
+     */
+    public function getErrors()
+    {
+        return $this->errors;
     }
 }

@@ -141,7 +141,7 @@ $user = Auth::user();
                                         <div class="form-group">
                                             <label for="filled-by">Filled by(within 24 hrs):</label>
                                             <select class="form-control" id="filled-by" name="filled-by">
-                                                <option value="">All</option>
+                                                <option value="">--Select--</option>
                                                 <option value="citizen">Citizen</option>
                                                 <option value="cyber">Cyber</option>
                                             </select>
