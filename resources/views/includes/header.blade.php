@@ -86,7 +86,7 @@
                                                             </i>Sign Out</a>
                                                 </div>
                                             </div>
-                                            <div class="ps__rail-x" style="left: 0px; top: 0px">
+                                            <div class="ps__rail-x" style="left: 0px; top: 0px;">
                                                 <div class="ps__thumb-x" tabindex="0"
                                                     style="
                                                             left: 0px;

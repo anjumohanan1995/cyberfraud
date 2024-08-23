@@ -1784,9 +1784,12 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         $additionalRowsData = [
             ['Sl.no', 'URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
-            ['1', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','TK0017','TK0018','Instagram','Public'],
-            ['2', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','TK0024','TK0025','Website','Public'],
-            ['3', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','TK0053','TK0054','Facebook','Open'],
+            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
+            ['2', 'https://www.facebook.com', 'facebook.com','','','','Site ','TK0023','TK0024','TK0025','Facebook','Public'],
+            ['3', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
+            ['4', '9632148574', '','','','','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
+            ['5', 'https://www.instagram.com', 'instagram.com','','','','Dismissed','TK0081','TK0082','TK0083','Instagram','Open'],
+
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');

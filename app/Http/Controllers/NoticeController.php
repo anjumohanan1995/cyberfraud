@@ -559,7 +559,7 @@ public function editNoticeView($id)
     $user = Auth::user();
     $role = $user->role;
     // dd($user_sign);
-    return view('notices.edit', compact('notice','users','user_sign'. 'role'));
+    return view('notices.edit', compact('notice','users','user_sign', 'role'));
 }
 
     public function updateNotice(Request $request, $id)

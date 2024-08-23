@@ -69,8 +69,8 @@
                                     @else
                                         <a href="#" class="btn btn-success w-auto me-2" disabled>Approved</a>
                                     @endif
-                                    <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-secondary">Cancel</a>
                                 @endif
+                                <a href="{{ route('notices.show', $notice->id) }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>
