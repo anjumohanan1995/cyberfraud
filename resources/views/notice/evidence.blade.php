@@ -504,6 +504,7 @@ $(document).ready(function(){
     var evidence_type_other = response.evidence_type_other;
 
 
+
     // Process the data as needed
    // console.log(data);
 

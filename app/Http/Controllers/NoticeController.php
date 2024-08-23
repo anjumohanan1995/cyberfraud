@@ -492,6 +492,7 @@ $evidenceTypeCounts = [];
             'user_id' => Auth::user()->id,
             'url' => $notice['urls'], // Store URLs as a comma-separated string
             'notice_type' => $noticeType,
+            'type' => 'Evidence'
         ];
 
         // Add the conditionally required field
@@ -815,6 +816,7 @@ public function follow(Request $request, $id)
                     'ack_number' => $noticeData[0]['acknowledgement_no'],
                     'notice_type' => 'NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023',
                     'content' => $htmlContent,
+                    'type' => 'Mule'
                 ]);
 
                 return response()->json(['success' => true]);
@@ -1029,6 +1031,7 @@ public function follow(Request $request, $id)
                         'ack_number' => $noticeData[0]['acknowledgement_no'],
                         'notice_type' => 'Notice U/s 94 of Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS)',
                         'content' => $htmlContent,
+                        'type' => 'Bank'
                     ]);
 
         return response()->json(['success' => true, 'message' => 'Notice generated successfully.']);
@@ -1268,6 +1271,7 @@ public function follow(Request $request, $id)
                     'ack_number' => $noticeData[0]['acknowledgement_no'],
                     'notice_type' => ' Notice for immediate intervention to prevent cyber fraud ',
                     'content' => $htmlContent,
+                    'type' => 'Bank'
                 ]);
 
                 return response()->json(['success' => true]);

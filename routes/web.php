@@ -318,7 +318,7 @@ Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErr
 
 //bulkuploadevidence
 
-Route::get('template', [EvidenceController::class, 'createEvidenceDownloadTemplate'])->name("create-download-evidence-template");
+Route::get('evidence/template', [EvidenceController::class, 'createEvidenceDownloadTemplate'])->name("create-download-evidence-template");
 
 
 

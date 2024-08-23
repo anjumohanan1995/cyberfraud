@@ -23,6 +23,7 @@ class Notice extends Eloquent
         'content',
         'user_id',
         'approve_id',
+        'type'
 
 
 

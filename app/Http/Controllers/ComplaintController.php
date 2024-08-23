@@ -59,35 +59,19 @@ class ComplaintController extends Controller
 
                 }
                 try {
-            FacadesExcel::import(new ComplaintImportOthers($source_type,$request->case_number,$fileName), $request->complaint_file);
-            return redirect()->back()->with('success', 'Form submitted successfully!');
-        } catch (ValidationException $e) {
-            // dd("1");
-            // Catch and display validation errors
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $e) {
-            // if ($e instanceof \Illuminate\Validation\ValidationException) {
-            //     // Retrieve the validation errors
-            //     $errors = $e->validator->getMessageBag();
-            //     // dd($errors);
+                    $importer = new ComplaintImportOthers($source_type, $request->case_number, $fileName);
+                    FacadesExcel::import($importer, $request->complaint_file);
 
-            //     // Redirect back with validation errors and input data
-            //     return redirect()->back()->withErrors($errors)->withInput();
-            if ($e instanceof \Illuminate\Validation\ValidationException) {
-                // Flatten the validation errors into a simple array
-                $errors = $e->validator->errors()->all();
-
-                // Redirect back with validation errors and input data
-                return redirect()->back()->withErrors($errors)->withInput();
-
-            } else {
-            // dd("2");
-            // Log the error and show a generic message
-            \Illuminate\Support\Facades\Log::error('File import failed: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'An error occurred while processing the file. Please try again.')->withInput();
+                    if ($importer->getErrors()) {
+                        return redirect()->back()->with('importErrors', $importer->getErrors())->withInput();
                     }
-        }
-    }
+
+                    return redirect()->back()->with('success', 'Form submitted successfully!');
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('File import failed: ' . $e->getMessage());
+                    return redirect()->back()->with('error', 'An error occurred while processing the file. Please try again.')->withInput();
+                }
+            }
 
             else{
 

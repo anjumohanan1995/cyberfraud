@@ -210,7 +210,7 @@
                                         <li>
                                             {{-- <strong>Total Amount Retrived:</strong> --}}
                                             <strong>Total Amount Hold:</strong>
-                                            <span>{{ $hold_amount }}</span>
+                                            <span>{{ $hold_amount_percentage }} %</span>
                                         </li>
                                         <li hidden>
                                             <strong>Expensive</strong>

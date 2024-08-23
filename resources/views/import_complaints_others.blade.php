@@ -58,23 +58,40 @@ $user = Auth::user();
                                         </button>
                                     </div>
                                 @endif
-                                @if ($errors->any())
+                                @if (session('importErrors'))
                                 <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-                                    @foreach ($errors->all() as $error)
-                                        @if (is_array($error))
-                                            @foreach ($error as $e)
-                                                <li>{{ $e }}</li>
-                                            @endforeach
-                                        @else
-                                            <li>{{ $error }}</li>
-                                        @endif
-                                    @endforeach
+                                    <ul>
+                                        @foreach (session('importErrors') as $rowNumber => $errors)
+                                            <li>
+                                                <strong>{{ $rowNumber }}:</strong>
+                                                <ul>
+                                                    @foreach ($errors as $field => $messages)
+                                                        @foreach ($messages as $message)
+                                                            <li>{{ $field }}: {{ $message }}</li>
+                                                        @endforeach
+                                                    @endforeach
+                                                </ul>
+                                            </li>
+                                        @endforeach
+                                    </ul>
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
 
+                            @if ($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
                             </div>
                             @if ($hasUploadOtherPermission)
 <div class=" m-4 d-flex justify-content-between">
