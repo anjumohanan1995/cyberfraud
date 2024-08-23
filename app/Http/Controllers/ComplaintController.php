@@ -62,15 +62,12 @@ class ComplaintController extends Controller
                     $importer = new ComplaintImportOthers($source_type, $request->case_number, $fileName);
                     FacadesExcel::import($importer, $request->complaint_file);
 
-                    if ($importer->getErrors()) {
-                        return redirect()->back()->with('importErrors', $importer->getErrors())->withInput();
-                    }
-
                     return redirect()->back()->with('success', 'Form submitted successfully!');
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('File import failed: ' . $e->getMessage());
-                    return redirect()->back()->with('error', 'An error occurred while processing the file. Please try again.')->withInput();
+                    $errors = json_decode($e->getMessage(), true);
+                    return redirect()->back()->with('import_errors', $errors)->withInput();
                 }
+
             }
 
             else{
