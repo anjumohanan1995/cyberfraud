@@ -160,7 +160,8 @@ if($source === 'NCRP'){
                 'distinct_acknowledgements' => ['$addToSet' => $groupField]
             ]],
             ['$project' => [
-                'cases' => ['$size' => '$distinct_acknowledgements']
+                //'cases' => ['$size' => '$distinct_acknowledgements']
+                'cases' => '$distinct_acknowledgements'
             ]],
             ['$sort' => ['_id' => 1]]
         ])->toArray();
@@ -184,7 +185,7 @@ if($source === 'NCRP'){
 }
 
     });
-
+//dd($casesPerDayData);
     // Cases per month grouped by acknowledgement_no (for the specific month)
     $casesPerMonthData = $collection->raw(function($collection) use ($startDateMonth, $endDateMonth, $source) {
         $groupField = ($source === 'NCRP') ? '$acknowledgement_no' : '$case_number';

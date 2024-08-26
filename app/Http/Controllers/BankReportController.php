@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-
+use MongoDB\BSON\UTCDateTime;
 use MongoDB\Client;
 
 class BankReportController extends Controller
@@ -164,30 +164,20 @@ class BankReportController extends Controller
 
     public function getBankDetailsByDate(Request $request)
 {
-    // Get date inputs and validate them
-    $from_date = $request->input('from_date', date('Y-m-d\TH:i:s.u\Z'));
-    $to_date = $request->input('to_date', date('Y-m-d\TH:i:s.u\Z'));
-
-    try {
-        // Parse the ISO 8601 formatted date string into Carbon objects and convert to DateTime
-        $from_date_dt = \Carbon\Carbon::parse($from_date)->setTimezone('Asia/Kolkata')->toDateTime();
-        $to_date_dt = \Carbon\Carbon::parse($to_date)->setTimezone('Asia/Kolkata')->toDateTime();
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Invalid date format'], 400);
+    $fromDate = $request->get('from_date');
+    $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+    $toDateEnd = $fromDate ? Carbon::parse($fromDate)->endOfDay() : null;
+    if ($fromDateStart && $toDateEnd) {
+        $startdate = new UTCDateTime($fromDateStart->timestamp * 1000);
+        $enddate = new UTCDateTime($toDateEnd->timestamp * 1000);
     }
-
-    // Convert DateTime objects to Y-m-d format for querying the database
-    $from_date_str = $from_date_dt->format('Y-m-d');
-    $to_date_str = $to_date_dt->format('Y-m-d');
-//dd($from_date_dt, $to_date_dt);
-    // Get the data
-    $bankCasedata = BankCaseData::whereBetween('transaction_date', [$from_date_dt, $to_date_dt])
+    $bankCasedata = BankCaseData::whereBetween('transaction_date', [$startdate, $enddate])
         ->where('com_status', 1)
         ->get();
-
+    //dd($bankCasedata);
     $acknowledgementNos = $bankCasedata->pluck('acknowledgement_no')->toArray();
     $complaints = Complaint::whereIn('acknowledgement_no', $acknowledgementNos)->get();
-
+    //dd($complaints);
     $complaintsByAcknowledgementNo = [];
     foreach ($complaints as $complaint) {
         $complaintsByAcknowledgementNo[$complaint->acknowledgement_no] = $complaint;
@@ -196,6 +186,7 @@ class BankReportController extends Controller
     $results = [];
 
     foreach ($bankCasedata as $data) {
+        //dd($data);
         $acknowledgementNo = $data->acknowledgement_no;
         $district = $complaintsByAcknowledgementNo[$acknowledgementNo]->district ?? null;
         $entry_date = $complaintsByAcknowledgementNo[$acknowledgementNo]->entry_date ?? null;
@@ -235,6 +226,18 @@ class BankReportController extends Controller
                     $entry_date_dt = new \DateTime($entry_date);
                     $transaction_date_dt = new \DateTime($data->transaction_date);
 
+                    $transaction_date = $data->transaction_date; // Assume this is the MongoDB\BSON\UTCDateTime object
+                    $dateTime = $transaction_date->toDateTime(); // Converts to PHP DateTime object
+                    $formattedDate = $dateTime->format('Y-m-d\TH:i:s.vP');
+                    $result['transaction_date'] = $formattedDate;
+                   // dd($entry_date_dt, $transaction_date_dt);
+
+                    // $transaction_date = $data->transaction_date; // Assume this is the MongoDB\BSON\UTCDateTime object
+                    // $dateTime = $transaction_date->toDateTime(); // Converts to PHP DateTime object
+
+                    // // Optionally, format the DateTime object to a string
+                    // $transaction_date_dt = $dateTime->format('Y-m-d\TH:i:s.vP'); // 2024-08-01T04:30:22.000+00:00
+
                     if ($data->Layer == 1 && $transaction_date_dt->format('Y-m-d') === $entry_date_dt->format('Y-m-d')) {
                         $results[$district]['actual_amount_lost_on'] += $data->transaction_amount;
                     }
@@ -270,11 +273,12 @@ class BankReportController extends Controller
         $result['amount_for_pending_actions'] = max(0, $result['actual_amount'] - $result['total_hold'] - $result['total_amount_lost_from_eco']);
         $result['amount_for_pending_action'] = round($result['amount_for_pending_actions'], 2);
         $result['total'] = $result['1930_count'] + $result['NCRP_count'];
+
     }
 
     // Convert results array to a format DataTables expects
     $data = array_values($results);
-
+//dd($data);
     // Implement server-side processing logic for DataTables
     $draw = intval($request->input('draw'));
     $start = intval($request->input('start'));

@@ -447,7 +447,7 @@
                     </div>
                 </div>
             </div>
-@if (Auth::user()->name == "Super Admin")
+            @if (Auth::user()->name == "Super Admin")
             <div class="container mt-5">
                 <div class="row mb-4">
                     <div class="col-md-4">
@@ -480,8 +480,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="chartTypeSelect" class="form-label">Select Chart Type:</label>
-                        <select id="chartTypeSelect">
+                        <label for="chartTypeSelect" class="form-label d-none">Select Chart Type:</label>
+                        <select id="chartTypeSelect" class="d-none">
                             <option value="bar">Bar Chart</option>
                             <option value="line">Line Chart</option>
                             <option value="pie">Pie Chart</option>
@@ -561,7 +561,7 @@
                 </div>
             </div>
 @endif
-        </div>
+</div>
         <!-- /row -->
     </div>
     <!-- /container -->
