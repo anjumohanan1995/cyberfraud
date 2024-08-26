@@ -82,16 +82,41 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" id="signature-field">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="sign">Signature:</label>
-                                                <input type="file" id="sign" name="sign" class="form-control" placeholder="">
-                                                @error('sign')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                    <div id="signature-fields" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sign">Signature:</label>
+                                                    <input type="file" id="sign" name="sign" class="form-control" placeholder="">
+                                                    @error('sign')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sign_name">Signature Name:</label>
+                                                    <input type="text" id="sign_name" name="sign_name" class="form-control" placeholder="">
+                                                    @error('sign_name')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="sign_designation">Signature Designation:</label>
+                                                    <input type="text" id="sign_designation" name="sign_designation" class="form-control" placeholder="">
+                                                    @error('sign_designation')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
@@ -109,22 +134,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const roleSelect = document.getElementById('role');
-            const signatureField = document.getElementById('signature-field');
+            const signatureFields = document.getElementById('signature-fields');
 
-            // Function to toggle the visibility of the signature field
-            function toggleSignatureField() {
+            // Function to toggle the visibility of the signature fields
+            function toggleSignatureFields() {
                 if (roleSelect.value === 'Super Admin') {
-                    signatureField.style.display = 'block';
+                    signatureFields.style.display = 'block';
                 } else {
-                    signatureField.style.display = 'none';
+                    signatureFields.style.display = 'none';
                 }
             }
 
             // Initial check
-            toggleSignatureField();
+            toggleSignatureFields();
 
             // Add event listener to role select dropdown
-            roleSelect.addEventListener('change', toggleSignatureField);
+            roleSelect.addEventListener('change', toggleSignatureFields);
         });
     </script>
     @endsection

@@ -82,6 +82,11 @@
     .row {
         margin-bottom: 20px;
     }
+
+    .approve img{
+        height:150px !important;
+        width:150px !important;
+        }
 </style>
 
 
