@@ -126,6 +126,6 @@
                 Contact us on: <a href="mailto:k4cict.pol@kerala.gov.in" style="color: #1a0dab;">k4cict.pol@kerala.gov.in</a>
             </b>
         </p>
-        <div id="signature-container" style="margin-top: 20px;"></div>
+        {{-- <div id="signature-container" style="margin-top: 20px;"></div> --}}
     </div>
 </body>

@@ -504,13 +504,13 @@ $evidenceTypeCounts = [];
 // dd($criteria);
 
         // Save the notice content to MongoDB
-        Notice::updateOrCreate(
-            $criteria,
+        // Notice::updateOrCreate(
+            // $criteria,
 
-            [
+            Notice::create(array_merge($criteria, [
                 'content' => $combinedHtmlContent,
                 // Add additional fields if needed
-            ]
+            ])
         );
         // dd("sucess");
     }
