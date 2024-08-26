@@ -28,7 +28,7 @@
                             <div class="card">
                         <div class="card-body">
                             @if($hasEditUserPermission || $role == 'Super Admin')
-                            <div class="edit btn btn-light"><a href="/users/{{$user->id}}/edit" style="colur:white !important;">EDIT</a></div>
+                            <div class="edit btn btn-primary"><a href="/users/{{$user->id}}/edit" style="color:white !important;">EDIT</a></div>
                             {{-- <div class="edit btn btn-light"><a href="/users/{{$user->id}}/edit" style="colur:white !important;">EDIT<i class="fa-solid fa-pen"></i></a></div> --}}
                             @endif
                             <h2>Profile Details</h2>
