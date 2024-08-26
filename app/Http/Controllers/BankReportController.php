@@ -171,6 +171,7 @@ class BankReportController extends Controller
         $startdate = new UTCDateTime($fromDateStart->timestamp * 1000);
         $enddate = new UTCDateTime($toDateEnd->timestamp * 1000);
     }
+   // dd($fromDateStart, $toDateEnd, $startdate, $enddate);
     $bankCasedata = BankCaseData::whereBetween('transaction_date', [$startdate, $enddate])
         ->where('com_status', 1)
         ->get();
@@ -301,15 +302,21 @@ class BankReportController extends Controller
     public function getAboveData(Request $request)
     {
   // Default dates to today if not provided
-  $from_date = $request->input('from_date', date('Y-m-d'));
-  $to_date = $request->input('to_date', date('Y-m-d'));
+  $fromDate = $request->input('from_date');
+  $to_date = $request->input('to_date');
+
+
+
+
+
    // Convert date strings to DateTime objects
   try {
-    // $from_date_dt = new \DateTime($from_date);
-    // $to_date_dt = new \DateTime($to_date);
-    $from_date_dt = \Carbon\Carbon::parse($from_date)->setTimezone('Asia/Kolkata')->toDateTime();
-  $to_date_dt = \Carbon\Carbon::parse($to_date)->setTimezone('Asia/Kolkata')->toDateTime();
- //dd($from_date_dt, $to_date_dt);
+    $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+    $toDateEnd = $to_date ? Carbon::parse($to_date)->endOfDay() : null;
+    if ($fromDateStart && $toDateEnd) {
+        $startdate = new UTCDateTime($fromDateStart->timestamp * 1000);
+        $enddate = new UTCDateTime($toDateEnd->timestamp * 1000);
+    }
 } catch (\Exception $e) {
     return response()->json([
         'draw' => intval($request->input('draw')),
@@ -319,78 +326,69 @@ class BankReportController extends Controller
         'error' => 'Invalid date format'
     ]);
 }
- // Format dates to Y-m-d
-//  $from_date = $from_date_dt->format('Y-m-d');
-//  $to_date = $to_date_dt->format('Y-m-d');
 
+    $bankCasedata = BankCaseData::whereBetween('transaction_date', [$startdate, $enddate])
+        ->where('com_status', 1)
+        ->get();
+    //dd($bankCasedata);
 
-   // Fetch complaints for acknowledgment numbers with total amount > 100000
-//    $bankCaseData = BankCaseData::raw(function ($collection) use ($from_date_dt, $to_date_dt) {
-//     return $collection->aggregate([
-//         ['$match' => [
-//             'transaction_date' => ['$gte' => $from_date_dt, '$lte' => $to_date_dt],
-//             'com_status' => 1,
-//             // 'Layer' => 1
-//         ]],
-//         ['$group' => ['_id' => '$acknowledgement_no']]
-//     ])->toArray();
-// });
-$bankCasedata = BankCaseData::whereBetween('transaction_date', [$from_date_dt, $to_date_dt])
-->where('com_status', 1)
-->get();
-//dd($bankCasedata);
+//dd($acknowledgementNos);
 
-if (empty($bankCaseData)) {
-    return response()->json([
-        'draw' => intval($request->input('draw')),
-        'recordsTotal' => 0,
-        'recordsFiltered' => 0,
-        'data' => [],
-        //'error' => 'No bank case data found for the specified criteria'
-    ]);
-}
-        $acknowledgementNos = array_column($bankCaseData, '_id');
+// if (empty($bankCaseData)) {
+//     return response()->json([
+//         'draw' => intval($request->input('draw')),
+//         'recordsTotal' => 0,
+//         'recordsFiltered' => 0,
+//         'data' => [],
+//         //'error' => 'No bank case data found for the specified criteria'
+//     ]);
+// }
+$acknowledgementNos = $bankCasedata->pluck('acknowledgement_no')->toArray();
 
         // Fetch complaints details
         $complaints = Complaint::whereIn('acknowledgement_no', $acknowledgementNos)->get();
-
-        if ($complaints->isEmpty()) {
-            return response()->json([
-                'draw' => intval($request->input('draw')),
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'data' => [],
-                'error' => 'No complaints found for the specified acknowledgements'
-            ]);
-        }
+//dd($complaints);
+        // if ($complaints->isEmpty()) {
+        //     return response()->json([
+        //         'draw' => intval($request->input('draw')),
+        //         'recordsTotal' => 0,
+        //         'recordsFiltered' => 0,
+        //         'data' => [],
+        //         'error' => 'No complaints found for the specified acknowledgements'
+        //     ]);
+        // }
         // Total Reported Amount
         $results = [];
         foreach ($complaints as $complaint) {
+            $date = Carbon::parse($complaint['entry_date']);
+
+// Format to d-m-Y
+$formattedDate = $date->format('d-m-Y');
             $ackNo = (string) $complaint['acknowledgement_no'];
             if (!isset($results[$ackNo])) {
                 $results[$ackNo] = [
                     'acknowledgement_no' => $ackNo,
                     'district' => $complaint['district'],
-                    'reported_date' => $complaint['entry_date'],
+                    'reported_date' => $formattedDate,
                     'total_amount' => 0
                 ];
             }
             $results[$ackNo]['total_amount'] += $complaint['amount'];
         }
-
+//dd($results);
         $filteredResults = array_filter($results, function ($result) {
             return $result['total_amount'] > 100000;
         });
 //validate above 100000
-        if (empty($filteredResults)) {
-            return response()->json([
-                'draw' => intval($request->input('draw')),
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'data' => [],
-                'error' => 'No complaints found with total amount greater than 100000'
-            ]);
-        }
+        // if (empty($filteredResults)) {
+        //     return response()->json([
+        //         'draw' => intval($request->input('draw')),
+        //         'recordsTotal' => 0,
+        //         'recordsFiltered' => 0,
+        //         'data' => [],
+        //         'error' => 'No complaints found with total amount greater than 100000'
+        //     ]);
+        // }
 
         // Transaction Dates
 
@@ -412,11 +410,15 @@ if (empty($bankCaseData)) {
             });
 
             if (!empty($firstTransaction)) {
-                $filteredResults[$ackNo]['first_transaction_date'] = $firstTransaction[0]['transaction_date'];
+                // Extract milliseconds and convert to seconds
+                $firstTransactionDate = $firstTransaction[0]['transaction_date']->toDateTime()->getTimestamp() * 1000;
+                $filteredResults[$ackNo]['first_transaction_date'] = Carbon::createFromTimestamp($firstTransactionDate / 1000)->format('d-m-Y');
             }
 
             if (!empty($lastTransaction)) {
-                $filteredResults[$ackNo]['last_transaction_date'] = $lastTransaction[0]['transaction_date'];
+                // Extract milliseconds and convert to seconds
+                $lastTransactionDate = $lastTransaction[0]['transaction_date']->toDateTime()->getTimestamp() * 1000;
+                $filteredResults[$ackNo]['last_transaction_date'] = Carbon::createFromTimestamp($lastTransactionDate / 1000)->format('d-m-Y');
             }
             $combained_date = $filteredResults[$ackNo]['first_transaction_date'] . ' - ' . $filteredResults[$ackNo]['last_transaction_date'];
             $filteredResults[$ackNo]['transaction_period']=$combained_date;
@@ -424,7 +426,7 @@ if (empty($bankCaseData)) {
             //dd($ackNo);
             $lienAmount = BankCaseData::where('acknowledgement_no', $ackNo)
                 ->where('action_taken_by_bank', 'transaction put on hold')
-                ->whereBetween('transaction_date', [$from_date, $to_date])
+                ->whereBetween('transaction_date', [$fromDate, $to_date])
                 ->sum('transaction_amount');
 
             // Since sum returns an integer, directly use it
@@ -444,7 +446,7 @@ if (empty($bankCaseData)) {
             ];
 
 
-            $totalAmountLost = BankCaseData::Where('acknowledgement_no', $ackNo)->WhereBetween('transaction_date', [$from_date, $to_date])->WhereIn('action_taken_by_bank', $actions)->sum('transaction_amount');
+            $totalAmountLost = BankCaseData::Where('acknowledgement_no', $ackNo)->WhereBetween('transaction_date', [$fromDate, $to_date])->WhereIn('action_taken_by_bank', $actions)->sum('transaction_amount');
            //dd($totalAmountLost);
             $totalAmountLost = !empty($totalAmountLost) ? $totalAmountLost : 0;
             $filteredResults[$ackNo]['amount_lost'] = $totalAmountLost;
