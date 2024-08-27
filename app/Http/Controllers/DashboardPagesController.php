@@ -115,9 +115,11 @@ $groupedOtherLayerCases = $otherLayerCases->groupBy(function ($case) {
 $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
     return $group->pluck('acknowledgement_no')->unique()->count() > 1;
 });
+// dd($validOtherLayerCases);
 
 // Merge layer 1 and valid other layer cases
 $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+// dd($allCases);
 
 // Group by account_no_2 and remove duplicates
 $groupedCases = $allCases->groupBy(function ($case) {
