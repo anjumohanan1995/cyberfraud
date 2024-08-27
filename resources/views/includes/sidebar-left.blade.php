@@ -30,6 +30,9 @@
     $hasEvidenceManagementPermission = in_array('Evidence Management', $permissions);
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
     $hasReportsPermission = in_array('Reports Management', $permissions);
+    $hasViewNCRPReportsPermission = in_array('View NCRP/Others Report', $sub_permissions);
+    $hasViewDailyBankReports = in_array('View Daily Bank Reports', $sub_permissions);
+    $hasViewAboveOneLakhReports = in_array('View Above One Lakh Report', $sub_permissions);
     $hasEvidenceTypePermission = in_array('Evidence Type Management', $permissions);
     $hasNoticeViewPermission = in_array('Notice View', $sub_permissions) || $user->role == 'Super Admin';
     if ($sub_permissions) {
@@ -320,19 +323,24 @@
                 <i class="angle fe fe-chevron-down"> </i>
             </a>
             <ul class="slide-menu">
+                @if ($hasViewNCRPReportsPermission)
                 <li>
                     <a class="slide-item" href="{{ url('reports') }}">NCRP / Others Case Data</a>
                 </li>
+                @endif
                 {{-- @if ($hasUploadPrimaryDataPermission) --}}
+                @if ($hasViewDailyBankReports)
                     <li>
                         <a class="slide-item" href="{{ url('/bank-daily-reports') }}">Daily Bank Reports</a>
                     </li>
+                @endif
                 {{-- @endif --}}
-                {{-- @if ($hasUploadBankActionPermission) --}}
+                @if ($hasViewAboveOneLakhReports)
+
                     <li>
                         <a class="slide-item" href="{{ route('above-one-lakh') }}">Above 1 Lakh Report</a>
                     </li>
-                {{-- @endif --}}
+             @endif
             </ul>
         </li>
     @endif

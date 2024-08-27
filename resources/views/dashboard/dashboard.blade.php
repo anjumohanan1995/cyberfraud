@@ -851,7 +851,7 @@
                         labels: labels,
                         datasets: [{
                             data: dataValues,
-                            backgroundColor: ['rgb(0, 143, 251)', 'rgb(255, 99, 132)', 'rgb(255, 205, 86)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)', 'rgb(255, 159, 64)'], // Add more colors if needed
+                            backgroundColor: ['rgb(0, 143, 251)', 'rgb(255, 99, 132)', 'rgb(255, 0, 0)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)', 'rgb(255, 159, 64)'], // Add more colors if needed
                             hoverOffset: 4 // Offset when hovering over a pie slice
                         }]
                     },
@@ -1013,61 +1013,61 @@ function fetchData() {
             });
 
             const options = {
-                series: [{
-                        name: 'Started',
-                        data: startedData
-                    },
-                    {
-                        name: 'Ongoing',
-                        data: ongoingData
-                    },
-                    {
-                        name: 'Completed',
-                        data: completedData
-                    }
-                ],
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded'
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    // formatter: function (val) {
-                    //     return val + "%"; // Append the % symbol to the data label
-                    // }
-                },
-                xaxis: {
-                    categories: users
-                },
-                yaxis: {
-                    title: {
-                        text: 'scale'
-                    },
-                    // labels: {
-                    //     formatter: function (val) {
-                    //         return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
-                    //     }
-                    // }
-                },
-                fill: {
-                    opacity: 1
-                },
-                // tooltip: {
-                //     y: {
-                //         formatter: function (val) {
-                //             return val + "%"; // Append the % symbol to the tooltip values
-                //         }
-                //     }
-                // }
-            };
-
+    series: [{
+            name: 'Started',
+            data: startedData
+        },
+        {
+            name: 'Ongoing',
+            data: ongoingData
+        },
+        {
+            name: 'Completed',
+            data: completedData
+        }
+    ],
+    chart: {
+        type: 'bar',
+        height: 350
+    },
+    plotOptions: {
+        bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+        }
+    },
+    dataLabels: {
+        enabled: true,
+        // formatter: function (val) {
+        //     return val + "%"; // Append the % symbol to the data label
+        // }
+    },
+    xaxis: {
+        categories: users
+    },
+    yaxis: {
+        title: {
+            text: 'scale'
+        },
+        // labels: {
+        //     formatter: function (val) {
+        //         return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
+        //     }
+        // }
+    },
+    fill: {
+        opacity: 1
+    },
+    colors: ['#00E396', '#0090FF', '#FF0000'], // Customize colors here
+    // tooltip: {
+    //     y: {
+    //         formatter: function (val) {
+    //             return val + "%"; // Append the % symbol to the tooltip values
+    //         }
+    //     }
+    // }
+};
             if (chart) {
                 chart.destroy(); // Destroy existing chart instance
             }
