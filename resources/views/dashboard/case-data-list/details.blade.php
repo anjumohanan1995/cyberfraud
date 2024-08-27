@@ -545,7 +545,8 @@
                                                         <br><br>
                                                         Layer : {{ @$bank_data['Layer'] }}</td>
                                                     <td>{{ @$bank_data['action_taken_by_bank'] }}<br><br>
-                                                        Txn Date: {{ @$bank_data['bank'] }}</td>
+                                                        <td>Txn Date: {{ \Carbon\Carbon::parse($bank_data['transaction_date'])->format('d-m-Y H:i:s') }}</td>
+
                                                     <td>{{ @$bank_data['bank'] }}</td>
                                                     <td>A/C No : {{ @$bank_data['account_no_2'] }}<br>
                                                         ifsc Code : {{ @$bank_data['ifsc_code'] }}</td>
@@ -554,7 +555,7 @@
                                                         {{ @$bank_data['transaction_id_sec'] }}<br><br>
                                                         Transaction Amount : {{ @$bank_data['transaction_amount'] }}
                                                         <br><br>
-                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
+                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></td>
 
 
 

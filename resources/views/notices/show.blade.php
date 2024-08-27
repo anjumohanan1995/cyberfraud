@@ -87,6 +87,7 @@
         height:150px !important;
         width:150px !important;
         }
+
 </style>
 
 

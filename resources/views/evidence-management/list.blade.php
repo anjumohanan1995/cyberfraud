@@ -306,6 +306,12 @@ $user = Auth::user();
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
+
+                                                                <a class="align-items-center justify-content-center btn btn-primary m-5"
+                                                                data-toggle="tooltip" data-placement="top" title="View Evidence"
+                                                                href="{{ route('upload-others-caseData')}}">
+                                                                <i class="ti ti-upload"></i> Bulk Upload </a>
+
                                                                 <table id="others" style="width:100%" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                                                  {{-- <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="others" title="Others Recheck"> Recheck <i class="fa fa-sync" ></i></button> --}}
                                                                     <thead>
