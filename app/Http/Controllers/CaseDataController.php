@@ -448,6 +448,7 @@ class CaseDataController extends Controller
 
             $edit = '';
             if ($hasShowActivatePermission) {
+                $overallStatus = $this->getOverallStatus($record['acknowledgement_no']);
                 $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                     <input
                         data-id="' . $record['acknowledgement_no'] . '"
@@ -455,7 +456,7 @@ class CaseDataController extends Controller
                         class="form-check-input"
                         type="checkbox"
                         id="SwitchCheckSizesm' . $record['_id'] . '"
-                        ' . ($record['com_status'] == 1 ? 'checked   title="Deactivate"' : '  title="Activate"') . '>
+                        ' . ($overallStatus == 1 ? 'checked title="Deactivate"' : 'title="Activate"') . '>
                  </div>';
             }
 
@@ -515,6 +516,16 @@ class CaseDataController extends Controller
         ];
 
         return response()->json($response);
+    }
+
+    public function getOverallStatus($acknowledgementNo)
+    {
+        // Query to check if any document with the same acknowledgement_no has com_status == 1
+        $anyActive = Complaint::where('acknowledgement_no', $acknowledgementNo)
+                              ->where('com_status', 1)
+                              ->exists();
+
+        return $anyActive ? 1 : 0; // If any document is active, return 1, otherwise return 0
     }
 
     //     public function getDatalist(Request $request)
@@ -1484,13 +1495,14 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 'assigned_to' => ['$first' => '$assigned_to'],
                 'case_status' => ['$first' => '$case_status'],
                 'status' => ['$first' => '$status'],
+                'created_at' => ['$first' => '$created_at'],
             ]
         ];
 
 
 
         // Sort stage (optional)
-        $pipeline[] = ['$sort' => ['_id' => 1]];
+        $pipeline[] = ['$sort' => ['created_at' => -1]];
 
         // Pagination stages
         $pipeline[] = ['$skip' => (int)$start];

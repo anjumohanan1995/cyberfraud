@@ -286,7 +286,8 @@ class EvidenceController extends Controller
                 'domain' => 'domain',
                 'ip' => 'ip',
                 'registrar' => 'registrar',
-                'registry_details' => 'registry_details'
+                'registry_details' => 'registry_details',
+                'created_at' => 'created_at'
             ];
 
         $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$ip,$domain ,$evidence_type , $evidence_type_text, $filteredAckNumbers, $searchValue, $columnName, $columnSortOrder, $sortableFields){
@@ -309,6 +310,7 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
+                        'created_at' => ['$first' => '$created_at']
 
                     ]
                 ]
@@ -370,16 +372,20 @@ class EvidenceController extends Controller
             array_unshift($pipeline, ['$match' => $matchConditions]);
         }
 
-        // Add dynamic sort stage
+        // Sort by created_at in descending order by default or by user-selected column
         if (isset($sortableFields[$columnName])) {
             $sortField = $sortableFields[$columnName];
             $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
-            $pipeline[] = [
-                '$sort' => [
-                    $sortField => $sortDirection
-                ]
-            ];
+        } else {
+            // Default sorting by created_at in descending order
+            $sortField = 'created_at';
+            $sortDirection = -1;
         }
+        $pipeline[] = [
+            '$sort' => [
+                $sortField => $sortDirection
+            ]
+        ];
 
         // Add skip and limit stages
         $pipeline[] = ['$skip' => (int)$start];
@@ -610,7 +616,8 @@ class EvidenceController extends Controller
             'domain' => 'domain',
             'ip' => 'ip',
             'registrar' => 'registrar',
-            'registry_details' => 'registry_details'
+            'registry_details' => 'registry_details',
+            'created_at' => 'created_at'
         ];
 
         $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain,$ip, $evidence_type, $evidence_type_text, $from_date, $to_date, $searchValue, $columnName, $columnSortOrder, $sortableFields) {
@@ -635,6 +642,7 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
+                        'created_at' => ['$first' => '$created_at']
                     ]
                 ]
                 // [
@@ -724,23 +732,20 @@ class EvidenceController extends Controller
                 $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
             }
 
-            // Add dynamic sort stage
-            if (isset($sortableFields[$columnName])) {
-                $sortField = $sortableFields[$columnName];
-                $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
-                $pipeline[] = [
-                    '$sort' => [
-                        $sortField => $sortDirection
-                    ]
-                ];
-            } else {
-                // Default sort if column is not sortable
-                $pipeline[] = [
-                    '$sort' => [
-                        '_id' => 1
-                    ]
-                ];
-            }
+        // Sort by created_at in descending order by default or by user-selected column
+        if (isset($sortableFields[$columnName])) {
+            $sortField = $sortableFields[$columnName];
+            $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
+        } else {
+            // Default sorting by created_at in descending order
+            $sortField = 'created_at';
+            $sortDirection = -1;
+        }
+        $pipeline[] = [
+            '$sort' => [
+                $sortField => $sortDirection
+            ]
+        ];
 
             // Add skip and limit stages
             $pipeline[] = ['$skip' => (int)$start];

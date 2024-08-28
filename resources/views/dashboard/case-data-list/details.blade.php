@@ -545,7 +545,7 @@
                                                         <br><br>
                                                         Layer : {{ @$bank_data['Layer'] }}</td>
                                                     <td>{{ @$bank_data['action_taken_by_bank'] }}<br><br>
-                                                        <td>Txn Date: {{ \Carbon\Carbon::parse($bank_data['transaction_date'])->format('d-m-Y H:i:s') }}</td>
+                                                        Txn Date: {{ \Carbon\Carbon::parse($bank_data['transaction_date'])->format('d-m-Y H:i:s') }}</td>
 
                                                     <td>{{ @$bank_data['bank'] }}</td>
                                                     <td>A/C No : {{ @$bank_data['account_no_2'] }}<br>
