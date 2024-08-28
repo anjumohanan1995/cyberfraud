@@ -82,7 +82,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="signature-fields" style="display: none;">
+                                    {{-- <div id="signature-fields" style="display: none;"> --}}
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
@@ -115,7 +115,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    {{-- </div> --}}
 
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -130,8 +130,8 @@
         <!-- /row -->
     </div>
 
-    @section('scripts')
-    <script>
+    {{-- @section('scripts') --}}
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function () {
             const roleSelect = document.getElementById('role');
             const signatureFields = document.getElementById('signature-fields');
@@ -151,6 +151,6 @@
             // Add event listener to role select dropdown
             roleSelect.addEventListener('change', toggleSignatureFields);
         });
-    </script>
-    @endsection
+    </script> --}}
+    {{-- @endsection --}}
 @endsection

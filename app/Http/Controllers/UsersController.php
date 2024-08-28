@@ -160,53 +160,64 @@ class UsersController extends Controller
     //     return redirect()->route('users.index')->with('success', 'User updated successfully!');
     // }
     public function update(Request $request, $id)
-    {
-        // Custom validation rules
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
-            'sign' => 'nullable|image',
-        ]);
+{
+    // Custom validation rules
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'password' => [
+            'nullable',
+            'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'
+        ],
+        'old_password' => 'nullable|min:6', // Ensure old password is provided if changing password
+        'sign' => 'nullable|image',
+    ]);
 
-        // Find the user by ID
-        $data = User::findOrFail($id);
+    // Find the user by ID
+    $data = User::findOrFail($id);
 
-        // Update name, email, and role if provided
-        $data->name = $request->input('name', $data->name);
-        $data->last_name = $request->input('last_name', $data->last_name);
-        $data->email = $request->input('email', $data->email);
-        $data->role = $request->input('role', $data->role);
+    // Update name, email, and role if provided
+    $data->name = $request->input('name', $data->name);
+    $data->last_name = $request->input('last_name', $data->last_name);
+    $data->email = $request->input('email', $data->email);
+    $data->role = $request->input('role', $data->role);
 
-        // Only update the password if it's provided and not null
-        if ($request->filled('password')) {
-            $data->password = Hash::make($request->password);
+    // Handle password update
+    if ($request->filled('password')) {
+        // Check if the old password is correct
+        if (!Hash::check($request->old_password, $data->password)) {
+            return redirect()->back()->withErrors(['old_password' => 'The current password is incorrect.']);
         }
 
-        // Handle the signature file upload if a new file is provided
-        if ($request->hasFile('sign')) {
-            // Delete the old signature if it exists
-            // if ($data->sign && file_exists(public_path($data->sign))) {
-            //     unlink(public_path($data->sign));
-            // }
-
-            // Store the new signature
-            $file = $request->file('sign');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('signatures'), $filename);
-            $data->sign = 'signatures/' . $filename;
-        }
-
-        // Update the sign-related fields if provided
-        $data->sign_name = $request->input('sign_name', $data->sign_name);
-        $data->sign_designation = $request->input('sign_designation', $data->sign_designation);
-
-        // Save the updated user data
-        $data->save();
-
-        // Redirect back with success message
-        return redirect()->route('users.index')->with('success', 'User updated successfully!');
+        // Update to the new password
+        $data->password = Hash::make($request->password);
     }
+
+    // Handle the signature file upload if a new file is provided
+    if ($request->hasFile('sign')) {
+        // Delete the old signature if it exists
+        if ($data->sign && file_exists(public_path($data->sign))) {
+            unlink(public_path($data->sign));
+        }
+
+        // Store the new signature
+        $file = $request->file('sign');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('signatures'), $filename);
+        $data->sign = 'signatures/' . $filename;
+    }
+
+    // Update the sign-related fields if provided
+    $data->sign_name = $request->input('sign_name', $data->sign_name);
+    $data->sign_designation = $request->input('sign_designation', $data->sign_designation);
+
+    // Save the updated user data
+    $data->save();
+
+    // Redirect back with success message
+    return redirect()->route('users.index')->with('success', 'User updated successfully!');
+}
+
 
 
     // public function update(Request $request, $id)

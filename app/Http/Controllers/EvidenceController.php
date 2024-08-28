@@ -1379,7 +1379,57 @@ class EvidenceController extends Controller
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }
+    public function createEvidenceMobileDownloadTemplate()
+    {
 
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Public'],
+            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
+            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Public'],
+
+
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
+    public function createEvidenceWebsiteDownloadTemplate()
+    {
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
+            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
 
 
 }

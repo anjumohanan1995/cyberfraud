@@ -74,7 +74,29 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="old_password">Current Password:</label>
+                                                    <input type="password" id="old_password" name="old_password" class="form-control" placeholder="Enter your current password">
+                                                    @error('old_password')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="password">New Password:</label>
+                                                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password">
+                                                    @error('password')
+                                                        <div class="text-danger">{{ $message }}</div>
+                                                    @enderror
+                                                    <small class="text-muted">Leave this field empty if you don't want to change the password.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="password">New Password:</label>
                                                 <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password">
@@ -83,9 +105,9 @@
                                                 @enderror
                                                 <small class="text-muted">Leave this field empty if you don't want to change the password.</small>
                                             </div>
-                                        </div>
+                                        </div> --}}
                                     </div>
-                                    <div id="signature-fields" style="display: none;">
+                                    {{-- <div id="signature-fields" style="display: none;"> --}}
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
@@ -118,7 +140,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    {{-- </div> --}}
 
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
@@ -132,7 +154,7 @@
         <!-- /row -->
     </div>
 
-    @section('scripts')
+    {{-- @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const roleSelect = document.getElementById('role');
@@ -154,5 +176,5 @@
             roleSelect.addEventListener('change', toggleSignatureFields);
         });
     </script>
-    @endsection
+    @endsection --}}
 @endsection

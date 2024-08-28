@@ -261,7 +261,7 @@
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('sourcetype') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Source Type</span>
+                    <span class="side-menu__label">Master</span>
                 </a>
             </li>
         @endif
@@ -344,14 +344,14 @@
             </ul>
         </li>
     @endif
-        @if ($hasEvidenceTypePermission)
+        {{-- @if ($hasEvidenceTypePermission)
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('evidencetype') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
                     <span class="side-menu__label">Evidence Type</span>
                 </a>
             </li>
-        @endif
+        @endif --}}
 
 
             {{-- <li class="slide">
