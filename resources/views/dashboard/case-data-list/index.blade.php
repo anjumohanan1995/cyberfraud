@@ -154,8 +154,8 @@ $user = Auth::user();
                                             <label for="filled_by_who">Complaint Reported:</label>
                                             <select class="form-control" id="filled_by_who" name="filled_by_who">
                                                 <option value="">All</option>
-                                                <option value="citizen">Through Helpline(1930)</option>
-                                                <option value="cyber">Cyber Crime Portal</option>
+                                                <option value="citizen">Cyber Crime Portal</option>
+                                                <option value="cyber">Through Helpline(1930)</option>
                                             </select>
                                         </div>
                                     </div>
