@@ -49,7 +49,7 @@
                 <div class="col-md-12 col-xl-12">
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
-                            <div class=" m-4 d-flex justify-content-between">
+                            <div class=" ">
 
                                 @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
@@ -59,7 +59,7 @@
                                         </button>
                                     </div>
                                 @endif
-                                @if ($hasAddSubPermissionPermission)
+                                {{-- @if ($hasAddSubPermissionPermission)
 <h4 class="card-title mg-b-10">
                                     Add Sub Permission Here!
                                 </h4>
@@ -84,16 +84,16 @@
                                 </form>
 
                             </div>
-@endif
+@endif --}}
 
                             <h3>Existing Subpermissions</h3>
                             <table class="table"  class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                 <thead>
                                     <tr>
                                         <th>Subpermission Name</th>
-                                         @if ($hasDeleteSubPermissionPermission)
+                                         {{-- @if ($hasDeleteSubPermissionPermission)
 <th>Action</th>
-                                         @endif
+                                         @endif --}}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -101,7 +101,7 @@
 @foreach($subpermissions as $detail )
                                     <tr>
                                         <td>{{ $detail }}</td>
-                                        @if ($hasDeleteSubPermissionPermission)
+                                        {{-- @if ($hasDeleteSubPermissionPermission)
                                          <td>
                                             <!-- Add a delete button with a form -->
                                             <form action="{{ route('subpermissions.destroy',$detail) }}" method="POST">
@@ -110,7 +110,7 @@
                                                 <button type="submit" class="btn btn-danger">Delete</button>
                                             </form>
                                         </td>
-                                        @endif
+                                        @endif --}}
                                     </tr>
                                     @endforeach
                                     @endif

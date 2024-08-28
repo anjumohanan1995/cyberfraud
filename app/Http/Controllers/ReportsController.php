@@ -18,6 +18,8 @@ use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Crypt;
 use MongoDB\Client;
 use DateTime;
+use Illuminate\Support\Facades\DB;
+
 
 
 class ReportsController extends Controller
@@ -94,7 +96,7 @@ if ($dailyDate) {
 
     if ($acknowledgementNos->isNotEmpty()) {
         $query->whereIn('acknowledgement_no', $acknowledgementNos);
-        dd($query);
+        // dd($query);
     } else {
         // If no acknowledgement numbers are found, apply an empty filter to return no results
         $query->whereIn('acknowledgement_no', []);
@@ -240,7 +242,7 @@ if (!empty($searchValue)) {
                 // $records_action = $query->get();
                 // dd($records_action);
                 // Fetch records
-                $records = $query->orderBy('created_at', 'desc')
+                $records = $query->orderBy(DB::raw('entry_date'), 'desc')
                                  ->orderBy('acknowledgement_no', 'asc')
                                  ->skip($start)
                                  ->take($rowperpage)
@@ -277,7 +279,7 @@ if (!empty($searchValue)) {
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
+                $entry_date = $com->entry_date->toDateTime()->format('d-m-Y H:i:s');
                 $current_status = $com->current_status;
                 $date_of_action = $com->date_of_action;
                 $action_taken_by_name = $com->action_taken_by_name;

@@ -166,6 +166,15 @@ $user = Auth::user();
                         <div class="text-center">
                             <button type="button" class="btn btn-success" id="sendMail">Send Mail</button>
                         </div>
+                        <div class="text-center" style="margin-top: 20px;">
+                            <div id="loader" style="display: none;">
+                                <p style="color: red;">
+                                    Sending emails... Please wait.
+                                    <i class="fa fa-spinner fa-spin"></i> <!-- Font Awesome spinner -->
+                                </p>
+                                <!-- Add your loader animation here -->
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -314,6 +323,7 @@ $user = Auth::user();
 
     // Validate if both fields are selected
     if (statusType && noticeType) {
+        $('#loader').show();
         $.ajax({
             type: 'POST',
             url: '{{ route("send-email") }}',
@@ -340,6 +350,9 @@ $user = Auth::user();
                     '<span aria-hidden="true">&times;</span></button></div>').show();
                 console.error('Error sending email:', error);
                 $('#status-popup').modal('hide');
+            },
+            complete: function() {
+                $('#loader').hide();
             }
         });
     } else {

@@ -100,13 +100,15 @@
         // Fetch the user's signature URL
         const signatureUrl = "{{ asset($user_sign[0]->sign) }}";
         const signatureHtml = `
-    <div style="text-align: right;" class="approve">
-        <p><strong>Approved by:</strong></p>
-        <img src="${signatureUrl}" alt="Signature" style="max-width: 250px; height: auto;">
-        <p><strong>{{$user_sign[0]->sign_name}}</strong></p>
-        <p><strong>{{$user_sign[0]->sign_designation}}</strong></p>
-    </div>
-    `.replace(/\s+/g, ' ').trim();
+        <div style="text-align: right;" class="approve">
+            <p><strong>Approved by:</strong></p>
+            <img src="${signatureUrl}" alt="Signature" style="max-width: 250px; height: auto;">
+            <p style="overflow: visible; word-wrap: break-word;">
+                <strong>{{ $user_sign[0]->sign_name }}</strong>
+            </p>
+            <p><strong>{{$user_sign[0]->sign_designation}}</strong></p>
+        </div>
+        `.replace(/\s+/g, ' ').trim();
 
         // Get CKEditor instance
         const editor = CKEDITOR.instances.content;

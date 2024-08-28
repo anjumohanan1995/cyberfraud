@@ -115,9 +115,11 @@ $groupedOtherLayerCases = $otherLayerCases->groupBy(function ($case) {
 $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
     return $group->pluck('acknowledgement_no')->unique()->count() > 1;
 });
+// dd($validOtherLayerCases);
 
 // Merge layer 1 and valid other layer cases
 $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+// dd($allCases);
 
 // Group by account_no_2 and remove duplicates
 $groupedCases = $allCases->groupBy(function ($case) {
@@ -161,9 +163,11 @@ $muleAccountCount = $uniqueCases->count();
         $pending_amount = 0;
 
         $sum_amount = Complaint::where('com_status', 1)->sum('amount');
+        // dd($sum_amount);
         $hold_amount = BankCaseData::where('com_status', 1)
             ->where('action_taken_by_bank', 'transaction put on hold')
             ->sum('transaction_amount');
+            // dd($hold_amount);
 
         // Calculate hold amount percentage
         $hold_amount_percentage = 0;
@@ -173,6 +177,7 @@ $muleAccountCount = $uniqueCases->count();
 
         // Round to 2 decimal places
         $hold_amount_percentage = round($hold_amount_percentage, 2);
+
 
         return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','hold_amount_percentage'));
     }

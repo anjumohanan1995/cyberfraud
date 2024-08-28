@@ -549,6 +549,7 @@ class MailController extends Controller
                     }
                 }
             }
+            // return response()->json(['message' => 'Emails queued for sending']);
         }
         // dd($caseData);
 

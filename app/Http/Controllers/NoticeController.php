@@ -524,18 +524,34 @@ $evidenceTypeCounts = [];
 
 public function Notices()
 {
-    $currentUserId = Auth::user()->id; // Get the current authenticated user's ID
-    // dd($currentUserId);
+    // $currentUserId = Auth::user()->id; // Get the current authenticated user's ID
+    // $isSuperAdmin = Auth::user()->role === 'super_admin';
+    // // dd($currentUserId);
 
-    // Fetch notices based on the presence of `assing_by_user_id` field
-    $notices = Notice::where(function ($query) use ($currentUserId) {
-        // Show notices where `assing_by_user_id` matches the current user's ID or where it is not present
-        $query->where('assing_to_user_id', $currentUserId)
-              ->orWhereNull('assing_to_user_id');
-    })
-    ->orderBy('created_at', 'desc')
-    ->get();
-    // dd($notices);
+    // // Fetch notices based on the presence of `assing_by_user_id` field
+    // $notices = Notice::where(function ($query) use ($currentUserId) {
+    //     // Show notices where `assing_by_user_id` matches the current user's ID or where it is not present
+    //     $query->where('assing_to_user_id', $currentUserId)
+    //           ->orWhereNull('assing_to_user_id');
+    // })
+    // ->orderBy('created_at', 'desc')
+    // ->get();
+    // // dd($notices);
+
+            $currentUser = Auth::user(); // Get the current authenticated user
+            $currentUserId = $currentUser->id; // Get the current user's ID
+            $isSuperAdmin = $currentUser->role === 'Super Admin'; // Check if the user is a super admin
+
+            // Fetch notices based on the user's role
+            $notices = Notice::when(!$isSuperAdmin, function ($query) use ($currentUserId) {
+                $query->where(function ($query) use ($currentUserId) {
+                    // Show notices where `assing_to_user_id` matches the current user's ID or where it is not present
+                    $query->where('assing_to_user_id', $currentUserId)
+                        ->orWhereNull('assing_to_user_id');
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
 
     return view('notices.index', compact('notices')); // Pass the data to the view
 }
