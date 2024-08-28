@@ -162,7 +162,141 @@ class BankReportController extends Controller
     // }
 
 
-    public function getBankDetailsByDate(Request $request)
+//     public function getBankDetailsByDate(Request $request)
+// {
+//     $fromDate = $request->get('from_date');
+//     $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+//     $toDateEnd = $fromDate ? Carbon::parse($fromDate)->endOfDay() : null;
+//     if ($fromDateStart && $toDateEnd) {
+//         $startdate = new UTCDateTime($fromDateStart->timestamp * 1000);
+//         $enddate = new UTCDateTime($toDateEnd->timestamp * 1000);
+//     }
+//    // dd($fromDateStart, $toDateEnd, $startdate, $enddate);
+//     $bankCasedata = BankCaseData::whereBetween('transaction_date', [$startdate, $enddate])
+//         ->where('com_status', 1)
+//         ->get();
+//     //dd($bankCasedata);
+//     $acknowledgementNos = $bankCasedata->pluck('acknowledgement_no')->toArray();
+//     $complaints = Complaint::whereIn('acknowledgement_no', $acknowledgementNos)->get();
+//     //dd($complaints);
+//     $complaintsByAcknowledgementNo = [];
+//     foreach ($complaints as $complaint) {
+//         $complaintsByAcknowledgementNo[$complaint->acknowledgement_no] = $complaint;
+//     }
+
+//     $results = [];
+
+//     foreach ($bankCasedata as $data) {
+//         //dd($data);
+//         $acknowledgementNo = $data->acknowledgement_no;
+//         $district = $complaintsByAcknowledgementNo[$acknowledgementNo]->district ?? null;
+//         $entry_date = $complaintsByAcknowledgementNo[$acknowledgementNo]->entry_date ?? null;
+
+//         if ($district) {
+//             if (!isset($results[$district])) {
+//                 $results[$district] = [
+//                     'district' => $district,
+//                     'actual_amount' => 0,
+//                     'actual_amount_lost_on' => 0,
+//                     'actual_amount_hold_on' => 0,
+//                     'hold_amount_otherthan' => 0,
+//                     'total_amount_lost_from_eco' => 0,
+//                     'total_hold' => 0,
+//                     'amount_for_pending_action' => 0,
+//                     '1930_count' => 0,
+//                     'NCRP_count' => 0,
+//                     'total' => 0,
+//                 ];
+//             }
+
+//             if ($data->Layer == 1) {
+//                 $results[$district]['actual_amount'] += $data->transaction_amount;
+//             }
+
+//             if (strpos($acknowledgementNo, '315') === 0) {
+//                 $results[$district]['1930_count'] += 1;
+//             } elseif (strpos($acknowledgementNo, '215') === 0) {
+//                 $results[$district]['NCRP_count'] += 1;
+//             }
+
+//             if ($entry_date) {
+//                 try {
+//                     $utc_date = \Carbon\Carbon::parse($entry_date, 'UTC')->setTimezone('Asia/Kolkata');
+//                     $entry_date = $utc_date->format('Y-m-d H:i:s');
+
+//                     $entry_date_dt = new \DateTime($entry_date);
+//                     $transaction_date_dt = new \DateTime($data->transaction_date);
+
+//                     $transaction_date = $data->transaction_date; // Assume this is the MongoDB\BSON\UTCDateTime object
+//                     $dateTime = $transaction_date->toDateTime(); // Converts to PHP DateTime object
+//                     $formattedDate = $dateTime->format('Y-m-d\TH:i:s.vP');
+//                     $result['transaction_date'] = $formattedDate;
+//                    // dd($entry_date_dt, $transaction_date_dt);
+
+//                     // $transaction_date = $data->transaction_date; // Assume this is the MongoDB\BSON\UTCDateTime object
+//                     // $dateTime = $transaction_date->toDateTime(); // Converts to PHP DateTime object
+
+//                     // // Optionally, format the DateTime object to a string
+//                     // $transaction_date_dt = $dateTime->format('Y-m-d\TH:i:s.vP'); // 2024-08-01T04:30:22.000+00:00
+
+//                     if ($data->Layer == 1 && $transaction_date_dt->format('Y-m-d') === $entry_date_dt->format('Y-m-d')) {
+//                         $results[$district]['actual_amount_lost_on'] += $data->transaction_amount;
+//                     }
+
+//                     if ($data->action_taken_by_bank == "transaction put on hold") {
+//                         if ($transaction_date_dt->format('Y-m-d') == $entry_date_dt->format('Y-m-d')) {
+//                             $results[$district]['actual_amount_hold_on'] += $data->transaction_amount;
+//                         }
+//                     }
+//                     if (($data->action_taken_by_bank == "transaction put on hold") && ($transaction_date_dt->format('Y-m-d') != $entry_date_dt->format('Y-m-d'))) {
+//                         $results[$district]['hold_amount_otherthan'] += $data->transaction_amount;
+//                     }
+
+//                     if (in_array($data->action_taken_by_bank, [
+//                         'cash withdrawal through cheque',
+//                         'withdrawal through atm',
+//                         'other',
+//                         'wrong transaction',
+//                         'withdrawal through pos'
+//                     ])) {
+//                         $results[$district]['total_amount_lost_from_eco'] += $data->transaction_amount;
+//                     }
+//                 } catch (\Exception $e) {
+//                     return response()->json(['error' => 'Error parsing date: ' . $e->getMessage()], 400);
+//                 }
+//             }
+//         }
+//     }
+
+//     foreach ($results as &$result) {
+//         $result['total_holds'] = $result['actual_amount_hold_on'] + $result['hold_amount_otherthan'];
+
+//         $result['amount_for_pending_actions'] = max(0, $result['actual_amount'] - $result['total_hold'] - $result['total_amount_lost_from_eco']);
+//         $result['amount_for_pending_action'] = round($result['amount_for_pending_actions'], 2);
+//         $result['total'] = $result['1930_count'] + $result['NCRP_count'];
+
+//     }
+
+//     // Convert results array to a format DataTables expects
+//     $data = array_values($results);
+// //dd($data);
+//     // Implement server-side processing logic for DataTables
+//     $draw = intval($request->input('draw'));
+//     $start = intval($request->input('start'));
+//     $length = intval($request->input('length'));
+
+//     // Apply pagination
+//     $data = array_slice($data, $start, $length);
+
+//     return response()->json([
+//         'draw' => $draw,
+//         'recordsTotal' => count($results),
+//         'recordsFiltered' => count($results),
+//         'data' => $data,
+//     ]);
+// }
+
+public function getBankDetailsByDate(Request $request)
 {
     $fromDate = $request->get('from_date');
     $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
@@ -171,14 +305,14 @@ class BankReportController extends Controller
         $startdate = new UTCDateTime($fromDateStart->timestamp * 1000);
         $enddate = new UTCDateTime($toDateEnd->timestamp * 1000);
     }
-   // dd($fromDateStart, $toDateEnd, $startdate, $enddate);
+
     $bankCasedata = BankCaseData::whereBetween('transaction_date', [$startdate, $enddate])
         ->where('com_status', 1)
         ->get();
-    //dd($bankCasedata);
+
     $acknowledgementNos = $bankCasedata->pluck('acknowledgement_no')->toArray();
     $complaints = Complaint::whereIn('acknowledgement_no', $acknowledgementNos)->get();
-    //dd($complaints);
+
     $complaintsByAcknowledgementNo = [];
     foreach ($complaints as $complaint) {
         $complaintsByAcknowledgementNo[$complaint->acknowledgement_no] = $complaint;
@@ -187,7 +321,6 @@ class BankReportController extends Controller
     $results = [];
 
     foreach ($bankCasedata as $data) {
-        //dd($data);
         $acknowledgementNo = $data->acknowledgement_no;
         $district = $complaintsByAcknowledgementNo[$acknowledgementNo]->district ?? null;
         $entry_date = $complaintsByAcknowledgementNo[$acknowledgementNo]->entry_date ?? null;
@@ -225,19 +358,7 @@ class BankReportController extends Controller
                     $entry_date = $utc_date->format('Y-m-d H:i:s');
 
                     $entry_date_dt = new \DateTime($entry_date);
-                    $transaction_date_dt = new \DateTime($data->transaction_date);
-
-                    $transaction_date = $data->transaction_date; // Assume this is the MongoDB\BSON\UTCDateTime object
-                    $dateTime = $transaction_date->toDateTime(); // Converts to PHP DateTime object
-                    $formattedDate = $dateTime->format('Y-m-d\TH:i:s.vP');
-                    $result['transaction_date'] = $formattedDate;
-                   // dd($entry_date_dt, $transaction_date_dt);
-
-                    // $transaction_date = $data->transaction_date; // Assume this is the MongoDB\BSON\UTCDateTime object
-                    // $dateTime = $transaction_date->toDateTime(); // Converts to PHP DateTime object
-
-                    // // Optionally, format the DateTime object to a string
-                    // $transaction_date_dt = $dateTime->format('Y-m-d\TH:i:s.vP'); // 2024-08-01T04:30:22.000+00:00
+                    $transaction_date_dt = new \DateTime($data->transaction_date->toDateTime()->format('Y-m-d H:i:s'));
 
                     if ($data->Layer == 1 && $transaction_date_dt->format('Y-m-d') === $entry_date_dt->format('Y-m-d')) {
                         $results[$district]['actual_amount_lost_on'] += $data->transaction_amount;
@@ -270,20 +391,26 @@ class BankReportController extends Controller
 
     foreach ($results as &$result) {
         $result['total_holds'] = $result['actual_amount_hold_on'] + $result['hold_amount_otherthan'];
-
         $result['amount_for_pending_actions'] = max(0, $result['actual_amount'] - $result['total_hold'] - $result['total_amount_lost_from_eco']);
         $result['amount_for_pending_action'] = round($result['amount_for_pending_actions'], 2);
         $result['total'] = $result['1930_count'] + $result['NCRP_count'];
-
     }
 
     // Convert results array to a format DataTables expects
     $data = array_values($results);
-//dd($data);
+
     // Implement server-side processing logic for DataTables
     $draw = intval($request->input('draw'));
     $start = intval($request->input('start'));
     $length = intval($request->input('length'));
+
+    // Apply search filter
+    $searchValue = $request->input('search.value');
+    if ($searchValue) {
+        $data = array_filter($data, function ($item) use ($searchValue) {
+            return strpos(strtolower($item['district']), strtolower($searchValue)) !== false;
+        });
+    }
 
     // Apply pagination
     $data = array_slice($data, $start, $length);
@@ -291,10 +418,12 @@ class BankReportController extends Controller
     return response()->json([
         'draw' => $draw,
         'recordsTotal' => count($results),
-        'recordsFiltered' => count($results),
-        'data' => $data,
+        'recordsFiltered' => count($data),
+        'data' => array_values($data),
     ]);
 }
+
+
 
 
     //////////////////////////////////////////////////////////////////////////////////
@@ -1083,7 +1212,7 @@ public function getAboveData(Request $request)
          $modus_name = Modus::Where('_id', $modus)->pluck('name')->first();
          $filteredResults[$ackNo]['modus'] = $modus_name;
     }
-
+    //dd($filteredResults);
     return response()->json([
         'draw' => intval($request->input('draw')),
         'recordsTotal' => count($filteredResults),
