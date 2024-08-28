@@ -8,8 +8,8 @@
         display: none !important;
     }
     .approve img{
-        height:550px !important;
-        width:550px !important;
+        height:50px !important;
+        width:50px !important;
         }
 </style>
 
