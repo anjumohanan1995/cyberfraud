@@ -429,7 +429,7 @@ class CaseDataController extends Controller
         $permission = RolePermission::where('role', $role)->first();
         $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
         $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
-        $hasShowSelfAssignPermission = $user->role == 'Super Admin' || in_array('Self Assign', $sub_permissions);
+        $hasShowSelfAssignPermission = in_array('Self Assign', $sub_permissions);
         $hasShowActivatePermission = $user->role == 'Super Admin' || in_array('Activate / Deactivate', $sub_permissions);
 
         $data_arr = [];
@@ -460,24 +460,30 @@ class CaseDataController extends Controller
                  </div>';
             }
 
-            if ($hasShowSelfAssignPermission) {
+
                 $CUser = Auth::id();
                 if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
+                    if ($hasShowSelfAssignPermission) {
                     $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                         <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
                         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
                         </div>
                     </div>';
+                    }
                 } elseif ($record['assigned_to'] == $CUser) {
+                    if ($hasShowSelfAssignPermission) {
                     $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
                     </div>';
+                    }
                 } elseif ($record['assigned_to'] == null) {
+                    if ($hasShowSelfAssignPermission) {
                     $edit .= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                         <form action="" method="GET">
                         <button data-id="' . $record['acknowledgement_no'] . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
                         </form>
                     </div>';
+                    }
                 } else {
                     $user = User::find($record['assigned_to']);
                     if ($user != null) {
@@ -487,7 +493,7 @@ class CaseDataController extends Controller
                         </div>';
                     }
                 }
-            }
+
 
             $data_arr[] = [
                 "id" => $start + 1,

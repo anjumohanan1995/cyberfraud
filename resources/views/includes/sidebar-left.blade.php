@@ -325,7 +325,10 @@
             <ul class="slide-menu">
                 @if ($hasViewNCRPReportsPermission)
                 <li>
-                    <a class="slide-item" href="{{ url('reports') }}">NCRP / Others Case Data</a>
+                    <a class="slide-item" href="{{ Route('evidence.reports.index') }}">Evidence based Case Data</a>
+                </li>
+                <li>
+                    <a class="slide-item" href="{{ Route('bank.reports.index') }}">Bank Action based Case Data</a>
                 </li>
                 @endif
                 {{-- @if ($hasUploadPrimaryDataPermission) --}}
@@ -338,7 +341,7 @@
                 @if ($hasViewAboveOneLakhReports)
 
                     <li>
-                        <a class="slide-item" href="{{ route('above-one-lakh') }}">Above 1 Lakh Report</a>
+                        <a class="slide-item" href="{{ route('above-one-lakh') }}">Amount wise Report</a>
                     </li>
              @endif
             </ul>

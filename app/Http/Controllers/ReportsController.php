@@ -42,7 +42,39 @@ class ReportsController extends Controller
 
         return view("dashboard.reports.index", compact('evidenceTypes','lowercaseEvidences'));
     }
+    public function evidenceReportsIndex(){
+        $evidenceTypes = EvidenceType::where('status', 'active')
+                             ->whereNull('deleted_at')
+                             ->get();
 
+        $getevidencename = ComplaintOthers::select('evidence_type')
+                             ->groupBy('evidence_type')
+                             ->get();
+
+        $lowercaseEvidences = $getevidencename->map(function ($item) {
+            return strtolower($item->evidence_type);
+        });
+                            //  dd($lowercaseEvidences);
+
+        return view("dashboard.reports.evidence", compact('evidenceTypes','lowercaseEvidences'));
+    }
+
+    public function bankReportsIndex(){
+        $evidenceTypes = EvidenceType::where('status', 'active')
+                             ->whereNull('deleted_at')
+                             ->get();
+
+        $getevidencename = ComplaintOthers::select('evidence_type')
+                             ->groupBy('evidence_type')
+                             ->get();
+
+        $lowercaseEvidences = $getevidencename->map(function ($item) {
+            return strtolower($item->evidence_type);
+        });
+                            //  dd($lowercaseEvidences);
+
+        return view("dashboard.reports.bank", compact('evidenceTypes','lowercaseEvidences'));
+    }
 
     public function getDatalistNcrp(Request $request)
     {
