@@ -7,7 +7,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="#">Reports</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">1 Lakh Above Cases</li>
+                    <li class="breadcrumb-item active" aria-current="page">Amount wise Report</li>
                 </ol>
             </nav>
         </div>
@@ -33,11 +33,56 @@
                         </div>
                     </div>
                     <div class="m-4 d-flex justify-content-between">
-                        <h4 class="card-title mg-b-10">1 Lakh Above Cases</h4>
+                        <h4 class="card-title mg-b-10">Amount wise Report</h4>
                     </div>
                     <div class="main-content-body">
                         <div class="row row-sm">
                             <div class="col-lg-12 col-xl-12 col-md-12 col-sm-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5>Filter Reports</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="complaint-form-ncrp">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="from-date-new">From Date:</label>
+                                                        <input type="date" class="form-control" id="from-date-new" value="{{ $today }}" name="from_date">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="to-date-new">To Date:</label>
+                                                        <input type="date" class="form-control" id="to-date-new" value="{{ $today }}" name="to_date" onchange="setFromDatencrp()">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="amount-fil">Amount:</label>
+                                                        <input type="text" class="form-control" id="amount-fil" name="amount">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="amount-operator">Operator:</label>
+                                                        <select name="amount-operator" id="amount-operator" class="form-control">
+                                                            <option value="">Select Operator</option>
+                                                            <option value="=">=</option>
+                                                            <option value=">">></option>
+                                                            <option value="<"><</option>
+                                                            <option value=">=">>=</option>
+                                                            <option value="<="><=</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 text-right">
+                                                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                                 <div class="card">
                                     <div class="card-body table-new">
                                         <div id="success_message" class="ajax_response" style="display: none;"></div>
@@ -45,31 +90,6 @@
                                             <div class="panel-body tabs-menu-body">
                                                 <div class="tab-content">
                                                     <div class="tab-pane active" id="tabNew">
-                                                        <form id="complaint-form-ncrp">
-                                                            <div class="row">
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group">
-                                                                        <label for="from-date-new">From Date:</label>
-                                                                        <input type="date" class="form-control" id="from-date-new" value="{{ $today }}" name="from_date">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-2">
-                                                                    <div class="form-group">
-                                                                        <label for="to-date-new">To Date:</label>
-                                                                        <input type="date" class="form-control" id="to-date-new" value="{{ $today }}" name="to_date" onchange="setFromDatencrp()">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-2 fil-btn">
-                                                            <div class="form-group">
-                                                                <button type="submit" class="btn btn-primary">Submit</button>
-                                                            </div>
-                                                                </div>
-                                                            </div>
-                                                            {{-- <div class="row">
-                                                                <div class="col-md-12  text-right">
-                                                                </div>
-                                                            </div> --}}
-                                                        </form>
                                                         <div class="table-responsive">
                                                             <table id="example" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                                                 <thead>
@@ -109,25 +129,13 @@
     </div>
 </div>
 @endsection
-<style>
-    .fil-btn{
-    padding-top: 30px;
-}
-    .csv-btn {
-    color: #fff!important;
-    background-color: #28a745!important;
-    border-color: #28a745!important;
-}
-.excel-btn {
-    color: #fff!important;
-    background-color: #17a2b8!important;
-    border-color: #17a2b8!important;
-}
-</style>
+
 @section('scripts')
 <script>
     $(document).ready(function () {
         var table = $('#example').DataTable({
+            "pageLength": 10, // Number of rows per page
+            "lengthMenu": [10, 25, 50, 75, 100],
             processing: true,
             serverSide: true,
             ajax: {
@@ -135,6 +143,8 @@
                 data: function (d) {
                     d.from_date = $('#from-date-new').val();
                     d.to_date = $('#to-date-new').val();
+                    d.amount = $('#amount-fil').val();  // Capture amount filter
+                    d.amount_operator = $('#amount-operator').val();  // Capture operator filter
                 },
                 error: function(xhr, error, thrown) {
                     let response = xhr.responseJSON;
@@ -143,10 +153,10 @@
                 }
             },
             dom: 'Bfrtip',
- buttons: [
-    { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
-    { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
- ],
+            buttons: [
+                { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
+                { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
+            ],
             columns: [
                 {
                     "data": null, "render": function (data, type, full, meta) {
@@ -162,8 +172,7 @@
                 { data: 'amount_lost', name: 'amount_lost' },
                 { data: 'amount_pending', name: 'amount_pending' },
                 { data: 'pending_banks', name: 'pending_banks' },
-                 { data: 'modus', name: 'modus' }
-                // Additional columns can be added here
+                { data: 'modus', name: 'modus' }
             ],
             order: [[0, 'desc']],
         });
@@ -176,3 +185,40 @@
     });
 </script>
 @endsection
+
+<style>
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 0.75rem 1.25rem;
+        font-weight: bold;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .csv-btn {
+        color: #fff!important;
+        background-color: #28a745!important;
+        border-color: #28a745!important;
+    }
+
+    .excel-btn {
+        color: #fff!important;
+        background-color: #17a2b8!important;
+        border-color: #17a2b8!important;
+    }
+</style>
