@@ -99,17 +99,21 @@ $user = Auth::user();
             <!-- row -->
             <div class="row row-sm">
                 <div class="col-md-12 col-xl-12">
+                  
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
-                                <div class="alert alert-danger alert-dismissible fade show w-100" role="alert" style="display:none" id="erroralert">
-                                    <ul id="errors">
-                                      
-                                    </ul>
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
+
+                                @if ($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade show " role="alert">
+                                <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                                </ul>
+                                </div>
+                                @endif
+                                
                              <div class="alert alert-success alert-dismissible fade show w-100" id="sucessalert" style="display:none" role="alert">
                                         {{ session('success') }}
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -121,7 +125,7 @@ $user = Auth::user();
                                 <input type="hidden" id="upload_id" value="{{ session('upload_id') }}">
                                
                                 @endif
-
+                            
                                 @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert" role="alert">
                                         {{ session('success') }}<div id="loader" class="d-none">
@@ -141,13 +145,7 @@ $user = Auth::user();
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                @if ($errors->any())
-                                    <div class="alert alert-danger alert-dismissible fade show " role="alert">
-                                        <ul>
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
+                              
                                 @if (session('error'))
                                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                         {{ session('error') }}

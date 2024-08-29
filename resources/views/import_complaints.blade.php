@@ -260,17 +260,26 @@ $(document).ready(function() {
     var intervalId; // Variable to store the interval ID
 
     @if (session('redirected'))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1d52dd4736cc6ebb37b2e39122769f151fcefc00
     <?php session()->forget('redirected'); ?>
     
     function executeAjaxCall() {
         var uploadId = $("#upload_id").val();
+<<<<<<< HEAD
        
         $('#loader').removeClass('d-none');
+=======
+
+>>>>>>> 1d52dd4736cc6ebb37b2e39122769f151fcefc00
         $.ajax({
             url: '/show-upload-errors/' + uploadId,
             method: 'GET',
             success: function(data){
                 $('#errors').html('');
+<<<<<<< HEAD
                 totalCalls += 1;
 
                 if (data.errors.length == 0 && totalCalls >= 10) {
@@ -279,6 +288,10 @@ $(document).ready(function() {
                     $('#loader').addClass('d-none');
                     $("#success-alert-upload").show();
                 } else if (data.errors.length > 0) {
+=======
+
+                if (data.errors.length > 0) {
+>>>>>>> 1d52dd4736cc6ebb37b2e39122769f151fcefc00
                     $('#erroralert').show();
                     $("#success-alert").hide();
                     $('#loader').addClass('d-none');
@@ -297,8 +310,13 @@ $(document).ready(function() {
         });
     }
 
+<<<<<<< HEAD
     // Start the interval function if redirected
     intervalId = setInterval(executeAjaxCall, 5000);
+=======
+    // Call executeAjaxCall function every 5 seconds
+    setInterval(executeAjaxCall, 2000);
+>>>>>>> 1d52dd4736cc6ebb37b2e39122769f151fcefc00
     @endif
 });
 </script>

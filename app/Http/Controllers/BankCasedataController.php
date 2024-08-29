@@ -33,7 +33,7 @@ class BankCasedataController extends Controller
         $file = $request->file('file');
         if ($request->hasFile('file')){
             $originalExtension = $file->getClientOriginalExtension(); 
-            // dd($originalExtension);
+            
             if($originalExtension == 'csv'){
                 if($file->getMimeType() == "application/octet-stream"){
                    
@@ -150,7 +150,7 @@ class BankCasedataController extends Controller
                 // ImportBankActionJob::dispatch($file, $userId, $uploadId);
             
                 // return redirect()->back()->with('success', 'Uploading...')->with('redirected', true);
-                return redirect()->back()->with('success', 'Uploading...');
+                return redirect()->back()->with('success', 'Uploaded Successfully');
             }  catch(\Illuminate\Validation\ValidationException $e){
 
                 return redirect()->back()->withErrors($e->errors())->withInput();

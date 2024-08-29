@@ -923,7 +923,7 @@ public function updateStatus(Request $request)
         $filtered_transactions = collect();
         $seen_combinations = [];
 
-        foreach ($layer_one_transactions as $transaction) {
+        foreach ($layer_one_transactions as $transaction){
         // Create a unique key for each combination of the specified fields
         $key = $transaction->acknowledgement_no . '_' . 
             $transaction->transaction_id_or_utr_no . '_' . 
@@ -943,124 +943,6 @@ public function updateStatus(Request $request)
 // ============================FOR FINDONG DESPUTED AMOUNT=======================================
 
 
-// function updateDisputeAmounts($parentLayer, $nextLayer, $id, &$updatedObjectIds) {
-//     // Retrieve all documents for the current parent layer
-//     $parents = BankCaseData::where('Layer', $parentLayer)
-//         ->where('acknowledgement_no', (int)$id)
-//         ->get();
-
-//     foreach ($parents as $parent) {
-//         // Retrieve child rows in the next layer
-//         $children = BankCaseData::where('Layer', $nextLayer)
-//             ->where('transaction_id_or_utr_no', 'like', '%' . $parent->transaction_id_sec)
-//             ->get();
-
-//         // Initialize capital amount with parent's transaction amount
-//         $capitalAmount = $parent->transaction_amount;
-
-//         foreach ($children as $child) {
-//             // Update the dispute_amount based on the current capital amount
-//             if ($capitalAmount <= 0) {
-//                 // If capital amount is zero or negative, no need to process further
-//                 break;
-//             }
-
-//             if ($child->transaction_amount < $capitalAmount) {
-//                 // Child's amount is less than capital amount
-//                 $disputeAmount = $child->transaction_amount;
-//                 $capitalAmount -= $disputeAmount;
-//             } elseif ($child->transaction_amount == $capitalAmount) {
-//                 // Child's amount equals the capital amount
-//                 $disputeAmount = $capitalAmount;
-//                 $capitalAmount = 0;
-//             } else {
-//                 // Child's amount is greater than the capital amount
-//                 //echo $child->transaction_amount."<br>";
-//                 $disputeAmount = $capitalAmount;
-//                 $capitalAmount = -1; // Set to negative to stop further processing
-//             }
-
-//             // Update the child's dispute_amount only if it hasn't been updated yet
-//             if (!isset($updatedObjectIds[$child->_id])) {
-
-//                 $child->dispute_amount = $disputeAmount;
-//                 $child->save();
-//                 // Mark child as updated
-//                 $updatedObjectIds[$child->_id] = true;
-//             }
-//         }
-
-//         // Mark parent as updated if it's not already updated
-//         if (!isset($updatedObjectIds[$parent->_id])) {
-
-//             $updatedObjectIds[$parent->_id] = true;
-//         }
-//     }
-// }
- 
-/**
- * Recursively process children across layers.
- *
- * @param string $transactionIdSec Parent's transaction ID to find children
- * @param float $capitalAmount Current capital amount passed from the parent
- * @param int $currentLayer Current layer being processed
- * @param array $updatedObjectIds Array to track updated records
- */
-// function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$updatedObjectIds) {
-//     // Retrieve child rows in the current layer
-//     $children = BankCaseData::where('Layer', $currentLayer)
-//         ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec)
-//         ->get();
-
-//     foreach ($children as $child) {
-//         // Update the dispute_amount based on the current capital amount
-//         if ($capitalAmount <= 0) {
-//             break; // If capital amount is zero or negative, stop processing further children
-//         }
-
-//         if ($child->transaction_amount <= $capitalAmount) {
-//             $disputeAmount = $child->transaction_amount;
-//             $capitalAmount -= $disputeAmount;
-//         } else {
-//             $disputeAmount = $capitalAmount;
-//             $capitalAmount = 0; // Set to zero to stop further processing
-//         }
-
-//         // Update the child's dispute_amount only if it hasn't been updated yet
-//         if (!isset($updatedObjectIds[$child->_id])) {
-//             $child->dispute_amount = $disputeAmount;
-//             $child->save();
-//             $updatedObjectIds[$child->_id] = true;
-//         }
-
-//         // Recursively process the next layer (e.g., Layer 3) using the child's transaction ID
-//         processChildren($child->transaction_id_sec, $disputeAmount, $currentLayer + 1, $updatedObjectIds);
-//     }
-// }
-
-
-// $updatedObjectIds = [];
-
-// // Get all records in Layer 1
-// $layer1Records = BankCaseData::where('Layer', 1)
-//     ->where('acknowledgement_no', (int)$id)
-//     ->where('com_status', 1)
-//     ->get();
-
-// foreach ($layer1Records as $layer1Record) {
-//     // Initialize dispute amount and capital amount for Layer 1
-//     if (!isset($updatedObjectIds[$layer1Record->_id])) {
-//         $layer1Record->dispute_amount = $layer1Record->transaction_amount;
-//         $capitalAmount = $layer1Record->transaction_amount;
-//         $layer1Record->save();
-
-//         $updatedObjectIds[$layer1Record->_id] = true;
-//     }
-
-//     // Process all Layer 2 children for the current Layer 1 record
-//     processChildren($layer1Record->transaction_id_sec, $capitalAmount, 2, $updatedObjectIds);
-// }
-
 
 
 function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$updatedObjectIds) {
@@ -1073,14 +955,14 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
         ->get();
        
     // If no children are found in the current layer, and we're not at the first layer
-    if ($children->isEmpty() && $currentLayer == 2) {
+    if ($children->isEmpty()) {
        
         // Check in the previous layer (Layer 1) itself for the same transaction ID
-        $sameLayerMatches = BankCaseData::where('Layer', 1)
+        $sameLayerMatches = BankCaseData::where('Layer', $currentLayer - 1 )
         ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
         ->whereNotIn('_id', $updatedObjectIds)
         ->get();
-       
+      
         foreach ($sameLayerMatches as $match){ 
             // Calculate the dispute amount as if it's a child in Layer 2
            
@@ -1110,62 +992,31 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
            
         }
     }
-
-    elseif($children->isEmpty() && $currentLayer >2){
-
-        $sameLayerMatches = BankCaseData::where('Layer', $currentLayer-1)
-        ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec)
-        ->whereNotIn('_id', array_keys($updatedObjectIds)) // Skip processed rows
-        ->get();
-     
-        foreach ($sameLayerMatches as $match) {
-            // Calculate the dispute amount as if it's a child in Layer 2
-           
+    else{
+        foreach ($children as $child) {
+            // Process as usual if children are found
             if ($capitalAmount <= 0) {
-              
-                break; // If capital amount is zero or negative, stop processing further matches
+                break; // If capital amount is zero or negative, stop processing further children
             }
-
-            if ($match->transaction_amount <= $capitalAmount) {
-                $disputeAmount = $match->transaction_amount;
+    
+            if ($child->transaction_amount <= $capitalAmount) {
+                $disputeAmount = $child->transaction_amount;
                 $capitalAmount -= $disputeAmount;
             } else {
                 $disputeAmount = $capitalAmount;
                 $capitalAmount = 0; // Set to zero to stop further processing
             }
-
-            // Update the match's dispute_amount only if it hasn't been updated yet
-            if (!isset($updatedObjectIds[$match->_id])) {
-                $match->dispute_amount = $disputeAmount;
-                $match->save();
-                $updatedObjectIds[$match->_id] = true;
+    
+            if (!isset($updatedObjectIds[$child->_id])) {
+                $child->dispute_amount = $disputeAmount;
+                $child->save();
+                $updatedObjectIds[$child->_id] = true;
             }
+    
+            processChildren($child->transaction_id_sec, $disputeAmount, $currentLayer + 1, $updatedObjectIds);
         }
     }
 
-
-    foreach ($children as $child) {
-        // Process as usual if children are found
-        if ($capitalAmount <= 0) {
-            break; // If capital amount is zero or negative, stop processing further children
-        }
-
-        if ($child->transaction_amount <= $capitalAmount) {
-            $disputeAmount = $child->transaction_amount;
-            $capitalAmount -= $disputeAmount;
-        } else {
-            $disputeAmount = $capitalAmount;
-            $capitalAmount = 0; // Set to zero to stop further processing
-        }
-
-        if (!isset($updatedObjectIds[$child->_id])) {
-            $child->dispute_amount = $disputeAmount;
-            $child->save();
-            $updatedObjectIds[$child->_id] = true;
-        }
-
-        processChildren($child->transaction_id_sec, $disputeAmount, $currentLayer + 1, $updatedObjectIds);
-    }
 }
 
 $updatedObjectIds = [];
@@ -1211,7 +1062,7 @@ $lost_amount = BankCaseData::where('acknowledgement_no', (int)$id)->where('com_s
 
 $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
-        $transaction_based_array_final = [];$final_array=[];
+        $transaction_based_array_final = [];$final_array=[]; $processed_ids = [];
         for($i=0;$i<count($layer_one_transactions);$i++){
             // dd($layer_one_transactions[$i]);
              $layer = 1;
@@ -1223,7 +1074,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
              ->toArray();
 
 
-             $processed_ids = [];
+            
              $transaction_baed_array = [];
              if($first_row){
 
@@ -1232,7 +1083,13 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
              }
 
                   $final_array = array_merge($final_array,$transaction_baed_array);
-
+                  if(!empty($final_array)){
+                    foreach($final_array as $f_a){
+                        $processed_ids[] = $f_a['_id'];
+                    }
+                  }
+                
+                 
 
         }
         //dd($final_array);
@@ -1310,6 +1167,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     // dd($finalData_pending_banks);
 
  $finalData_pending_banks = collect($finalData_pending_banks)->groupBy('pending_banks')->map(function ($group) {
+    
         return [
             'pending_banks' => $group->first()['pending_banks'],
             'transaction_id'=> $group->count(),
@@ -1427,62 +1285,69 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     //     return $main_array;
     // }
 
+
+
     public function checkifempty($layer, $first_rows, $id, &$processed_ids = [])
-{   
-  
-    $layer++;
-    $main_array = [];
-
-    foreach ($first_rows as $first_row) {
-        // Check if the transaction_id_sec is null
-        if ($first_row['transaction_id_sec'] === null) {
-            // Handle the case where transaction_id_sec is null
+    {
+        $layer++;
+        $main_array = [];
+       
+        foreach ($first_rows as $first_row) {
+    
+            if (in_array($first_row['_id'], $processed_ids)) {
+                continue;
+            }
+    
+            // Skip processing if transaction_id_sec is null
+            if ($first_row['transaction_id_sec'] === null) {
+                $main_array[] = $first_row;
+                $processed_ids[] = $first_row['_id'];
+                continue; // Skipping further processing for this row
+            }
+    
+            // Add current row to the processed list and main array
+            $processed_ids[] = $first_row['_id'];
             $main_array[] = $first_row;
-            continue; // Skipping processing for this row
-        }
-
-        // Skip if already processed
-        if (in_array($first_row['transaction_id_sec'], $processed_ids)) {
-            continue;
-        }
-
-        // Add current transaction_id_sec to processed list
-        $processed_ids[] = $first_row['transaction_id_sec'];
-
-        // Add current first row to main array
-        $main_array[] = $first_row;
-     
-        // Fetch next layer's rows
-        $next_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
-            ->where('Layer', $layer)
-            ->where('transaction_id_or_utr_no', 'like', '%' . $first_row['transaction_id_sec'] . '%')
-            ->get()
-            ->toArray();
-        
-        if (!empty($next_layer_rows)) {
-            // If there are rows in the next layer, recursively process them
-           
-            $nested_results = $this->checkifempty($layer, $next_layer_rows, $id, $processed_ids);
-            $main_array = array_merge($main_array, $nested_results);
-        } else {
-            // If next layer rows are empty, check if the current row should be shown
-            // Check if the current row should be shown in the same layer
+    
+            // First, fetch rows from the same layer
             $same_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
                 ->where('Layer', $layer - 1) // Stay in the same layer
                 ->where('transaction_id_or_utr_no', 'like', '%' . $first_row['transaction_id_sec'] . '%')
-                ->whereNotIn('transaction_id_sec', $processed_ids) // Ensure we do not add already processed rows
+                ->whereNotIn('_id', $processed_ids) // Ensure we do not add already processed rows
                 ->get()
                 ->toArray();
-
+    
             if (!empty($same_layer_rows)) {
-                // Add current layer rows to main array if they exist
                 $main_array = array_merge($main_array, $same_layer_rows);
+    
+                // Add the same layer rows to processed_ids to avoid re-processing
+                foreach ($same_layer_rows as $same_layer_row) {
+                    $processed_ids[] = $same_layer_row['_id'];
+                }
+    
+                // Continue checking in the same layer if there are more rows
+                $nested_results = $this->checkifempty($layer - 1, $same_layer_rows, $id, $processed_ids);
+                $main_array = array_merge($main_array, $nested_results);
+            }
+    
+            // Then, fetch rows from the next layer
+            $next_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
+                ->where('Layer', $layer)
+                ->where('transaction_id_or_utr_no', 'like', '%' . $first_row['transaction_id_sec'] . '%')
+                ->whereNotIn('_id', $processed_ids) // Ensure to not re-process rows
+                ->get()
+                ->toArray();
+    
+            if (!empty($next_layer_rows)) {
+                $nested_results = $this->checkifempty($layer, $next_layer_rows, $id, $processed_ids);
+                $main_array = array_merge($main_array, $nested_results);
             }
         }
+    
+        return $main_array;
     }
-
-    return $main_array;
-}
+    
+    
 
     public function change_status_layerwise($layer, $first_rows, $id, &$processed_ids = [] ,$status )
     {
