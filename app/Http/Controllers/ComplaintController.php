@@ -81,14 +81,14 @@ class ComplaintController extends Controller
                        
                         return redirect()->back()->with('success', 'Uploading...')->with('redirected', true);
                         
-                        //UploadErrors::where('upload_id', $uploadId)->delete();
+                        UploadErrors::where('upload_id', $uploadId)->delete();
                         
                     } catch (\Illuminate\Validation\ValidationException $e){
                         // Show all validation errors
                        
                         return redirect()->back()->withErrors($e->errors())->withInput();
                     } 
-                    catch (\Exception $e) {
+                    catch (\Exception $e){
                         Log::error($e->getMessage());
                       
                         return redirect()->back()->with('error', 'An error occurred during import: ' . $e->getMessage());

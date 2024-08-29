@@ -74,7 +74,7 @@
         <!-- /breadcrumb -->
         <!-- main-content-body -->
         <div class="main-content-body">
-
+            
 
 
             <!-- row -->
@@ -84,6 +84,14 @@
 
 
                         <div class="card-body" width="500px">
+                    @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    @endif
                             <div class="m-4 d-flex justify-content-between align-items-start">
                                 <div class="col-7">
                                     <table>
@@ -541,7 +549,8 @@
                                                         {{ @$bank_data['transaction_id_sec'] }}<br><br>
                                                         Transaction Amount : {{ @$bank_data['transaction_amount'] }}
                                                         <br><br>
-                                                        <span style="color:red">Disputed Amount : {{ @$bank_data['transaction_amount'] }}</span></td>
+                                                        <a href="#" class="disputeAmountLink" data-objectid="{{ $bank_data['_id'] }}"><span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></a>
+                                                        </td>
 
 
 
@@ -584,7 +593,35 @@
 
 
     </div>
-    <!-- /row -->
+
+<div id="disputeModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Dispute Amount</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="disputeForm" method="POST" action="{{ route('update-dispute-amount') }}">
+        @csrf
+        <div class="modal-body">
+          <input type="hidden" name="object_id" id="modalObjectIdInput" value="">
+          <div class="form-group">
+            <label for="disputeAmount">Dispute Amount</label>
+            <input type="number" class="form-control" id="disputeAmount" name="dispute_amount" placeholder="Enter dispute amount">
+          </div>
+        </div>
+        <div class="modal-footer">
+        
+          <button type="submit" class="btn btn-success btn-sm ">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
     </div>
     <link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
 
@@ -871,4 +908,22 @@
 
     </script>
 
+
+<script>
+$(document).ready(function() {
+    $('.disputeAmountLink').on('click', function(e) {
+        e.preventDefault(); // Prevent the default anchor behavior
+        var objectId = $(this).data('objectid');
+        
+        // Set the ObjectId in the hidden input field within the modal form
+        $('#modalObjectIdInput').val(objectId);
+        
+        // Show the modal
+        $('#disputeModal').modal('show');
+    });
+});
+
+
+
+</script>
 @endsection

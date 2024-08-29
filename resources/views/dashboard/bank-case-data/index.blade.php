@@ -32,6 +32,38 @@ $user = Auth::user();
             pointer-events: none; 
             opacity: 0.5; 
         }
+        #loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    background-color: #fff;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
        
 </style>
 
@@ -69,7 +101,45 @@ $user = Auth::user();
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
                             <div class=" m-4 d-flex justify-content-between">
+                                <div class="alert alert-danger alert-dismissible fade show w-100" role="alert" style="display:none" id="erroralert">
+                                    <ul id="errors">
+                                      
+                                    </ul>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                             <div class="alert alert-success alert-dismissible fade show w-100" id="sucessalert" style="display:none" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
 
+                                @if (session()->has('upload_id'))
+                                <input type="hidden" id="upload_id" value="{{ session('upload_id') }}">
+                               
+                                @endif
+
+                                @if (session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert" role="alert">
+                                        {{ session('success') }}<div id="loader" class="d-none">
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        <div class="dot"></div>
+                                        </div>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+
+                                @endif
+                                <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert-upload" style="display:none" role="alert">
+                                        Successfully Uploaded.
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
                                 @if ($errors->any())
                                     <div class="alert alert-danger alert-dismissible fade show " role="alert">
                                         <ul>
@@ -83,14 +153,14 @@ $user = Auth::user();
                                     </div>
                                 @endif
 
-                                @if (session('success'))
+                                {{-- @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                @endif
+                                @endif --}}
                             </div>
 
 @if ($hasUploadBankActionPermission)
@@ -192,3 +262,52 @@ $user = Auth::user();
             document.body.classList.remove('blur-background');
         });
     </script>
+
+    <script>
+$(document).ready(function() { 
+    var totalCalls = 0; // Counter for the total number of AJAX calls
+    var maxCalls = 20; // Maximum number of AJAX calls
+    var intervalId; // Variable to store the interval ID
+
+    @if (session('redirected'))
+    <?php session()->forget('redirected'); ?>
+
+    function executeAjaxCall() {
+        var uploadId = $("#upload_id").val();
+        $('#loader').removeClass('d-none');
+        $.ajax({
+            url: '/show-upload-errors/' + uploadId,
+            method: 'GET',
+            success: function(data){
+                $('#errors').html('');
+                totalCalls += 1;
+
+                if (data.errors.length == 0 && totalCalls >= 10) {
+                    $('#erroralert').hide();
+                    $("#success-alert").hide();
+                    $('#loader').addClass('d-none');
+                    $("#success-alert-upload").show();
+                } else if (data.errors.length > 0) {
+                    $('#erroralert').show();
+                    $("#success-alert").hide();
+                    $('#loader').addClass('d-none');
+                    $("#success-alert-upload").hide();
+                    data.errors.forEach(error => {
+                        $('#errors').append('<li>' + error.error + '</li>');
+                    });
+                    clearInterval(intervalId); // Stop the interval function
+                }
+
+                // Stop the interval function after 20 calls
+                if (totalCalls >= maxCalls) {
+                    clearInterval(intervalId);
+                }
+            }
+        });
+    }
+
+    // Start the interval function if redirected
+    intervalId = setInterval(executeAjaxCall, 5000);
+    @endif
+});
+</script>

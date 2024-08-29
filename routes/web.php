@@ -312,6 +312,8 @@ Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name(
 Route::get('/show-upload-errors/{uploadId}',[ComplaintController::class, 'showUploadErrors']);
 Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErrors']);
 
+Route::post('disputeamount/update',[BankCasedataController::class, 'disputeAmountUpdate'])->name('update-dispute-amount');
+
 
 
 

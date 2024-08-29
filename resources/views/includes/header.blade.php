@@ -486,8 +486,8 @@
                                 </div>
                             </div> --}}
                             <div class="dropdown main-profile-menu nav nav-item nav-link">
-                                <a class="profile-user d-flex" href="">
-                                    <img src="img/user.jpg" alt="user-img" class="rounded-circle mCS_img_loaded" />
+                                <a class="profile-user d-flex" href="#">
+                                    <img src="{{ asset('img/user.jpg') }}" alt="user-img"  />
                                     <span> </span>
                                 </a>
                                 <div class="dropdown-menu">
