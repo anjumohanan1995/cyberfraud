@@ -166,7 +166,7 @@ $user = Auth::user();
 
                                                     </div>
                                                 </div> --}}
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-group">
                                                         <label for="file">File:</label>
                                                         <input type="file" id="file" name="file" class="form-control">
@@ -176,11 +176,24 @@ $user = Auth::user();
                                                     </div>
                                                 </div>
 
-                                                <div class="col-md-2 justify-content-center align-self-center">
-                                                    <a href="{{ route('create-download-evidence-template')  }}"><button type="button" class="btn btn-primary btn-sm">Template <br>
+                                                <div class="col-md-3 justify-content-center align-self-center">
+                                                    <a href="{{ route('create-download-evidence-template')  }}"><button type="button" class="btn btn-primary btn-sm">Template-Social Media <br>
                                                     <i class="fa fa-download"></i></button>
                                                     </a>
                                                 </div>
+
+                                                <div class="col-md-3 justify-content-center align-self-center">
+                                                    <a href="{{ route('create-download-evidence-website-template')  }}"><button type="button" class="btn btn-primary btn-sm">Template-Website <br>
+                                                    <i class="fa fa-download"></i></button>
+                                                    </a>
+                                                </div>
+
+                                                <div class="col-md-3 justify-content-center align-self-center">
+                                                    <a href="{{ route('create-download-evidence-mobile-template')  }}"><button type="button" class="btn btn-primary btn-sm">Template-Mobile/Whatsapp <br>
+                                                    <i class="fa fa-download"></i></button>
+                                                    </a>
+                                                </div>
+
                                             </div>
                                             {{-- <input type="hidden" name="ackno" value="{{ $ackno }}"> --}}
 

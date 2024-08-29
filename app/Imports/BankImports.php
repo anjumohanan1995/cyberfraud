@@ -46,10 +46,9 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     {
      
         $errors = [];
-        $acknowledgementNos = Complaint::pluck('acknowledgement_no')->toArray();
-        $acknowledgementNos = array_unique($acknowledgementNos);
-       
-        $collection->transform(function ($values) {
+ 
+      
+        $collection->transform(function ($values){
              // Convert the 'entry_date' field
            
             return [
@@ -91,7 +90,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
         
         
         foreach ($rows as $index => $row){
-        
+          
             $rowIndex = $index + 2;
         
             $data = [
@@ -124,9 +123,9 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'branch_manager_details' => $row['branch_manager_details'] ?? null,
                
             ];
-
+           
             $validator = Validator::make($data, [
-
+                
                 'acknowledgement_no' => ['required',new IntegerWithoutDecimal( $rowIndex),'exists_in_acknowledgement_nos'],
                 'transaction_id_or_utr_no' => ['required',new TransactionIDFormat( $rowIndex)],
                 'Layer' => 'required',
@@ -166,6 +165,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             $rowIndex++;
 
             if (!empty($errors)) {
+               
                 // Create a validator with accumulated errors to throw ValidationException
                 $dummyValidator = Validator::make([], []);
                 foreach ($errors as $rowIndex => $messages) {
@@ -179,10 +179,11 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
           
         }
         if($errors){
+          
             throw new \Illuminate\Validation\ValidationException($dummyValidator);
         }
 
-        DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',$collection[0]['acknowledgement_no'])->delete();
+        DB::connection('mongodb')->collection('bank_casedata')->where('acknowledgement_no',(int)$collection[0]['acknowledgement_no'])->delete();
 
         foreach ($filteredCollection as $collect){
 
@@ -209,7 +210,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->approval_code = $collect['approval_code'];
                 $bank_data->merchant_name = $collect['merchant_name'];
                 $bank_data->transaction_date = $this->parseDate($collect['transaction_date']);
-                $bank_data->transaction_id_sec = $this->convertAcknoToString($collect['transaction_id_sec']);
+                $bank_data->transaction_id_sec = trim($this->convertAcknoToString($collect['transaction_id_sec']));
                 $bank_data->transaction_amount = $collect['transaction_amount'];
                 $bank_data->reference_no = $collect['reference_no'];
 

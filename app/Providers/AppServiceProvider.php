@@ -6,6 +6,7 @@ use App\Models\Complaint;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,8 +36,8 @@ class AppServiceProvider extends ServiceProvider
         $this->acknowledgementNos = array_unique($this->acknowledgementNos);
 
         Validator::extend('exists_in_acknowledgement_nos', function ($attribute, $value, $parameters, $validator) {
-            
-            return in_array($value,  $this->acknowledgementNos);
+        
+            return in_array((int)$value,  $this->acknowledgementNos);
 
         }, 'The :attribute is not a valid acknowledgement number.');
 

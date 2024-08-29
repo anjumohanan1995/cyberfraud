@@ -145,7 +145,14 @@ $user = Auth::user();
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
+
                                 @endif
+                                <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert-upload" style="display:none" role="alert">
+                                        Successfully Uploaded.
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
                                 @if (session('error'))
                                     <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
                                         {{ session('error') }}
@@ -179,9 +186,7 @@ $user = Auth::user();
                                             <div class="form-group">
                                                 <label for="place">File:</label>
                                                 <input type="file" id="place" name="complaint_file">
-                                                @error('complaint_file')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                              
                                             </div>
 
                                         </div>
@@ -249,39 +254,54 @@ $(document).ready(function(){
 
 <script>
 $(document).ready(function() {
+ 
+    var totalCalls = 0; // Counter for the total number of AJAX calls
+    var maxCalls = 20; // Maximum number of AJAX calls
+    var intervalId; // Variable to store the interval ID
 
     @if (session('redirected'))
-
     <?php session()->forget('redirected'); ?>
+    
     function executeAjaxCall() {
         var uploadId = $("#upload_id").val();
-
+       
+        $('#loader').removeClass('d-none');
         $.ajax({
             url: '/show-upload-errors/' + uploadId,
             method: 'GET',
             success: function(data){
                 $('#errors').html('');
+                totalCalls += 1;
 
-                if (data.errors.length > 0) {
+                if (data.errors.length == 0 && totalCalls >= 10) {
+                    $('#erroralert').hide();
+                    $("#success-alert").hide();
+                    $('#loader').addClass('d-none');
+                    $("#success-alert-upload").show();
+                } else if (data.errors.length > 0) {
                     $('#erroralert').show();
                     $("#success-alert").hide();
                     $('#loader').addClass('d-none');
+                    $("#success-alert-upload").hide();
                     data.errors.forEach(error => {
                         $('#errors').append('<li>' + error.error + '</li>');
                     });
-                } else {
-                    $('#erroralert').hide();
-                    $("#success-alert").show();
-                    $('#loader').removeClass('d-none');
+                    clearInterval(intervalId); // Stop the interval function
+                }
+
+                // Stop the interval function after 20 calls
+                if (totalCalls >= maxCalls) {
+                    clearInterval(intervalId);
                 }
             }
         });
     }
 
-    // Call executeAjaxCall function every 5 seconds
-    setInterval(executeAjaxCall, 2000);
+    // Start the interval function if redirected
+    intervalId = setInterval(executeAjaxCall, 5000);
     @endif
-})
-
+});
 </script>
+
+
 

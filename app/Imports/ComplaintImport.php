@@ -111,12 +111,12 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
         $rows = $filteredCollection;
 
         foreach ($rows as $index => $row){
-
+            
             $parts = explode(' ', $row['entry_date']);
-            if (count($parts) == 2) {
+            if (count($parts) == 2){
                 list($datePart, $timePart) = $parts;
-                $timeParts = explode(':', $timePart);
-                if (count($timeParts) == 3) {
+                $timeParts = explode(':', $timePart); 
+                if (count($timeParts) == 3){
 
                     list($hour, $minute, $second) = $timeParts;
                     $hour = str_pad($hour, 2, '0', STR_PAD_LEFT);
@@ -126,8 +126,19 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                     $formattedTimePart = "{$hour}:{$minute}:{$second}";
                     $row['entry_date'] = "{$datePart} {$formattedTimePart}";
                 }
+                if (count($timeParts) == 2) { 
+                   
+                    list($hour, $minute) = $timeParts;
+                    $hour = str_pad($hour, 2, '0', STR_PAD_LEFT);
+                    $minute = str_pad($minute, 2, '0', STR_PAD_LEFT);
+            
+                    // Append ":00" as seconds
+                    $formattedTimePart = "{$hour}:{$minute}:00";
+                    $row['entry_date'] = "{$datePart} {$formattedTimePart}";
+                }
+            
             }
-
+           
 
             $rowIndex = $chunkStartRow + $index;
 
@@ -206,10 +217,22 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 $date_of_action = $collect['date_of_action'] ?? null;
             }
 
-            $complaint = Complaint::where('acknowledgement_no', (int)$collect['acknowledgement_no'])
-                                    ->where('transaction_id',(string)$collect['transaction_id'])
-                                    ->first();
+            if($collect['transaction_id'] =="" || $collect['transaction_id'] === null ){
+               
+                $complaint = Complaint::where('acknowledgement_no', (int)trim($collect['acknowledgement_no']))
+                ->where('transaction_id',"")
+                ->where('amount',$collect['amount'])
+                ->where('bank_name',$collect['bank_name'])
+                ->first(); 
+            }
+            else{
 
+                $complaint = Complaint::where('acknowledgement_no', (int)trim($collect['acknowledgement_no']))
+                ->where('transaction_id', 'like', '%' .trim($this->convertAcknoToString($collect['transaction_id'])))
+                ->first();
+               
+            }
+           
             if($collect['date_of_action'] === 'N/A'){
                 $date_of_action=$collect['entry_date'];
             }
@@ -217,18 +240,51 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 $date_of_action=$collect['date_of_action'];
             }
 
+            if (strpos($collect['entry_date'], '-') !== false) {
+                $collect['entry_date'] = str_replace('-', '/', $collect['entry_date']);
+            } else {
+                $collect['entry_date'] = $collect['entry_date'];
+            }
 
+            $parts = explode(' ', $collect['entry_date']);
+            if (count($parts) == 2){
+                list($datePart, $timePart) = $parts;
+                $timeParts = explode(':', $timePart); 
+                if (count($timeParts) == 3){
 
-            if($complaint){
+                    list($hour, $minute, $second) = $timeParts;
+                    $hour = str_pad($hour, 2, '0', STR_PAD_LEFT);
+                    $minute = str_pad($minute, 2, '0', STR_PAD_LEFT);
+                    $second = str_pad($second, 2, '0', STR_PAD_LEFT);
+
+                    $formattedTimePart = "{$hour}:{$minute}:{$second}";
+                    $collect['entry_date'] = "{$datePart} {$formattedTimePart}";
+                }
+                if (count($timeParts) == 2) { 
+                   
+                    list($hour, $minute) = $timeParts;
+                    $hour = str_pad($hour, 2, '0', STR_PAD_LEFT);
+                    $minute = str_pad($minute, 2, '0', STR_PAD_LEFT);
+            
+                    // Append ":00" as seconds
+                    $formattedTimePart = "{$hour}:{$minute}:00";
+                    $collect['entry_date'] = "{$datePart} {$formattedTimePart}";
+                }
+            
+            }
+            
+            if($complaint && isset($complaint)){
+               
                 $complaint->source_type = $this->source_type;
-                $complaint->acknowledgement_no = $collect['acknowledgement_no'];
+                $complaint->acknowledgement_no = (int)trim($collect['acknowledgement_no']);
                 $complaint->district = $collect['district'];
                 $complaint->police_station = $collect['police_station'];
                 $complaint->complainant_name = $collect['complainant_name'];
                 $complaint->complainant_mobile = $this->convertAcknoToString($collect['complainant_mobile']);
-                $complaint->transaction_id = $this->convertAcknoToString($collect['transaction_id']);
+                $complaint->transaction_id = trim($this->convertAcknoToString($collect['transaction_id']));
                 $complaint->bank_name = $collect['bank_name'];
-                $complaint->account_id = $this->convertAcknoToString($collect['account_id']);
+                // $complaint->account_id = $this->convertAcknoToString($collect['account_id']);
+                $complaint->account_id = preg_replace('/[^\w]/', '', $this->convertAcknoToString($collect['account_id']));
                 $complaint->amount = $collect['amount'];
 
                 $complaint->entry_date = $this->parseDate($collect['entry_date']);
@@ -243,16 +299,17 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
                 $complaint->update();
             }
             else{
-                $complaint = new Complaint();
+        
+            $complaint = new Complaint();
             $complaint->source_type = $this->source_type;
-            $complaint->acknowledgement_no = $collect['acknowledgement_no'];
+            $complaint->acknowledgement_no = (int)trim($collect['acknowledgement_no']);
             $complaint->district = $collect['district'];
             $complaint->police_station = $collect['police_station'];
             $complaint->complainant_name = $collect['complainant_name'];
             $complaint->complainant_mobile = $this->convertAcknoToString($collect['complainant_mobile']);
-            $complaint->transaction_id = $this->convertAcknoToString($collect['transaction_id']);
+            $complaint->transaction_id = trim($this->convertAcknoToString($collect['transaction_id']));
             $complaint->bank_name = $collect['bank_name'];
-            $complaint->account_id = $this->convertAcknoToString($collect['account_id']);
+            $complaint->account_id = preg_replace('/[^\w]/', '', $this->convertAcknoToString($collect['account_id']));
             $complaint->amount = $collect['amount'];
             // dd($collect['entry_date']);
             $complaint->entry_date = $this->parseDate($collect['entry_date']);
@@ -266,7 +323,6 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
             $complaint->com_status = 1;
             $complaint->save();
             }
-
 
         }
 
@@ -308,13 +364,7 @@ protected function formatErrorMessage($message, $index)
     }
 
     function parseDate($dateString, $targetFormat = 'd-m-Y H:i:s') {
-
-        // Define possible date formats with placeholders for two-digit years
-
-        // if (is_numeric($dateString)) {
-        //     dd("number");
-        //     return $this->excelSerialToDate($dateString);
-        // }
+        
 
         $formats = [
             'd/m/Y',
@@ -329,7 +379,8 @@ protected function formatErrorMessage($message, $index)
             'd/m/Y H:i:s',
             'm/d/Y H:i:s',
             'd-m-Y, h:i:s A',
-            'd/m/Y G:i:s'
+            'd/m/Y G:i:s',
+            
 
         ];
 
@@ -401,7 +452,7 @@ protected function formatErrorMessage($message, $index)
             }
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception $e){
             // Continue to next format
             continue;
         }

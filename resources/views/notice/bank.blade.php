@@ -64,7 +64,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
 
                     <div class="container mt-5">
                         <!-- Trigger the modal with a button -->
-                        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Bank</button>
+                        {{-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Bank</button> --}}
 
                         <!-- Modal -->
                         <div id="evidenceModal" class="modal fade" role="dialog">
@@ -171,6 +171,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
             </div>
         </div>
     </div>
+</div>
 
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
@@ -281,5 +282,19 @@ if ($sub_permissions || $user->role == 'Super Admin') {
             $('#merchantDropdown').hide();
         }
     </script>
-</div>
+
+    <!-- jQuery to trigger the modal on page load -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#evidenceModal').modal('show');
+    });
+</script>
+
+<script>
+    function closeModal() {
+        window.location.href = "{{ route('notices.index') }}";
+    }
+</script>
+
 @endsection

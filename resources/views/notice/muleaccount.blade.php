@@ -79,7 +79,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
     <div id="error-message" style="display: none; color: red;"></div>
 
     <!-- Trigger the modal with a button -->
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Mule Account</button>
+    {{-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Mule Account</button> --}}
 
     <!-- Modal -->
     <div id="evidenceModal" class="modal fade" role="dialog">
@@ -88,7 +88,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Select Bank/Wallet/Merchant/Insurance Name</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="evidenceForm">
@@ -163,6 +163,12 @@ if ($sub_permissions || $user->role == 'Super Admin') {
             </div>
         </div>
     </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- main-content-body -->
 </div>
 
 <!-- Toastr CSS -->
@@ -248,10 +254,21 @@ if ($sub_permissions || $user->role == 'Super Admin') {
     }
 </script>
 
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- main-content-body -->
-</div>
+
+
+    <!-- jQuery to trigger the modal on page load -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('#evidenceModal').modal('show');
+        });
+    </script>
+
+    <script>
+        function closeModal() {
+            window.location.href = "{{ route('notices.index') }}";
+        }
+    </script>
+
+
 @endsection

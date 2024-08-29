@@ -176,7 +176,10 @@ class EvidenceTypeController extends Controller
     $totalRecordswithFilter = $query->count();
 
     // Fetch records with sorting, filtering, and pagination
-    $records = $query->orderBy($columnName, $columnSortOrder)
+    $records = $query
+        ->orderBy($columnName, $columnSortOrder)
+                        ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
+
                      ->skip($start)
                      ->take($rowperpage)
                      ->get();

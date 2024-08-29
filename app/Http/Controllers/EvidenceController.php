@@ -286,7 +286,8 @@ class EvidenceController extends Controller
                 'domain' => 'domain',
                 'ip' => 'ip',
                 'registrar' => 'registrar',
-                'registry_details' => 'registry_details'
+                'registry_details' => 'registry_details',
+                'created_at' => 'created_at'
             ];
 
         $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$ip,$domain ,$evidence_type , $evidence_type_text, $filteredAckNumbers, $searchValue, $columnName, $columnSortOrder, $sortableFields){
@@ -309,6 +310,7 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
+                        'created_at' => ['$first' => '$created_at']
 
                     ]
                 ]
@@ -370,16 +372,20 @@ class EvidenceController extends Controller
             array_unshift($pipeline, ['$match' => $matchConditions]);
         }
 
-        // Add dynamic sort stage
+        // Sort by created_at in descending order by default or by user-selected column
         if (isset($sortableFields[$columnName])) {
             $sortField = $sortableFields[$columnName];
             $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
-            $pipeline[] = [
-                '$sort' => [
-                    $sortField => $sortDirection
-                ]
-            ];
+        } else {
+            // Default sorting by created_at in descending order
+            $sortField = 'created_at';
+            $sortDirection = -1;
         }
+        $pipeline[] = [
+            '$sort' => [
+                $sortField => $sortDirection
+            ]
+        ];
 
         // Add skip and limit stages
         $pipeline[] = ['$skip' => (int)$start];
@@ -610,7 +616,8 @@ class EvidenceController extends Controller
             'domain' => 'domain',
             'ip' => 'ip',
             'registrar' => 'registrar',
-            'registry_details' => 'registry_details'
+            'registry_details' => 'registry_details',
+            'created_at' => 'created_at'
         ];
 
         $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain,$ip, $evidence_type, $evidence_type_text, $from_date, $to_date, $searchValue, $columnName, $columnSortOrder, $sortableFields) {
@@ -635,6 +642,7 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
+                        'created_at' => ['$first' => '$created_at']
                     ]
                 ]
                 // [
@@ -724,23 +732,20 @@ class EvidenceController extends Controller
                 $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
             }
 
-            // Add dynamic sort stage
-            if (isset($sortableFields[$columnName])) {
-                $sortField = $sortableFields[$columnName];
-                $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
-                $pipeline[] = [
-                    '$sort' => [
-                        $sortField => $sortDirection
-                    ]
-                ];
-            } else {
-                // Default sort if column is not sortable
-                $pipeline[] = [
-                    '$sort' => [
-                        '_id' => 1
-                    ]
-                ];
-            }
+        // Sort by created_at in descending order by default or by user-selected column
+        if (isset($sortableFields[$columnName])) {
+            $sortField = $sortableFields[$columnName];
+            $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
+        } else {
+            // Default sorting by created_at in descending order
+            $sortField = 'created_at';
+            $sortDirection = -1;
+        }
+        $pipeline[] = [
+            '$sort' => [
+                $sortField => $sortDirection
+            ]
+        ];
 
             // Add skip and limit stages
             $pipeline[] = ['$skip' => (int)$start];
@@ -1379,7 +1384,57 @@ class EvidenceController extends Controller
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }
+    public function createEvidenceMobileDownloadTemplate()
+    {
 
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Public'],
+            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
+            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Public'],
+
+
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
+    public function createEvidenceWebsiteDownloadTemplate()
+    {
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
+            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
 
 
 }
