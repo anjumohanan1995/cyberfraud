@@ -7,7 +7,7 @@
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    Import Registrar !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -51,6 +51,17 @@
                                         </button>
                                     </div>
                                 @endif
+
+                                @if($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">

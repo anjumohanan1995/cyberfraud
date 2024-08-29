@@ -23,7 +23,7 @@ $user = Auth::user();
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div>
-            <h4 class="content-title mb-2">Hi, welcome back!</h4>
+            <h4 class="content-title mb-2">Notice Management !</h4>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="#">Notice Management</a></li>
@@ -58,7 +58,7 @@ $user = Auth::user();
 <div class="container mt-5">
     {{-- <div id="error-message" style="display: none; color: red;"></div> --}}
     <!-- Trigger the modal with a button -->
-    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Evidence</button>
+    {{-- <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#evidenceModal">Against Evidence</button> --}}
 
 
     <!-- Modal -->
@@ -504,6 +504,7 @@ $(document).ready(function(){
     var evidence_type_other = response.evidence_type_other;
 
 
+
     // Process the data as needed
    // console.log(data);
 
@@ -653,8 +654,17 @@ $(document).ready(function(){
 
 <script>
     function closeModal() {
-        location.reload();
+        window.location.href = "{{ route('notices.index') }}";
     }
+</script>
+
+
+<!-- jQuery to trigger the modal on page load -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#evidenceModal').modal('show');
+    });
 </script>
 
 

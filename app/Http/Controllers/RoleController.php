@@ -149,6 +149,7 @@ class RoleController extends Controller
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
 
+        $allowedColumns = ['id', 'name', 'created_at'];
         $columnIndex = $columnIndex_arr[0]['column']; // Column index
         $columnName = $columnName_arr[$columnIndex]['data']; // Column name
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
@@ -168,12 +169,18 @@ class RoleController extends Controller
     }
     $totalRecordswithFilter = $totalRecordswithFilte->count();
 
+    // Validate column name
+if (!in_array($columnName, $allowedColumns)) {
+    $columnName = 'created_at'; // Default to created_at if invalid column
+}
+
     // Fetch filtered records
     $items = Role::whereNull('deleted_at');
     if (!empty($searchValue)) {
         $items->where('name', 'like', '%' . $searchValue . '%');
     }
-    $items->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
+    $items->orderBy($columnName, $columnSortOrder);
+    // $items->orderBy('created_at', 'desc')->orderBy($columnName, $columnSortOrder);
     $records = $items->skip($start)->take($rowperpage)->get();
 
 

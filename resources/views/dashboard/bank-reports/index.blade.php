@@ -3,7 +3,7 @@
 <div class="container-fluid">
     <div class="breadcrumb-header justify-content-between">
         <div>
-            <h4 class="content-title mb-2">Hi, welcome back!</h4>
+            <h4 class="content-title mb-2">Reports !</h4>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="#">Reports</a></li>
@@ -49,16 +49,16 @@
                                                             <div class="row">
                                                                 <div class="col-md-2">
                                                                     <div class="form-group">
-                                                                        <label for="from-date-new">From Date:</label>
+                                                                        <label for="from-date-new">Date:</label>
                                                                         <input type="date" class="form-control" id="from-date-new"  value="{{ $today }}" name="from_date">
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-md-2">
+                                                                {{-- <div class="col-md-2">
                                                                     <div class="form-group">
                                                                         <label for="to-date-new">To Date:</label>
                                                                         <input type="date" class="form-control" id="to-date-new"  value="{{ $today }}" name="to_date" onchange="setFromDatencrp()">
                                                                     </div>
-                                                                </div>
+                                                                </div> --}}
                                                                 <div class="col-md-2 fil-btn">
                                                                     <div class="form-group">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -77,11 +77,11 @@
                                                                         <th>NCRP</th>
                                                                         <th>Total</th>
                                                                         <th>Actual Amount<br>Lost</th>
-                                                                        <th>Actual Amount<br>Lost On</th>
-                                                                        <th>Actual Amount<br>Hold On</th>
-                                                                        <th>Hold Other<br>Than</th>
-                                                                        <th>Total Hold<br>On</th>
-                                                                        <th>Amount Lost<br>From ECO ON</th>
+                                                                        <th>Actual Amount<br>Lost On <br><span id="actual_amount_lost_on" class="text-info"></span></th>
+                                                                        <th>Actual Amount<br>Hold On <br><span id="actual_amount_hold_on" class="text-info"></span></th>
+                                                                        <th>Hold Other<br>Than <br><span id="hold_other_than" class="text-info"></span></th>
+                                                                        <th>Total Hold<br>On <br><span id="total_hold_on" class="text-info"></span></th>
+                                                                        <th>Amount Lost<br>From ECO ON <br><span id="amount_lost_from_eco" class="text-info"></span></th>
                                                                         {{-- <th>Total Amount<br>LOST FROM ECO</th> --}}
                                                                         <th>Amount For<br>Pending Action</th>
                                                                     </tr>
@@ -126,6 +126,15 @@
 @section('scripts')
 <script>
     $(document).ready(function () {
+        var dateValue = $('#from-date-new').val();
+            var dateObj = new Date(dateValue);
+            var formattedDate = dateObj.getDate() + '-' + (dateObj.getMonth() + 1) + '-' + dateObj.getFullYear();
+            document.getElementById('actual_amount_lost_on').textContent = formattedDate;
+            document.getElementById('actual_amount_hold_on').textContent = formattedDate;
+            document.getElementById('hold_other_than').textContent = formattedDate;
+            document.getElementById('total_hold_on').textContent = formattedDate;
+            document.getElementById('amount_lost_from_eco').textContent = formattedDate;
+            
         var table = $('#example').DataTable({
             processing: true,
             serverSide: true,
@@ -133,7 +142,7 @@
                 url: "{{ route('bank-daily-reports.index') }}",
                 data: function (d) {
                     d.from_date = $('#from-date-new').val();
-                    d.to_date = $('#to-date-new').val();
+                    //d.to_date = $('#to-date-new').val();
                 }
             },
             dom: 'Bfrtip',
@@ -155,7 +164,7 @@
                 { data: 'actual_amount_lost_on', name: 'actual_amount_lost_on' },
                 { data: 'actual_amount_hold_on', name: 'actual_amount_hold_on' },
                 { data: 'hold_amount_otherthan', name: 'hold_amount_otherthan' },
-                { data: 'total_hold', name: 'total_hold' },
+                { data: 'total_holds', name: 'total_holds' },
                 { data: 'total_amount_lost_from_eco', name: 'total_amount_lost_from_eco' },
                 { data: 'amount_for_pending_action', name: 'amount_for_pending_action' }
             ],
@@ -167,7 +176,7 @@
         var format = $(this).attr('id') === 'csvDownload' ? 'csv' : 'excel'; // Determine format based on button clicked
         var url = "{{ route('bank-daily-reports.index') }}" + '?format=' + format + '&' + $.param({
             from_date: $('#from-date-new').val(),
-            to_date: $('#to-date-new').val(),
+            //to_date: $('#to-date-new').val(),
             current_date: $('#current_date').val(),
             bank_action_status: $('#bank_action_status').val(),
             evidence_type_ncrp: $('#evidence_type_ncrp').val(),
@@ -178,6 +187,15 @@
         $('#complaint-form-ncrp').on('submit', function (e) {
             e.preventDefault();
             table.draw();
+            var dateValue = $('#from-date-new').val();
+            var dateObj = new Date(dateValue);
+            var formattedDate = dateObj.getDate() + '-' + (dateObj.getMonth() + 1) + '-' + dateObj.getFullYear();
+            document.getElementById('actual_amount_lost_on').textContent = formattedDate;
+            document.getElementById('actual_amount_hold_on').textContent = formattedDate;
+            document.getElementById('hold_other_than').textContent = formattedDate;
+            document.getElementById('total_hold_on').textContent = formattedDate;
+            document.getElementById('amount_lost_from_eco').textContent = formattedDate;
+
         });
     });
 </script>

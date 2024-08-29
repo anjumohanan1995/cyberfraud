@@ -21,7 +21,11 @@ class Notice extends Eloquent
         'case_number',
         'url',
         'content',
-        'user_id'
+        'user_id',
+        'approve_id',
+        'assing_by_user_id',
+        'assing_to_user_id',
+        'type'
 
 
 
@@ -32,4 +36,15 @@ class Notice extends Eloquent
         return $this->belongsTo(User::class, 'user_id');
     }
 
+        // Relationship to the user who approved the notice
+        public function approvedBy()
+        {
+            return $this->belongsTo(User::class, 'approve_id');
+        }
+        public function  assingTo()
+        {
+            return $this->belongsTo(User::class, 'assing_to_user_id');
+        }
+
     }
+

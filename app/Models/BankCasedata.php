@@ -20,8 +20,14 @@ class BankCasedata extends Eloquent
 
         'transaction_date' => 'datetime',
         // 'date_of_action' => 'datetime',
-        
+
     ];
+
+        // Add this relationship method
+        public function complaint()
+        {
+            return $this->belongsTo(Complaint::class, 'acknowledgement_no', 'acknowledgement_no');
+        }
 
 
 }

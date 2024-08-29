@@ -3,29 +3,70 @@
 @section('content')
 
 <style>
-    .custom-dropdown {
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 20px; /* Fixed width */
+        max-width: 20%; /* Ensures it's not too wide on small screens */
+        border-radius: 5px;
         position: relative;
-        display: inline-block;
+    }
+
+    .close {
+        color: #aaa;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .custom-dropdown {
+        width: 100%;
+        margin-top: 20px; /* Add some space below the close button */
     }
 
     .custom-dropdown-button {
-        background-color: #28a745; /* Bootstrap's success color */
+        width: 100%;
+        text-align: left;
+        background-color: #28a745;
         color: white;
         border: none;
         padding: 10px;
         cursor: pointer;
+        border-radius: 5px;
     }
 
     .custom-dropdown-content {
-        display: none; /* Hidden by default */
-        position: absolute;
+        display: none;
         background-color: #f9f9f9;
-        min-width: 160px; /* Adjust the width as needed */
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-        max-height: 200px; /* Set a max height for the dropdown */
-        overflow-y: auto; /* Add vertical scrollbar if content overflows */
-        padding: 5px 0;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 5px;
+        border-radius: 5px;
     }
 
     .custom-dropdown-content a {
@@ -38,11 +79,16 @@
     .custom-dropdown-content a:hover {
         background-color: #f1f1f1;
     }
-
-    .custom-dropdown:hover .custom-dropdown-content {
-        display: block; /* Show dropdown on hover */
+    .row {
+        margin-bottom: 20px;
     }
-    </style>
+
+    .approve img{
+        height:150px !important;
+        width:150px !important;
+        }
+
+</style>
 
 
 <!-- Local Bootstrap CSS -->
@@ -60,7 +106,7 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div>
-            <h4 class="content-title mb-2">Hi, welcome back!</h4>
+            <h4 class="content-title mb-2">Notice Management !</h4>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="#">Notice Management</a></li>
@@ -113,18 +159,37 @@ Dated. 03-07-2024</p>
                 </div>
             </div>
         </div>
+        <span class="custom-dropdown w-auto">
         <a href="{{ route('notices.index') }}" class="btn btn-secondary w-auto me-2">Back to List</a>
                     <a href="{{ route('notices.edit', $notice->id) }}" class="btn btn-success w-auto me-2">Update</a>
                     <a href="#" class="btn btn-primary w-auto me-2" onclick="downloadContent()">Download Content</a>
+                    {{-- <a href="#" class="btn btn-info w-auto me-2" onclick="approveContent()">Approve</a> --}}
 
 
-                       <span class="custom-dropdown w-auto">  <button class="custom-dropdown-button btn btn-success w-auto">Follow Up</button>
+
+                        <button onclick="openModal()" class="btn btn-success">Follow Up</button>
+
+                        <div id="followUpModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close" onclick="closeModal()">&times;</span>
+                                <h4>Select User to Follow Up</h4>
+                                <div class="custom-dropdown">
+                                    <button onclick="toggleDropdown()" class="custom-dropdown-button">Select User</button>
+                                    <div id="userDropdown" class="custom-dropdown-content">
+                                        @foreach($users as $user)
+                                            <a href="#" data-user-id="{{ $user->id }}" onclick="selectUser(this)">{{ $user->name }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{-- <button class="custom-dropdown-button btn btn-success w-auto">Follow Up</button>
                         <div class="custom-dropdown-content">
                             @foreach($users as $user)
                                 <a href="#" data-user-id="{{ $user->id }}">{{ $user->name }}</a>
                             @endforeach
-                        </div>
-</span>
+                        </div> --}}
+</span><br><br>
     </div>
     <!-- /row -->
 </div>
@@ -135,7 +200,7 @@ Dated. 03-07-2024</p>
 <!-- Bootstrap Bundle with Popper.js -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-<script>
+{{-- <script>
     document.querySelectorAll('.custom-dropdown-content a').forEach(item => {
         item.addEventListener('click', event => {
             event.preventDefault();
@@ -164,6 +229,54 @@ Dated. 03-07-2024</p>
         });
     });
 
+</script> --}}
+
+<script>
+    function openModal() {
+        document.getElementById('followUpModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('followUpModal').style.display = 'none';
+    }
+
+    function toggleDropdown() {
+        document.getElementById('userDropdown').style.display =
+            document.getElementById('userDropdown').style.display === 'block' ? 'none' : 'block';
+    }
+
+    function selectUser(element) {
+        const userId = element.getAttribute('data-user-id');
+        const userName = element.textContent;
+
+        fetch(`/notices/{{ $notice->id }}/follow`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ user_id: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Followed user ${userName} successfully!`);
+                closeModal();
+            } else {
+                alert('Failed to follow user.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Close the modal if clicked outside of it
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('followUpModal')) {
+            closeModal();
+        }
+    }
 </script>
 
 <script>
@@ -191,7 +304,6 @@ Dated. 03-07-2024</p>
                 document.head.removeChild(style);
             }
         }
-
         // Apply temporary font size
         setTempFontSize();
 
@@ -228,4 +340,43 @@ Dated. 03-07-2024</p>
 
 </script>
 
+{{-- <script>
+    function approveContent() {
+    // Fetch the user's signature
+    const signatureHtml = `<p><strong>Approved by:</strong></p><img src="{{ asset('storage/signatures/' . $user->sign) }}" alt="Signature" style="max-width: 200px;">`;
+
+    // Get the notice content element
+    const noticeContent = document.getElementById('notice-content');
+
+    // Append the signature inside the notice content
+    noticeContent.innerHTML += signatureHtml;
+
+    // Get the updated content as a string
+    const updatedContent = noticeContent.innerHTML;
+
+    // Send the updated content to the server via an AJAX request
+    fetch(`/notices/{{ $notice->id }}/approve`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ content: updatedContent })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Content approved and signature added successfully!');
+            location.reload(); // Reload the page to reflect the changes
+        } else {
+            alert('Failed to approve content.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+
+</script> --}}
 @endsection

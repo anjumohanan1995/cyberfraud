@@ -43,7 +43,15 @@ class DashboardPagesController extends Controller
 //     });
 
 // Retrieve all documents with non-null account_no_2
-$documents = BankCasedata::whereNotNull('account_no_2')->get();
+$documents = BankCasedata::whereNotNull('account_no_2')
+->where(function($query) {
+    $query->whereRaw([
+        'acknowledgement_no' => [
+            '$in' => Complaint::pluck('acknowledgement_no')->toArray()
+        ]
+    ]);
+})
+->get();
 
 $accountNumbers = [];
 foreach ($documents as $doc) {
@@ -107,9 +115,11 @@ $groupedOtherLayerCases = $otherLayerCases->groupBy(function ($case) {
 $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
     return $group->pluck('acknowledgement_no')->unique()->count() > 1;
 });
+// dd($validOtherLayerCases);
 
 // Merge layer 1 and valid other layer cases
 $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+// dd($allCases);
 
 // Group by account_no_2 and remove duplicates
 $groupedCases = $allCases->groupBy(function ($case) {
@@ -136,18 +146,40 @@ $muleAccountCount = $uniqueCases->count();
 
             // dd($muleAccountCount);
 
-    //pending amount calculation
-    $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
-    $sum_amount = Complaint::where('com_status',1)->sum('amount');
-    $hold_amount = BankCaseData::where('com_status',1)
-        ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
+    // //pending amount calculation
+    // $sum_amount=0;$hold_amount=0;$lost_amount=0;$pending_amount=0;
+    // $sum_amount = Complaint::where('com_status',1)->sum('amount');
+    // $hold_amount = BankCaseData::where('com_status',1)
+    //     ->where('action_taken_by_bank','transaction put on hold')->sum('transaction_amount');
 
-    $lost_amount = BankCaseData::where('com_status',1)
-                                ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
-                                ->sum('transaction_amount');
-    $pending_amount = $sum_amount - $hold_amount - $lost_amount;
+    // $lost_amount = BankCaseData::where('com_status',1)
+    //                             ->whereIn('action_taken_by_bank',['cash withdrawal through cheque', 'withdrawal through atm', 'other','wrong transaction','withdrawal through pos'])
+    //                             ->sum('transaction_amount');
+    // $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
-        return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','pending_amount'));
+        $sum_amount = 0;
+        $hold_amount = 0;
+        $lost_amount = 0;
+        $pending_amount = 0;
+
+        $sum_amount = Complaint::where('com_status', 1)->sum('amount');
+        // dd($sum_amount);
+        $hold_amount = BankCaseData::where('com_status', 1)
+            ->where('action_taken_by_bank', 'transaction put on hold')
+            ->sum('transaction_amount');
+            // dd($hold_amount);
+
+        // Calculate hold amount percentage
+        $hold_amount_percentage = 0;
+        if ($sum_amount > 0) {
+            $hold_amount_percentage = ($hold_amount / $sum_amount) * 100;
+        }
+
+        // Round to 2 decimal places
+        $hold_amount_percentage = round($hold_amount_percentage, 2);
+
+
+        return view('dashboard.dashboard',compact('totalComplaints', 'totalOtherComplaints', 'muleAccountCount','hold_amount_percentage'));
     }
 
 }

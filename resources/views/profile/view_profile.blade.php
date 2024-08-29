@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<STYLE>
+    .edit{
+        float:right;
+        color:white;
+    }
+</STYLE>
 <div class="main-content app-content">
     <div class="main-container container-fluid">
         <div class="breadcrumb-header justify-content-between row me-0 ms-0">
@@ -19,8 +25,12 @@
         <div class="main-content-body">
             <div class="row row-sm mt-4 mouse">
                 <div class="col-lg-12 col-xl-12 col-md-12 col-sm-12">
-                    <div class="card">
+                            <div class="card">
                         <div class="card-body">
+                            @if($hasEditUserPermission || $role == 'Super Admin')
+                            <div class="edit btn btn-primary"><a href="/users/{{$user->id}}/edit" style="color:white !important;">EDIT</a></div>
+                            {{-- <div class="edit btn btn-light"><a href="/users/{{$user->id}}/edit" style="colur:white !important;">EDIT<i class="fa-solid fa-pen"></i></a></div> --}}
+                            @endif
                             <h2>Profile Details</h2>
                             <div class="card">
                                 <div class="card-body" width="500px">
@@ -49,6 +59,27 @@
                                                     <td>{{$user->hospital_name}}</td>
                                                 </tr>
                                                 @endif
+                                                @if (!empty($user->sign))
+                                                    <tr>
+                                                        <td>Signature</td>
+                                                        <td>:</td>
+                                                        <td>
+                                                            {{-- @if (File::exists(storage_path('public/' . $user->sign))) --}}
+                                                            <img src="{{ asset($user->sign) }}" alt="Signature" style="max-width: 200px; height: auto;">
+                                                            {{-- @endif --}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Signature Name</td>
+                                                        <td>:</td>
+                                                        <td>{{$user->sign_name}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Signature Designation</td>
+                                                        <td>:</td>
+                                                        <td>{{$user->sign_designation}}</td>
+                                                    </tr>
+                                                @endif
                                             </tbody>
                                         </table>
                                     </center>
@@ -72,7 +103,6 @@
         </div>
     </div>
 </div>
-
 <script>
     jQuery('.validatedForm').validate({
         rules: {

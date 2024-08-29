@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('content')
 @php
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ $user = Auth::user();
                 }
 
 @endphp
-@section('content')
+
 
 <style>
     .tabs-menu1 ul li a {
@@ -165,6 +166,15 @@ $user = Auth::user();
                         <div class="text-center">
                             <button type="button" class="btn btn-success" id="sendMail">Send Mail</button>
                         </div>
+                        <div class="text-center" style="margin-top: 20px;">
+                            <div id="loader" style="display: none;">
+                                <p style="color: red;">
+                                    Sending emails... Please wait.
+                                    <i class="fa fa-spinner fa-spin"></i> <!-- Font Awesome spinner -->
+                                </p>
+                                <!-- Add your loader animation here -->
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -240,8 +250,13 @@ $user = Auth::user();
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="path_to_bootstrap_js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
+<script src="{{ asset('js/toastr.js') }}"></script>
 
 
 <script src="path_to_bootstrap_js"></script>
@@ -308,6 +323,7 @@ $user = Auth::user();
 
     // Validate if both fields are selected
     if (statusType && noticeType) {
+        $('#loader').show();
         $.ajax({
             type: 'POST',
             url: '{{ route("send-email") }}',
@@ -334,6 +350,9 @@ $user = Auth::user();
                     '<span aria-hidden="true">&times;</span></button></div>').show();
                 console.error('Error sending email:', error);
                 $('#status-popup').modal('hide');
+            },
+            complete: function() {
+                $('#loader').hide();
             }
         });
     } else {
@@ -356,7 +375,7 @@ $user = Auth::user();
                 data: function(d) {
                     // d.website_id = $('#website_id').val();
                     d.ack_no = $('#ack_no').val();
-                }
+                },
             },
             columns: [
                 { data: 'id' },
@@ -370,7 +389,9 @@ $user = Auth::user();
                 { data: 'registry_details' },
                 { data: 'portal_link' },
                 { data: 'mail_status' },
-                @if($hasViewNCRPStatus){ data: 'status' },@endif
+                @if($hasViewNCRPStatus)
+                { data: 'status' },
+                @endif
             ],
             order: [0, 'desc'],
             ordering: true

@@ -54,7 +54,7 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- coustom style to render   --}}
-    @yield('styles');
+    @yield('styles')
 
 
 

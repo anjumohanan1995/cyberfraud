@@ -2,6 +2,15 @@
 
 @section('content')
     <style>
+    .main-header-left{
+    	display:none;
+    }
+        aside.main-sidebar{
+            display:none;
+        }
+        .main-content{
+            margin-left: 0%;
+        }
         .table {
             width: 100%;
             overflow-x: scroll;
@@ -56,7 +65,7 @@
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    NCRP Case Data!
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -223,7 +232,7 @@
                                                 </a> --}}
                                                 <a class="text-white d-flex align-items-center justify-content-center w-100 h-100"
                                                     data-toggle="tooltip" data-placement="top" title="View Evidence" href="{{ route('bank-case-data.index') }}">
-                                                    
+
                                                     <span style="font-size:smaller"><i class="ti ti-plus"></i> Upload<br> Bank Action </span>
                                                 </a>
                                             </div>
@@ -275,11 +284,14 @@
                                                     <label for="profession">Modus:</label>
                                                     <select class="form-control" id="modus" name="modus">
                                                         <option value="">--select--</option>
-                                                        @foreach($modus as $modus)
-                                                            <option value="{{ $modus->id }}" {{ (isset($additional->modus) && $additional->modus== $modus->id) ? 'selected' : '' }}>
-                                                                {{ $modus->name }}
-                                                            </option>
-                                                        @endforeach
+                                                        @if ($modus)
+                                                            @foreach($modus as $modus)
+                                                                <option value="{{ $modus->id }}" {{ (isset($additional->modus) && $additional->modus== $modus->id) ? 'selected' : '' }}>
+                                                                    {{ $modus->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+
                                                     </select>
                                                     @error('modus')
                                                         <div class="text-danger">{{ $message }}</div>
@@ -477,25 +489,26 @@
 
                                     </div>
                                 @else
-                                    <table class="table table-bordered table-responsive">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped" style="table-layout:fixed">
                                         <thead>
                                             <tr>
-                                                <th >Account No./(Wallet/PG/PA) Id<br>
+                                                <th style="width: 140px;">Account No./(Wallet/PG/PA) Id<br>
                                                     <hr> Transaction ID / UTR Number
                                                 </th>
-                                                <th>Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
-                                                <th>Bank<br>
+                                                <th style="width: 120px;">Action Taken by Bank / (Wallet/PG/PA) / Merchant / Insurance</th>
+                                                <th style="width: 105px;">Bank<br>
                                                     <hr>(Wallet/PG/PA)<br>
                                                     <hr> Merchant<br>
                                                     <hr>Insurance
                                                 </th>
-                                                <th>Account Details</th>
-                                                <th>Transaction Details</th>
-                                                <th>Branch Location<br>
+                                                <th style="width: 115px;">Account Details</th>
+                                                <th style="width: 150px;">Transaction Details</th>
+                                                <th style="width: 135px;">Branch Location<br>
                                                     <hr>Branch Manager Name & Contact Details
                                                 </th>
-                                                <th>Reference No / Remarks</th>
-                                                <th>ATM ID<br>
+                                                <th style="width: 250px;">Reference No / Remarks</th>
+                                                <th style="width: 140px;">ATM ID<br>
                                                     <hr>Place / Location of ATM
                                                 </th>
                                                 <th>Action Taken By<br>
@@ -540,7 +553,8 @@
                                                         <br><br>
                                                         Layer : {{ @$bank_data['Layer'] }}</td>
                                                     <td>{{ @$bank_data['action_taken_by_bank'] }}<br><br>
-                                                        Txn Date: {{ @$bank_data['bank'] }}</td>
+                                                        Txn Date: {{ \Carbon\Carbon::parse($bank_data['transaction_date'])->format('d-m-Y H:i:s') }}</td>
+
                                                     <td>{{ @$bank_data['bank'] }}</td>
                                                     <td>A/C No : {{ @$bank_data['account_no_2'] }}<br>
                                                         ifsc Code : {{ @$bank_data['ifsc_code'] }}</td>
@@ -574,6 +588,7 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                            </div>
                                 @endif
                             </div>
 

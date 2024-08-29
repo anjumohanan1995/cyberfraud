@@ -205,12 +205,12 @@
                                 </div>
                                 <div class="project-content">
                                     {{-- <h6>Amount Retrived</h6> --}}
-                                    <h6>Amount Pending</h6>
+                                    <h6>Amount Hold</h6>
                                     <ul>
                                         <li>
                                             {{-- <strong>Total Amount Retrived:</strong> --}}
-                                            <strong>Total Amount Pending:</strong>
-                                            <span>{{ $pending_amount }}</span>
+                                            <strong>Total Amount Hold:</strong>
+                                            <span>{{ $hold_amount_percentage }} %</span>
                                         </li>
                                         <li hidden>
                                             <strong>Expensive</strong>
@@ -447,6 +447,7 @@
                     </div>
                 </div>
             </div>
+            @if (Auth::user()->name == "Super Admin")
             <div class="container mt-5">
                 <div class="row mb-4">
                     <div class="col-md-4">
@@ -479,8 +480,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="chartTypeSelect" class="form-label">Select Chart Type:</label>
-                        <select id="chartTypeSelect">
+                        <label for="chartTypeSelect" class="form-label d-none">Select Chart Type:</label>
+                        <select id="chartTypeSelect" class="d-none">
                             <option value="bar">Bar Chart</option>
                             <option value="line">Line Chart</option>
                             <option value="pie">Pie Chart</option>
@@ -559,7 +560,8 @@
                     </div>
                 </div>
             </div>
-        </div>
+@endif
+</div>
         <!-- /row -->
     </div>
     <!-- /container -->
@@ -849,7 +851,7 @@
                         labels: labels,
                         datasets: [{
                             data: dataValues,
-                            backgroundColor: ['rgb(0, 143, 251)', 'rgb(255, 99, 132)', 'rgb(255, 205, 86)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)', 'rgb(255, 159, 64)'], // Add more colors if needed
+                            backgroundColor: ['rgb(0, 143, 251)', 'rgb(255, 99, 132)', 'rgb(255, 0, 0)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)', 'rgb(255, 159, 64)'], // Add more colors if needed
                             hoverOffset: 4 // Offset when hovering over a pie slice
                         }]
                     },
@@ -1011,61 +1013,61 @@ function fetchData() {
             });
 
             const options = {
-                series: [{
-                        name: 'Started',
-                        data: startedData
-                    },
-                    {
-                        name: 'Ongoing',
-                        data: ongoingData
-                    },
-                    {
-                        name: 'Completed',
-                        data: completedData
-                    }
-                ],
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded'
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val) {
-                        return val + "%"; // Append the % symbol to the data label
-                    }
-                },
-                xaxis: {
-                    categories: users
-                },
-                yaxis: {
-                    title: {
-                        text: 'Percentage'
-                    },
-                    labels: {
-                        formatter: function (val) {
-                            return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
-                        }
-                    }
-                },
-                fill: {
-                    opacity: 1
-                },
-                tooltip: {
-                    y: {
-                        formatter: function (val) {
-                            return val + "%"; // Append the % symbol to the tooltip values
-                        }
-                    }
-                }
-            };
-
+    series: [{
+            name: 'Started',
+            data: startedData
+        },
+        {
+            name: 'Ongoing',
+            data: ongoingData
+        },
+        {
+            name: 'Completed',
+            data: completedData
+        }
+    ],
+    chart: {
+        type: 'bar',
+        height: 350
+    },
+    plotOptions: {
+        bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+        }
+    },
+    dataLabels: {
+        enabled: true,
+        // formatter: function (val) {
+        //     return val + "%"; // Append the % symbol to the data label
+        // }
+    },
+    xaxis: {
+        categories: users
+    },
+    yaxis: {
+        title: {
+            text: 'scale'
+        },
+        // labels: {
+        //     formatter: function (val) {
+        //         return Math.round(val) + "%"; // Round and append the % symbol to the y-axis labels
+        //     }
+        // }
+    },
+    fill: {
+        opacity: 1
+    },
+    colors: ['#00E396', '#0090FF', '#FF0000'], // Customize colors here
+    // tooltip: {
+    //     y: {
+    //         formatter: function (val) {
+    //             return val + "%"; // Append the % symbol to the tooltip values
+    //         }
+    //     }
+    // }
+};
             if (chart) {
                 chart.destroy(); // Destroy existing chart instance
             }

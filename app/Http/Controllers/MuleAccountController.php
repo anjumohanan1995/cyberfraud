@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\BankCasedata;
+use App\Models\Complaint;
 use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
@@ -98,8 +99,15 @@ class MuleAccountController extends Controller
         $columnSortOrder = $order[0]['dir'];
         $searchValue = $search['value'];
 
-        // Retrieve documents with non-null account_no_2
-        $documents = BankCasedata::whereNotNull('account_no_2')->get();
+        $documents = BankCasedata::whereNotNull('account_no_2')
+        ->where(function($query) {
+            $query->whereRaw([
+                'acknowledgement_no' => [
+                    '$in' => Complaint::pluck('acknowledgement_no')->toArray()
+                ]
+            ]);
+        })
+        ->get();
 
         $accountNumbers = [];
         foreach ($documents as $doc) {

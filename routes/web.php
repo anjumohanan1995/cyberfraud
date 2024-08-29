@@ -201,7 +201,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 //evidence
-    Route::resource('evidence', EvidenceController::class);
+    // Route::resource('evidence', EvidenceController::class);
     Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
     Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
     Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
@@ -266,7 +266,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('/update-reported-statusother/{id}', [EvidenceController::class, 'updateReportedStatusOther']);
 
     //evidence bulk upload ncrp
-   
+
     // Route::get('evidence.evidenceBulkUploadImport', [EvidenceController::class, 'evidenceBulkUploadImport']);
     Route::get('/evidence/bulkimport',[EvidenceController::class, 'evidenceBulkImport'])->name('evidence.bulk.import');
     Route::post('evidence/bulk-upload',[EvidenceController::class, 'evidenceBulkUploadFile'])->name('evidence.bulk-upload');
@@ -289,7 +289,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 //Route for bank Reports
-Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports.index');
+Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports');
 Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
 
 Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
@@ -308,14 +308,48 @@ Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name(
 Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
 
 Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name('notice.bank');
+Route::post('/generate/bankacc/notice', [NoticeController::class, 'generateBankAccNotice'])->name('generate.bank.acc.notice');
+Route::post('/generate/bankack/notice', [NoticeController::class, 'generateBankAckNotice'])->name('generate.bank.ack.notice');
+
+Route::post('/notices/{id}/approve', [NoticeController::class, 'approve'])->name('notices.approve');
 
 Route::get('/show-upload-errors/{uploadId}',[ComplaintController::class, 'showUploadErrors']);
 Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErrors']);
 
 Route::post('disputeamount/update',[BankCasedataController::class, 'disputeAmountUpdate'])->name('update-dispute-amount');
 
+//bulkuploadevidence
+
+Route::get('evidence/template', [EvidenceController::class, 'createEvidenceDownloadTemplate'])->name("create-download-evidence-template");
+Route::get('evidence-mobile/template', [EvidenceController::class, 'createEvidenceMobileDownloadTemplate'])->name("create-download-evidence-mobile-template");
+Route::get('evidence-website/template', [EvidenceController::class, 'createEvidenceWebsiteDownloadTemplate'])->name("create-download-evidence-website-template");
 
 
+Route::get('bank-create', [SourceTypeController::class,'bankCreate'])->name('bank.create');
+Route::get('users-management/bank-list/get', [SourceTypeController::class, 'getbank'])->name("get.bank");
+Route::post('bank-store', [SourceTypeController::class,'bankstore'])->name('bank.store');
+Route::get('/bank/{id}/edit', [SourceTypeController::class, 'bankedit'])->name('bank.edit');
+Route::put('/bank/{id}', [SourceTypeController::class, 'bankupdate'])->name('bank.update');
+Route::delete('/bank/{id}', [SourceTypeController::class, 'destroybank'])->name('bank.destroy');
 
+Route::get('insurance-create', [SourceTypeController::class,'insuranceCreate'])->name('insurance.create');
+Route::get('users-management/insurance-list/get', [SourceTypeController::class, 'getinsurance'])->name("get.insurance");
+Route::post('insurance-store', [SourceTypeController::class,'insurancestore'])->name('insurance.store');
+Route::get('/insurance/{id}/edit', [SourceTypeController::class, 'insuranceedit'])->name('insurance.edit');
+Route::put('/insurance/{id}', [SourceTypeController::class, 'insuranceupdate'])->name('insurance.update');
+Route::delete('/insurance/{id}', [SourceTypeController::class, 'destroyinsurance'])->name('insurance.destroy');
 
+Route::get('merchant-create', [SourceTypeController::class,'merchantCreate'])->name('merchant.create');
+Route::get('users-management/merchant-list/get', [SourceTypeController::class, 'getmerchant'])->name("get.merchant");
+Route::post('merchant-store', [SourceTypeController::class,'merchantstore'])->name('merchant.store');
+Route::get('/merchant/{id}/edit', [SourceTypeController::class, 'merchantedit'])->name('merchant.edit');
+Route::put('/merchant/{id}', [SourceTypeController::class, 'merchantupdate'])->name('merchant.update');
+Route::delete('/merchant/{id}', [SourceTypeController::class, 'destroymerchant'])->name('merchant.destroy');
+
+Route::get('wallet-create', [SourceTypeController::class,'walletCreate'])->name('wallet.create');
+Route::get('users-management/wallet-list/get', [SourceTypeController::class, 'getwallet'])->name("get.wallet");
+Route::post('wallet-store', [SourceTypeController::class,'walletstore'])->name('wallet.store');
+Route::get('/wallet/{id}/edit', [SourceTypeController::class, 'walletedit'])->name('wallet.edit');
+Route::put('/wallet/{id}', [SourceTypeController::class, 'walletupdate'])->name('wallet.update');
+Route::delete('/wallet/{id}', [SourceTypeController::class, 'destroywallet'])->name('wallet.destroy');
 

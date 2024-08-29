@@ -149,8 +149,7 @@ class PermissionController extends Controller
         $totalRecordswithFilter = Permission::where('deleted_at', null)
             ->when($searchValue, function ($query, $searchValue) {
                 return $query->where(function ($q) use ($searchValue) {
-                    $q->where('name', 'like', '%' . $searchValue . '%')
-                      ->orWhere('description', 'like', '%' . $searchValue . '%');
+                    $q->where('name', 'like', '%' . $searchValue . '%');
                 });
             })
             ->count();
@@ -159,8 +158,7 @@ class PermissionController extends Controller
         $records = Permission::where('deleted_at', null)
             ->when($searchValue, function ($query, $searchValue) {
                 return $query->where(function ($q) use ($searchValue) {
-                    $q->where('name', 'like', '%' . $searchValue . '%')
-                      ->orWhere('description', 'like', '%' . $searchValue . '%');
+                    $q->where('name', 'like', '%' . $searchValue . '%');
                 });
             })
             ->orderBy($columnName, $columnSortOrder)
@@ -191,13 +189,13 @@ class PermissionController extends Controller
             $name = $record->name;
             $edit = '';
 
-            if ($hasEditPermissionPermission || $user->role == 'Super Admin') {
-                $edit .= '<a href="' . url('permissions/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
-            }
+            // if ($hasEditPermissionPermission || $user->role == 'Super Admin') {
+            //     $edit .= '<a href="' . url('permissions/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+            // }
 
-            if ($hasDeletePermissionPermission || $user->role == 'Super Admin') {
-                $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>&nbsp;&nbsp;';
-            }
+            // if ($hasDeletePermissionPermission || $user->role == 'Super Admin') {
+            //     $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>&nbsp;&nbsp;';
+            // }
 
             if ($hasShowSubpermissionsPermission || $user->role == 'Super Admin') {
                 $edit .= '<a href="' . url('subpermissions/' . $id) . '" class="btn btn-primary edit-btn">Sub Permission</a>';

@@ -29,52 +29,57 @@ class UsersController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
+        $role = $user->role;
         $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view("dashboard.user-management.users.create",compact('roles'));
+        return view("dashboard.user-management.users.create",compact('roles','role'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        // $messages = [
-        // 'password.regex' => 'The password must contain at least one uppercase letter,
-        //                         one lowercase letter,
-        //                         one digit,
-        //                         and one special character.
-        //                         It must also be at least 8 characters long.',
-        // ];
-
-        $validate = Validator::make($request->all(),
-        [
-          'name' => 'required',
-          'email' => 'required|email|unique:users,deleted_at,NULL',
-          'password' => ['required', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
-          'role' => 'required' ,
+        // Validation rules
+        $validate = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|email|unique:users,deleted_at,NULL',
+            'password' => ['required', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+            'role' => 'required',
+            'sign' => 'image|nullable', // Nullable if signature is not uploaded
+            'sign_name' => 'required_with:sign,sign_designation|nullable',
+            'sign_designation' => 'required_with:sign,sign_name|nullable'
         ]);
 
-
-        // ], $messages);
+        // Check if validation fails
         if ($validate->fails()) {
-            //dd($validate);
             return Redirect::back()->withInput()->withErrors($validate);
         }
 
+        // Initialize the image path variable
+        $imagePath = '';
+
+        // Handle the signature upload if it exists
+        if ($request->hasFile('sign')) {
+            $file = $request->file('sign');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('signatures'), $filename);
+
+            // Save the relative path to the database
+            $imagePath = 'signatures/' . $filename;
+        }
+
+        // Create the user
         User::create([
-            'name' => @$request->name? $request->name:'',
-            'last_name' => @$request->lname?$request->lname:'',
-            'email' => @$request->email?$request->email:'',
+            'name' => $request->name ?: '',
+            'last_name' => $request->lname ?: '',
+            'email' => $request->email ?: '',
             'password' => Hash::make($request->password),
-            'role' => @$request->role?$request->role:''
+            'role' => $request->role ?: '',
+            'sign' => $imagePath,
+            'sign_name' => $request->sign_name ?: '',
+            'sign_designation' => $request->sign_designation ?: '',
         ]);
 
-        return redirect()->route('users.index')->with('success','User Added successfully.');
-
-
+        // Redirect with success message
+        return redirect()->route('users.index')->with('success', 'User added successfully.');
     }
 
     /**
@@ -97,9 +102,11 @@ class UsersController extends Controller
     public function edit($id)
     {
         $data = User::findOrFail($id);
+        $user = Auth::user();
+        $role = $user->role;
 
         $roles =Role::orderBy('id','desc')->where('deleted_at',null)->get();
-        return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$roles]);
+        return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$roles, 'role'=>$role]);
     }
 
     /**
@@ -109,35 +116,100 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+    // public function update(Request $request, $id)
+    // {
+    //     // Validate the incoming request data
+    //     $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
+    //         'sign' => 'nullable|image' // Validate 'sign' if it's provided
+    //     ]);
 
-     public function update(Request $request, $id)
+    //     // Find the user by its ID
+    //     $data = User::findOrFail($id);
+
+    //     // Update the user with the data from the request
+    //     $data->name = $request->name;
+    //     $data->last_name = $request->last_name;
+    //     $data->email = $request->email;
+    //     $data->role = $request->role;
+
+    //     // Only update the password if a new password is provided
+    //     if ($request->filled('password')) {
+    //         $data->password = Hash::make($request->password);
+    //     }
+
+    //     // Handle file upload for 'sign'
+    //     if ($request->hasFile('sign')) {
+    //         // Delete the old signature if it exists
+    //         if ($data->sign && file_exists(public_path($data->sign))) {
+    //             unlink(public_path($data->sign));
+    //         }
+
+    //         // Store the new signature directly in the public/signatures directory
+    //         $file = $request->file('sign');
+    //         $filename = time() . '_' . $file->getClientOriginalName();
+    //         $file->move(public_path('signatures'), $filename);
+    //         $data->sign = 'signatures/' . $filename;
+    //     }
+
+    //     // Save the updated user data
+    //     $data->save();
+
+    //     // Redirect back with success message
+    //     return redirect()->route('users.index')->with('success', 'User updated successfully!');
+    // }
+    public function update(Request $request, $id)
 {
-    // Define custom validation messages
-    // $messages = [
-    //     'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character. It must also be at least 8 characters long.',
-    // ];
-
-    // Validate the incoming request data with custom messages
+    // Custom validation rules
     $request->validate([
         'name' => 'required|string|max:255',
-        'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/']
+        'email' => 'required|email|max:255',
+        'password' => [
+            'nullable',
+            'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'
+        ],
+        'old_password' => 'nullable|min:6', // Ensure old password is provided if changing password
+        'sign' => 'nullable|image',
     ]);
-// ], $messages);
 
-
-    // Find the user by its ID
+    // Find the user by ID
     $data = User::findOrFail($id);
 
-    // Update the user with the data from the request
-    $data->name = $request->name;
-    $data->last_name = $request->last_name;
-    $data->email = $request->email;
-    $data->role = $request->role;
+    // Update name, email, and role if provided
+    $data->name = $request->input('name', $data->name);
+    $data->last_name = $request->input('last_name', $data->last_name);
+    $data->email = $request->input('email', $data->email);
+    $data->role = $request->input('role', $data->role);
 
-    // Only update the password if a new password is provided
+    // Handle password update
     if ($request->filled('password')) {
+        // Check if the old password is correct
+        if (!Hash::check($request->old_password, $data->password)) {
+            return redirect()->back()->withErrors(['old_password' => 'The current password is incorrect.']);
+        }
+
+        // Update to the new password
         $data->password = Hash::make($request->password);
     }
+
+    // Handle the signature file upload if a new file is provided
+    if ($request->hasFile('sign')) {
+        // Delete the old signature if it exists
+        if ($data->sign && file_exists(public_path($data->sign))) {
+            unlink(public_path($data->sign));
+        }
+
+        // Store the new signature
+        $file = $request->file('sign');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('signatures'), $filename);
+        $data->sign = 'signatures/' . $filename;
+    }
+
+    // Update the sign-related fields if provided
+    $data->sign_name = $request->input('sign_name', $data->sign_name);
+    $data->sign_designation = $request->input('sign_designation', $data->sign_designation);
 
     // Save the updated user data
     $data->save();
@@ -145,6 +217,7 @@ class UsersController extends Controller
     // Redirect back with success message
     return redirect()->route('users.index')->with('success', 'User updated successfully!');
 }
+
 
 
     // public function update(Request $request, $id)
@@ -213,17 +286,25 @@ class UsersController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-            // Total records
-            $totalRecord = User::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecords = $totalRecord->select('count(*) as allcount')->count();
+        $query = User::where('deleted_at', null);
 
+        // Search
+        if(!empty($searchValue)) {
+            $query->where(function($q) use ($searchValue) {
+                $q->where('name', 'like', '%' . $searchValue . '%')
+                  ->orWhere('email', 'like', '%' . $searchValue . '%')
+                  ->orWhere('role', 'like', '%' . $searchValue . '%');
+            });
+        }
 
-            $totalRecordswithFilte = User::where('deleted_at',null)->orderBy('created_at','desc');
-            $totalRecordswithFilter = $totalRecordswithFilte->select('count(*) as allcount')->count();
+        // Total records
+        $totalRecords = $query->count();
 
-            // Fetch records
-            $items = User::where('deleted_at',null)->orderBy('created_at','desc')->orderBy($columnName,$columnSortOrder);
-            $records = $items->skip($start)->take($rowperpage)->get();
+        // Sort
+        $query->orderBy($columnName, $columnSortOrder);
+
+        // Pagination
+        $records = $query->skip($start)->take($rowperpage)->get();
 
             $user = Auth::user();
             $role = $user->role;
@@ -268,7 +349,7 @@ class UsersController extends Controller
             $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
-            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "iTotalDisplayRecords" => $totalRecords,
             "aaData" => $data_arr
             );
 
@@ -277,8 +358,18 @@ class UsersController extends Controller
 
     public function profile()
     {
+        $user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
+                } else{
+                    $hasEditUserPermission = false;
+                }
         $user = User::where('_id', auth()->user()->id)->where('deleted_at', null)->first();
-        return view('profile.view_profile', compact('user'));
+        return view('profile.view_profile', compact('user', 'role', 'hasEditUserPermission'));
     }
 
 

@@ -18,6 +18,8 @@ use MongoDB\BSON\UTCDateTime;
 use Illuminate\Support\Facades\Crypt;
 use MongoDB\Client;
 use DateTime;
+use Illuminate\Support\Facades\DB;
+
 
 
 class ReportsController extends Controller
@@ -32,6 +34,7 @@ class ReportsController extends Controller
         $getevidencename = ComplaintOthers::select('evidence_type')
                              ->groupBy('evidence_type')
                              ->get();
+
         $lowercaseEvidences = $getevidencename->map(function ($item) {
             return strtolower($item->evidence_type);
         });
@@ -93,7 +96,7 @@ if ($dailyDate) {
 
     if ($acknowledgementNos->isNotEmpty()) {
         $query->whereIn('acknowledgement_no', $acknowledgementNos);
-        dd($query);
+        // dd($query);
     } else {
         // If no acknowledgement numbers are found, apply an empty filter to return no results
         $query->whereIn('acknowledgement_no', []);
@@ -213,13 +216,21 @@ if ($evidence_type_ncrp || $search_value_ncrp) {
 //     }
 // }
 
-
-
 if (!empty($searchValue)) {
     $query->where(function ($q) use ($searchValue) {
-        $q->where('acknowledgement_no', 'like', '%' . $searchValue . '%')
-          ->orWhere('district', 'like', '%' . $searchValue . '%')
+        // Check if the search value is numeric
+        if (is_numeric($searchValue)) {
+            $numericValue = $searchValue + 0; // Converts to int or float automatically
+            $q->orWhere('acknowledgement_no', (int)$numericValue)
+              ->orWhere('amount', $numericValue);
+        }
+
+        // String-based searches
+        $q->orWhere('district', 'like', '%' . $searchValue . '%')
           ->orWhere('complainant_name', 'like', '%' . $searchValue . '%')
+          ->orWhere('complainant_mobile', 'like', '%' . $searchValue . '%')
+          ->orWhere('transaction_id', 'like', '%' . $searchValue . '%')
+          ->orWhere('account_id', 'like', '%' . $searchValue . '%')
           ->orWhere('bank_name', 'like', '%' . $searchValue . '%')
           ->orWhere('police_station', 'like', '%' . $searchValue . '%');
     });
@@ -231,7 +242,7 @@ if (!empty($searchValue)) {
                 // $records_action = $query->get();
                 // dd($records_action);
                 // Fetch records
-                $records = $query->orderBy('created_at', 'desc')
+                $records = $query->orderBy(DB::raw('entry_date'), 'desc')
                                  ->orderBy('acknowledgement_no', 'asc')
                                  ->skip($start)
                                  ->take($rowperpage)
@@ -260,7 +271,7 @@ if (!empty($searchValue)) {
             foreach($com as $com){
                 $transaction_id .= $com->transaction_id."<br>";
                 // $amount .= '<span class="editable" data-ackno="'.$record->acknowledgement_no.'" data-transaction="'.$com->transaction_id.'" >'.$com->amount."</span><br>";
-                $amount .= $com->amount;
+                $amount .= $com->amount . "<br>";
                 $bank_name .= $com->bank_name."<br>";
                 $complainant_name = $com->complainant_name;
                 $complainant_mobile = $com->complainant_mobile;
@@ -268,7 +279,7 @@ if (!empty($searchValue)) {
                 $district = $com->district;
                 $police_station = $com->police_station;
                 $account_id = $com->account_id;
-                $entry_date = Carbon::parse($com->entry_date)->format('Y-m-d H:i:s');
+                $entry_date = $com->entry_date->toDateTime()->format('d-m-Y H:i:s');
                 $current_status = $com->current_status;
                 $date_of_action = $com->date_of_action;
                 $action_taken_by_name = $com->action_taken_by_name;
@@ -367,7 +378,7 @@ if (!empty($searchValue)) {
             // '<button class="btn btn-outline-success" type="submit">' . $acknowledgement_no . '</button>' . // Submit button with the acknowledgment number as text
             // '</form>';
             $id = Crypt::encrypt($acknowledgement_no);
-            $ack_no = '<a class="btn btn-outline-primary" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
+            $ack_no = '<a class="btn btn-outline-primary" target="_blank" href="' . route('case-data.view', ['id' => $id]) . '">' . $acknowledgement_no . '</a>';
            // $ack_no = '<a href="' . route('case-data.view', ['id' => $acknowledgement_no]) . '">' . $acknowledgement_no . '</a>';
             // $edit = '<div><form action="' . url("case-data/bank-case-data") . '" method="GET"><input type="hidden" name="acknowledgement_no" value="' . $acknowledgement_no . '"><input type="hidden" name="account_id" value="' . $account_id . '"><button type="submit" class="btn btn-danger">Show Case</button></form></div>';
             $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
@@ -696,24 +707,24 @@ public function getDatalistOthersourcetype(Request $request)
             '$limit' => (int)$rowperpage
         ]
     ];
-    if (!empty($searchValue)) {
-        $pipeline = array_merge([
-            [
-                '$match' => [
-                    '$or' => [
-                        ['source_type' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['url' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
-                        ['remarks' => ['$regex' => $searchValue, '$options' => 'i']],
-                    ]
-                ]
+
+    // Add search filtering to the pipeline if $searchValue is not empty
+if (!empty($searchValue)) {
+    array_unshift($pipeline, [
+        '$match' => [
+            '$or' => [
+                ['source_type' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['case_number' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['url' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['domain' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['evidence_type' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['ip' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['registrar' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]],
+                ['remarks' => ['$regex' => new \MongoDB\BSON\Regex($searchValue, 'i')]]
             ]
-        ], $pipeline);
-    }
+        ]
+    ]);
+}
 
     // Conditional pipeline stages
     if ($current_value === 'today') {
@@ -728,12 +739,16 @@ public function getDatalistOthersourcetype(Request $request)
     if ($fromDate && $toDate) {
         array_unshift($pipeline, [
             '$match' => [
-                'created_at' => ['$gte' => new UTCDateTime(strtotime($fromDate) * 1000), '$lte' => new UTCDateTime(strtotime($toDate) * 1000)]
+                'created_at' => [
+                    '$gte' => new UTCDateTime((new DateTime($fromDate))->getTimestamp() * 1000),
+                    '$lte' => new UTCDateTime((new DateTime($toDate))->getTimestamp() * 1000)
+                ]
             ]
         ]);
     }
 
-    if ($evidence_type_others && $search_value_others) {
+
+    if ($evidence_type_others || $search_value_others) {
         array_unshift($pipeline, [
             '$match' => [
                 'evidence_type' => ['$regex' => new \MongoDB\BSON\Regex($evidence_type_others, 'i')],

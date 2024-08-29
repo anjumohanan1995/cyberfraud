@@ -25,7 +25,7 @@ $user = Auth::user();
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    User Management !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -66,7 +66,7 @@ $user = Auth::user();
                                 <h4 class="card-title mg-b-10">
                                     All Permissions
                                 </h4>
-                                <div class="col-md-1 col-6 text-center">
+                                <div class="col-md-1 col-6 text-center d-none">
                                     @if ($hasAddPermissionPermission)
                                     <div class="task-box primary  mb-0">
                                         <a class="text-white" href="{{ route('permissions.create') }}">

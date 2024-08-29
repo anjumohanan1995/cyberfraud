@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\EvidenceBulkImport;
+use App\exports\SampleExport;
 
 class EvidenceController extends Controller
 {
@@ -248,6 +249,7 @@ class EvidenceController extends Controller
         $ack_no="";
         $acknowledgement_no = $request->acknowledgement_no;
         $url = $request->url;
+        $ip = $request->ip;
         $domain = $request->domain;
         $evidence_type = $request->evidence_type;
         $evidence_name = $request->evidence_name;
@@ -261,21 +263,34 @@ class EvidenceController extends Controller
         // // Convert fromDate and toDate to start and end of the day
         // $fromDateStart = $fromDate ? Carbon::parse($from_date)->startOfDay() : null;
         // $toDateEnd = $toDate ? Carbon::parse($to_date)->endOfDay() : null;
+        $fromDateStart = Carbon::parse($from_date)->startOfDay();
+        $toDateEnd = Carbon::parse($to_date)->endOfDay();
+
 
         if($current_date){
-            $from_date = Carbon::today('Asia/Kolkata')->toDateString();
-            $to_date = $from_date;
+            $today = Carbon::today('Asia/Kolkata');
+            $fromDateStart = $today->copy()->startOfDay();
+            $toDateEnd = $today->copy()->endOfDay();
         }
 
-        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$domain ,$evidence_type , $evidence_type_text, $from_date , $to_date){
+        // First, get the acknowledgement numbers from the Complaints model based on date filters
+        $filteredAckNumbers = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+            ->pluck('acknowledgement_no')
+            ->toArray();
+            // dd($filteredAckNumbers);
 
-            if ($from_date && $to_date) {
-                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
-                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
+            $sortableFields = [
+                'acknowledgement_no' => '_id',
+                'evidence_type' => 'evidence_type',
+                'url' => 'url',
+                'domain' => 'domain',
+                'ip' => 'ip',
+                'registrar' => 'registrar',
+                'registry_details' => 'registry_details',
+                'created_at' => 'created_at'
+            ];
 
-                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
-                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
-            }
+        $evidences = Evidence::raw(function($collection) use ($start, $rowperpage,$acknowledgement_no,$url,$ip,$domain ,$evidence_type , $evidence_type_text, $filteredAckNumbers, $searchValue, $columnName, $columnSortOrder, $sortableFields){
 
             $pipeline = [
 
@@ -295,84 +310,91 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
+                        'created_at' => ['$first' => '$created_at']
 
                     ]
-                ],
-                [
-                    '$sort' => [
-                        '_id' => 1,
                 ]
-                ],
-                [
-                    '$skip' => (int)$start
-                ],
-                [
-                    '$limit' => (int)$rowperpage
-                ],
+                 // [
+                //     '$sort' => [
+                //         '_id' => 1,
+                // ]
+                // ],
+                // [
+                //     '$skip' => (int)$start
+                // ],
+                // [
+                //     '$limit' => (int)$rowperpage
+                // ],
 
             ];
 
-            if (isset($acknowledgement_no)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ack_no' => $acknowledgement_no
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            // if (isset($url)) {
-            //     $matchStage = [
-            //         '$match' => [
-            //             '$or' => [
-            //                 ['url' => $url],
-            //                 ['mobile' => $url]
-            //             ]
-            //         ]
-            //     ];
-            //     $pipeline = array_merge([$matchStage], $pipeline);
-            // }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($evidence_type)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'evidence_type' => $evidence_type_text
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if ($from_date && $to_date){
-                $pipeline = array_merge([
-                    ['$match' => [
-                        'created_at' => [
-                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
-                        ]
-                    ]]
-                ], $pipeline);
-            }
+        // Apply filters
+        $matchConditions = [];
 
-            return $collection->aggregate($pipeline);
+        if (!empty($filteredAckNumbers)) {
+            $stringFilteredAckNumbers = array_map('strval', $filteredAckNumbers);
+            $matchConditions['ack_no'] = ['$in' => $stringFilteredAckNumbers];
+        }
+
+        if (isset($acknowledgement_no)) {
+            $matchConditions['ack_no'] = $acknowledgement_no;
+        }
+
+        if (isset($url)) {
+            $matchConditions['url'] = $url;
+        }
+
+        if (isset($domain)) {
+            $matchConditions['domain'] = $domain;
+        }
+
+        if (isset($ip)) {
+            $matchConditions['ip'] = $ip;
+        }
+
+        if (isset($evidence_type)) {
+            $matchConditions['evidence_type'] = $evidence_type_text;
+        }
+
+        if (!empty($searchValue)) {
+            $matchConditions['$or'] = [
+                ['ack_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]
+            ];
+        }
+
+        if (!empty($matchConditions)) {
+            array_unshift($pipeline, ['$match' => $matchConditions]);
+        }
+
+        // Sort by created_at in descending order by default or by user-selected column
+        if (isset($sortableFields[$columnName])) {
+            $sortField = $sortableFields[$columnName];
+            $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
+        } else {
+            // Default sorting by created_at in descending order
+            $sortField = 'created_at';
+            $sortDirection = -1;
+        }
+        $pipeline[] = [
+            '$sort' => [
+                $sortField => $sortDirection
+            ]
+        ];
+
+        // Add skip and limit stages
+        $pipeline[] = ['$skip' => (int)$start];
+        $pipeline[] = ['$limit' => (int)$rowperpage];
+
+        return $collection->aggregate($pipeline);
         });
 
-        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url , $domain ,$evidence_type , $evidence_type_text ,$from_date , $to_date) {
-
-            if ($from_date && $to_date) {
-                $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
-                $endOfDay = Carbon::createFromFormat('Y-m-d', $to_date, 'Asia/Kolkata')->endOfDay();
-
-                $utcStartDate = $startOfDay->copy()->setTimezone('UTC');
-                $utcEndDate = $endOfDay->copy()->setTimezone('UTC');
-            }
+        $distinctEvidences = Evidence::raw(function($collection) use ($acknowledgement_no ,$url ,$ip, $domain ,$evidence_type , $evidence_type_text ,$filteredAckNumbers, $searchValue) {
 
             $pipeline = [
                 [
@@ -383,54 +405,47 @@ class EvidenceController extends Controller
                 ]
             ];
 
-            if (isset($acknowledgement_no)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'ack_no' => $acknowledgement_no
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            // if (isset($url)) {
-            //     $matchStage = [
-            //         '$match' => [
-            //             '$or' => [
-            //                 ['url' => $url],
-            //                 ['mobile' => $url]
-            //             ]
-            //         ]
-            //     ];
-            //     $pipeline = array_merge([$matchStage], $pipeline);
-            // }
-            if (isset($domain)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'domain' => $domain
-                        ]
-                    ]
-                ], $pipeline);
-            }
-            if (isset($evidence_type)){
-                $pipeline = array_merge([
-                    [
-                        '$match' => [
-                            'evidence_type' => $evidence_type_text
-                        ]
-                    ]
-                ], $pipeline);
-            }
+                    // Apply the same filters as in the main query
+        $matchConditions = [];
 
-            if ($from_date && $to_date){
-                $pipeline = array_merge([
-                    ['$match' => [
-                        'created_at' => [
-                            '$gte' => new UTCDateTime($utcStartDate->timestamp * 1000),
-                            '$lte' => new UTCDateTime($utcEndDate->timestamp * 1000)
-                        ]
-                    ]]
-                ], $pipeline);
+        if (!empty($filteredAckNumbers)) {
+            $stringFilteredAckNumbers = array_map('strval', $filteredAckNumbers);
+            $matchConditions['ack_no'] = ['$in' => $stringFilteredAckNumbers];
+        }
+
+        if (isset($acknowledgement_no)) {
+            $matchConditions['ack_no'] = $acknowledgement_no;
+        }
+
+        if (isset($url)) {
+            $matchConditions['url'] = $url;
+        }
+
+        if (isset($domain)) {
+            $matchConditions['domain'] = $domain;
+        }
+
+        if (isset($ip)) {
+            $matchConditions['ip'] = $ip;
+        }
+
+        if (isset($evidence_type)) {
+            $matchConditions['evidence_type'] = $evidence_type_text;
+        }
+
+        if (!empty($searchValue)) {
+            $matchConditions['$or'] = [
+                ['ack_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]
+            ];
+        }
+            if (!empty($matchConditions)) {
+                array_unshift($pipeline, ['$match' => $matchConditions]);
             }
 
             return $collection->aggregate($pipeline);
@@ -582,6 +597,7 @@ class EvidenceController extends Controller
         $case_number = $request->case_number;
         $url = $request->url;
         $domain = $request->domain;
+        $ip = $request->ip;
         $evidence_type = $request->evidence_type;
         $evidence_type_text = $request->evidence_type_text;
         // dd($evidence_type_text);
@@ -593,7 +609,18 @@ class EvidenceController extends Controller
             $to_date = $from_date;
         }
 
-        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain, $evidence_type, $evidence_type_text, $from_date, $to_date) {
+        $sortableFields = [
+            'case_number' => '_id',
+            'evidence_type' => 'evidence_type',
+            'url' => 'url',
+            'domain' => 'domain',
+            'ip' => 'ip',
+            'registrar' => 'registrar',
+            'registry_details' => 'registry_details',
+            'created_at' => 'created_at'
+        ];
+
+        $evidences = ComplaintOthers::raw(function($collection) use ($start, $rowperpage, $case_number, $url, $domain,$ip, $evidence_type, $evidence_type_text, $from_date, $to_date, $searchValue, $columnName, $columnSortOrder, $sortableFields) {
 
 
             if ($from_date && $to_date) {
@@ -615,19 +642,20 @@ class EvidenceController extends Controller
                         'registry_details' => ['$push' => '$registry_details'],
                         'ip' => ['$push' => '$ip'],
                         'registrar' => ['$push' => '$registrar'],
+                        'created_at' => ['$first' => '$created_at']
                     ]
-                ],
-                [
-                    '$sort' => [
-                        '_id' => 1,
-                    ]
-                ],
-                [
-                    '$skip' => (int)$start
-                ],
-                [
-                    '$limit' => (int)$rowperpage
-                ],
+                ]
+                // [
+                //     '$sort' => [
+                //         '_id' => 1,
+                //     ]
+                // ],
+                // [
+                //     '$skip' => (int)$start
+                // ],
+                // [
+                //     '$limit' => (int)$rowperpage
+                // ],
             ];
 
 
@@ -660,6 +688,16 @@ class EvidenceController extends Controller
                 ], $pipeline);
 
             }
+            if (isset($ip)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
+                        ]
+                    ]
+                ], $pipeline);
+
+            }
             if (isset($evidence_type)) {
                 $pipeline = array_merge([
                     [
@@ -681,10 +719,42 @@ class EvidenceController extends Controller
                 ], $pipeline);
             }
 
+            if (!empty($searchValue)) {
+                $matchStage['$or'] = [
+                    ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
+                ];
+                $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
+            }
+
+        // Sort by created_at in descending order by default or by user-selected column
+        if (isset($sortableFields[$columnName])) {
+            $sortField = $sortableFields[$columnName];
+            $sortDirection = $columnSortOrder === 'asc' ? 1 : -1;
+        } else {
+            // Default sorting by created_at in descending order
+            $sortField = 'created_at';
+            $sortDirection = -1;
+        }
+        $pipeline[] = [
+            '$sort' => [
+                $sortField => $sortDirection
+            ]
+        ];
+
+            // Add skip and limit stages
+            $pipeline[] = ['$skip' => (int)$start];
+            $pipeline[] = ['$limit' => (int)$rowperpage];
+
             return $collection->aggregate($pipeline);
         });
 
-        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$evidence_type , $evidence_type_text , $from_date , $to_date ) {
+        $distinctEvidences = ComplaintOthers::raw(function($collection) use ($case_number ,$url , $domain ,$ip, $evidence_type , $evidence_type_text , $from_date , $to_date,$searchValue ) {
 
             if ($from_date && $to_date) {
                 $startOfDay = Carbon::createFromFormat('Y-m-d', $from_date, 'Asia/Kolkata')->startOfDay();
@@ -729,6 +799,16 @@ class EvidenceController extends Controller
                     ]
                 ], $pipeline);
             }
+            if (isset($ip)) {
+                $pipeline = array_merge([
+                    [
+                        '$match' => [
+                            'ip' => $ip
+                        ]
+                    ]
+                ], $pipeline);
+
+            }
             if (isset($evidence_type)){
                 $pipeline = array_merge([
                     [
@@ -747,6 +827,18 @@ class EvidenceController extends Controller
                         ]
                     ]]
                 ], $pipeline);
+            }
+            if (!empty($searchValue)) {
+                $matchStage['$or'] = [
+                    ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['evidence_type' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                    ['registry_details' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
+                ];
+                $pipeline = array_merge([['$match' => $matchStage]], $pipeline);
             }
 
 
@@ -1007,21 +1099,54 @@ class EvidenceController extends Controller
         return view('dashboard.bank-case-data.evidence.bulkUpload');
     }
 
-    public function evidenceBulkUploadFile(Request $request){
-
+    public function evidenceBulkUploadFile(Request $request)
+    {
+        // Validate the file input
         $request->validate([
             'file' => 'required|mimes:csv,xlsx,xls,ods'
         ]);
 
-        if ($request->hasFile('file')){
+        // Check if a file is present in the request
+        if ($request->hasFile('file')) {
             $file = $request->file('file');
-            Excel::import(new EvidenceBulkImport, $file);
-            return redirect()->route('evidence.bulkUpload',$request->ackno)->with('success', 'File uploaded successfully.');
+            $import = new EvidenceBulkImport;
+
+            // Run the import process
+            Excel::import($import, $file);
+
+            // Check if there are any custom errors from the import process
+            if (!empty($import->getErrors())) {
+                // Redirect with errors using withErrors
+                return redirect()->route('evidence.bulk.import', $request->ackno)
+                    ->withErrors($import->getErrors()) // Ensure this is an array of error messages
+                    ->withInput();
+            }
+
+            // Redirect on successful import
+            return redirect()->route('evidence.bulk.import', $request->ackno)
+                ->with('success', 'File uploaded successfully.');
         }
-        return redirect('evidence.bulkUpload',$request->ackno)->with('error', 'File upload failed.');
 
-
+        // Redirect back with validation errors
+        return redirect()->back()->withErrors(['file' => 'File upload failed.'])->withInput();
     }
+
+
+    // public function evidenceBulkUploadFile(Request $request){
+
+    //     $request->validate([
+    //         'file' => 'required|mimes:csv,xlsx,xls,ods'
+    //     ]);
+
+    //     if ($request->hasFile('file')){
+    //         $file = $request->file('file');
+    //         Excel::import(new EvidenceBulkImport, $file);
+    //         return redirect()->route('evidence.bulk.import',$request->ackno)->with('success', 'File uploaded successfully.');
+    //     }
+    //     return redirect('evidence.bulk.import',$request->ackno)->with('error', 'File upload failed.');
+
+
+    // }
 
     public function storeEvidence(Request $request)
     {
@@ -1042,6 +1167,7 @@ class EvidenceController extends Controller
         $evidence_type_ncrp = $request->input('evidence_type_ncrp');
         $evidence_type_ncrp_name = Evidence::whereNull('deleted_at')
                                             ->where('evidence_type_id', $evidence_type_ncrp)
+                                            ->whereNotIn('evidence_type', ['mobile', 'whatsapp'])
                                             ->pluck('evidence_type')
                                             ->unique()
                                             ->first();
@@ -1233,6 +1359,82 @@ class EvidenceController extends Controller
         ]);
     }
 
+    public function createEvidenceDownloadTemplate()
+    {
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            [ 'Acknowledgement No','URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['1212120', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','TK0017','TK0018','Instagram','Phishing'],
+            ['1215212', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','TK0024','TK0025','Website','Malware'],
+            ['1216212', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','TK0053','TK0054','Facebook','Fraud'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
+    public function createEvidenceMobileDownloadTemplate()
+    {
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Public'],
+            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
+            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Public'],
+
+
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
+    public function createEvidenceWebsiteDownloadTemplate()
+    {
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
+            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
+            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
+
+    }
 
 
 }

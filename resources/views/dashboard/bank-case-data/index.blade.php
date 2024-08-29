@@ -20,17 +20,17 @@ $user = Auth::user();
         .spinner-container {
             position: fixed;
             top: 40%;
-            left: 50%;                         
-            z-index: 9999; 
+            left: 50%;
+            z-index: 9999;
             display: none;
         }
         .spinner-active {
-            display: block !important; 
+            display: block !important;
         }
         .blur-background {
-            
-            pointer-events: none; 
-            opacity: 0.5; 
+
+            pointer-events: none;
+            opacity: 0.5;
         }
         #loader {
     display: flex;
@@ -74,7 +74,8 @@ $user = Auth::user();
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    Upload NCRP Case Data !
+
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -147,6 +148,9 @@ $user = Auth::user();
                                                 <li>{{ $error }}</li>
                                             @endforeach
                                         </ul>
+                                @if (session('error'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('error') }}
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -163,8 +167,8 @@ $user = Auth::user();
                                 @endif --}}
                             </div>
 
-@if ($hasUploadBankActionPermission)
-<div class=" m-4 d-flex justify-content-between">
+                            @if ($hasUploadBankActionPermission)
+                            <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Bank data!
                                 </h4>
@@ -214,8 +218,8 @@ $user = Auth::user();
                                     </div>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>
-                                
-                                
+
+
                             </div>
 @endif
 
@@ -236,7 +240,7 @@ $user = Auth::user();
         </div>
         <!-- /row -->
     </div>
-    
+
 
 
 
@@ -248,16 +252,16 @@ $user = Auth::user();
         function showSpinner() {
             var spinnerContainer = document.getElementById('spinnerContainer');
             spinnerContainer.classList.add('spinner-active'); // Show spinner
-            
+
             // Blur the background
             document.body.classList.add('blur-background');
         }
-        
+
         // Hide spinner when page loaded
         window.addEventListener('load', function() {
             var spinnerContainer = document.getElementById('spinnerContainer');
             spinnerContainer.classList.remove('spinner-active'); // Hide spinner after page loaded
-            
+
             // Unblur the background
             document.body.classList.remove('blur-background');
         });

@@ -10,6 +10,7 @@ use App\Models\Registrar;
 use App\Models\EvidenceType;
 use App\Models\ComplaintOthers;
 use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\Regex;
 use Illuminate\Support\Facades\Session;
 
 class MailController extends Controller
@@ -36,7 +37,12 @@ class MailController extends Controller
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows per page
-        $searchValue = $request->get('search')['value']; // Search value
+        $searchValue = trim($request->get('search')['value']); // Search value
+
+        // Get column index for sorting
+        $columnIndex = $request->get('order')[0]['column'] ?? 1; // Default to the second column if not specified
+        $columnName = $request->get('columns')[$columnIndex]['data'] ?? 'evidence_type'; // Default to 'evidence_type' if not specified
+        $columnSortOrder = $request->get('order')[0]['dir'] ?? 'asc'; // Default to ascending if not specified
 
         // Build the query
         $query = Evidence::where('ack_no', $acknowledgement_no);
@@ -44,15 +50,18 @@ class MailController extends Controller
 
         // Apply search filter
         if (!empty($searchValue)) {
-            $query = $query->where(function($q) use ($searchValue) {
-                $q->where('url', 'like', '%'.$searchValue.'%')
-                  ->orWhere('domain', 'like', '%'.$searchValue.'%')
-                  ->orWhere('ip', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registrar', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registry_details', 'like', '%'.$searchValue.'%')
-                  ->orWhere('mobile', 'like', '%'.$searchValue.'%');
+            $regex = new Regex($searchValue, 'i');
+            $query = $query->where(function($q) use ($regex) {
+                $q->orWhere('evidence_type', $regex)
+                    ->orWhere('url', $regex)
+                    ->orWhere('domain', $regex)
+                    ->orWhere('ip', $regex)
+                    ->orWhere('registrar', $regex)
+                    ->orWhere('registry_details', $regex);
             });
         }
+
+        $query = $query->orderBy($columnName, $columnSortOrder);
 
         // Total records count
         $totalRecords = $query->count();
@@ -253,21 +262,29 @@ class MailController extends Controller
         $rowperpage = $request->get("length"); // Rows per page
         $searchValue = $request->get('search')['value']; // Search value
 
+        // Get column index for sorting
+        $columnIndex = $request->get('order')[0]['column'] ?? 1; // Default to the second column if not specified
+        $columnName = $request->get('columns')[$columnIndex]['data'] ?? 'evidence_type'; // Default to 'evidence_type' if not specified
+        $columnSortOrder = $request->get('order')[0]['dir'] ?? 'asc'; // Default to ascending if not specified
+
         // Build the query
         $query = ComplaintOthers::where('case_number', $case_no);
                         //  dd($query);
 
         // Apply search filter
         if (!empty($searchValue)) {
-            $query = $query->where(function($q) use ($searchValue) {
-                $q->where('url', 'like', '%'.$searchValue.'%')
-                  ->orWhere('domain', 'like', '%'.$searchValue.'%')
-                  ->orWhere('ip', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registrar', 'like', '%'.$searchValue.'%')
-                  ->orWhere('registry_details', 'like', '%'.$searchValue.'%')
-                  ->orWhere('mobile', 'like', '%'.$searchValue.'%');
+            $regex = new Regex($searchValue, 'i');
+            $query = $query->where(function($q) use ($regex) {
+                $q->orWhere('evidence_type', $regex)
+                    ->orWhere('url', $regex)
+                    ->orWhere('domain', $regex)
+                    ->orWhere('ip', $regex)
+                    ->orWhere('registrar', $regex)
+                    ->orWhere('registry_details', $regex);
             });
         }
+
+        $query = $query->orderBy($columnName, $columnSortOrder);
 
         // Total records count
         $totalRecords = $query->count();
@@ -532,6 +549,7 @@ class MailController extends Controller
                     }
                 }
             }
+            // return response()->json(['message' => 'Emails queued for sending']);
         }
         // dd($caseData);
 

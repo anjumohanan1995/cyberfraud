@@ -12,6 +12,22 @@ class Evidence extends Eloquent
     protected $connection = 'mongodb';
     protected $collection = 'evidence';
 
+    // protected $fillable = [
+    //     'ack_no',
+    //     'evidence_type',
+    //     'url',
+    //     'domain',
+    //     'registry_details',
+    //     'ip',
+    //     'registrar',
+    //     'pdf',
+    //     'screenshots',
+    //     'remarks',
+    //     'category',
+    //     'ticket',
+    //     'reported_status'
+    // ];
+
     protected $fillable = [
         'ack_no',
         'evidence_type',
@@ -20,12 +36,15 @@ class Evidence extends Eloquent
         'registry_details',
         'ip',
         'registrar',
-        'pdf',
         'screenshots',
         'remarks',
-        'category',
         'ticket',
+        'data_disclosure',
+        'preservation',
+        'evidence_type',
+        'category',
         'reported_status'
     ];
+
 
 }

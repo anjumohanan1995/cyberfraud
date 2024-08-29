@@ -156,5 +156,6 @@
         <p style="font-size: 19px; line-height: 1.5;" class="to">
             To: The Nodal Officer,  {{$notice[0]['bank']}}, Kerala.
         </p>
+        {{-- <div id="signature-container" style="margin-top: 20px;"></div> --}}
     </div>
 </body>

@@ -30,7 +30,7 @@ $user = Auth::user();
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    NCRP Case Data!
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -91,26 +91,26 @@ $user = Auth::user();
                             </div>
                             <form id="complaint-form">
                                 <div class="row">
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="from-date">From Date:</label>
                                             <input type="date" class="form-control" id="from-date" name="from_date">
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="to-date">To Date:</label>
                                             <input type="date" class="form-control" id="to-date" name="to_date" onchange="setFromDatencrp()">
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="mobile">Complaint Mobile no: </label>
                                             <input type="text" class="form-control" id="mobile" name="mobile">
                                         </div>
                                     </div>
                                     @if ($hasShowTTypePermission)
-<div class="col-md-2">
+<div class="col-md-3">
                                         <div class="form-group">
                                             <label for="type">Transaction Type:</label><br>
                                             <select class="form-control" id="type">
@@ -134,14 +134,14 @@ $user = Auth::user();
                                         </div>
                                     </div>
                                     @endif
-                                </div>
-                                <div class="row">
+                                {{-- </div> --}}
+                                {{-- <div class="row"> --}}
 @if ($hasShowFilledByPermission)
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="filled-by">Filled by(within 24 hrs):</label>
                                             <select class="form-control" id="filled-by" name="filled-by">
-                                                <option value="">All</option>
+                                                <option value="">--Select--</option>
                                                 <option value="citizen">Citizen</option>
                                                 <option value="cyber">Cyber</option>
                                             </select>
@@ -149,18 +149,18 @@ $user = Auth::user();
                                     </div>
 @endif
 @if($hasShowFilledByPermission)
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="filled_by_who">Complaint Reported:</label>
                                             <select class="form-control" id="filled_by_who" name="filled_by_who">
                                                 <option value="">All</option>
-                                                <option value="citizen">Through Helpline(1930)</option>
-                                                <option value="cyber">Cyber Crime Portal</option>
+                                                <option value="citizen">Cyber Crime Portal</option>
+                                                <option value="cyber">Through Helpline(1930)</option>
                                             </select>
                                         </div>
                                     </div>
                                     @endif
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="acknowledgement_no">Acknowledgement No: </label>
                                             <input type="text" class="form-control" id="acknowledgement_no"
@@ -168,7 +168,7 @@ $user = Auth::user();
                                         </div>
                                     </div>
                                     @if ($hasShowFIRLodgePermission)
-                                    <div class="col-md-2">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="fir_lodge">FIR Lodge:</label>
                                             <select class="form-control" id="fir_lodge" name="fir_lodge">
@@ -180,7 +180,7 @@ $user = Auth::user();
                                     </div>
                                     @endif
                                     @if ($hasShowStatusPermission)
-                                        <div class="col-md-2">
+                                        <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="com_status">Status </label>
                                             <select class="form-control" id="com_status">
@@ -195,10 +195,10 @@ $user = Auth::user();
 
 
 
-                                </div>
-                                <div class="row">
+                                {{-- </div> --}}
+                                {{-- <div class="row"> --}}
                                     @if ($hasShowSearchByPermission)
-<div class="col-md-2">
+<div class="col-md-3">
                                         <div class="form-group">
                                             <label for="search-by">Search by:</label>
                                             <select class="form-control" id="search-by" name="search-by" onchange="showTextBox()">
@@ -211,20 +211,20 @@ $user = Auth::user();
                                     </div>
                                     @endif
 
-                                    <div class="col-md-4" id="account-id-input" style="display: none;">
+                                    <div class="col-md-3" id="account-id-input" style="display: none;">
                                         <div class="form-group">
                                             <label for="account-id">Enter Account ID/Account Number/UPI ID:</label>
                                             <input type="text" class="form-control" id="account-id" name="account-id">
                                         </div>
                                     </div>
-                                    <div class="col-md-4" id="transaction-id-input" style="display: none;">
+                                    <div class="col-md-3" id="transaction-id-input" style="display: none;">
                                         <div class="form-group">
                                             <label for="transaction-id">Enter Transaction ID/UTR/RRN Number:</label>
                                             <input type="text" class="form-control" id="transaction-id" name="transaction-id">
                                         </div>
                                     </div>
                                     @if ($hasShowSubCategoryPermission)
-<div class="col-md-2">
+<div class="col-md-3">
                                         <div class="form-group" hidden>
                                             <label for="sub-category">Sub category:</label>
                                             <select class="form-control" id="sub-category" name="sub-category">
@@ -242,10 +242,10 @@ $user = Auth::user();
                                     </div>
                                     @endif
 
-                                </div>
+                                {{-- </div> --}}
 
 
-                                <div class="row">
+                                {{-- <div class="row"> --}}
                                     {{-- <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="search-by">Search by:</label>
@@ -256,7 +256,7 @@ $user = Auth::user();
                                             </select>
                                         </div>
                                     </div> --}}
-                                    <div class="col-md-2" hidden>
+                                    <div class="col-md-3" hidden>
                                         <div class="form-group">
                                             <label for="acknowledgement_no">Acknowledgement No: </label>
                                             <input type="text" class="form-control" id="acknowledgement_no"
@@ -264,9 +264,9 @@ $user = Auth::user();
                                         </div>
                                     </div>
 
-                                </div>
+                                {{-- </div> --}}
 
-                                <div class="row">
+                                {{-- <div class="row"> --}}
                                     <div class="col-md-12 text-right">
                                         <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
@@ -329,7 +329,7 @@ $user = Auth::user();
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="submitStatus()">Submit</button>
+                        <button type="button" id="submitButton" class="btn btn-primary" onclick="submitStatus()">Submit</button>
                     </div>
                 </div>
             </div>

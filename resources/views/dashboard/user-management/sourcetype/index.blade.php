@@ -28,7 +28,7 @@ $user = Auth::user();
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Hi, welcome back!
+                    Source Type !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -128,6 +128,55 @@ $user = Auth::user();
                                     </div>
                                 </div>
                                 @endif
+
+                                {{-- @if ($hasAddModusPermission) --}}
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('evidencetype') }}">
+                                            <p class="mb-0 tx-12"> Evidence Type </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
+                                {{-- @endif --}}
+
+
+
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('bank-create') }}">
+                                            <p class="mb-0 tx-12"> Bank </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('wallet-create') }}">
+                                            <p class="mb-0 tx-12"> Wallet </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('insurance-create') }}">
+                                            <p class="mb-0 tx-12"> Insurance </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1 text-center mb-3">
+                                    <div class="task-box primary mb-0">
+                                        <a class="text-white" href="{{ url('merchant-create') }}">
+                                            <p class="mb-0 tx-12"> Merchants </p>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                        </a>
+                                    </div>
+                                </div>
 
                                 @if($hasUploadRegistrarPermission)
                                 <div class="col-md-1 text-center mb-3">
