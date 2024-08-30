@@ -381,10 +381,13 @@ class UsersController extends Controller
         $permission = RolePermission::where('role', $role)->first();
         $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
         $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
-
-        $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
-        $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
-
+        if ($sub_permissions || $user->role == 'Super Admin') {
+            $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
+            $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+            } else{
+                $hasEditUserPermission = false;
+                $hasDeleteUserPermission = false;
+            }
         $data_arr = [];
         $i = $start;
 
