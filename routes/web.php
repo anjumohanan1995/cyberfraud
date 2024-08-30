@@ -320,6 +320,10 @@ Route::get('/clear-session-errors',[ComplaintController::class, 'clearSessionErr
 
 Route::post('disputeamount/update',[BankCasedataController::class, 'disputeAmountUpdate'])->name('update-dispute-amount');
 
+//change bank status
+
+Route::post('bankaction/status',[BankCasedataController::class, 'bankActionUpdate'])->name('update-bankaction-status');
+
 //bulkuploadevidence
 
 Route::get('evidence/template', [EvidenceController::class, 'createEvidenceDownloadTemplate'])->name("create-download-evidence-template");

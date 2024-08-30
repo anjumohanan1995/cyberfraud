@@ -86,11 +86,10 @@ return [
     | have failed. You may change them to any database / table you wish.
     |
     */
-
-    'failed' => [
+'failed' => [
     'driver' => 'mongodb',
-    'database' => env('MONGO_DB_DATABASE', 'cyber'), // Adjust database name as per your setup
-    'collection' => 'failed_jobs', // Collection name for storing failed jobs
+    'table' => 'failed_jobs',
+    'database' => env('DB_CONNECTION', 'mongodb'),
 ],
 
 ];

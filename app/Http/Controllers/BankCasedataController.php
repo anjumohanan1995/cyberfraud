@@ -210,4 +210,16 @@ class BankCasedataController extends Controller
         return redirect()->back()->with('success', 'Dispute Amount Updated Sucessfully.');
 
     }
+
+    public function bankActionUpdate(Request $request){
+
+        $objectId = $request->input('object_id_bank');
+        $bankAction = $request->input('bankAction');
+        $bankData = BankCasedata::find($objectId);
+        $bankData->action_taken_by_bank = $bankAction;
+        $bankData->save();
+      
+        return redirect()->back()->with('success', 'Bank Action Updated Sucessfully.');
+
+    }
 }

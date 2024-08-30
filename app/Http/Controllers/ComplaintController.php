@@ -23,7 +23,7 @@ use Illuminate\Support\Str;
 class ComplaintController extends Controller
 {
     public function importComplaints()
-    {
+    {   
         // Fetch only active source types from the database
         $sourceTypes = SourceType::where('status', 'active')->get();
         $upload_id = session('upload_id');
