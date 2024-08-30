@@ -1371,7 +1371,7 @@ class EvidenceController extends Controller
         $additionalRowsData = [
             [ 'Acknowledgement No','URL', 'Post/Profile','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
             ['1212120', 'https://www.facebook.com', 'facebook.com','Site maintenance','TK0016','TK0017','TK0018','Instagram','Phishing'],
-            ['1215212', 'https://www.twitter.com', 'twitter.com','Reopened','TK0023','TK0024','TK0025','Website','Malware'],
+            ['1215212', 'https://www.twitter.com', 'twitter.com','Reopened','TK0023','TK0024','TK0025','Twitter','Malware'],
             ['1216212', 'https://www.instagram.com', 'instagram.com','Hosting','TK0052','TK0053','TK0054','Facebook','Fraud'],
 
         ];

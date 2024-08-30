@@ -113,56 +113,6 @@ class UsersController extends Controller
         return view('dashboard.user-management.users.edit', ['data' => $data,'roles'=>$roles, 'role'=>$role]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    // public function update(Request $request, $id)
-    // {
-    //     // Validate the incoming request data
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'password' => ['nullable', 'regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
-    //         'sign' => 'nullable|image' // Validate 'sign' if it's provided
-    //     ]);
-
-    //     // Find the user by its ID
-    //     $data = User::findOrFail($id);
-
-    //     // Update the user with the data from the request
-    //     $data->name = $request->name;
-    //     $data->last_name = $request->last_name;
-    //     $data->email = $request->email;
-    //     $data->role = $request->role;
-
-    //     // Only update the password if a new password is provided
-    //     if ($request->filled('password')) {
-    //         $data->password = Hash::make($request->password);
-    //     }
-
-    //     // Handle file upload for 'sign'
-    //     if ($request->hasFile('sign')) {
-    //         // Delete the old signature if it exists
-    //         if ($data->sign && file_exists(public_path($data->sign))) {
-    //             unlink(public_path($data->sign));
-    //         }
-
-    //         // Store the new signature directly in the public/signatures directory
-    //         $file = $request->file('sign');
-    //         $filename = time() . '_' . $file->getClientOriginalName();
-    //         $file->move(public_path('signatures'), $filename);
-    //         $data->sign = 'signatures/' . $filename;
-    //     }
-
-    //     // Save the updated user data
-    //     $data->save();
-
-    //     // Redirect back with success message
-    //     return redirect()->route('users.index')->with('success', 'User updated successfully!');
-    // }
     public function update(Request $request, $id)
 {
     // Custom validation rules
