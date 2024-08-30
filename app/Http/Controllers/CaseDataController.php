@@ -954,15 +954,15 @@ public function updateStatus(Request $request)
 function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$updatedObjectIds) {
     // Retrieve child rows in the current layer
     $updatedObjectIds = array_keys($updatedObjectIds);
- 
+    
     $children = BankCaseData::where('Layer', $currentLayer)
         ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
         ->whereNotIn('_id', $updatedObjectIds)
         ->get();
-       
+   
     // If no children are found in the current layer, and we're not at the first layer
     if ($children->isEmpty()) {
-       
+         
         // Check in the previous layer (Layer 1) itself for the same transaction ID
         $sameLayerMatches = BankCaseData::where('Layer', $currentLayer - 1 )
         ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
@@ -999,27 +999,38 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
         }
     }
     else{
+        $recursiveData = [];
         foreach ($children as $child) {
+            
             // Process as usual if children are found
-            if ($capitalAmount <= 0) {
+           
+            if ($capitalAmount <= 0){
                 break; // If capital amount is zero or negative, stop processing further children
             }
     
-            if ($child->transaction_amount <= $capitalAmount) {
+            if ($child->transaction_amount <= $capitalAmount){
                 $disputeAmount = $child->transaction_amount;
-                $capitalAmount -= $disputeAmount;
+                $capitalAmount -= $disputeAmount; 
             } else {
                 $disputeAmount = $capitalAmount;
                 $capitalAmount = 0; // Set to zero to stop further processing
             }
-    
-            if (!isset($updatedObjectIds[$child->_id])) {
+            
+            if (!isset($updatedObjectIds[$child->_id])){
                 $child->dispute_amount = $disputeAmount;
                 $child->save();
                 $updatedObjectIds[$child->_id] = true;
             }
-    
-            processChildren($child->transaction_id_sec, $disputeAmount, $currentLayer + 1, $updatedObjectIds);
+            $recursiveData[] = [
+                'transaction_id_sec' => $child->transaction_id_sec,
+                'dispute_amount' => $disputeAmount
+            ];
+            
+            // processChildren($child->transaction_id_sec, $disputeAmount, $currentLayer + 1, $updatedObjectIds);
+        }
+      
+        foreach ($recursiveData as $data){
+            processChildren($data['transaction_id_sec'], $data['dispute_amount'], $currentLayer + 1, $updatedObjectIds);
         }
     }
 
@@ -1173,7 +1184,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     // dd($finalData_pending_banks);
 
  $finalData_pending_banks = collect($finalData_pending_banks)->groupBy('pending_banks')->map(function ($group) {
-    
+
         return [
             'pending_banks' => $group->first()['pending_banks'],
             'transaction_id'=> $group->count(),
@@ -1208,7 +1219,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             $split_transactions = preg_split('/[\s,]+/', trim($transaction, '[]'));
     
             // Add the trimmed and split transaction IDs to the array
-            foreach ($split_transactions as $id) {
+            foreach ($split_transactions as $id){
                 $trimmedId = trim($id);
                 if (!empty($trimmedId)) {
                     $transaction_ids[] = $trimmedId;

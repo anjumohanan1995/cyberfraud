@@ -552,7 +552,7 @@
                                                     @endif
                                                         <br><br>
                                                         Layer : {{ @$bank_data['Layer'] }}</td>
-                                                    <td>{{ @$bank_data['action_taken_by_bank'] }}<br><br>
+                                                    <td><a href="#" class="changeBankAction" data-objectid="{{ $bank_data['_id'] }}" data-bankstatus="{{ @$bank_data['action_taken_by_bank'] }}"><span style="color:black;font-weight:500">{{ @$bank_data['action_taken_by_bank'] }}</span></a><br><br>
                                                         Txn Date: {{ \Carbon\Carbon::parse($bank_data['transaction_date'])->format('d-m-Y H:i:s') }}</td>
 
                                                     <td>{{ @$bank_data['bank'] }}</td>
@@ -563,7 +563,7 @@
                                                         {{ @$bank_data['transaction_id_sec'] }}<br><br>
                                                         Transaction Amount : {{ @$bank_data['transaction_amount'] }}
                                                         <br><br>
-                                                        <a href="#" class="disputeAmountLink" data-objectid="{{ $bank_data['_id'] }}"><span style="color:red">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></a>
+                                                        <a href="#" class="disputeAmountLink" data-objectid="{{ $bank_data['_id'] }}"><span style="color:red;font-weight:600">Disputed Amount : {{ @$bank_data['dispute_amount'] }}</span></a>
                                                         </td>
 
 
@@ -636,6 +636,39 @@
   </div>
 </div>
 
+
+<div id="bankActionModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update bank action status</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="bankactionForm" method="POST" action="{{ route('update-bankaction-status') }}">
+        @csrf
+        <div class="modal-body">
+          <input type="hidden" name="object_id_bank" id="modalObjectIdBankAction" value="">
+          <div class="form-group">
+            <label for="disputeAmount">Bank Action</label>
+            <select name="bankAction" id="bankAction" class="form-control">
+            <option value="money transfer to"> money transfer to </option>
+            <option value="withdrawal through atm"> withdrawal through atm </option>
+            <option value="transaction put on hold"> transaction put on hold </option>
+            <option value="other"> other </option>
+            </select>
+        
+          </div>
+        </div>
+        <div class="modal-footer">
+        
+          <button type="submit" class="btn btn-success btn-sm ">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
     </div>
     <link rel="stylesheet" href="{{ asset('css/toastr.min.css') }}">
@@ -926,16 +959,28 @@
 
 <script>
 $(document).ready(function() {
+
+
     $('.disputeAmountLink').on('click', function(e) {
-        e.preventDefault(); // Prevent the default anchor behavior
+        e.preventDefault();
         var objectId = $(this).data('objectid');
         
-        // Set the ObjectId in the hidden input field within the modal form
         $('#modalObjectIdInput').val(objectId);
         
-        // Show the modal
+     
         $('#disputeModal').modal('show');
     });
+
+        $('.changeBankAction').on('click', function(e) {
+        e.preventDefault(); 
+        var objectId = $(this).data('objectid');
+        var bankstatus = $(this).data('bankstatus');
+
+        $('#modalObjectIdBankAction').val(objectId);
+        $('#bankAction').val(bankstatus).change();
+        $('#bankActionModal').modal('show');
+    });
+
 });
 
 
