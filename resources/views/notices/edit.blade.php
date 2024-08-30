@@ -1,4 +1,19 @@
 @extends('layouts.app')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasApproveButtonPermission = in_array('Approve Button', $sub_permissions);
+                } else{
+                    $hasApproveButtonPermission = false;
+                }
+
+@endphp
 @section('content')
 
 <style>
@@ -67,7 +82,9 @@
                             </div>
                             <div class="footer">
                                 <button type="submit" class="btn btn-success">Update</button>
-                                 @if($role=='Super Admin')
+                                 {{-- @if($role=='Super Admin'||($hasApproveButtonPermission)) --}}
+                                 @if($hasApproveButtonPermission)
+
                                     @if (!$notice->approve_id)
                                         <a href="#" id="approve-button" class="btn btn-info w-auto me-2" onclick="approveContent(event)">Approve</a>
                                     @else
@@ -123,6 +140,7 @@
         editor.setData(updatedContent);
 
         // Disable the button and change text immediately
+
         const approveButton = document.getElementById('approve-button');
         if (approveButton) {
             approveButton.textContent = 'Approved';

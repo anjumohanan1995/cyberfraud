@@ -261,7 +261,7 @@
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('sourcetype') }}">
                     <i class="side-menu__icon fe fe-database"> </i>
-                    <span class="side-menu__label">Master</span>
+                    <span class="side-menu__label">Masters</span>
                 </a>
             </li>
         @endif

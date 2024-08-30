@@ -96,7 +96,8 @@ class PermissionSeeder extends Seeder
                     '6' => 'Generate Token',
                     '7' => 'Against Bank Management',
                     '8' => 'Against Mule Account Management',
-                    '9' => 'Notice View'
+                    '9' => 'Notice View',
+                    '10'=> 'Approve Button'
                 ]),
             ],
             [
@@ -131,6 +132,7 @@ class PermissionSeeder extends Seeder
                     '3' => 'Delete Evidence Type',
                 ]),
             ],
+
 
         ];
 

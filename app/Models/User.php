@@ -28,7 +28,8 @@ class User extends Eloquent implements AuthenticatableContract
         'role',
         'sign',
         'sign_name',
-        'sign_designation'
+        'sign_designation',
+        'status'
     ];
 
     protected $hidden = [

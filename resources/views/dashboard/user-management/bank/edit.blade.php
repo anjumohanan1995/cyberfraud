@@ -7,15 +7,15 @@
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Source Type !
+                    Bank !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Source Type Management</a>
+                            <a href="#">Bank Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Edit Source Type
+                            Edit Bank
                         </li>
                     </ol>
                 </nav>

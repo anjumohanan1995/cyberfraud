@@ -22,21 +22,27 @@ $user = Auth::user();
 
 @endphp
 @section('content')
+<style>
+.task-box.danger i {
+    color: #fff;
+    padding: 20px;
+}
+    </style>
     <!-- container -->
     <div class="container-fluid">
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
             <div>
                 <h4 class="content-title mb-2">
-                    Source Type !
+                    Masters !
                 </h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="#">Source Type Management</a>
+                            <a href="#"> Management</a>
                         </li>
                         <li class="breadcrumb-item active" aria-current="page">
-                            Source Type
+                            Masters
                         </li>
                     </ol>
                 </nav>
@@ -71,70 +77,66 @@ $user = Auth::user();
                                         </button>
                                     </div>
                             </div>
-                            <div class="m-4 d-flex justify-content-between flex-wrap">
-                                <h4 class="card-title mg-b-10">All Source Types</h4>
+                            <div class="m-4 justify-content-between flex-wrap">
+                                <h4 class="card-title mg-b-10">All  Types</h4><br><br>
 
                                 @if ($hasAddSTPermission)
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ route('sourcetype.create') }}">
-                                            <p class="mb-0 tx-12"> Source Type </p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3><p class="mb-0 tx-12"> Source Type </p>
                                         </a>
                                     </div>
                                 </div>
                                 @endif
 
                                 @if ($hasAddCategoryPermission)
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ route('category.index') }}">
-                                            <p class="mb-0 tx-12">Category</p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3> <p class="mb-0 tx-12">Category</p>
                                         </a>
                                     </div>
                                 </div>
                                 @endif
 
                                 @if ($hasAddSubCategoryPermission)
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ route('subcategory.create') }}">
-                                            <p class="mb-0 tx-12">SubCategory</p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3> <p class="mb-0 tx-12">SubCategory</p>
                                         </a>
                                     </div>
                                 </div>
                                 @endif
 
                                 @if ($hasAddProfessionPermission)
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('profession') }}">
-                                            <p class="mb-0 tx-12"> Profession </p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3> <p class="mb-0 tx-12"> Profession </p>
                                         </a>
                                     </div>
                                 </div>
                                 @endif
 
                                 @if ($hasAddModusPermission)
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('modus') }}">
-                                            <p class="mb-0 tx-12"> Modus </p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>  <p class="mb-0 tx-12"> Modus </p>
                                         </a>
                                     </div>
                                 </div>
                                 @endif
 
                                 {{-- @if ($hasAddModusPermission) --}}
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('evidencetype') }}">
-                                            <p class="mb-0 tx-12"> Evidence Type </p>
-                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <h3 class="mb-0"><i class="fa fa-plus"></i></h3>  <p class="mb-0 tx-12"> Evidence Type </p>
+
                                         </a>
                                     </div>
                                 </div>
@@ -142,8 +144,8 @@ $user = Auth::user();
 
 
 
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('bank-create') }}">
                                             <p class="mb-0 tx-12"> Bank </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
@@ -151,8 +153,8 @@ $user = Auth::user();
                                     </div>
                                 </div>
 
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('wallet-create') }}">
                                             <p class="mb-0 tx-12"> Wallet </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
@@ -160,8 +162,8 @@ $user = Auth::user();
                                     </div>
                                 </div>
 
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('insurance-create') }}">
                                             <p class="mb-0 tx-12"> Insurance </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
@@ -169,8 +171,8 @@ $user = Auth::user();
                                     </div>
                                 </div>
 
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('merchant-create') }}">
                                             <p class="mb-0 tx-12"> Merchants </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
@@ -179,8 +181,8 @@ $user = Auth::user();
                                 </div>
 
                                 @if($hasUploadRegistrarPermission)
-                                <div class="col-md-1 text-center mb-3">
-                                    <div class="task-box primary mb-0">
+                                <div class="col-md-2 text-center mb-3 float-left">
+                                    <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('upload-registrar') }}">
                                             <p class="mb-0 tx-12"> Registrar upload </p>
                                             <h3 class="mb-0"><i class="fa fa-upload"></i></h3>

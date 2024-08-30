@@ -622,7 +622,6 @@ public function follow(Request $request, $id)
     }
 
 
-//working well without merging layer 1
 
     public function generateMuleNotice(Request $request)
         {
@@ -703,7 +702,7 @@ public function follow(Request $request, $id)
                 $frequentAccountNumbers = array_filter($accountNumbers, function($count) {
                     return $count > 2;
                 });
-// dd($documents);
+                // dd($documents);
                 // Get the keys (account numbers) that have more than two occurrences
                 $frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
                 $layer1Cases = BankCasedata::where(function($query) use ($entity) {
@@ -843,7 +842,7 @@ public function follow(Request $request, $id)
 
                 return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
             }
-        }
+    }
 
         public function againstBankAccount()
         {

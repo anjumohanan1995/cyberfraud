@@ -1087,12 +1087,6 @@ class EvidenceController extends Controller
         return response()->json(['message' => 'Status updated successfully']);
     }
 
-    // public function evidenceBulkUpload(Request $request){
-
-    //     // return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
-    //     return view('dashboard.bank-case-data.evidence.bulkUpload');
-    // }
-
     public function evidenceBulkImport(Request $request){
 
         // return view('dashboard.bank-case-data.evidence.bulkUpload',['ackno'=>$ackno]);
@@ -1144,8 +1138,6 @@ class EvidenceController extends Controller
     //         return redirect()->route('evidence.bulk.import',$request->ackno)->with('success', 'File uploaded successfully.');
     //     }
     //     return redirect('evidence.bulk.import',$request->ackno)->with('error', 'File upload failed.');
-
-
     // }
 
     public function storeEvidence(Request $request)
@@ -1364,20 +1356,23 @@ class EvidenceController extends Controller
 
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
-        ->whereNull('deleted_at')
-        ->pluck('name')
-        ->toArray();
+                                    ->where('name','!=', 'mobile')
+                                    ->where('name','!=', 'whatsapp')
+                                    ->where('name','!=', 'website')
+                                    ->whereNull('deleted_at')
+                                    ->pluck('name')
+                                    ->toArray();
 
         $uniqueItems = array_unique($evidenceTypes);
         $commaSeparatedString = implode(',', $uniqueItems);
 
-        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+        $firstRow = ['The evidence types should be the following : ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            [ 'Acknowledgement No','URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
-            ['1212120', 'https://forum.com', 'forum.com','192.0.2.16','GoDaddy','klkl','Site maintenance','TK0016','TK0017','TK0018','Instagram','Phishing'],
-            ['1215212', 'https://abcd.com', 'abcd.com','192.2.2.16','sdsdds','rtrt','Site ghghg','TK0023','TK0024','TK0025','Website','Malware'],
-            ['1216212', 'https://dfdf.com', 'dfdf.com','192.3.2.16','bnnn','ghgh','ghgh gg','TK0052','TK0053','TK0054','Facebook','Fraud'],
+            [ 'Acknowledgement No','URL', 'Post/Profile','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['1212120', 'https://www.facebook.com', 'facebook.com','Site maintenance','TK0016','TK0017','TK0018','Instagram','Phishing'],
+            ['1215212', 'https://www.twitter.com', 'twitter.com','Reopened','TK0023','TK0024','TK0025','Website','Malware'],
+            ['1216212', 'https://www.instagram.com', 'instagram.com','Hosting','TK0052','TK0053','TK0054','Facebook','Fraud'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
@@ -1389,20 +1384,25 @@ class EvidenceController extends Controller
 
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
-        ->whereNull('deleted_at')
-        ->pluck('name')
-        ->toArray();
+                                    ->whereNull('deleted_at')
+                                    ->where(function ($query) {
+                                        $query->where('name', 'mobile')
+                                            ->orWhere('name', 'whatsapp');
+                                    })
+                                    ->pluck('name')
+                                    ->toArray();
+
 
         $uniqueItems = array_unique($evidenceTypes);
         $commaSeparatedString = implode(',', $uniqueItems);
-
+// dd($evidenceTypes);
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
-            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Public'],
-            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
-            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Public'],
+            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Phishing'],
+            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Fraud'],
+            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Malware'],
 
 
 
@@ -1416,9 +1416,10 @@ class EvidenceController extends Controller
 
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
-        ->whereNull('deleted_at')
-        ->pluck('name')
-        ->toArray();
+                                    ->where('name','=', 'website')
+                                    ->whereNull('deleted_at')
+                                    ->pluck('name')
+                                    ->toArray();
 
         $uniqueItems = array_unique($evidenceTypes);
         $commaSeparatedString = implode(',', $uniqueItems);
@@ -1426,9 +1427,10 @@ class EvidenceController extends Controller
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
-            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
-            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
+            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Malware'],
+            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Fraud'],
+            ['3', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
