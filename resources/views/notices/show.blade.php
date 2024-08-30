@@ -140,11 +140,11 @@
                    <div class="text-center w-100">
                         <img src="../img/newlogo.jpg" class="logo-11" />
                        <p><b> No. IP(C4)-12442/2024/Cyb(18)
-Cyber Police Headquarters,
-Thiruvananthapuram<br></b>
-sptele.pol@kerala.gov.in<br>
-04712448707<br>
-Dated. 03-07-2024</p>
+                                Cyber Police Headquarters,
+                                Thiruvananthapuram<br></b>
+                                sptele.pol@kerala.gov.in<br>
+                                04712448707<br>
+                                Dated. 03-07-2024</p>
                     </div>
 
                     </div>

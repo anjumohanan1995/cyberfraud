@@ -359,5 +359,5 @@ Route::get('/wallet/{id}/edit', [SourceTypeController::class, 'walletedit'])->na
 Route::put('/wallet/{id}', [SourceTypeController::class, 'walletupdate'])->name('wallet.update');
 Route::delete('/wallet/{id}', [SourceTypeController::class, 'destroywallet'])->name('wallet.destroy');
 
-
+Route::patch('users/{id}/update-status', [UsersController::class, 'updateStatus']);
 

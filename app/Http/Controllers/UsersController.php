@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\ActivityLog;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\Models\RolePermission;
 use Illuminate\Support\Facades\Auth;
+
 class UsersController extends Controller
 {
     /**
@@ -76,6 +79,7 @@ class UsersController extends Controller
             'sign' => $imagePath,
             'sign_name' => $request->sign_name ?: '',
             'sign_designation' => $request->sign_designation ?: '',
+            'status'=>'active',
         ]);
 
         // Redirect with success message
@@ -181,6 +185,7 @@ class UsersController extends Controller
     $data->last_name = $request->input('last_name', $data->last_name);
     $data->email = $request->input('email', $data->email);
     $data->role = $request->input('role', $data->role);
+    $data->status = $request->input('status', $data->status);
 
     // Handle password update
     if ($request->filled('password')) {
@@ -219,44 +224,6 @@ class UsersController extends Controller
 }
 
 
-
-    // public function update(Request $request, $id)
-    // {
-    //      // Validate the incoming request data
-    //      $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'password' => ['regex:/^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'\"\\|,.<>\/?])(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/'],
-
-    //         // Add more validation rules as needed
-    //     ]);
-
-    //     // Find the permission by its ID.
-    //     $data = User::findOrFail($id);
-
-    //     // Update the permission with the data from the request
-    //     $data->name = $request->name;
-    //     $data->last_name = $request->last_name;
-    //     $data->email = $request->email;
-    //     $data->role = $request->role;
-    //     // 'password' => Hash::make($request->password),
-
-    //     $data->password = Hash::make($request->password);
-
-    //     // Update other attributes as needed
-
-    //     // Save the updated permission
-    //     $data->save();
-
-    //     // Redirect back with success message
-    //     return redirect()->route('users.index')->with('success', 'User updated successfully!');
-    // }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $data = User::findOrFail($id);
@@ -265,13 +232,104 @@ class UsersController extends Controller
 
         return back()->with('success', 'User successfully deleted!');
     }
+    // public function getUsersList(Request $request)
+    // {
+    //     ## Read value
+    //     $draw = $request->get('draw');
+    //     $start = $request->get("start");
+    //     $rowperpage = $request->get("length"); // Rows display per page
 
+    //     $columnIndex_arr = $request->get('order');
+    //     $columnName_arr = $request->get('columns');
+    //     $order_arr = $request->get('order');
+    //     $search_arr = $request->get('search');
 
+    //     $columnIndex = $columnIndex_arr[0]['column']; // Column index
+    //     $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+    //     $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+    //     $searchValue = $search_arr['value']; // Search value
+
+    //     // Retrieve the status filter (active or inactive)
+    //     $statusFilter = $request->get('status_filter', 'active'); // Default to 'active'
+
+    //     // Build the base query
+    //     $query = User::query();
+
+    //     // Apply filter based on status
+    //     if ($statusFilter === 'active') {
+    //         $query->whereNull('deleted_at');
+    //     } else if ($statusFilter === 'inactive') {
+    //         $query->whereNotNull('deleted_at');
+    //     }
+
+    //     // Apply search filter
+    //     if (!empty($searchValue)) {
+    //         $query->where(function ($q) use ($searchValue) {
+    //             $q->where('name', 'like', '%' . $searchValue . '%')
+    //               ->orWhere('email', 'like', '%' . $searchValue . '%')
+    //               ->orWhere('role', 'like', '%' . $searchValue . '%');
+    //         });
+    //     }
+
+    //     // Total records
+    //     $totalRecords = $query->count();
+
+    //     // Sort
+    //     $query->orderBy($columnName, $columnSortOrder);
+
+    //     // Pagination
+    //     $records = $query->skip($start)->take($rowperpage)->get();
+
+    //     // Process user permissions
+    //     $user = Auth::user();
+    //     $role = $user->role;
+    //     $permission = RolePermission::where('role', $role)->first();
+    //     $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+    //     $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+    //     $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
+    //     $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+
+    //     $data_arr = [];
+    //     $i = $start;
+
+    //     foreach ($records as $record) {
+    //         $i++;
+    //         $id = $record->id;
+    //         $name = $record->name;
+    //         $email = $record->email;
+    //         $role = $record->role;
+    //         $edit = '';
+
+    //         if ($hasEditUserPermission || $user->role == 'Super Admin') {
+    //             $edit .= '<a href="' . url('users/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+    //         }
+    //         if ($hasDeleteUserPermission || $user->role == 'Super Admin') {
+    //             $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
+    //         }
+
+    //         $data_arr[] = [
+    //             "id" => $i,
+    //             "name" => $name,
+    //             "email" => $email,
+    //             "role" => $role,
+    //             "edit" => $edit
+    //         ];
+    //     }
+
+    //     $response = [
+    //         "draw" => intval($draw),
+    //         "iTotalRecords" => $totalRecords,
+    //         "iTotalDisplayRecords" => $totalRecords,
+    //         "aaData" => $data_arr
+    //     ];
+
+    //     return response()->json($response);
+    // }
 
     public function getUsersList(Request $request)
     {
-
-        ## Read value
+        // Read values
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length"); // Rows display per page
@@ -286,11 +344,22 @@ class UsersController extends Controller
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue = $search_arr['value']; // Search value
 
-        $query = User::where('deleted_at', null);
+        // Retrieve the status filter (active or inactive)
+        $statusFilter = $request->get('status_filter', 'active'); // Default to 'active'
 
-        // Search
-        if(!empty($searchValue)) {
-            $query->where(function($q) use ($searchValue) {
+        // Build the base query
+        $query = User::query();
+
+        // Apply filter based on status field in MongoDB
+        if ($statusFilter === 'active') {
+            $query->where('status', 'active'); // Ensure to filter based on 'status' field in MongoDB
+        } else if ($statusFilter === 'inactive') {
+            $query->where('status', 'inactive'); // Ensure to filter based on 'status' field in MongoDB
+        }
+
+        // Apply search filter
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
                 $q->where('name', 'like', '%' . $searchValue . '%')
                   ->orWhere('email', 'like', '%' . $searchValue . '%')
                   ->orWhere('role', 'like', '%' . $searchValue . '%');
@@ -306,55 +375,100 @@ class UsersController extends Controller
         // Pagination
         $records = $query->skip($start)->take($rowperpage)->get();
 
-            $user = Auth::user();
-            $role = $user->role;
-            $permission = RolePermission::where('role', $role)->first();
-            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
-            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
-            if ($sub_permissions || $user->role == 'Super Admin') {
-                $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
-                $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
-                } else{
-                    $hasEditUserPermission = false;
-                    $hasDeleteUserPermission = false;
-                }
-            $data_arr = array();
-            $i=$start;
-
-            foreach($records as $record){
-                $i++;
-                $id = $record->id;
-                $name = $record->name;
-                $email =  $record->email;
-                $role  =  $record->role;
-                $edit = '';
-                // only show links to edit and delete if they have permission. if they ave both permission it should show both edit and delete
-                if($hasEditUserPermission || $user->role == 'Super Admin'){
-                    $edit .= '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
-                }
-                if($hasDeleteUserPermission || $user->role == 'Super Admin'){
-                    $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
-                }
-                //$edit = '<a  href="' . url('users/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
-
-                $data_arr[] = array(
-                    "id" => $i,
-                    "name" => $name,
-                    "email" => $email,
-                    "role" => $role,
-                    "edit" => $edit
-                );
+        // Process user permissions
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+        if ($sub_permissions || $user->role == 'Super Admin') {
+            $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
+            $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+            } else{
+                $hasEditUserPermission = false;
+                $hasDeleteUserPermission = false;
             }
+        $data_arr = [];
+        $i = $start;
 
-            $response = array(
+        foreach ($records as $record) {
+            $i++;
+            $id = $record->id;
+            $name = $record->name;
+            $email = $record->email;
+            $role = $record->role;
+            $status = $record->status; // Get the status field
+            $edit = '';
+
+            // Create toggle button for active/inactive status
+            $isChecked = $status === 'active' ? 'checked' : '';
+            $statusToggleButton = '
+                <label class="switch">
+                    <input type="checkbox" class="status-toggle" data-id="' . $id . '" ' . $isChecked . '>
+                    <span class="slider round"></span>
+                </label>
+            ';
+
+            if ($hasEditUserPermission || $user->role == 'Super Admin') {
+                $edit .= '<a href="' . url('users/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+            }
+            // if ($hasDeleteUserPermission || $user->role == 'Super Admin') {
+            //     $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
+            // }
+
+            $data_arr[] = [
+                "id" => $i,
+                "name" => $name,
+                "email" => $email,
+                "role" => $role,
+                "status" => $statusToggleButton,
+                "edit" => $edit
+            ];
+        }
+
+
+        $response = [
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,
             "iTotalDisplayRecords" => $totalRecords,
             "aaData" => $data_arr
-            );
+        ];
 
-            return response()->json($response);
+        return response()->json($response);
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+
+        $status = $request->input('status');
+
+    if ($status === 'inactive') {
+        $remover = Auth::user();
+
+        // Log the activity
+        ActivityLog::create([
+            'remover_id' => $remover->id,
+            'remover_role' => $remover->role,
+            'remover_name' => $remover->name,
+            'removed_id' => $user->id,
+            'removed_name' => $user->name,
+        ]);
+    }
+
+    // Update the user's status
+    $user->status = $status;
+    $user->save();
+
+        // Return success response
+        return response()->json(['success' => 'Status updated successfully.']);
+    }
+
+
+
+
+
 
     public function profile()
     {

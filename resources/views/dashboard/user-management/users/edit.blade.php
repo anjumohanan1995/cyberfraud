@@ -43,7 +43,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="name">Name:</label>
-                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" value="{{ old('name') ?: $data->name }}" required>
+                                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" value="{{ old('name', $data->name) }}" required>
                                                 @error('name')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
@@ -52,19 +52,20 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="email">Email:</label>
-                                                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" value="{{ old('email') ?: $data->email }}" required>
+                                                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" value="{{ old('email', $data->email) }}" required>
                                                 @error('email')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="role">Role:</label>
                                                 <select id="role" name="role" class="form-control" required>
-                                                    <option value="" selected>Select Role</option>
+                                                    <option value="" disabled selected>Select Role</option>
                                                     @foreach($roles as $role)
                                                         <option value="{{ $role->name }}" @if ($data->role == $role->name) selected @endif>{{ $role->name }}</option>
                                                     @endforeach
@@ -74,29 +75,32 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="old_password">Current Password:</label>
-                                                    <input type="password" id="old_password" name="old_password" class="form-control" placeholder="Enter your current password">
-                                                    @error('old_password')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="password">New Password:</label>
-                                                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password">
-                                                    @error('password')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                    <small class="text-muted">Leave this field empty if you don't want to change the password.</small>
-                                                </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="status">Status:</label>
+                                                <select id="status" name="status" class="form-control" required>
+                                                    <option value="" disabled selected>Select Status</option>
+                                                    <option value="active" @if ($data->status == 'active') selected @endif>Active</option>
+                                                    <option value="inactive" @if ($data->status == 'inactive') selected @endif>Inactive</option>
+                                                </select>
+                                                @error('status')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {{-- <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="old_password">Current Password:</label>
+                                                <input type="password" id="old_password" name="old_password" class="form-control" placeholder="Enter your current password">
+                                                @error('old_password')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="password">New Password:</label>
                                                 <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password">
@@ -105,42 +109,41 @@
                                                 @enderror
                                                 <small class="text-muted">Leave this field empty if you don't want to change the password.</small>
                                             </div>
-                                        </div> --}}
+                                        </div>
                                     </div>
-                                    {{-- <div id="signature-fields" style="display: none;"> --}}
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="sign">Signature:</label>
-                                                    <input type="file" id="sign" name="sign" class="form-control" placeholder="">
-                                                    @error('sign')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="sign_name">Signature Name:</label>
-                                                    <input type="text" id="sign_name" name="sign_name" class="form-control" placeholder="" value="{{ old('sign_name') ?: $data->sign_name }}">
-                                                    @error('sign_name')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="sign_designation">Signature Designation:</label>
-                                                    <input type="text" id="sign_designation" name="sign_designation" class="form-control" placeholder="" value="{{ old('sign_designation') ?: $data->sign_designation }}">
-                                                    @error('sign_designation')
-                                                        <div class="text-danger">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
+                                    <div class="row" id="signature-fields" >
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sign">Signature:</label>
+                                                <input type="file" id="sign" name="sign" class="form-control">
+                                                @error('sign')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
                                             </div>
                                         </div>
-                                    {{-- </div> --}}
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sign_name">Signature Name:</label>
+                                                <input type="text" id="sign_name" name="sign_name" class="form-control" placeholder="Enter signature name" value="{{ old('sign_name', $data->sign_name) }}">
+                                                @error('sign_name')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row" id="signature-fields">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sign_designation">Signature Designation:</label>
+                                                <input type="text" id="sign_designation" name="sign_designation" class="form-control" placeholder="Enter signature designation" value="{{ old('sign_designation', $data->sign_designation) }}">
+                                                @error('sign_designation')
+                                                    <div class="text-danger">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                 </form>

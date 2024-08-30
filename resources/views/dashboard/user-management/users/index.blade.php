@@ -22,6 +22,59 @@
 
 @section('content')
     <!-- container -->
+
+    <style>
+        /* CSS for toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(14px);
+}
+
+    </style>
     <div class="container-fluid">
         <!-- breadcrumb -->
         <div class="breadcrumb-header justify-content-between">
@@ -44,9 +97,6 @@
         <!-- /breadcrumb -->
         <!-- main-content-body -->
         <div class="main-content-body">
-
-
-
             <!-- row -->
             <div class="row row-sm">
                 <div class="col-md-12 col-xl-12">
@@ -75,6 +125,13 @@
                                 <h4 class="card-title mg-b-10">
                                     All Users
                                 </h4>
+
+                                <select name="status_filter" id="status_filter" class="form-group col-2">
+                                    <option value="active" selected>Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+
+
                                 <div class="col-md-1 col-6 text-center">
                                     @if ($hasAddUserPermission)
                                         <div class="task-box primary  mb-0">
@@ -87,7 +144,6 @@
 
                                 </div>
                             </div>
-
                             <div class="table-responsive mb-0">
                                 <table id="example"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
@@ -100,6 +156,7 @@
                                             @if ($hasEditUserPermission || $hasDeleteUserPermission)
                                                 <th>ACTION</th>
                                             @endif
+                                            <th>STATUS</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -116,72 +173,115 @@
         </div>
         <!-- /row -->
     </div>
+
+
+
 <script>
     $(document).ready(function(){
-     	var table = $('#example').DataTable({
+        // Initialize DataTable
+        var table = $('#example').DataTable({
             processing: true,
             serverSide: true,
-	        buttons: [
-	            'copyHtml5',
-	            'excelHtml5',
-	            'csvHtml5',
-	            'pdfHtml5'
-	        ],
-             "ajax": {
-
-			       	"url": "{{ route('get.users-list') }}",
-			       	"data": function ( d ) {
-			        	return $.extend( {}, d, {
-
-			          	});
-       				}
-       			},
-
+            buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+            ],
+            ajax: {
+                url: "{{ route('get.users-list') }}",
+                data: function(d) {
+                    // Send the status filter to the server
+                    d.status_filter = $('#status_filter').val();
+                }
+            },
             columns: [
                 { data: 'id' },
                 { data: 'name' },
                 { data: 'email' },
                 { data: 'role' },
-               @if ($hasEditUserPermission || $hasDeleteUserPermission)
-{ data: 'edit' }
-               @endif
-			],
+                @if ($hasEditUserPermission || $hasDeleteUserPermission)
+                    { data: 'edit' },
+                @endif
+                { data: 'status' },
+
+            ],
             "order": [0, 'desc'],
             'ordering': true
         });
-      	table.draw();
-    });
-    $(document).on('click', '.delete-btn', function() {
-        var Id = $(this).data('id');
-        if (confirm('Are you sure you want to delete this item?')) {
+
+        // Redraw table on status filter change
+        $('#status_filter').change(function() {
+            table.draw();
+        });
+
+        // Handle toggle button change
+        $(document).on('change', '.status-toggle', function() {
+            var status = $(this).is(':checked') ? 'active' : 'inactive'; // Check toggle state
+            var userId = $(this).data('id');
+
             $.ajax({
-                url: '/users/' + Id,
-                type: 'POST', // Use POST method
+                url: '/users/' + userId + '/update-status', // Define a route for updating user status
+                type: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 data: {
-                    _method: 'DELETE' // Override method to DELETE
+                    status: status,
+                    _method: 'PATCH' // Override method to PATCH
                 },
                 success: function(response) {
-                    //console.log('Success response:', response); // Log the response
-                // Handle success response
-                $('.alert-success-one').html('<div class="alert alert-success alert-dismissible fade show w-100" role="alert">' +
-                    response.success +
-                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-                    '<span aria-hidden="true">&times;</span>' +
-                    '</button>' +
-                    '</div>').show();
+                    // Handle success response
+                    $('.alert-success-one').html('<div class="alert alert-success alert-dismissible fade show w-100" role="alert">' +
+                        response.success +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                        '</button>' +
+                        '</div>').show();
 
-                // Optionally reload the page or update the UI
-                $('#example').DataTable().ajax.reload();
+                    // Optionally reload the table to reflect changes
+                    table.draw();
                 },
                 error: function(xhr, status, error) {
                     // Handle error response
                     console.error(xhr.responseText)
                 }
             });
-        }
+        });
+
+        // Handle delete button click
+        $(document).on('click', '.delete-btn', function() {
+            var Id = $(this).data('id');
+            if (confirm('Are you sure you want to delete this item?')) {
+                $.ajax({
+                    url: '/users/' + Id,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: {
+                        _method: 'DELETE'
+                    },
+                    success: function(response) {
+                        // Handle success response
+                        $('.alert-success-one').html('<div class="alert alert-success alert-dismissible fade show w-100" role="alert">' +
+                            response.success +
+                            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                            '<span aria-hidden="true">&times;</span>' +
+                            '</button>' +
+                            '</div>').show();
+
+                        // Reload the table
+                        table.draw();
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        });
     });
-</script>
+    </script>
+
 @endsection
