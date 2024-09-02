@@ -1399,10 +1399,10 @@ class EvidenceController extends Controller
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
-            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Phishing'],
-            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Fraud'],
-            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Malware'],
+            ['Acknowledgement No', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['11212120', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Phishing'],
+            ['21215212', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Fraud'],
+            ['31216212', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Malware'],
 
 
 
@@ -1427,10 +1427,10 @@ class EvidenceController extends Controller
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
-            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Malware'],
-            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Fraud'],
-            ['3', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
+            ['Acknowledgement No', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['12121201', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Malware'],
+            ['12152122', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Fraud'],
+            ['12162123', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');

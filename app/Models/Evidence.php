@@ -43,7 +43,8 @@ class Evidence extends Eloquent
         'preservation',
         'evidence_type',
         'category',
-        'reported_status'
+        'reported_status',
+        'country_code'
     ];
 
 
