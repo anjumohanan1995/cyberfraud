@@ -925,15 +925,15 @@ public function updateStatus(Request $request)
 
         $bank_datas = BankCasedata::where('acknowledgement_no',(int)$id)->get();
         $layer_one_transactions = BankCasedata::where('acknowledgement_no',(int)$id)->where('Layer',1)->where('com_status',1)->get();
-       
+
         $filtered_transactions = collect();
         $seen_combinations = [];
 
         foreach ($layer_one_transactions as $transaction){
         // Create a unique key for each combination of the specified fields
-        $key = $transaction->acknowledgement_no . '_' . 
-            $transaction->transaction_id_or_utr_no . '_' . 
-            $transaction->transaction_id_sec . '_' . 
+        $key = $transaction->acknowledgement_no . '_' .
+            $transaction->transaction_id_or_utr_no . '_' .
+            $transaction->transaction_id_sec . '_' .
             $transaction->transaction_amount;
 
         // Check if this combination has already been seen
@@ -944,7 +944,7 @@ public function updateStatus(Request $request)
         }
         }
         $layer_one_transactions = $filtered_transactions;
-      
+
 
 // ============================FOR FINDONG DESPUTED AMOUNT=======================================
 
@@ -954,68 +954,68 @@ public function updateStatus(Request $request)
 function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$updatedObjectIds) {
     // Retrieve child rows in the current layer
     $updatedObjectIds = array_keys($updatedObjectIds);
-    
+
     $children = BankCaseData::where('Layer', $currentLayer)
         ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
         ->whereNotIn('_id', $updatedObjectIds)
         ->get();
-   
+
     // If no children are found in the current layer, and we're not at the first layer
     if ($children->isEmpty()) {
-         
+
         // Check in the previous layer (Layer 1) itself for the same transaction ID
         $sameLayerMatches = BankCaseData::where('Layer', $currentLayer - 1 )
         ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
         ->whereNotIn('_id', $updatedObjectIds)
         ->get();
-      
-        foreach ($sameLayerMatches as $match){ 
+
+        foreach ($sameLayerMatches as $match){
             // Calculate the dispute amount as if it's a child in Layer 2
-           
+
             if ($capitalAmount <= 0) {
                 break; // If capital amount is zero or negative, stop processing further matches
             }
 
             if ($match->transaction_amount <= $capitalAmount) {
-                
+
                 $disputeAmount = $match->transaction_amount;
                 $capitalAmount -= $disputeAmount;
             } else {
-               
+
                 $disputeAmount = $capitalAmount;
                 $capitalAmount = 0; // Set to zero to stop further processing
             }
 
             // Update the match's dispute_amount only if it hasn't been updated yet
-           
+
             if (!isset($updatedObjectIds[$match->_id])) {
                 $match->dispute_amount = $disputeAmount;
                 $match->save();
                 $updatedObjectIds[$match->_id] = true;
-                
+
             }
-          
-           
+
+
         }
     }
     else{
         $recursiveData = [];
         foreach ($children as $child) {
-            
+
             // Process as usual if children are found
-           
+
             if ($capitalAmount <= 0){
                 break; // If capital amount is zero or negative, stop processing further children
             }
-    
+
             if ($child->transaction_amount <= $capitalAmount){
                 $disputeAmount = $child->transaction_amount;
-                $capitalAmount -= $disputeAmount; 
+                $capitalAmount -= $disputeAmount;
             } else {
                 $disputeAmount = $capitalAmount;
                 $capitalAmount = 0; // Set to zero to stop further processing
             }
-            
+
             if (!isset($updatedObjectIds[$child->_id])){
                 $child->dispute_amount = $disputeAmount;
                 $child->save();
@@ -1025,10 +1025,10 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
                 'transaction_id_sec' => $child->transaction_id_sec,
                 'dispute_amount' => $disputeAmount
             ];
-            
+
             // processChildren($child->transaction_id_sec, $disputeAmount, $currentLayer + 1, $updatedObjectIds);
         }
-      
+
         foreach ($recursiveData as $data){
             processChildren($data['transaction_id_sec'], $data['dispute_amount'], $currentLayer + 1, $updatedObjectIds);
         }
@@ -1052,9 +1052,9 @@ foreach ($layer1Records as $layer1Record){
         $layer1Record->save();
 
         $updatedObjectIds[$layer1Record->_id] = true;
-        
+
     }
-    
+
     // Process all Layer 2 children for the current Layer 1 record
     processChildren($layer1Record->transaction_id_sec, $capitalAmount, 2, $updatedObjectIds);
 }
@@ -1091,7 +1091,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
              ->toArray();
 
 
-            
+
              $transaction_baed_array = [];
              if($first_row){
 
@@ -1105,8 +1105,8 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                         $processed_ids[] = $f_a['_id'];
                     }
                   }
-                
-                 
+
+
 
         }
         //dd($final_array);
@@ -1122,8 +1122,8 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 ->where('action_taken_by_bank', 'money transfer to')
                 ->where('bank', '!=', 'Others')
                 ->get(['transaction_id_sec', 'bank', 'transaction_amount', 'desputed_amount']);
-            
-    
+
+
             $next_layer = BankCasedata::where('acknowledgement_no', (int)$id)
                 ->where('Layer', $i + 1)
                 ->pluck('transaction_id_or_utr_no')
@@ -1140,9 +1140,9 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
                foreach ($current_layer as $transaction){
                 if ($transaction->transaction_id_sec && $transaction->transaction_id_sec !=="refer Remarks") {
-                                     
+
                     if(!in_array($transaction->transaction_id_sec, $next_layer_utr_array , true) && !in_array($transaction->transaction_id_sec, $current_layer_utr_array , true)){
-                                           
+
                         $pending_banks_array[] = [
                             "pending_banks" => $transaction->bank,
                             "transaction_id" => $transaction->transaction_id_sec,
@@ -1153,7 +1153,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 }
                 elseif($transaction->transaction_id_sec && $transaction->transaction_id_sec =="refer Remarks"){
                     if(!in_array("refer", $next_layer_utr_array , true) && !in_array("refer", $current_layer_utr_array , true)){
-                                           
+
                         $pending_banks_array[] = [
                             "pending_banks" => $transaction->bank,
                             "transaction_id" => $transaction->transaction_id_sec,
@@ -1162,7 +1162,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                         ];
                     }
                 }
-              
+
             }
         }
 
@@ -1213,11 +1213,11 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     // }
     private function extractTransactionIds($transactions) {
         $transaction_ids = [];
-    
+
         foreach ($transactions as $transaction) {
             // Split by comma first, then by space
             $split_transactions = preg_split('/[\s,]+/', trim($transaction, '[]'));
-    
+
             // Add the trimmed and split transaction IDs to the array
             foreach ($split_transactions as $id){
                 $trimmedId = trim($id);
@@ -1226,10 +1226,10 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 }
             }
         }
-    
+
         return $transaction_ids;
     }
-    
+
     public function updateTransactionAmount(Request $request)
     {
         // Get the input values
@@ -1308,24 +1308,24 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
     {
         $layer++;
         $main_array = [];
-       
+
         foreach ($first_rows as $first_row) {
-    
+
             if (in_array($first_row['_id'], $processed_ids)) {
                 continue;
             }
-    
+
             // Skip processing if transaction_id_sec is null
             if ($first_row['transaction_id_sec'] === null) {
                 $main_array[] = $first_row;
                 $processed_ids[] = $first_row['_id'];
                 continue; // Skipping further processing for this row
             }
-    
+
             // Add current row to the processed list and main array
             $processed_ids[] = $first_row['_id'];
             $main_array[] = $first_row;
-    
+
             // First, fetch rows from the same layer
             $same_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
                 ->where('Layer', $layer - 1) // Stay in the same layer
@@ -1333,20 +1333,20 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 ->whereNotIn('_id', $processed_ids) // Ensure we do not add already processed rows
                 ->get()
                 ->toArray();
-    
+
             if (!empty($same_layer_rows)) {
                 $main_array = array_merge($main_array, $same_layer_rows);
-    
+
                 // Add the same layer rows to processed_ids to avoid re-processing
                 foreach ($same_layer_rows as $same_layer_row) {
                     $processed_ids[] = $same_layer_row['_id'];
                 }
-    
+
                 // Continue checking in the same layer if there are more rows
                 $nested_results = $this->checkifempty($layer - 1, $same_layer_rows, $id, $processed_ids);
                 $main_array = array_merge($main_array, $nested_results);
             }
-    
+
             // Then, fetch rows from the next layer
             $next_layer_rows = BankCasedata::where('acknowledgement_no', (int)$id)
                 ->where('Layer', $layer)
@@ -1354,17 +1354,17 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 ->whereNotIn('_id', $processed_ids) // Ensure to not re-process rows
                 ->get()
                 ->toArray();
-    
+
             if (!empty($next_layer_rows)) {
                 $nested_results = $this->checkifempty($layer, $next_layer_rows, $id, $processed_ids);
                 $main_array = array_merge($main_array, $nested_results);
             }
         }
-    
+
         return $main_array;
     }
-    
-    
+
+
 
     public function change_status_layerwise($layer, $first_rows, $id, &$processed_ids = [] ,$status )
     {
@@ -1940,10 +1940,11 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             return $caseNumber;
     }
 
-    public function createDownloadTemplate(){
+    public function createWebsiteDownloadTemplate(){
 
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
+        ->where('name','=', 'website')
         ->whereNull('deleted_at')
         ->pluck('name')
         ->toArray();
@@ -1954,13 +1955,67 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
-            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
-            ['2', 'https://www.facebook.com', 'facebook.com','','','','Site ','TK0023','TK0024','TK0025','Facebook','Public'],
-            ['3', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
-            ['4', '9632148574', '','','','','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
-            ['5', 'https://www.instagram.com', 'instagram.com','','','','Dismissed','TK0081','TK0082','TK0083','Instagram','Open'],
+            ['Sl.no','Evidence Type', 'Remarks', 'Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Source','URL','Domain','IP','Registrar','Registry Details' ],
+            ['1','Website','Site maintenance','TK0016','TK0017','TK0018','Public','https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration'],
+            ['2','Website','Site maintenance','TK0016','TK0017','TK0018','Public','https://www.dffc.com', 'dffc.com','156.250.193.119','GoDaddy','Domain registration'],
+            ['3','Website','Download','TK0052','TK0053','TK0054','Open','https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration'],
+            ['4','Website','Escalated','TK0016','TK0017','TK0018','Public','https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration'],
 
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+    }
+
+
+    public function createSocialmediaDownloadTemplate(){
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->where('name','!=', 'mobile')
+        ->where('name','!=', 'whatsapp')
+        ->where('name','!=', 'website')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no','Evidence Type','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Source','URL','Post/Profile','Modus Keyword'],
+            ['1','Instagram','Site maintenance','TK0016','TK0017','TK0018','Public','https://www.facebook.com', 'Post','Modus Keyword'],
+            ['2','Twitter','Reopened','TK0023','TK0024','TK0025','Open','https://www.twitter.com', 'Profile','Modus Keyword'],
+            ['3','Facebook','Hosting','TK0052','TK0053','TK0054','Open','https://www.instagram.com', 'Post','Modus Keyword'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+    }
+
+
+    public function createMobileDownloadTemplate(){
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->where(function ($query) {
+            $query->where('name', 'mobile')
+                ->orWhere('name', 'whatsapp');
+        })
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no','Evidence Type','Remarks', 'Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Source','Mobile/Whatsapp','Country Code' ],
+            ['1','Mobile','Site maintenance','TK0016','TK0017','TK0018','Open','6985743214', '+91'],
+            ['2','Mobile','In-Progress','TK0063','TK0064','TK0065','Public','9632148574', '+91'],
+            ['3','Whatsapp','Dismissed','TK0081','TK0082','TK0083','Open','9685743201', '+91'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
