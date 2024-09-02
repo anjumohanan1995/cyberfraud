@@ -38,28 +38,28 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
         foreach ($collection as $index => $row) {
             $rowIndex = $index + $this->startRow();
 
-            $evidenceType = strtolower(trim($row[10]));
+            $evidenceType = strtolower(trim($row[1]));
             $data = [
-                'url/mobile' => $row[1],
+                'url/mobile' => $row[7],
                 'evidencetype' => $evidenceType,
             ];
 
             switch ($evidenceType) {
                 case 'mobile':
                 case 'whatsapp':
-                    // No additional fields required
+                    $data['country_code'] = $row[8];
                     break;
 
                 case 'website':
-                    $data['domain/post/profile'] = $row[2];
-                    $data['ip/ModusKeyword'] = $row[3];
-                    $data['registrar'] = $row[4];
-                    $data['registry_details'] = $row[5];
+                    $data['domain/post/profile'] = $row[8];
+                    $data['ip/ModusKeyword'] = $row[9];
+                    $data['registrar'] = $row[10];
+                    $data['registry_details'] = $row[11];
                     break;
 
                 default:
-                    $data['domain/post/profile'] = $row[2];
-                    $data['ip/ModusKeyword'] = $row[3];
+                    $data['domain/post/profile'] = $row[8];
+                    $data['ip/ModusKeyword'] = $row[9];
                     break;
             }
 
@@ -72,11 +72,11 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                     'file_name'   => $this->filename,
                     'url'         => $this->convertUrlToString($data['url/mobile']),
                     'evidence_type' => $evidenceType,
-                    'remarks'     => $row[6],
-                    'content_removal_ticket' => $row[7],
-                    'data_disclosure_ticket' => $row[8],
-                    'preservation_ticket' => $row[9],
-                    'source'       => $row[11],
+                    'remarks'     => $row[2],
+                    'content_removal_ticket' => $row[3],
+                    'data_disclosure_ticket' => $row[4],
+                    'preservation_ticket' => $row[5],
+                    'source'       => $row[6],
                     'status'       => 1,
                     'reported_status' => 'active'
                 ];
@@ -89,6 +89,8 @@ class ComplaintImportOthers implements ToCollection, WithStartRow
                 } elseif ($evidenceType !== 'mobile' && $evidenceType !== 'whatsapp') {
                     $complaintData['domain'] = $data['domain/post/profile'];
                     $complaintData['ip'] = $this->convertUrlToString($data['ip/ModusKeyword']);
+                } elseif ($evidenceType === 'mobile' || $evidenceType === 'whatsapp') {
+                    $complaintData['country_code'] = $this->convertUrlToString($data['country_code']);
                 }
 
                 $validData[] = $complaintData;
