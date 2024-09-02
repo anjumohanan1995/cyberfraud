@@ -90,7 +90,7 @@ class EvidenceBulkImport implements ToCollection, WithStartRow
             }
 
             if (!$this->isValidForType($data['data'], $data['data']['evidence_type'] ?? '')) {
-                $this->errors[] = "Row {$rowIndex}: Invalid data for evidence type '{$data['data']['evidence_type']}'";
+                $this->errors[] = "Row {$rowIndex}:Data not sufficient for evidence type '{$data['data']['evidence_type']}'";
                 continue;
             }
 
