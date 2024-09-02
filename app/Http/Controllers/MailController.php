@@ -81,6 +81,8 @@ class MailController extends Controller
 
             $editButton = $this->generateEditButton($record);
 
+            $NoticeGeneration = $this->generateNotice($record);
+
 
         $mailStatus = '';
         if($record->evidence_type == 'website'){
@@ -133,6 +135,7 @@ class MailController extends Controller
                 "ip" => $record->ip,
                 "registrar" => $record->registrar,
                 "registry_details" => $record->registry_details,
+                'notice_generation' => $NoticeGeneration,
                 "portal_link" => $editButton,
                 "mail_status" => $mailStatus,
                 "status" => $status,
@@ -179,6 +182,40 @@ class MailController extends Controller
 
     return $editButton;
 }
+
+private function generateNotice($record)
+{
+    // Check if the evidence type is neither 'mobile' nor 'whatsapp'
+    if ($record->evidence_type != 'mobile' && $record->evidence_type != 'whatsapp') {
+        // Determine the key to use based on the type of case data
+        $identifier = isset($record->ack_no) ? $record->ack_no : $record->case_number;
+        $idField = (string) $record->_id;
+
+        // Generate the notice link using a form
+        $NoticeGeneration = '
+        <div class="d-flex align-items-center">
+            <div>
+                <form method="POST" action="' . route('evidenceStore') . '" target="_blank" onsubmit="storeEvidence(\'' . $identifier . '\', \'' . $idField . '\'); return false;">
+                    <input type="hidden" name="_token" value="' . csrf_token() . '">
+                    <input type="hidden" name="identifier" value="' . $identifier . '">
+                    <input type="hidden" name="idField" value="' . $idField . '">
+                    <button type="submit" class="btn btn-danger">
+                        <small>
+                            <i class="fas fa-file-alt" data-toggle="tooltip" data-placement="top" title="Generate Notice"></i>
+                        </small>
+                    </button>
+                </form>
+            </div>
+        </div>
+        ';
+    } else {
+        $NoticeGeneration = ''; // If evidence type is 'mobile' or 'whatsapp', return an empty string
+    }
+
+    return $NoticeGeneration;
+}
+
+
 
 
     public function getPortalLink($registrar)
@@ -304,6 +341,8 @@ class MailController extends Controller
 
             $editButton = $this->generateEditButton($record);
 
+            $NoticeGeneration = $this->generateNotice($record);
+
             $mailStatus = '';
             if($record->evidence_type == 'website'){
                 $mailStatus = '
@@ -352,6 +391,7 @@ class MailController extends Controller
                 "ip" => $record->ip,
                 "registrar" => $record->registrar,
                 "registry_details" => $record->registry_details,
+                'notice_generation' => $NoticeGeneration,
                 "portal_link" => $editButton,
                 "mail_status" => $mailStatus,
                 "status" => $status,

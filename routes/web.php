@@ -361,3 +361,5 @@ Route::delete('/wallet/{id}', [SourceTypeController::class, 'destroywallet'])->n
 
 Route::patch('users/{id}/update-status', [UsersController::class, 'updateStatus']);
 
+Route::post('individual/evidence/store', [EvidenceController::class, 'individualStoreEvidence'])->name('individualevidenceStore');
+

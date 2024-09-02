@@ -1349,7 +1349,58 @@ class EvidenceController extends Controller
             'evidence_type_other' => $evidence_type_other,
             'status' => $status
         ]);
+
     }
+
+
+    public function individualStoreEvidence(Request $request)
+    {
+        // dd($request);
+        if ($request->has('identifier') && $request->has('idField')) {
+            $identifier = $request->input('identifier');
+            $idField = $request->input('idField');
+            $source_type = null;
+            $evidence_type_ncrp = null;
+            $evidence_type_other = null;
+
+            // Try to retrieve the record from the ComplaintOthers model first
+            $query = ComplaintOthers::where('case_number', $identifier)
+                                    ->where('_id', $idField);
+    // dd($query);
+            if ($query->exists()) {
+                $source_type = 'other';
+                $evidence_type_other = $query->pluck('evidence_type')->first();
+                // dd($evidence_type_other);
+            } else {
+                // If not found in ComplaintOthers, try the Evidence model
+                $query = Evidence::where('ack_no', $identifier)
+                                ->where('_id', $idField);
+                if ($query->exists()) {
+                    $source_type = 'ncrp';
+                    $evidence_type_ncrp = $query->pluck('evidence_type')->first();
+                }
+            }
+
+            // If the record is still not found, handle the error scenario
+            if (!$query->exists()) {
+                return redirect()->back()->with('error', 'Record not found');
+            }
+
+            $data = $query->get();
+    // dd($data);
+            // Perform actions specific to this request
+
+            return response()->json([
+                'message' => 'Data received successfully',
+                'data' => $data,
+                'source_type' => $source_type,
+                'evidence_type_ncrp' => $evidence_type_ncrp,
+                'evidence_type_other' => $evidence_type_other,
+            ]);
+        }
+        return redirect()->back()->with('error', 'Invalid Request');
+    }
+
 
     public function createEvidenceDownloadTemplate()
     {
