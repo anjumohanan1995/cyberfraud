@@ -84,15 +84,40 @@ class SubCategoryController extends Controller
             'subcategory' => 'required',
             'status' => 'required',
         ]);
-          if ($validate->fails()) {
+        //   if ($validate->fails()) {
 
-              return response()->json(['errors' => $validate->errors()], 422);
-          }
-        $subcategory = SubCategory::find($id);
-        $subcategory->category_id = $request->category;
-        $subcategory->subcategory = $request->subcategory;
-        $subcategory->status = $request->status;
-        $subcategory->update();
+        //       return response()->json(['errors' => $validate->errors()], 422);
+        //   }
+        // $subcategory = SubCategory::find($id);
+        // $subcategory->category_id = $request->category;
+        // $subcategory->subcategory = $request->subcategory;
+        // $subcategory->status = $request->status;
+        // $subcategory->update();
+
+
+        if ($validate->fails()) {
+            //dd($validate);
+            return Redirect::back()->withInput()->withErrors($validate);
+        }
+
+        // Find the role by its ID.
+        $data = SubCategory::findOrFail($id);
+
+        $newsubcategory = strtoupper($request->subcategory);
+
+        // Check if the new name already exists for a different record
+        if (SubCategory::where('deleted_at', null)->where('name', $newsubcategory)->where('category_id', $request->category)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['name' => 'This SubCategory type name already exists.']);
+        }
+
+        // Update the evidence type with the data from the request
+        $data->category_id = $request->category;
+        $data->subcategory= $newsubcategory;
+        $data->status = $request->status;
+
+        // Update other attributes as needed
+        // Save the updated evidence type
+        $data->save();
 
         return redirect()->route('subcategory.create')->with('success', 'SubCategory Updated successfully!');
     }
@@ -206,9 +231,16 @@ class SubCategoryController extends Controller
               return response()->json(['errors' => $validate->errors()], 422);
           }
 
+          $subcategory = strtoupper($request->input('subcategory'));
+
+          // Check if the name already exists in the database
+          if (SubCategory::where('deleted_at', null)->where('subcategory', $subcategory)->where('category_id', $request->category)->exists()) {
+              return response()->json(['errors' => ['name' => 'This subcategory already exists.']], 422);
+          }
+
           SubCategory::create([
               'category_id' => $request->input('category'),
-              'subcategory' => $request->input('subcategory'),
+              'subcategory' => $subcategory,
               'status' => $request->input('status'),
 
 

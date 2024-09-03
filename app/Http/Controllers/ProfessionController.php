@@ -42,16 +42,25 @@ class ProfessionController extends Controller
 
 
         ]);
+
         if ($validate->fails()) {
             //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
+            return response()->json(['errors' => $validate->errors()], 422);
+        }
+
+
+        $name = strtoupper($request->name);
+
+        // Check if the name already exists in the database
+        if (Profession::where('deleted_at', null)->where('name', $name)->exists()) {
+            return response()->json(['errors' => ['name' => 'This profession name already exists.']], 422);
         }
 
         Profession::create([
-            'name' => @$request->name? $request->name:'',
+            'name' => $name,
             'status' => $request->input('status'),
-
         ]);
+
 
         return redirect()->route('profession.index')->with('success','Profession Added successfully.');
 
@@ -99,15 +108,28 @@ class ProfessionController extends Controller
             // Add more validation rules as needed
         ]);
 
+        if ($validate->fails()) {
+            //dd($validate);
+            return Redirect::back()->withInput()->withErrors($validate);
+        }
+
+
         // Find the role by its ID.
         $data = Profession::findOrFail($id);
 
-        // Update the role with the data from the request
-        $data->name = $request->name;
+        $newName = strtoupper($request->name);
+
+        // Check if the new name already exists for a different record
+        if (Profession::where('deleted_at', null)->where('name', $newName)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['name' => 'This profession name already exists.']);
+        }
+
+        // Update the evidence type with the data from the request
+        $data->name = $newName;
         $data->status = $request->status;
 
         // Update other attributes as needed
-        // Save the updated role
+        // Save the updated evidence type
         $data->save();
 
         // Redirect back with success message
