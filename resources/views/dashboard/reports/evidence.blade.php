@@ -410,7 +410,7 @@ $user = Auth::user();
             from_date: $('#from-date-new').val(),
             to_date: $('#to-date-new').val(),
             current_date: $('#current_date').val(),
-            bank_action_status: $('#bank_action_status').val(),
+            //bank_action_status: $('#bank_action_status').val(),
             evidence_type_ncrp: $('#evidence_type_ncrp').val(),
             search_value_ncrp: window['evidence_type_ncrp_searchValue'] || ''
         });

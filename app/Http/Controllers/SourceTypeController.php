@@ -51,16 +51,25 @@ class SourceTypeController extends Controller
 
 
         ]);
+
         if ($validate->fails()) {
             //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
+            return response()->json(['errors' => $validate->errors()], 422);
+        }
+
+
+        $name = strtoupper($request->name);
+
+        // Check if the name already exists in the database
+        if (SourceType::where('deleted_at', null)->where('name', $name)->exists()) {
+            return response()->json(['errors' => ['name' => 'This source type name already exists.']], 422);
         }
 
         SourceType::create([
-            'name' => @$request->name? $request->name:'',
+            'name' => $name,
             'status' => $request->input('status'),
-
         ]);
+
 
         return redirect()->route('sourcetype.create')->with('success','Source Type Added successfully.');
 
@@ -106,9 +115,23 @@ class SourceTypeController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+
+        // Find the role by its ID.
         $data = SourceType::findOrFail($id);
-        $data->name = $request->name;
+
+        $newName = strtoupper($request->name);
+
+        // Check if the new name already exists for a different record
+        if (SourceType::where('deleted_at', null)->where('name', $newName)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['name' => 'This source type name already exists.']);
+        }
+
+        // Update the evidence type with the data from the request
+        $data->name = $newName;
         $data->status = $request->status;
+
+        // Update other attributes as needed
+        // Save the updated evidence type
         $data->save();
 
         return redirect()->route('sourcetype.create')->with('success', 'Source Type updated successfully!');

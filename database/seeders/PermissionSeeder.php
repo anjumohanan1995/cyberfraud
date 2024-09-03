@@ -124,7 +124,8 @@ class PermissionSeeder extends Seeder
                     '4' => 'Other Excel Download',
                     '5' => 'View NCRP/Others Report',
                     '6' => 'View Daily Bank Reports',
-                    '7' => 'View Above One Lakh Report',
+                    '7' => 'View Above One Lakh Report'
+
                 ]),
             ],
             [

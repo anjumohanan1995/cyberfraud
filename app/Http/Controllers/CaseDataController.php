@@ -83,6 +83,54 @@ class CaseDataController extends Controller
     ]);
     }
 
+    public function selfAssignedIndex()
+    {
+        // Retrieve the bank data from the Bank model
+        $banks = Bank::all()->map(function($bank) {
+            return [
+                'id' => $bank->id,
+                'name' => $bank->bank
+            ];
+        })->toArray();
+
+        // dd($banks);
+
+        $wallets = Wallet::all()->map(function($wallet) {
+            return [
+                'id' => $wallet->id,
+                'name' => $wallet->wallet
+            ];
+        })->toArray();
+
+        // dd($wallets);
+
+        $merchants = Merchant::all()->map(function($merchant) {
+            return [
+                'id' => $merchant->id,
+                'name' => $merchant->merchant
+            ];
+        })->toArray();
+
+        // dd($merchants);
+
+        $insurances = Insurance::all()->map(function($insurance) {
+            return [
+                'id' => $insurance->id,
+                'name' => $insurance->insurance
+            ];
+        })->toArray();
+
+        // dd($insurances);
+
+        // Pass the $banks and $wallets data to the view
+        return view('dashboard.case-data-list.ncrpSelf')->with([
+            'banks' => $banks,
+            'wallets' => $wallets,
+            'merchants' => $merchants,
+            'insurances' => $insurances
+    ]);
+    }
+
 
 
      public function bankCaseData(Request $request)
@@ -492,6 +540,329 @@ class CaseDataController extends Controller
                         <p class="text-success">Assigned To: ' . $user->name . '</p>
                         </div>';
                     }
+                }
+
+
+            $data_arr[] = [
+                "id" => $start + 1,
+                "acknowledgement_no" => $ack_no,
+                "district" => $record['district'] . "<br>" . $record['police_station'],
+                "complainant_name" => $record['complainant_name'] . "<br>" . $record['complainant_mobile'],
+                "transaction_id" => $transaction_id,
+                "bank_name" => $bank_name,
+                "account_id" => $record['account_id'],
+                "amount" => $amount,
+                "entry_date" => $record['entry_date']->toDateTime()->format('d-m-Y H:i:s'),
+                "current_status" => $record['current_status'],
+                "date_of_action" => $record['date_of_action'],
+                "action_taken_by_name" => $record['action_taken_by_name'],
+                "edit" => $edit
+            ];
+
+            $start++;
+        }
+
+        $response = [
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecords,
+            "aaData" => $data_arr
+        ];
+
+        return response()->json($response);
+    }
+
+    public function ncrpSelfAssigned(Request $request)
+    {
+        // Initialize variables (this part remains largely unchanged)
+        $draw = $request->get('draw');
+        $start = (int)$request->get("start");
+        $rowperpage = (int)$request->get("length");
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+        $columnIndex = $columnIndex_arr[0]['column'];
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
+        $fromDate = $request->get('from_date');
+        $toDate = $request->get('to_date');
+        $mobile = $request->get('mobile');
+        $acknowledgement_no = $request->get('acknowledgement_no');
+        $filled_by = $request->get('filled_by');
+        $search_by = $request->get('search_by');
+        $options = $request->get('options');
+        $com_status = $request->get('com_status');
+        $fir_lodge = $request->get('fir_lodge');
+        $filled_by_who = $request->get('filled_by_who');
+        $transaction_id = $request->get('transaction_id');
+        $account_id = $request->get('account_id');
+
+        // Convert fromDate and toDate to start and end of the day
+        $fromDateStart = $fromDate ? Carbon::parse($fromDate)->startOfDay() : null;
+        $toDateEnd = $toDate ? Carbon::parse($toDate)->endOfDay() : null;
+
+        // Base pipeline
+        $pipeline = [
+            ['$match' => ['deleted_at' => null]]
+        ];
+
+            // Function to build filter conditions
+            $buildFilterConditions = function() use ($request, $fromDateStart, $toDateEnd) {
+                $conditions = [];
+
+                // Apply conditions
+                if ($request->get('com_status') == "1" || $request->get('com_status') == "0") {
+                    $conditions[] = ['com_status' => (int)$request->get('com_status')];
+                    // $pipeline[0]['$match']['com_status'] = (int)$com_status;
+                }
+
+                if ($fromDateStart && $toDateEnd) {
+                    $conditions[] = ['entry_date' => [
+                        '$gte' => new UTCDateTime($fromDateStart->timestamp * 1000),
+                        '$lte' => new UTCDateTime($toDateEnd->timestamp * 1000)
+                    ]];
+                    // $dump = var_dump(class_exists('MongoDB\BSON\UTCDateTime'));
+                    //  dd($dump);
+                    // $pipeline[0]['$match']['entry_date'] = [
+                    //     '$gte' => new UTCDateTime($fromDateStart->timestamp * 1000),
+                    //     '$lte' => new UTCDateTime($toDateEnd->timestamp * 1000)
+                    // ];
+                }
+
+                if (!empty($request->get('mobile'))) {
+                    $conditions[] = ['complainant_mobile' => ['$in' => [(string)$request->get('mobile'), (int)$request->get('mobile')]]];
+                    // $pipeline[0]['$match']['complainant_mobile'] = (string)$mobile;
+                }
+
+                if (!empty($request->get('transaction_id'))) {
+                    $conditions[] = ['transaction_id' => ['$in' => [(string)$request->get('transaction_id'), (int)$request->get('transaction_id')]]];
+
+                    // $pipeline[0]['$match']['transaction_id'] = ['$in' => [(string)$transaction_id, (string)$transaction_id]];
+                }
+
+                if (!empty($request->get('account_id'))) {
+                    $conditions[] = ['account_id' => ['$in' => [(string)$request->get('account_id'), (int)$request->get('account_id')]]];
+                    // $pipeline[0]['$match']['account_id'] = (string)$account_id;
+                }
+
+                // if (!empty($options) && $options != 'null') {
+                //     $pipeline[0]['$match']['bank_name'] = $options;
+                // }
+                $options = $request->get('options');
+                if (!empty($options) && $options != 'null') {
+                    $conditions[] = ['bank_name' => $options];
+                }
+
+                // if (!empty($acknowledgement_no)) {
+                //     $pipeline[0]['$match']['acknowledgement_no'] = (int)$acknowledgement_no;
+                // }
+                $acknowledgement_no = $request->get('acknowledgement_no');
+                if (!empty($acknowledgement_no)) {
+                    $conditions[] = ['acknowledgement_no' => (int)$acknowledgement_no];
+                }
+
+                // if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
+                //     $pipeline[0]['$match']['entry_date'] = [
+                //         '$gte' => new UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
+                //         '$lte' => new UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
+                //     ];
+                //     $pipeline[0]['$match']['acknowledgement_no'] = [
+                //         '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
+                //         '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
+                //     ];
+                // }
+                $filled_by = $request->get('filled_by');
+                if (!empty($filled_by) && in_array($filled_by, ['citizen', 'cyber'])) {
+                    $conditions[] = ['entry_date' => [
+                        '$gte' => new UTCDateTime(Carbon::now()->subDay()->startOfDay()->timestamp * 1000),
+                        '$lte' => new UTCDateTime(Carbon::now()->endOfDay()->timestamp * 1000)
+                    ]];
+                    $conditions[] = ['acknowledgement_no' => [
+                        '$gte' => $filled_by === 'citizen' ? 21500000000000 : 31500000000000,
+                        '$lte' => $filled_by === 'citizen' ? 21599999999999 : 31599999999999
+                    ]];
+                }
+
+                // if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
+                //     $pipeline[0]['$match']['acknowledgement_no'] = [
+                //         '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
+                //         '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
+                //     ];
+                // }
+                $filled_by_who = $request->get('filled_by_who');
+                if (!empty($filled_by_who) && in_array($filled_by_who, ['citizen', 'cyber'])) {
+                    $conditions[] = ['acknowledgement_no' => [
+                        '$gte' => $filled_by_who === 'citizen' ? 21500000000000 : 31500000000000,
+                        '$lte' => $filled_by_who === 'citizen' ? 21599999999999 : 31599999999999
+                    ]];
+                }
+
+                      // FIR Lodge filter
+                    //   if ($fir_lodge == "1" || $fir_lodge == "0") {
+                    //     $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
+                    //     $pipeline[0]['$match']['acknowledgement_no'] = [
+                    //         $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
+                    //     ];
+                    // }
+
+                            // FIR Lodge filter
+                $fir_lodge = $request->get('fir_lodge');
+                if ($fir_lodge == "1" || $fir_lodge == "0") {
+                    $ackNumbers = ComplaintAdditionalData::whereNotNull('fir_doc')->pluck('ack_no')->toArray();
+                    $conditions[] = ['acknowledgement_no' => [
+                        $fir_lodge == "1" ? '$in' : '$nin' => array_map('intval', $ackNumbers)
+                    ]];
+                }
+
+
+                // if (!empty($searchValue)) {
+                //     $pipeline[0]['$match']['$or'] = [
+                //         ['acknowledgement_no' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['district' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['police_station' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
+                //         ['amount' => (int)$searchValue],
+                //         // ['entry_date' => new UTCDateTime(new DateTime($searchValue))],
+                //         ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
+                //     ];
+                // }
+
+
+                return $conditions;
+            };
+
+                // Apply combined filters
+                $filterConditions = $buildFilterConditions();
+                if (!empty($filterConditions)) {
+                    $pipeline[] = ['$match' => ['$and' => $filterConditions]];
+                }
+
+                if (!empty($searchValue)) {
+                    $pipeline[0]['$match']['$or'] = [
+                        ['district' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['complainant_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['bank_name' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['police_station' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['account_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['transaction_id' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['complainant_mobile' => ['$regex' => $searchValue, '$options' => 'i']],
+                        ['current_status' => ['$regex' => $searchValue, '$options' => 'i']]
+                    ];
+
+                    // Handle numeric fields (acknowledgement_no and amount)
+                    if (is_numeric($searchValue)) {
+                        $numericValue = $searchValue + 0; // Convert to int or float based on the value
+                        $pipeline[0]['$match']['$or'][] = ['acknowledgement_no' => (int)$numericValue];
+                        $pipeline[0]['$match']['$or'][] = ['amount' => $numericValue];
+                    }
+                }
+
+
+        // Grouping and sorting
+        $pipeline[] = [
+            '$group' => [
+                '_id' => '$acknowledgement_no',
+                'latest_entry_date' => ['$max' => '$entry_date'],
+                'doc' => ['$first' => '$$ROOT']
+            ]
+        ];
+        $pipeline[] = ['$replaceRoot' => ['newRoot' => '$doc']];
+        $pipeline[] = ['$sort' => [$columnName => $columnSortOrder === 'desc' ? 1 : -1]];
+
+        // Count total records
+        $countPipeline = $pipeline;
+        $countPipeline[] = ['$count' => 'total'];
+        $totalRecords = Complaint::raw(function($collection) use ($countPipeline) {
+            return $collection->aggregate($countPipeline);
+        })->first()['total'] ?? 0;
+
+        // Apply pagination
+        $pipeline[] = ['$skip' => $start];
+        $pipeline[] = ['$limit' => $rowperpage];
+
+        // Execute the main query
+        $records = Complaint::raw(function($collection) use ($pipeline) {
+            return $collection->aggregate($pipeline);
+        });
+
+        // Fetch user permissions
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+        // $hasShowSelfAssignPermission = in_array('Self Assign', $sub_permissions);
+         //$hasShowActivatePermission = $user->role == 'Super Admin' || in_array('Activate / Deactivate', $sub_permissions);
+
+        $data_arr = [];
+        foreach ($records as $record) {
+            $com = Complaint::where('acknowledgement_no', $record['acknowledgement_no'])->take(10)->get();
+
+            $transaction_id = $amount = $bank_name = "";
+            foreach ($com as $c) {
+                $transaction_id .= $c->transaction_id . "<br>";
+                $amount .= '<span class="editable" data-ackno="' . $record['acknowledgement_no'] . '" data-transaction="' . $c->transaction_id . '" >' . $c->amount . "</span><br>";
+                $bank_name .= $c->bank_name . "<br>";
+            }
+
+            $id = Crypt::encrypt($record['acknowledgement_no']);
+            $ack_no = '<a class="btn btn-outline-primary" target="_blank" href="' . route('case-data.view', ['id' => $id]) . '">' . $record['acknowledgement_no'] . '</a>';
+
+            $edit = '';
+            // if ($hasShowActivatePermission) {
+            //     $overallStatus = $this->getOverallStatus($record['acknowledgement_no']);
+            //     $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            //         <input
+            //             data-id="' . $record['acknowledgement_no'] . '"
+            //             onchange="confirmActivation(this)"
+            //             class="form-check-input"
+            //             type="checkbox"
+            //             id="SwitchCheckSizesm' . $record['_id'] . '"
+            //             ' . ($overallStatus == 1 ? 'checked title="Deactivate"' : 'title="Activate"') . '>
+            //      </div>';
+            // }
+
+
+                 $CUser = Auth::id();
+                 if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
+                //     if ($hasShowSelfAssignPermission) {
+                     $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                         <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                         </div>
+                     </div>';
+                   //  }
+                } elseif ($record['assigned_to'] == $CUser) {
+                //     if ($hasShowSelfAssignPermission) {
+                    $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                    </div>';
+                //     }
+                } elseif ($record['assigned_to'] == null) {
+                //     if ($hasShowSelfAssignPermission) {
+                    $edit .= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                         <form action="" method="GET">
+                        <button data-id="' . $record['acknowledgement_no'] . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                        </form>
+                     </div>';
+                //     }
+
+                } elseif($record['assigned_to']) {
+                    dd($record['assigned_to']);
+                    $user = User::find($record['assigned_to']);
+                   // dd($user);
+                //     if ($user != null) {
+                        $edit .= '<p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                        <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <p class="text-success">Assigned To: ' . $user->name . '</p>
+                        </div>';
+                //     }
                 }
 
 
@@ -962,6 +1333,7 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
 
     // If no children are found in the current layer, and we're not at the first layer
     if ($children->isEmpty()) {
+        
 
         // Check in the previous layer (Layer 1) itself for the same transaction ID
         $sameLayerMatches = BankCaseData::where('Layer', $currentLayer - 1 )
@@ -971,24 +1343,24 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
 
         foreach ($sameLayerMatches as $match){
             // Calculate the dispute amount as if it's a child in Layer 2
-
-            if ($capitalAmount <= 0) {
+           
+            if ($capitalAmount <= 0){
                 break; // If capital amount is zero or negative, stop processing further matches
             }
 
-            if ($match->transaction_amount <= $capitalAmount) {
-
+            if($match->transaction_amount <= $capitalAmount){
+                
                 $disputeAmount = $match->transaction_amount;
                 $capitalAmount -= $disputeAmount;
-            } else {
-
+            } else{
+               
                 $disputeAmount = $capitalAmount;
                 $capitalAmount = 0; // Set to zero to stop further processing
             }
 
             // Update the match's dispute_amount only if it hasn't been updated yet
-
-            if (!isset($updatedObjectIds[$match->_id])) {
+           
+            if (!isset($updatedObjectIds[$match->_id])){
                 $match->dispute_amount = $disputeAmount;
                 $match->save();
                 $updatedObjectIds[$match->_id] = true;
@@ -999,6 +1371,7 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
         }
     }
     else{
+       
         $recursiveData = [];
         foreach ($children as $child) {
 
@@ -1047,16 +1420,16 @@ $layer1Records = BankCaseData::where('Layer', 1)
 foreach ($layer1Records as $layer1Record){
     // Initialize dispute amount and capital amount for Layer 1
     if (!isset($updatedObjectIds[$layer1Record->_id])) {
-        $layer1Record->dispute_amount = $layer1Record->transaction_amount;
-        $capitalAmount = $layer1Record->transaction_amount;
-        $layer1Record->save();
+        // $layer1Record->dispute_amount = $layer1Record->transaction_amount;
+        // $capitalAmount = $layer1Record->transaction_amount;
+        // $layer1Record->save();
 
-        $updatedObjectIds[$layer1Record->_id] = true;
-
+         $updatedObjectIds[$layer1Record->_id] = true;
+        processChildren($layer1Record->transaction_id_sec, $layer1Record->transaction_amount, 2, $updatedObjectIds);
     }
 
     // Process all Layer 2 children for the current Layer 1 record
-    processChildren($layer1Record->transaction_id_sec, $capitalAmount, 2, $updatedObjectIds);
+    // processChildren($layer1Record->transaction_id_sec, $capitalAmount, 2, $updatedObjectIds);
 }
 
 
@@ -1433,6 +1806,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
 
         return response()->json(['status'=>'Status changed successfully.']);
     }
+
     public function AssignedTo(Request $request)
     {
 //dd($request->all());

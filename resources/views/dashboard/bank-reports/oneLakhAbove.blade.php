@@ -78,6 +78,9 @@
                                                 </div>
                                                 <div class="col-md-12 text-right">
                                                     <button type="submit" class="btn btn-primary">Apply Filters</button>
+                                                    <a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>
+                                                    <!-- Excel Download Button -->
+                                                   <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
                                                 </div>
                                             </div>
                                         </form>
@@ -129,13 +132,21 @@
     </div>
 </div>
 @endsection
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- DataTables CSS and JS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+<!-- DataTables Buttons CSS and JS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.2/css/buttons.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.2/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.2/js/buttons.html5.min.js"></script>
 @section('scripts')
 <script>
     $(document).ready(function () {
         var table = $('#example').DataTable({
-            "pageLength": 10, // Number of rows per page
-            "lengthMenu": [10, 25, 50, 75, 100],
             processing: true,
             serverSide: true,
             ajax: {
@@ -143,8 +154,8 @@
                 data: function (d) {
                     d.from_date = $('#from-date-new').val();
                     d.to_date = $('#to-date-new').val();
-                    d.amount = $('#amount-fil').val();  // Capture amount filter
-                    d.amount_operator = $('#amount-operator').val();  // Capture operator filter
+                    d.amount = $('#amount-fil').val();
+                    d.amount_operator = $('#amount-operator').val();
                 },
                 error: function(xhr, error, thrown) {
                     let response = xhr.responseJSON;
@@ -152,14 +163,9 @@
                     $('#alert_ajaxx').html('<div class="alert alert-danger">' + errorMessage + '</div>').show();
                 }
             },
-            dom: 'Bfrtip',
-            buttons: [
-                { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
-                { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
-            ],
             columns: [
                 {
-                    "data": null, "render": function (data, type, full, meta) {
+                   "data": null, "render": function (data, type, full, meta) {
                         return meta.row + 1;
                     }
                 },
@@ -179,9 +185,20 @@
 
         $('#complaint-form-ncrp').on('submit', function (e) {
             e.preventDefault();
-            $('#alert_ajaxx').hide();  // Hide any previous error messages
+            $('#alert_ajaxx').hide();
             table.draw();
         });
+    });
+    $('#csvDownload, #excelDownload').on('click', function(e) {
+        e.preventDefault();
+        var format = $(this).attr('id') === 'csvDownload' ? 'csv' : 'excel'; // Determine format based on button clicked
+        var url = "{{ route('aboveReport') }}" + '?format=' + format + '&' + $.param({
+            from_date: $('#from-date-new').val(),
+            to_date: $('#to-date-new').val(),
+            amount: $('#amount-fil').val(),
+            amount_operator: $('#amount-operator').val()
+        });
+        window.location.href = url;
     });
 </script>
 @endsection

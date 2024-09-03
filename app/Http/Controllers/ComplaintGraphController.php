@@ -126,33 +126,29 @@ class ComplaintGraphController extends Controller
 
 public function chartData(Request $request)
 {
-    $day = $request->input('day');
-    $month = $request->input('month', date('m'));
-    $year = $request->input('year', date('Y'));
+    $fromDate = $request->input('from_date');
+    $toDate = $request->input('to_date');
     $source = $request->input('source', 'NCRP'); // Default to 'NCRP'
 
     // Define the default collection to use
     $collection = ($source === 'NCRP') ? Complaint::query() : ComplaintOthers::query();
 
-    // Set the start and end dates to UTC explicitly for day
-    if ($day) {
-        $startDateDay = Carbon::create($year, $month, $day, 0, 0, 0, 'UTC');
-        $endDateDay = Carbon::create($year, $month, $day, 23, 59, 59, 'UTC');
-    }
+    // Set the start and end dates to UTC explicitly
+    $startDate = Carbon::parse($fromDate)->startOfDay()->timezone('UTC');
+    $endDate = Carbon::parse($toDate)->endOfDay()->timezone('UTC');
 
-    // Set the start and end dates for the entire month
-    $startDateMonth = Carbon::create($year, $month, 1, 0, 0, 0, 'UTC');
-    $endDateMonth = Carbon::create($year, $month, Carbon::parse($startDateMonth)->daysInMonth, 23, 59, 59, 'UTC');
-
-    // Cases per day grouped by acknowledgement_no (for the specific day)
-    $casesPerDayData = $collection->raw(function($collection) use ($startDateDay, $endDateDay, $source) {
+    // Cases per day grouped by acknowledgement_no within the date range
+    $casesPerDayData = $collection->raw(function($collection) use ($startDate, $endDate, $source) {
         $groupField = ($source === 'NCRP') ? '$acknowledgement_no' : '$case_number';
-if($source === 'NCRP'){
-    return $collection->aggregate([
+
+        // Adjust end date to include only until the end of the day
+        $adjustedEndDate = $endDate->copy()->endOfDay();
+
+        return $collection->aggregate([
             ['$match' => [
                 'entry_date' => [
-                    '$gte' => new MongoDB\BSON\UTCDateTime($startDateDay->timestamp * 1000),
-                    '$lte' => new MongoDB\BSON\UTCDateTime($endDateDay->timestamp * 1000)
+                    '$gte' => new MongoDB\BSON\UTCDateTime($startDate->timestamp * 1000),
+                    '$lte' => new MongoDB\BSON\UTCDateTime($adjustedEndDate->timestamp * 1000)
                 ]
             ]],
             ['$group' => [
@@ -160,115 +156,53 @@ if($source === 'NCRP'){
                 'distinct_acknowledgements' => ['$addToSet' => $groupField]
             ]],
             ['$project' => [
-                //'cases' => ['$size' => '$distinct_acknowledgements']
-                'cases' => '$distinct_acknowledgements'
+                'cases' => ['$size' => '$distinct_acknowledgements']
             ]],
             ['$sort' => ['_id' => 1]]
         ])->toArray();
-}else{
-    return $collection->aggregate([
-        ['$match' => [
-            'created_at' => [
-                '$gte' => new MongoDB\BSON\UTCDateTime($startDateDay->timestamp * 1000),
-                '$lte' => new MongoDB\BSON\UTCDateTime($endDateDay->timestamp * 1000)
-            ]
-        ]],
-        ['$group' => [
-            '_id' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$entry_date']],
-            'distinct_acknowledgements' => ['$addToSet' => $groupField]
-        ]],
-        ['$project' => [
-            'cases' => ['$size' => '$distinct_acknowledgements']
-        ]],
-        ['$sort' => ['_id' => 1]]
-    ])->toArray();
-}
-
-    });
-//dd($casesPerDayData);
-    // Cases per month grouped by acknowledgement_no (for the specific month)
-    $casesPerMonthData = $collection->raw(function($collection) use ($startDateMonth, $endDateMonth, $source) {
-        $groupField = ($source === 'NCRP') ? '$acknowledgement_no' : '$case_number';
-        if($source === 'NCRP'){
-            return $collection->aggregate([
-                        ['$match' => [
-                            'entry_date' => [
-                                '$gte' => new MongoDB\BSON\UTCDateTime($startDateMonth->timestamp * 1000),
-                                '$lte' => new MongoDB\BSON\UTCDateTime($endDateMonth->timestamp * 1000)
-                            ]
-                        ]],
-                        ['$group' => [
-                            '_id' => ['$dateToString' => ['format' => '%Y-%m', 'date' => '$entry_date']],
-                            'distinct_acknowledgements' => ['$addToSet' => $groupField]
-                        ]],
-                        ['$project' => [
-                            'cases' => ['$size' => '$distinct_acknowledgements']
-                        ]],
-                        ['$sort' => ['_id' => 1]]
-                    ])->toArray();
-        }else{
-            return $collection->aggregate([
-                ['$match' => [
-                    'created_at' => [
-                        '$gte' => new MongoDB\BSON\UTCDateTime($startDateMonth->timestamp * 1000),
-                        '$lte' => new MongoDB\BSON\UTCDateTime($endDateMonth->timestamp * 1000)
-                    ]
-                ]],
-                ['$group' => [
-                    '_id' => ['$dateToString' => ['format' => '%Y-%m', 'date' => '$entry_date']],
-                    'distinct_acknowledgements' => ['$addToSet' => $groupField]
-                ]],
-                ['$project' => [
-                    'cases' => ['$size' => '$distinct_acknowledgements']
-                ]],
-                ['$sort' => ['_id' => 1]]
-            ])->toArray();
-        }
-
     });
 
-    // Cases per year grouped by acknowledgement_no (only for the selected year)
-    $casesPerYearData = $collection->raw(function($collection) use ($year, $source) {
-        $startOfYear = Carbon::create($year, 1, 1, 0, 0, 0, 'UTC');
-        $endOfYear = Carbon::create($year, 12, 31, 23, 59, 59, 'UTC');
 
+    // Cases per month grouped by acknowledgement_no within the date range
+    $casesPerMonthData = $collection->raw(function($collection) use ($startDate, $endDate, $source) {
         $groupField = ($source === 'NCRP') ? '$acknowledgement_no' : '$case_number';
-        if($source === 'NCRP'){
-            return $collection->aggregate([
-                        ['$match' => [
-                            'entry_date' => [
-                                '$gte' => new MongoDB\BSON\UTCDateTime($startOfYear->timestamp * 1000),
-                                '$lte' => new MongoDB\BSON\UTCDateTime($endOfYear->timestamp * 1000)
-                            ]
-                        ]],
-                        ['$group' => [
-                            '_id' => ['$dateToString' => ['format' => '%Y', 'date' => '$entry_date']],
-                            'distinct_acknowledgements' => ['$addToSet' => $groupField]
-                        ]],
-                        ['$project' => [
-                            'cases' => ['$size' => '$distinct_acknowledgements']
-                        ]],
-                        ['$sort' => ['_id' => 1]]
-                    ])->toArray();
-        }else{
-            return $collection->aggregate([
-                ['$match' => [
-                    'created_at' => [
-                        '$gte' => new MongoDB\BSON\UTCDateTime($startOfYear->timestamp * 1000),
-                        '$lte' => new MongoDB\BSON\UTCDateTime($endOfYear->timestamp * 1000)
-                    ]
-                ]],
-                ['$group' => [
-                    '_id' => ['$dateToString' => ['format' => '%Y', 'date' => '$entry_date']],
-                    'distinct_acknowledgements' => ['$addToSet' => $groupField]
-                ]],
-                ['$project' => [
-                    'cases' => ['$size' => '$distinct_acknowledgements']
-                ]],
-                ['$sort' => ['_id' => 1]]
-            ])->toArray();
-        }
+        return $collection->aggregate([
+            ['$match' => [
+                'entry_date' => [
+                    '$gte' => new MongoDB\BSON\UTCDateTime($startDate->timestamp * 1000),
+                    '$lte' => new MongoDB\BSON\UTCDateTime($endDate->timestamp * 1000)
+                ]
+            ]],
+            ['$group' => [
+                '_id' => ['$dateToString' => ['format' => '%Y-%m', 'date' => '$entry_date']],
+                'distinct_acknowledgements' => ['$addToSet' => $groupField]
+            ]],
+            ['$project' => [
+                'cases' => ['$size' => '$distinct_acknowledgements']
+            ]],
+            ['$sort' => ['_id' => 1]]
+        ])->toArray();
+    });
 
+    // Cases per year grouped by acknowledgement_no within the date range
+    $casesPerYearData = $collection->raw(function($collection) use ($startDate, $endDate, $source) {
+        $groupField = ($source === 'NCRP') ? '$acknowledgement_no' : '$case_number';
+        return $collection->aggregate([
+            ['$match' => [
+                'entry_date' => [
+                    '$gte' => new MongoDB\BSON\UTCDateTime($startDate->timestamp * 1000),
+                    '$lte' => new MongoDB\BSON\UTCDateTime($endDate->timestamp * 1000)
+                ]
+            ]],
+            ['$group' => [
+                '_id' => ['$dateToString' => ['format' => '%Y', 'date' => '$entry_date']],
+                'distinct_acknowledgements' => ['$addToSet' => $groupField]
+            ]],
+            ['$project' => [
+                'cases' => ['$size' => '$distinct_acknowledgements']
+            ]],
+            ['$sort' => ['_id' => 1]]
+        ])->toArray();
     });
 
     $casesPerDay = array_column($casesPerDayData, 'cases', '_id');

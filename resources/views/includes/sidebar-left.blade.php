@@ -24,17 +24,17 @@
 
     $hasSourceTypeManagementPermission = in_array('Source Type Management', $permissions);
     $hasNoticeManagementPermission = in_array('Notice Management', $permissions);
-    $hasAgainstEvidencePermission = in_array('Against Evidence Permission', $sub_permissions);
-    $hasAgainstBankManagement = in_array('Against Bank Management', $sub_permissions);
-    $hasAgainstMuleAccountManagement = in_array('Against Mule Account Management', $sub_permissions);
+    // $hasAgainstEvidencePermission = in_array('Against Evidence Permission', $sub_permissions);
+    // $hasAgainstBankManagement = in_array('Against Bank Management', $sub_permissions);
+    // $hasAgainstMuleAccountManagement = in_array('Against Mule Account Management', $sub_permissions);
     $hasEvidenceManagementPermission = in_array('Evidence Management', $permissions);
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
     $hasReportsPermission = in_array('Reports Management', $permissions);
-    $hasViewNCRPReportsPermission = in_array('View NCRP/Others Report', $sub_permissions);
-    $hasViewDailyBankReports = in_array('View Daily Bank Reports', $sub_permissions);
-    $hasViewAboveOneLakhReports = in_array('View Above One Lakh Report', $sub_permissions);
+    // $hasViewNCRPReportsPermission = in_array('View NCRP/Others Report', $sub_permissions);
+    //$hasViewDailyBankReports = in_array('View Daily Bank Reports', $sub_permissions);
+    //$hasViewAboveOneLakhReports = in_array('View Above One Lakh Report', $sub_permissions);
     $hasEvidenceTypePermission = in_array('Evidence Type Management', $permissions);
-    $hasNoticeViewPermission = in_array('Notice View', $sub_permissions) || $user->role == 'Super Admin';
+    //$hasNoticeViewPermission = in_array('Notice View', $sub_permissions) || $user->role == 'Super Admin';
     if ($sub_permissions) {
     $hasUploadPrimaryDataPermission = in_array('Upload Primary Data', $sub_permissions);
     $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions);
@@ -257,6 +257,21 @@
                 </a>
             </li>
         @endif
+        <li class="slide">
+            <a class="side-menu__item" data-toggle="slide" href="#">
+                <i class="side-menu__icon fe fe-file"> </i>
+                <span class="side-menu__label">Self Assigned Case Data</span>
+            </a>
+            <ul class="slide-menu">
+                <li>
+                    <a class="slide-item" href="{{ url('self-assigned-ncrp-data') }}">Self Assigned NCRP Case Data</a>
+                </li>
+                <li>
+                    <a class="slide-item" href="{{ url('self-assigned-others-data') }}">Self Assigned Others Case Data</a>
+                </li>
+            </ul>
+
+        </li>
         @if ($hasSourceTypeManagementPermission)
             <li class="slide">
                 <a class="side-menu__item" href="{{ url('sourcetype') }}">
@@ -273,28 +288,28 @@
                     <i class="angle fe fe-chevron-down"> </i>
                 </a>
                 <ul class="slide-menu">
-                    @if($hasAgainstEvidencePermission)
+                    {{-- @if($hasAgainstEvidencePermission) --}}
                     <li>
                         {{-- <a class="slide-item" href="{{ route('notice.evidence') }}">Against Evidence</a> --}}
                         <a class="slide-item" href="{{ route('notice.evidence') }}">Against Evidence</a>
                     </li>
-                    @endif
-                    @if($hasAgainstBankManagement)
+                    {{-- @endif --}}
+                    {{-- @if($hasAgainstBankManagement) --}}
                     <li>
                         <a class="slide-item" href="{{ route('notice.bank') }}">Against Bank</a>
                     </li>
-                    @endif
-                    @if($hasAgainstMuleAccountManagement)
+                    {{-- @endif --}}
+                    {{-- @if($hasAgainstMuleAccountManagement) --}}
                     <li>
                         {{-- <a class="slide-item" href="{{ route('bank-case-data.index') }}">Against Mule Account</a> --}}
                         <a class="slide-item" href="{{ route('notice.mule.account') }}">Against Mule Account</a>
                     </li>
-                    @endif
-                    @if ($hasNoticeViewPermission)
+                    {{-- @endif --}}
+                    {{-- @if ($hasNoticeViewPermission) --}}
                     <li>
                         <a class="slide-item" href="{{ url('notices') }}">View Notices</a>
                     </li>
-                @endif
+                {{-- @endif --}}
                 </ul>
 
             </li>
@@ -323,27 +338,27 @@
                 <i class="angle fe fe-chevron-down"> </i>
             </a>
             <ul class="slide-menu">
-                @if ($hasViewNCRPReportsPermission)
+                {{-- @if ($hasViewNCRPReportsPermission) --}}
                 <li>
                     <a class="slide-item" href="{{ Route('evidence.reports.index') }}">Evidence based Case Data</a>
                 </li>
                 <li>
                     <a class="slide-item" href="{{ Route('bank.reports.index') }}">Bank Action based Case Data</a>
                 </li>
-                @endif
+                {{-- @endif --}}
                 {{-- @if ($hasUploadPrimaryDataPermission) --}}
-                @if ($hasViewDailyBankReports)
+                {{-- @if ($hasViewDailyBankReports) --}}
                     <li>
                         <a class="slide-item" href="{{ url('/bank-daily-reports') }}">Daily Bank Reports</a>
                     </li>
-                @endif
                 {{-- @endif --}}
-                @if ($hasViewAboveOneLakhReports)
+                {{-- @endif --}}
+                {{-- @if ($hasViewAboveOneLakhReports) --}}
 
                     <li>
                         <a class="slide-item" href="{{ route('above-one-lakh') }}">Amount wise Report</a>
                     </li>
-             @endif
+             {{-- @endif --}}
             </ul>
         </li>
     @endif
