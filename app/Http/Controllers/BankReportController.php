@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Bank;
 use App\Models\Modus;
+use League\Csv\Writer;
 use App\Models\ComplaintAdditionalData;
 use App\Models\BankCasedata;
 use Illuminate\Http\Request;
@@ -452,10 +454,12 @@ public function getBankDetailsByDate(Request $request)
 
 public function getAboveData(Request $request)
 {
+    //dd($request->all());
     // Default dates to today if not provided
     $fromDate = $request->input('from_date');
     $toDate = $request->input('to_date');
-
+    $format = $request->input('format');
+    //dd($format);
     // Extract search term from DataTable request
     $search_arr = $request->get('search');
     $searchValue = $search_arr['value'] ?? '';
@@ -672,7 +676,60 @@ public function getAboveData(Request $request)
     }
 
     $formattedResults = array_values($filteredResults);
+    //dd($formattedResults);
+if($format == 'csv'){
 
+
+    if (empty($formattedResults)) {
+        // Return JSON response with the error message
+        return response()->json(['errorMessage' => 'No data available for CSV export'], 422);
+    }
+
+    // Create a CSV writer
+    $csv = Writer::createFromString('');
+    $csv->insertOne([
+         "Sl.no", "Acknowledgement No", "District", "Reported Date & Time", "Amount Reported",
+        "Transaction Date", "Lien Amount", "Amount Lost", "Amount Pending", "Pending Banks"
+    ]);
+//print_r($data_arr_print);
+    foreach ($formattedResults as $key => $row) {
+        $row["Sl.no"] = $key + 1;
+        $csv->insertOne([
+            $row["Sl.no"], $row["acknowledgement_no"], $row["district"], $row["reported_date"],
+            $row["total_amount"], $row["transaction_period"], $row["lien_amount"], $row["amount_lost"], $row["amount_pending"], $row["pending_banks"], $row["modus"],
+
+        ]);
+    }
+
+    $csvOutput = $csv->toString();
+    return response($csvOutput, 200, [
+        'Content-Type' => 'text/csv',
+        'Content-Disposition' => 'attachment; filename="Ncrp case data.csv"',
+    ]);
+
+
+
+}elseif($format == 'excel'){
+    if (empty($formattedResults)) {
+        // Return JSON response with the error message
+        return response()->json(['errorMessage' => 'No data available for Excel export'], 422);
+    }
+
+    // Define the headings for the Excel file
+    $headings = [
+        "Sl.no", "Acknowledgement No", "District", "Reported Date & Time", "Amount Reported",
+        "Transaction Date", "Lien Amount", "Amount Lost", "Amount Pending", "Pending Banks"
+    ];
+
+    // Remove 'id' field from data_arr_print
+    $formattedResults = array_map(function ($row) {
+        unset($row['Sl.no']);
+        return $row;
+    }, $formattedResults);
+
+    // Generate and return Excel file with specified headings
+    return Excel::download(new \App\Exports\ComplaintExport($formattedResults, $headings), 'Ncrp case data.xlsx');
+}
     // Implement server-side processing logic for DataTables
     $draw = intval($request->input('draw'));
     $start = intval($request->input('start'));

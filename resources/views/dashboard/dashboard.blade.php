@@ -568,14 +568,21 @@
         const fromDateInput = document.getElementById('startDate');
         const toDateInput = document.getElementById('endDate');
 
+        const fromDateInputs = document.getElementById('start_date');
+        const toDateInputs = document.getElementById('end_date');
+
         const today = new Date();
         const toDate = today.toISOString().split('T')[0];
+        const toDates = today.toISOString().split('T')[0];
 
         today.setMonth(today.getMonth() - 1);
         const fromDate = today.toISOString().split('T')[0];
+        const fromDates = today.toISOString().split('T')[0];
 
         fromDateInput.value = fromDate;
+        fromDateInputs.value = fromDates;
         toDateInput.value = toDate;
+        toDateInputs.value = toDates;
     });
 
     $(document).ready(function() {
@@ -646,7 +653,7 @@
         }],
         xaxis: {
             categories: labels,
-            labels: { 
+            labels: {
                 style: {
                     fontSize: '12px'
                 }

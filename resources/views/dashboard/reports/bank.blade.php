@@ -406,7 +406,7 @@ $user = Auth::user();
  $('#csvDownload, #excelDownload').on('click', function(e) {
         e.preventDefault();
         var format = $(this).attr('id') === 'csvDownload' ? 'csv' : 'excel'; // Determine format based on button clicked
-        var url = "{{ route('get.datalist.ncrp') }}" + '?format=' + format + '&' + $.param({
+        var url = "{{ route('get.datalist.bank') }}" + '?format=' + format + '&' + $.param({
             from_date: $('#from-date-new').val(),
             to_date: $('#to-date-new').val(),
             current_date: $('#current_date').val(),

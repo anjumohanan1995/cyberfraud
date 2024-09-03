@@ -196,6 +196,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('bank-action-reports', [ReportsController::class, 'bankReportsIndex'])->name("bank.reports.index")->middleware('check.permission:Reports Management');
     // Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
+    Route::get('get-datalist-bank', [ReportsController::class, 'getDatalistBank'])->name("get.datalist.bank");
+
     Route::get('get-datalist-othersourcetype', [ReportsController::class, 'getDatalistOthersourcetype'])->name("get.datalist.othersourcetype");
 
     Route::resource('evidencetype', EvidenceTypeController::class)->middleware('check.permission:Evidence Type Management');
