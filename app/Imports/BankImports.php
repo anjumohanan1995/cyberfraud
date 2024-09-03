@@ -50,7 +50,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         $collection->transform(function ($values){
              // Convert the 'entry_date' field
-           
+
             return [
                 'sl_no' => $values[0] ?? null,
                 'acknowledgement_no' => $values[1] ?? null,
@@ -300,7 +300,7 @@ protected function validationMessages($index)
             }
         }
 
-        throw new \Illuminate\Validation\ValidationException("Unable to parse date: '$dateString'");
+        //throw new \Illuminate\Validation\ValidationException("Unable to parse date: '$dateString'");
 
     }
 

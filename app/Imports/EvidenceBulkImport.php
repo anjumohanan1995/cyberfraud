@@ -43,7 +43,7 @@ class EvidenceBulkImport implements ToCollection, WithStartRow
 
     public function startRow(): int
     {
-        return 2;
+        return 1;
     }
 
     public function collection(Collection $collection)
@@ -259,39 +259,79 @@ class EvidenceBulkImport implements ToCollection, WithStartRow
     }
 
 
+    // protected function isDuplicate($data)
+    // {
+    //     $query = Evidence::where('url', $data['url']);
+
+    //     $orConditions = [];
+
+    //     if (!empty($data['domain'])) {
+    //         $orConditions[] = ['domain' => $data['domain']];
+    //     }
+    //     if (!empty($data['ip'])) {
+    //         $orConditions[] = ['ip' => $data['ip']];
+    //     }
+    //     if (!empty($data['ack_no'])) {
+    //         $orConditions[] = ['ack_no' => $data['ack_no']];
+    //     }
+    //     if (!empty($data['ticket'])) {
+    //         $orConditions[] = ['ticket' => $data['ticket']];
+    //     }
+
+    //     if (!empty($orConditions)) {
+    //         $query->where(function ($q) use ($orConditions) {
+    //             foreach ($orConditions as $condition) {
+    //                 $q->orWhere($condition);
+    //             }
+    //         });
+    //     }
+
+    //     $isDuplicate = $query->exists();
+
+    //     Log::info("Duplicate check result: " . ($isDuplicate ? 'Yes' : 'No'), $data);
+
+    //     return $isDuplicate;
+    // }
+
     protected function isDuplicate($data)
     {
-        $query = Evidence::where('url', $data['url']);
+        // Start the query scoped by the provided ack_no
+        $query = Evidence::where('ack_no', $data['ack_no'])
+                     ->where('url', $data['url']);
 
-        $orConditions = [];
+        // Add conditions to check for uniqueness of domain and ip within the same ack_no
 
-        if (!empty($data['domain'])) {
-            $orConditions[] = ['domain' => $data['domain']];
-        }
-        if (!empty($data['ip'])) {
-            $orConditions[] = ['ip' => $data['ip']];
-        }
-        if (!empty($data['ack_no'])) {
-            $orConditions[] = ['ack_no' => $data['ack_no']];
-        }
-        if (!empty($data['ticket'])) {
-            $orConditions[] = ['ticket' => $data['ticket']];
-        }
-
-        if (!empty($orConditions)) {
-            $query->where(function ($q) use ($orConditions) {
-                foreach ($orConditions as $condition) {
-                    $q->orWhere($condition);
-                }
+        if (!empty($data['url'])) {
+            // Check if the domain exists for the same ack_no
+            $query->orWhere(function ($q) use ($data) {
+                $q->where('url', $data['url']);
             });
         }
 
+        if (!empty($data['domain'])) {
+            // Check if the domain exists for the same ack_no
+            $query->orWhere(function ($q) use ($data) {
+                $q->where('domain', $data['domain']);
+            });
+        }
+
+        if (!empty($data['ip'])) {
+            // Check if the ip exists for the same ack_no
+            $query->orWhere(function ($q) use ($data) {
+                $q
+                  ->where('ip', $data['ip']);
+            });
+        }
+
+        // Execute the query to check if any duplicates exist
         $isDuplicate = $query->exists();
 
+        // Log the result of the duplicate check for debugging purposes
         Log::info("Duplicate check result: " . ($isDuplicate ? 'Yes' : 'No'), $data);
 
         return $isDuplicate;
     }
+
 
     protected function isValidForType($data, $type)
     {

@@ -126,7 +126,7 @@
 
                             @if ($account['Layer'] == 1)
                             1
-                        @elseif ($account['Layer'] > 1 && $account['action_taken_by_bank'] != 'Cash Withdrawal through Cheque' && $account['action_taken_by_bank'] != 'Withdrawal through ATM')
+                        @elseif ($account['Layer'] > 1 && $account['action_taken_by_bank'] != 'cash withdrawal through cheque' && $account['action_taken_by_bank'] != 'withdrawal through atm')
                             {{ $account['Layer'] }}
                         @else
                         {{ $account['action_taken_by_bank'] }}

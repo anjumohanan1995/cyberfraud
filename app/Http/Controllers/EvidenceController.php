@@ -1106,7 +1106,29 @@ class EvidenceController extends Controller
             $import = new EvidenceBulkImport;
 
             // Run the import process
-            Excel::import($import, $file);
+            // Excel::import($import, $file);
+              $excelFile = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+            $worksheet = $excelFile->getActiveSheet();
+
+            // Check the first row
+            $firstRow = $worksheet->rangeToArray('A1:Z1')[0];  // Adjust range if necessary
+            $firstCellValue = $firstRow[0];
+
+            // If the first row starts with the specified text, delete the row
+            if (stripos($firstCellValue, 'The evidence types should be the following') === 0) {
+                $worksheet->removeRow(1);
+            }
+
+            // Save the modified file
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelFile, 'Xlsx');
+            $tempPath = storage_path('app/uploads/temp_' . time() . '.xlsx');
+            $writer->save($tempPath);
+
+            // Import the modified file
+            Excel::import($import, $tempPath);
+
+            // Delete the temporary file
+            unlink($tempPath);
 
             // Check if there are any custom errors from the import process
             if (!empty($import->getErrors())) {
@@ -1426,7 +1448,7 @@ class EvidenceController extends Controller
             ['1216212', 'https://www.instagram.com', 'instagram.com','Hosting','TK0052','TK0053','TK0054','Facebook','Fraud'],
 
         ];
-        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'social-media.xlsx');
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }
@@ -1458,7 +1480,7 @@ class EvidenceController extends Controller
 
 
         ];
-        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'mobile.xlsx');
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }
@@ -1484,7 +1506,7 @@ class EvidenceController extends Controller
             ['12162123', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
 
         ];
-        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'website.xlsx');
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }

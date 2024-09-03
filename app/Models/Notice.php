@@ -25,7 +25,9 @@ class Notice extends Eloquent
         'approve_id',
         'assing_by_user_id',
         'assing_to_user_id',
-        'type'
+        'type',
+        'account_no',
+        'bank'
 
 
 
