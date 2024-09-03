@@ -122,21 +122,21 @@ $user = Auth::user();
                                         <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
-                            <div class="alert alert-success alert-dismissible fade show w-100" id="sucessalert" style="display:none" role="alert">
-                                        {{ session('success') }}
+                            {{-- <div class="alert alert-success alert-dismissible fade show w-100" id="sucessalert" style="display:none" role="alert">
+                                        <span id="success-span"></span>
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
-                                    </div>
+                            </div> --}}
 
                                 @if (session()->has('upload_id'))
                                 <input type="hidden" id="upload_id" value="{{ session('upload_id') }}">
 
                                 @endif
 
-                                @if (session('success'))
-                                    <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert" role="alert">
-                                        {{ session('success') }}<div id="loader" class="d-none">
+                                {{-- @if (session('success')) --}}
+                                    <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert-loader" role="alert" style="display:none">
+                                        Processing Upload.<div id="loader" class="d-none">
                                         <div class="dot"></div>
                                         <div class="dot"></div>
                                         <div class="dot"></div>
@@ -146,13 +146,17 @@ $user = Auth::user();
                                         </button>
                                     </div>
 
-                                @endif
+                                {{-- @endif --}}
+                                
+
                                 <div class="alert alert-success alert-dismissible fade show w-100" id="success-alert-upload" style="display:none" role="alert">
-                                        Successfully Uploaded.
+                                        Successfully Uploaded!!.
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
+
+
                                 @if (session('error'))
                                     <div class="alert alert-danger alert-dismissible fade show w-100" role="alert">
                                         {{ session('error') }}
@@ -174,7 +178,7 @@ $user = Auth::user();
 
 
                             <div class="table-responsive mb-0">
-                                <form action="{{ route('complaints.store') }}" method="POST" enctype="multipart/form-data" onsubmit="showSpinner()">
+                                <form action="{{ route('complaints.store') }}" method="POST" enctype="multipart/form-data" >
                                     @csrf
                                     <div class="row">
                                         <div class="col-md-6">
@@ -243,16 +247,16 @@ $(document).ready(function(){
         }
 
         // Hide spinner when page loaded
-        window.addEventListener('load', function() {
+        /*window.addEventListener('load', function() {
             var spinnerContainer = document.getElementById('spinnerContainer');
             spinnerContainer.classList.remove('spinner-active'); // Hide spinner after page loaded
 
             // Unblur the background
             document.body.classList.remove('blur-background');
-        });
+        });*/
     </script>
 
-<script>
+{{-- <script>
 $(document).ready(function() {
  
     var totalCalls = 0; // Counter for the total number of AJAX calls
@@ -301,7 +305,78 @@ $(document).ready(function() {
     intervalId = setInterval(executeAjaxCall, 5000);
     @endif
 });
+</script> --}}
+
+
+<script>
+@if (session('redirected'))
+<?php session()->forget('redirected'); ?>
+document.addEventListener("DOMContentLoaded", function() {
+    const uploadId = $("#upload_id").val();
+    const eventSource = new EventSource(`/sse/${uploadId}`);
+    const spinnerContainer = document.getElementById("spinnerContainer");
+    spinnerContainer.classList.add('spinner-active');
+    document.body.classList.add('blur-background');
+
+    eventSource.onmessage = function(event){
+        const data = JSON.parse(event.data);
+
+    
+        console.log("Job Status:", data.status);
+        console.log("Errors:", data.errors);
+
+        if (data.status === 'completed') {
+
+            spinnerContainer.classList.remove('spinner-active');
+            document.body.classList.remove('blur-background');
+            $("#success-alert-upload").show();
+        
+            $("#erroralert").hide();
+      
+
+        }
+        else if(data.status === 'unknown'|| data.status === 'processing'){
+              $("#success-alert-loader").hide();
+              $("#success-alert-upload").hide();
+              spinnerContainer.classList.add('spinner-active');
+              document.body.classList.add('blur-background');
+          
+              $("#erroralert").hide();
+        }
+        else if(data.status === 'failed'){
+
+             const errorsList = document.getElementById('errors');
+             spinnerContainer.classList.remove('spinner-active'); 
+             document.body.classList.remove('blur-background');
+             $("#erroralert").show();
+             $("#success-alert-upload").hide();
+             $("#success-alert-loader").hide();
+      
+             data.errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                errorsList.appendChild(li);
+            });
+        }
+     
+        if (data.status === 'completed' || data.status === 'failed') {
+            eventSource.close();
+        }
+         
+    };
+
+    eventSource.onerror = function(error) {
+        console.error("SSE Error:", error);
+        eventSource.close(); // Optionally close the connection on error
+    };
+});
+@endif
 </script>
+
+
+
+
+
 
 
 

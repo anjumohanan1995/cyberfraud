@@ -79,7 +79,7 @@ class ComplaintController extends Controller
                 if ($file){
                     try {
 
-                        // FacadesExcel::import(new ComplaintImport($source_type), $file);
+                         FacadesExcel::import(new ComplaintImport($source_type), $file);
                         $userId = Auth::user()->id;
                         $uploadId = (string) Str::uuid();
                         session()->forget('upload_id');
@@ -87,7 +87,8 @@ class ComplaintController extends Controller
                         $filePath = $request->file('complaint_file')->store('imports');
                         ImportComplaintsJob::dispatch($filePath, $source_type , $userId , $uploadId);
 
-                        return redirect()->back()->with('success', 'Uploading...')->with('redirected', true);
+                        //return redirect()->back()->with('success', 'Uploading...')->with('redirected', true);
+                        return redirect()->back()->with('redirected', true);
                         
                         UploadErrors::where('upload_id', $uploadId)->delete();
                         
