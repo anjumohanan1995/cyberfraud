@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use MongoDB\Operation\DropCollection;
+use App\Http\Controllers\SSEController;
 
 /*
 |--------------------------------------------------------------------------
@@ -372,5 +373,6 @@ Route::delete('/wallet/{id}', [SourceTypeController::class, 'destroywallet'])->n
 
 Route::patch('users/{id}/update-status', [UsersController::class, 'updateStatus']);
 
+Route::get('/sse/{uploadId}', [SSEController::class, 'stream']);
 Route::post('individual/evidence/store', [EvidenceController::class, 'individualStoreEvidence'])->name('individualevidenceStore');
 

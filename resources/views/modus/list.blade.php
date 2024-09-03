@@ -169,8 +169,11 @@ $(document).ready(function(){
                     $('#success-message').fadeIn(); // Show the message
                 }
             },
-            error: function(xhr, status, error){
-                console.error(xhr.responseText);
+            error: function(xhr, status, error) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $('#' + key).after('<div class="text-danger">' + value + '</div>');
+                });
             }
         });
     });

@@ -67,7 +67,7 @@
                                             <div class="form-group">
                                                 <label for="name">Sub Category:</label>
                                                 <input type="text" id="subcategory" name="subcategory" class="form-control" placeholder="Category Name" value="{{ old('name') }}" required>
-                                                @error('name')
+                                                @error('subcategory')
                                                     <div class="text-danger">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -167,8 +167,11 @@ $(document).ready(function(){
                 subcategoryTable.ajax.reload(null, false);
 
             },
-            error: function(xhr, status, error){
-                console.error(xhr.responseText);
+            error: function(xhr, status, error) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $('#' + key).after('<div class="text-danger">' + value + '</div>');
+                });
             }
         });
     });

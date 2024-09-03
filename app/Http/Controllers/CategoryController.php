@@ -45,16 +45,25 @@ class CategoryController extends Controller
           'name' => 'required',
           'status' => 'required',
         ]);
+
+
         if ($validate->fails()) {
             //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
+            return response()->json(['errors' => $validate->errors()], 422);
+        }
+
+        $name = strtoupper($request->name);
+
+        // Check if the name already exists in the database
+        if (Category::where('deleted_at', null)->where('name', $name)->exists()) {
+            return response()->json(['errors' => ['name' => 'This category type name already exists.']], 422);
         }
 
         Category::create([
-            'name' => @$request->name? $request->name:'',
+            'name' => $name,
             'status' => $request->input('status'),
-
         ]);
+
 
         return redirect()->back()->with('success', 'Category Added successfully!');
     }
@@ -98,14 +107,30 @@ class CategoryController extends Controller
           'name' => 'required',
           'status' => 'required',
         ]);
+
         if ($validate->fails()) {
             //dd($validate);
             return Redirect::back()->withInput()->withErrors($validate);
         }
-        $category = category::find($id);
-        $category->name = $request->name;
-        $category->status = $request->status;
-        $category->update();
+
+        // Find the role by its ID.
+        $data = Category::findOrFail($id);
+
+        $newName = strtoupper($request->name);
+
+        // Check if the new name already exists for a different record
+        if (Category::where('deleted_at', null)->where('name', $newName)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['name' => 'This category type name already exists.']);
+        }
+
+        // Update the evidence type with the data from the request
+        $data->name = $newName;
+        $data->status = $request->status;
+
+        // Update other attributes as needed
+        // Save the updated evidence type
+        $data->save();
+
         return redirect()->route('category.index')->with('success', 'Category Updated successfully!');
 
     }
@@ -212,15 +237,22 @@ class CategoryController extends Controller
           'status' => 'required',
         ]);
         if ($validate->fails()) {
-
+            //dd($validate);
             return response()->json(['errors' => $validate->errors()], 422);
         }
 
-        Category::create([
-            'name' => @$request->name? $request->name:'',
-            'status' => $request->input('status'),
+        $name = strtoupper($request->name);
 
+        // Check if the name already exists in the database
+        if (Category::where('deleted_at', null)->where('name', $name)->exists()) {
+            return response()->json(['errors' => ['name' => 'This category type name already exists.']], 422);
+        }
+
+        Category::create([
+            'name' => $name,
+            'status' => $request->input('status'),
         ]);
+
         return response()->json(['success' => 'Category Added successfully!'], 200);
     }
 }

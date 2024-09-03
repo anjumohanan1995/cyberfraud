@@ -52,7 +52,9 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                                     <div class="form-group">
                                         <label for="name">Name:</label>
                                         <input type="text" id="name" name="name" class="form-control" placeholder="Enter Evidence Type" value="{{ old('name') }}" required>
-                                        <div class="text-danger" id="nameError"></div>
+                                        @error('name')
+                                           <div class="text-danger">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -62,7 +64,9 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
                                         </select>
-                                        <div class="text-danger" id="statusError"></div>
+                                        @error('status')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
                                     </div>
                                 </div>
                             </div>
@@ -128,21 +132,27 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                 data: $(this).serialize(),
                 success: function(response) {
                     // Clear form fields and errors
-                    $('#addEvidenceTypeForm')[0].reset();
-                    $('#nameError').text('');
-                    $('#statusError').text('');
+                    // $('#addEvidenceTypeForm')[0].reset();
+                    // $('#nameError').text('');
+                    // $('#statusError').text('');
 
-                    // Show success message
-                    $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                    // // Show success message
+                    // $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
 
-                    // Reload DataTable
-                    table.ajax.reload();
+                    // // Reload DataTable
+                    // table.ajax.reload();
+
+                            // Reload DataTable to show the new record
+                table.ajax.reload(null, false); // false to keep the current page
+                $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                $('#sourceTypeForm')[0].reset(); // Reset the form
                 },
-                error: function(xhr) {
-                    var errors = xhr.responseJSON.errors;
-                    $('#nameError').text(errors.name ? errors.name[0] : '');
-                    $('#statusError').text(errors.status ? errors.status[0] : '');
-                }
+                error: function(xhr, status, error) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $('#' + key).after('<div class="text-danger">' + value + '</div>');
+                });
+            }
             });
         });
 
