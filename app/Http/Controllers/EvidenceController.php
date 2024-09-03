@@ -1349,7 +1349,58 @@ class EvidenceController extends Controller
             'evidence_type_other' => $evidence_type_other,
             'status' => $status
         ]);
+
     }
+
+
+    public function individualStoreEvidence(Request $request)
+    {
+        // dd($request);
+        if ($request->has('identifier') && $request->has('idField')) {
+            $identifier = $request->input('identifier');
+            $idField = $request->input('idField');
+            $source_type = null;
+            $evidence_type_ncrp = null;
+            $evidence_type_other = null;
+
+            // Try to retrieve the record from the ComplaintOthers model first
+            $query = ComplaintOthers::where('case_number', $identifier)
+                                    ->where('_id', $idField);
+    // dd($query);
+            if ($query->exists()) {
+                $source_type = 'other';
+                $evidence_type_other = $query->pluck('evidence_type')->first();
+                // dd($evidence_type_other);
+            } else {
+                // If not found in ComplaintOthers, try the Evidence model
+                $query = Evidence::where('ack_no', $identifier)
+                                ->where('_id', $idField);
+                if ($query->exists()) {
+                    $source_type = 'ncrp';
+                    $evidence_type_ncrp = $query->pluck('evidence_type')->first();
+                }
+            }
+
+            // If the record is still not found, handle the error scenario
+            if (!$query->exists()) {
+                return redirect()->back()->with('error', 'Record not found');
+            }
+
+            $data = $query->get();
+    // dd($data);
+            // Perform actions specific to this request
+
+            return response()->json([
+                'message' => 'Data received successfully',
+                'data' => $data,
+                'source_type' => $source_type,
+                'evidence_type_ncrp' => $evidence_type_ncrp,
+                'evidence_type_other' => $evidence_type_other,
+            ]);
+        }
+        return redirect()->back()->with('error', 'Invalid Request');
+    }
+
 
     public function createEvidenceDownloadTemplate()
     {
@@ -1371,7 +1422,7 @@ class EvidenceController extends Controller
         $additionalRowsData = [
             [ 'Acknowledgement No','URL', 'Post/Profile','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
             ['1212120', 'https://www.facebook.com', 'facebook.com','Site maintenance','TK0016','TK0017','TK0018','Instagram','Phishing'],
-            ['1215212', 'https://www.twitter.com', 'twitter.com','Reopened','TK0023','TK0024','TK0025','Website','Malware'],
+            ['1215212', 'https://www.twitter.com', 'twitter.com','Reopened','TK0023','TK0024','TK0025','Twitter','Malware'],
             ['1216212', 'https://www.instagram.com', 'instagram.com','Hosting','TK0052','TK0053','TK0054','Facebook','Fraud'],
 
         ];
@@ -1399,10 +1450,10 @@ class EvidenceController extends Controller
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
-            ['1', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Phishing'],
-            ['2', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Fraud'],
-            ['3', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Malware'],
+            ['Acknowledgement No', 'Mobile', 'Country Code','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['11212120', '6985743214', '+91','Site maintenance','TK0016','TK0017','TK0018','Mobile','Phishing'],
+            ['21215212', '9632148574', '+91','In-Progress','TK0063','TK0064','TK0065','Mobile','Fraud'],
+            ['31216212', '9685743201', '+91','Dismissed','TK0081','TK0082','TK0083','Whatsapp','Malware'],
 
 
 
@@ -1427,10 +1478,10 @@ class EvidenceController extends Controller
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
-            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Malware'],
-            ['2', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Fraud'],
-            ['3', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
+            ['Acknowledgement No', 'URL', 'Domain','IP','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Category' ],
+            ['12121201', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Malware'],
+            ['12152122', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Fraud'],
+            ['12162123', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');

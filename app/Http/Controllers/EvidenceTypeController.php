@@ -45,14 +45,14 @@ class EvidenceTypeController extends Controller
         ]);
         if ($validate->fails()) {
             //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
+            return response()->json(['errors' => $validate->errors()], 422);
         }
 
         $name = strtolower($request->name);
 
         // Check if the name already exists in the database
         if (EvidenceType::where('deleted_at', null)->where('name', $name)->exists()) {
-            return Redirect::back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
+            return response()->json(['errors' => ['name' => 'This evidence type name already exists.']], 422);
         }
 
         EvidenceType::create([
@@ -105,6 +105,11 @@ class EvidenceTypeController extends Controller
             'status' => 'required|in:active,inactive',
             // Add more validation rules as needed
         ]);
+
+        if ($validate->fails()) {
+            //dd($validate);
+            return Redirect::back()->withInput()->withErrors($validate);
+        }
 
         // Find the role by its ID.
         $data = EvidenceType::findOrFail($id);

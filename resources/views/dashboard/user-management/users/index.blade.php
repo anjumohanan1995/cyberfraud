@@ -125,14 +125,14 @@ input:checked + .slider:before {
                                 <h4 class="card-title mg-b-10">
                                     All Users
                                 </h4>
-
+                            </div>
+                            <div >
+                                <label for="from-date-new">Status:</label>
                                 <select name="status_filter" id="status_filter" class="form-group col-2">
                                     <option value="active" selected>Active</option>
                                     <option value="inactive">Inactive</option>
                                 </select>
-
-
-                                <div class="col-md-1 col-6 text-center">
+                                <div class="col-md-1 col-6 text-center" style="float:right">
                                     @if ($hasAddUserPermission)
                                         <div class="task-box primary  mb-0">
                                             <a class="text-white" href="{{ route('users.create') }}">
@@ -141,8 +141,8 @@ input:checked + .slider:before {
                                             </a>
                                         </div>
                                     @endif
-
                                 </div>
+                            </div>
                             </div>
                             <div class="table-responsive mb-0">
                                 <table id="example"
@@ -168,8 +168,6 @@ input:checked + .slider:before {
                 </div>
             </div>
             <!-- /row -->
-
-
         </div>
         <!-- /row -->
     </div>

@@ -47,13 +47,20 @@ class ModusController extends Controller
         ]);
         if ($validate->fails()) {
             //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
+            return response()->json(['errors' => $validate->errors()], 422);
+        }
+
+
+        $name = strtoupper($request->name);
+
+        // Check if the name already exists in the database
+        if (Modus::where('deleted_at', null)->where('name', $name)->exists()) {
+            return response()->json(['errors' => ['name' => 'This modus name already exists.']], 422);
         }
 
         Modus::create([
-            'name' => @$request->name? $request->name:'',
+            'name' => $name,
             'status' => $request->input('status'),
-
         ]);
 
         return redirect()->back()->with('success', 'Modus Added successfully!');
@@ -102,10 +109,27 @@ class ModusController extends Controller
             //dd($validate);
             return Redirect::back()->withInput()->withErrors($validate);
         }
-        $modus = Modus::find($id);
-        $modus->name = $request->name;
-        $modus->status = $request->status;
-        $modus->update();
+
+
+
+        // Find the role by its ID.
+        $data = Modus::findOrFail($id);
+
+        $newName = strtoupper($request->name);
+
+        // Check if the new name already exists for a different record
+        if (Modus::where('deleted_at', null)->where('name', $newName)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->withInput()->withErrors(['name' => 'This modus name already exists.']);
+        }
+
+        // Update the evidence type with the data from the request
+        $data->name = $newName;
+        $data->status = $request->status;
+
+        // Update other attributes as needed
+        // Save the updated evidence type
+        $data->save();
+
         return redirect()->route('modus.index')->with('success', 'Modus Updated successfully!');
 
     }
@@ -207,14 +231,21 @@ class ModusController extends Controller
           'status' => 'required',
         ]);
         if ($validate->fails()) {
-
+            //dd($validate);
             return response()->json(['errors' => $validate->errors()], 422);
         }
 
-        Modus::create([
-            'name' => @$request->name? $request->name:'',
-            'status' => $request->input('status'),
 
+        $name = strtoupper($request->name);
+
+        // Check if the name already exists in the database
+        if (Modus::where('deleted_at', null)->where('name', $name)->exists()) {
+            return response()->json(['errors' => ['name' => 'This modus name already exists.']], 422);
+        }
+
+        Modus::create([
+            'name' => $name,
+            'status' => $request->input('status'),
         ]);
         return response()->json(['success' => 'Modus Added successfully!'], 200);
     }

@@ -64,7 +64,7 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="name">Name:</label>
-                                            <input type="text" id="name" name="name" class="form-control" placeholder="Enter Source Type" value="{{ old('name') }}" required>
+                                            <input type="text" id="name" name="name" class="form-control" placeholder="Enter Source Type" required>
                                             @error('name')
                                                 <div class="text-danger">{{ $message }}</div>
                                             @enderror
@@ -139,6 +139,7 @@ $(document).ready(function() {
 
     $('#sourceTypeForm').on('submit', function(e) {
         e.preventDefault(); // Prevent the default form submission
+        $('.text-danger').remove();
 
         $.ajax({
             url: "{{ route('sourcetype.store') }}",
@@ -151,7 +152,10 @@ $(document).ready(function() {
                 $('#sourceTypeForm')[0].reset(); // Reset the form
             },
             error: function(xhr, status, error) {
-                console.error(xhr.responseText);
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $('#' + key).after('<div class="text-danger">' + value + '</div>');
+                });
             }
         });
     });

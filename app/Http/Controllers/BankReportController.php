@@ -312,7 +312,7 @@ public function getBankDetailsByDate(Request $request)
     //dd($complaints);
     $acknowledgementNos = $complaints->pluck('acknowledgement_no')->toArray();
 
-    $bankCasedata = BankCaseData::whereIn('acknowledgement_no', $acknowledgementNos)->get();
+    $bankCasedata = BankCaseData::whereIn('acknowledgement_no', $acknowledgementNos)->where('com_status', 1)->get();
 //dd($bankCasedata);
 
     //$complaints = Complaint::whereIn('acknowledgement_no', $acknowledgementNos)->get();
@@ -338,7 +338,7 @@ public function getBankDetailsByDate(Request $request)
                     'actual_amount_hold_on' => 0,
                     'hold_amount_otherthan' => 0,
                     'total_amount_lost_from_eco' => 0,
-                    'total_hold' => 0,
+                    'total_holds' => 0,
                     'amount_for_pending_action' => 0,
                     '1930_count' => 0,
                     'NCRP_count' => 0,
@@ -362,13 +362,16 @@ public function getBankDetailsByDate(Request $request)
                     $entry_date = $utc_date->format('Y-m-d H:i:s');
 
                     $entry_date_dt = new \DateTime($entry_date);
+                    //dd($entry_date_dt->format('Y-m-d'));
                     $transaction_date_dt = new \DateTime($data->transaction_date->toDateTime()->format('Y-m-d H:i:s'));
-
+                    //dd($transaction_date_dt->format('Y-m-d'), $entry_date_dt->format('Y-m-d'));
                     if ($data->Layer == 1 && $transaction_date_dt->format('Y-m-d') === $entry_date_dt->format('Y-m-d')) {
                         $results[$district]['actual_amount_lost_on'] += $data->transaction_amount;
                     }
 
                     if ($data->action_taken_by_bank == "transaction put on hold") {
+                       // dd($data->transaction_amount);
+                        //dd($data->action_taken_by_bank);
                         if ($transaction_date_dt->format('Y-m-d') == $entry_date_dt->format('Y-m-d')) {
                             $results[$district]['actual_amount_hold_on'] += $data->transaction_amount;
                         }
@@ -386,18 +389,35 @@ public function getBankDetailsByDate(Request $request)
                     ])) {
                         $results[$district]['total_amount_lost_from_eco'] += $data->transaction_amount;
                     }
+                    $results[$district]['total_holds'] = $results[$district]['actual_amount_hold_on'] + $results[$district]['hold_amount_otherthan'];
+                    $results[$district]['amount_for_pending_action'] = $results[$district]['actual_amount'] - $results[$district]['total_holds'] - $results[$district]['total_amount_lost_from_eco'];
+                    $results[$district]['total'] = $results[$district]['1930_count'] + $results[$district]['NCRP_count'];
+                    // $actions = [
+                    //     'Cash Withdrawal Through Cheque',
+                    //     'Withdrawal through ATM',
+                    //     'Other',
+                    //     'Wrong Transaction',
+                    //     'Withdrawal through POS'
+                    // ];
+                    // $totalAmountLost = BankCaseData::where('acknowledgement_no', $ackNo)
+                    // ->whereBetween('transaction_date', [$fromDateStart, $toDateEnd])
+                    //     ->whereIn('action_taken_by_bank', $actions)
+                    //     ->sum('transaction_amount');
+                    //     $results[$district]['total_amount_lost_from_eco'] = $totalAmountLost;
+
                 } catch (\Exception $e) {
                     return response()->json(['error' => 'Error parsing date: ' . $e->getMessage()], 400);
                 }
             }
         }
-    }
-
-    foreach ($results as &$result) {
-        $result['total_holds'] = $result['actual_amount_hold_on'] + $result['hold_amount_otherthan'];
-        $result['amount_for_pending_actions'] = max(0, $result['actual_amount'] - $result['total_hold'] - $result['total_amount_lost_from_eco']);
-        $result['amount_for_pending_action'] = round($result['amount_for_pending_actions'], 2);
-        $result['total'] = $result['1930_count'] + $result['NCRP_count'];
+        foreach ($results as $result) {
+            //dd($result);
+            //dd($result['actual_amount']);
+            $result['total_holds'] = $result['actual_amount_hold_on'] + $result['hold_amount_otherthan'];
+            $result['amount_for_pending_action'] = $result['actual_amount'] - $result['total_holds'] - $result['total_amount_lost_from_eco'];
+            //$result['amount_for_pending_action'] = round($result['amount_for_pending_actions'], 2);
+            $result['total'] = $result['1930_count'] + $result['NCRP_count'];
+        }
     }
 
     // Convert results array to a format DataTables expects
@@ -484,7 +504,7 @@ public function getAboveData(Request $request)
     $results = [];
     foreach ($complaints as $complaint) {
         $date = Carbon::parse($complaint['entry_date']);
-        $formattedDate = $date->format('d-m-Y');
+        $formattedDate = $date->format('d-m-Y H:i:s');
         $ackNo = (string) $complaint['acknowledgement_no'];
         if (!isset($results[$ackNo])) {
             $results[$ackNo] = [
@@ -548,20 +568,15 @@ public function getAboveData(Request $request)
         }
 
         // Check if the dates are set before using them
-        if (isset($filteredResults[$ackNo]['first_transaction_date']) && isset($filteredResults[$ackNo]['last_transaction_date'])) {
-            $combinedDate = $filteredResults[$ackNo]['first_transaction_date'] . ' - ' . $filteredResults[$ackNo]['last_transaction_date'];
-            $filteredResults[$ackNo]['transaction_period'] = $combinedDate;
-        } else {
-            $filteredResults[$ackNo]['transaction_period'] = 'N/A';
-        }
+
 
         // Lien Amount calculation
         $lienAmount = BankCaseData::where('acknowledgement_no', $ackNo)
             ->where('action_taken_by_bank', 'transaction put on hold')
-            ->whereBetween('transaction_date', [$fromDate, $toDate])
+            ->whereBetween('transaction_date', [$fromDateStart, $toDateEnd])
             ->sum('transaction_amount');
             //dd($lienAmount);
-        $filteredResults[$ackNo]['lien_amount'] = !empty($lienAmount) ? $lienAmount : 0;
+        //$filteredResults[$ackNo]['lien_amount'] = !empty($lienAmount) ? $lienAmount : 0;
 
         // Amount Lost calculation
         $actions = [
@@ -572,13 +587,15 @@ public function getAboveData(Request $request)
             'Withdrawal through POS'
         ];
         $totalAmountLost = BankCaseData::where('acknowledgement_no', $ackNo)
-            ->whereBetween('transaction_date', [$fromDate, $toDate])
+        ->whereBetween('transaction_date', [$fromDateStart, $toDateEnd])
             ->whereIn('action_taken_by_bank', $actions)
             ->sum('transaction_amount');
         $filteredResults[$ackNo]['amount_lost'] = !empty($totalAmountLost) ? $totalAmountLost : 0;
 
         // Amount Pending calculation
         $sum_amount = Complaint::where('acknowledgement_no', (int)$ackNo)->where('com_status', 1)->sum('amount');
+        //dd($sum_amount);
+        $results[$ackNo]['total_amount'] = $sum_amount;
         $hold_amount = BankCaseData::where('acknowledgement_no', (int)$ackNo)
             ->where('com_status', 1)
             ->where('action_taken_by_bank', 'transaction put on hold')
@@ -592,10 +609,9 @@ public function getAboveData(Request $request)
                 'withdrawal through pos',
                 'aadhaar enabled payment System'
             ])
-            ->sum('dispute_amount');
+            ->sum('transaction_amount');
 
         $pending_amount = $sum_amount - $hold_amount - $lost_amount;
-        $filteredResults[$ackNo]['amount_pending'] = $pending_amount;
 
         // New logic for pending banks
         $layer_one_transactions = BankCaseData::where('acknowledgement_no', (int)$ackNo)
@@ -636,11 +652,22 @@ public function getAboveData(Request $request)
        $unique_pending_banks = array_unique($pending_banks_array);
         $concatenated_banks = implode(', ', $unique_pending_banks);
 
-        $filteredResults[$ackNo]['pending_banks'] = $concatenated_banks;
         $ACK = (string)$ackNo;
         $modus = ComplaintAdditionalData::Where('ack_no', $ACK)->pluck('modus')->first();
         $modus_name = Modus::Where('_id', $modus)->pluck('name')->first();
+        $filteredResults[$ackNo]['pending_banks'] = $concatenated_banks;
         $filteredResults[$ackNo]['modus'] = $modus_name;
+        $filteredResults[$ackNo]['amount_pending'] = $pending_amount;
+        $filteredResults[$ackNo]['lien_amount'] = $hold_amount;
+        $filteredResults[$ackNo]['amount_lost'] = $lost_amount;
+        if (isset($filteredResults[$ackNo]['first_transaction_date']) && isset($filteredResults[$ackNo]['last_transaction_date'])) {
+            $combinedDate = $filteredResults[$ackNo]['first_transaction_date'] . ' - ' . $filteredResults[$ackNo]['last_transaction_date'];
+            $filteredResults[$ackNo]['transaction_period'] = $combinedDate;
+        } else {
+            $filteredResults[$ackNo]['transaction_period'] = 'N/A';
+        }
+
+
 
     }
 
@@ -653,13 +680,13 @@ public function getAboveData(Request $request)
 
 
     // Apply pagination
-    $data = array_slice($formattedResults, $start, $length);
+    $paginatedResults = array_slice($formattedResults, $start, $length);
 
     return response()->json([
         'draw' => $draw,
-        'recordsTotal' => count($results),
-        'recordsFiltered' => count($data),
-        'data' => array_values($data),
+        'recordsTotal' => count($results), // Total number of records without any filtering
+        'recordsFiltered' => count($filteredResults), // Total number of records after filtering
+        'data' => array_values($paginatedResults),
     ]);
 
 }

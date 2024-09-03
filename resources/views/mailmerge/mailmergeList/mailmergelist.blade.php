@@ -234,6 +234,7 @@ $user = Auth::user();
                                     <th>IP</th>
                                     <th>Registrar</th>
                                     <th>Registry Details</th>
+                                    <th>Generate Notice</th>
                                     <th>Portal link</th>
                                     <th>Reported Status</th>
                                     @if($hasViewNCRPStatus)<th>Status</th>@endif
@@ -247,6 +248,86 @@ $user = Auth::user();
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="noticeTable_ncrp_website" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - NCRP - Website</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - website">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - website</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/Sec.94 BNSS Act 2023 - NCRP - website">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="noticeTable_ncrp_social_media" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Notice Table</h4>
+                <button type="button" class="close" data-dismiss="modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Notice - NCRP - Social Media</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-1" data-notice="Notice U/Sec. 94 of BNSS & 79(3)(b) of IT Act 2000 - NCRP - social media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/sec 79(3)(b) of IT Act - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-2" data-notice="Notice U/sec 79(3)(b) of IT Act - NCRP - social media">Generate Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td>Notice U/Sec.94 BNSS Act 2023 - social media</td>
+                            <td><button class="btn btn-primary" id="generate-notice-3" data-notice="Notice U/Sec.94 BNSS Act 2023 - NCRP - social media">Generate Notice</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -387,6 +468,7 @@ $user = Auth::user();
                 { data: 'ip' },
                 { data: 'registrar' },
                 { data: 'registry_details' },
+                { data: 'notice_generation' },
                 { data: 'portal_link' },
                 { data: 'mail_status' },
                 @if($hasViewNCRPStatus)
@@ -568,9 +650,109 @@ $(document).ready(function(){
 
 
      })
+
+     function storeEvidence(identifier, idField) {
+        // alert("hi");
+        $.ajax({
+            console.log("hi");
+            url: "{{ route('evidenceStore') }}",
+            type: "POST",
+            data: {
+                _token: '{{ csrf_token() }}',
+                identifier: identifier,
+                idField: idField
+            },
+            success: function(response) {
+                console.log('Data saved successfully:', response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error saving data:', error);
+            }
+        });
+    }
 })
 
 </script>
+
+<script>
+
+    function storeEvidence(identifier, idField) {
+        $.ajax({
+            url: "{{ route('individualevidenceStore') }}",
+            type: "POST",
+            data: {
+                identifier: identifier,
+                idField: idField,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                alert("Data submitted successfully");
+
+                var data = response.data;
+                var source_type = response.source_type;
+                var evidence_type_ncrp = response.evidence_type_ncrp;
+
+                // Hide all modals first to ensure they are correctly toggled
+                $('#noticeTable_ncrp_website').modal('hide');
+                $('#noticeTable_ncrp_social_media').modal('hide');
+
+                // Remove any existing click event handlers to prevent multiple attachments
+                $('#noticeTable_ncrp_website .btn').off('click');
+                $('#noticeTable_ncrp_social_media .btn').off('click');
+
+                if (source_type == 'ncrp') {
+                        if (evidence_type_ncrp == 'website' && data) {
+                            $('#noticeTable_ncrp_website').modal('show'); // Show the website table
+                        } else if (evidence_type_ncrp != 'website' && data && evidence_type_ncrp != null) {
+                            $('#noticeTable_ncrp_social_media').modal('show');
+                        }
+                }
+
+
+                // Attach click event handlers to "Generate Notice" buttons
+                $('#noticeTable_ncrp_social_media .btn').click(function(){
+                        var noticeId = $(this).data('notice');
+                        // alert(noticeId);// Get the notice ID from button data attribute
+                        generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
+                    });
+                              // Attach click event handlers to "Generate Notice" buttons
+              $('#noticeTable_ncrp_website .btn').click(function(){
+                        var noticeId = $(this).data('notice');
+                        // alert(noticeId);// Get the notice ID from button data attribute
+                        generateNotice(noticeId, data, source_type); // Call function to generate notice with ID and data
+                    });
+            },
+            error: function(xhr, status, error) {
+                alert('Error: ' + error);
+            }
+        });
+    }
+
+            // Function to generate notice
+            function generateNotice(noticeId, data, source_type) {
+            console.log(data)
+            $.ajax({
+                url: "{{ route('generate.notice') }}", // Replace with your route to generate notice
+                type: "POST",
+                data: {
+                    notice_id: noticeId,
+                    data: data,
+                    source_type: source_type,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    alert("Notice generated successfully");
+                    // location.reload();
+                    // Process the response if needed
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred while generating notice");
+                }
+            });
+        }
+
+    </script>
+
 
 
 

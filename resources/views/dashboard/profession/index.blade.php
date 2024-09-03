@@ -161,9 +161,11 @@
                 // Redraw the DataTable to reflect the new data
                 table.ajax.reload();
             },
-            error: function(xhr) {
-                // Handle error response
-                console.error(xhr.responseText);
+            error: function(xhr, status, error) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $('#' + key).after('<div class="text-danger">' + value + '</div>');
+                });
             }
         });
     });
