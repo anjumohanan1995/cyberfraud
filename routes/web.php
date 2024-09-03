@@ -135,6 +135,7 @@ Route::middleware(['auth'])->group(function () {
     //case data controller starts here.
     Route::get('case-data', [CaseDataController::class, 'index'])->name("case-data.index")->middleware('check.permission:NCRP Case Data Management');
     Route::get('case-data/get-datalist', [CaseDataController::class, 'getDatalist'])->name("get.datalist");
+
     // Route::post('case-data/post-datalist/filter', [CaseDataController::class, 'getDatalist'])->name("post.datalist-filter");
     Route::get('case-data/get-bank-datalist', [CaseDataController::class, 'getBankDatalist'])->name("get.bank.datalist");
     Route::get('case-data/bank-case-data', [CaseDataController::class, 'bankCaseData'])->name("case.data.bank.case.data")->middleware('check.permission:Upload NCRP Case Data Management,Upload Bank Action');
@@ -208,6 +209,12 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
     Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
     Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
+
+
+    Route::get('self-assigned-ncrp-data', [CaseDataController::class, 'selfAssignedIndex'])->name('self-assigned-ncrp');
+    Route::get('ncrp-self-assigned-list', [CaseDataController::class, 'ncrpSelfAssigned'])->name("ncrp.self-assigned");
+    Route::get('self-assigned-others-data', [EvidenceController::class, 'OthersSelfAssigned'])->name('self-assigned-othersSelfAssigned');
+
 
     Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');
     Route::get('download-fir/{ak_no}', [CaseDataController::class, 'downloadFIR'])->name('download.fir');

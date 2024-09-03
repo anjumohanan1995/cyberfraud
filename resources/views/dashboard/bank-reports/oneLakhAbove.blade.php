@@ -134,8 +134,8 @@
 <script>
     $(document).ready(function () {
         var table = $('#example').DataTable({
-            "pageLength": 10, // Number of rows per page
-            "lengthMenu": [10, 25, 50, 75, 100],
+            // "pageLength": 10, // Number of rows per page
+            // "lengthMenu": [10, 25, 50, 75, 100],
             processing: true,
             serverSide: true,
             ajax: {
@@ -159,7 +159,7 @@
             ],
             columns: [
                 {
-                    "data": null, "render": function (data, type, full, meta) {
+                   "data": null, "render": function (data, type, full, meta) {
                         return meta.row + 1;
                     }
                 },
