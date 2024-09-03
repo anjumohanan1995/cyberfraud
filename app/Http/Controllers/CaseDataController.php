@@ -2312,10 +2312,11 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             return $caseNumber;
     }
 
-    public function createDownloadTemplate(){
+    public function createWebsiteDownloadTemplate(){
 
         $excelData = [];
         $evidenceTypes = EvidenceType::where('status', 'active')
+        ->where('name','=', 'website')
         ->whereNull('deleted_at')
         ->pluck('name')
         ->toArray();
@@ -2326,13 +2327,67 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
 
         $additionalRowsData = [
-            ['Sl.no', 'URL/Mobile', 'Domain/Post/Profile','IP/Modus Keyword','Registrar','Registry Details','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Evidence Type','Source' ],
-            ['1', 'https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration','Site maintenance','TK0016','TK0017','TK0018','Website','Public'],
-            ['2', 'https://www.facebook.com', 'facebook.com','','','','Site ','TK0023','TK0024','TK0025','Facebook','Public'],
-            ['3', 'https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration','Download','TK0052','TK0053','TK0054','Website','Open'],
-            ['4', '9632148574', '','','','','In-Progress','TK0063','TK0064','TK0065','Mobile','Open'],
-            ['5', 'https://www.instagram.com', 'instagram.com','','','','Dismissed','TK0081','TK0082','TK0083','Instagram','Open'],
+            ['Sl.no','Evidence Type', 'Remarks', 'Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Source','URL','Domain','IP','Registrar','Registry Details' ],
+            ['1','Website','Site maintenance','TK0016','TK0017','TK0018','Public','https://www.youtube.com', 'youtube.com','142.250.193.206','GoDaddy','Domain registration'],
+            ['2','Website','Site maintenance','TK0016','TK0017','TK0018','Public','https://www.dffc.com', 'dffc.com','156.250.193.119','GoDaddy','Domain registration'],
+            ['3','Website','Download','TK0052','TK0053','TK0054','Open','https://www.netflix.com', 'nteflix.com','52.94.233.108','Bluehost','WordPress integration'],
+            ['4','Website','Escalated','TK0016','TK0017','TK0018','Public','https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration'],
 
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+    }
+
+
+    public function createSocialmediaDownloadTemplate(){
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->where('name','!=', 'mobile')
+        ->where('name','!=', 'whatsapp')
+        ->where('name','!=', 'website')
+        ->whereNull('deleted_at')
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no','Evidence Type','Remarks','Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Source','URL','Post/Profile','Modus Keyword'],
+            ['1','Instagram','Site maintenance','TK0016','TK0017','TK0018','Public','https://www.facebook.com', 'Post','Modus Keyword'],
+            ['2','Twitter','Reopened','TK0023','TK0024','TK0025','Open','https://www.twitter.com', 'Profile','Modus Keyword'],
+            ['3','Facebook','Hosting','TK0052','TK0053','TK0054','Open','https://www.instagram.com', 'Post','Modus Keyword'],
+
+        ];
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+    }
+
+
+    public function createMobileDownloadTemplate(){
+
+        $excelData = [];
+        $evidenceTypes = EvidenceType::where('status', 'active')
+        ->whereNull('deleted_at')
+        ->where(function ($query) {
+            $query->where('name', 'mobile')
+                ->orWhere('name', 'whatsapp');
+        })
+        ->pluck('name')
+        ->toArray();
+
+        $uniqueItems = array_unique($evidenceTypes);
+        $commaSeparatedString = implode(',', $uniqueItems);
+
+        $firstRow = ['The evidence types should be the following :  ' . $commaSeparatedString];
+
+        $additionalRowsData = [
+            ['Sl.no','Evidence Type','Remarks', 'Content Removal Ticket','Data Disclosure Ticket','Preservation Ticket','Source','Mobile/Whatsapp','Country Code' ],
+            ['1','Mobile','Site maintenance','TK0016','TK0017','TK0018','Open','6985743214', '+91'],
+            ['2','Mobile','In-Progress','TK0063','TK0064','TK0065','Public','9632148574', '+91'],
+            ['3','Whatsapp','Dismissed','TK0081','TK0082','TK0083','Open','9685743201', '+91'],
 
         ];
         return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');

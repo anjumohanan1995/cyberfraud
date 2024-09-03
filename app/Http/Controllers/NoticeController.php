@@ -623,8 +623,231 @@ public function follow(Request $request, $id)
 
 
 
-    public function generateMuleNotice(Request $request)
-        {
+    // public function generateMuleNotice(Request $request)
+    // {
+    //     try {
+    //         // dd("hi");
+    //         $sourceType = $request->input('source_type');
+    //         $fromDate = $request->input('from_date');
+    //         $toDate = $request->input('to_date');
+    //         $entityId = $request->input('entity_id');
+    //         $entityType = $request->input('entity_type');
+
+    //         $validator = Validator::make($request->all(), [
+    //             'from_date' => 'required|date',
+    //             'to_date' => 'required|date|after_or_equal:from_date',
+    //             'entity_type' => 'required|in:bank,wallet,insurance,merchant',
+    //             'entity_id' => 'required',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return response()->json(['success' => false, 'message' => $validator->errors()->first()]);
+    //         }
+
+    //         Log::info('Generate Mule Notice Request Data', [
+    //             'source_type' => $sourceType,
+    //             'from_date' => $fromDate,
+    //             'to_date' => $toDate,
+    //             'entity_id' => $entityId,
+    //             'entity_type' => $entityType,
+    //         ]);
+
+    //         $fromDateStart = Carbon::parse($fromDate)->startOfDay();
+    //         $toDateEnd = Carbon::parse($toDate)->endOfDay();
+
+    //         switch ($entityType) {
+    //             case 'bank':
+    //                 $entity = Bank::find($entityId);
+    //                 break;
+    //             case 'wallet':
+    //                 $entity = Wallet::find($entityId);
+    //                 break;
+    //             case 'insurance':
+    //                 $entity = Insurance::find($entityId);
+    //                 break;
+    //             case 'merchant':
+    //                 $entity = Merchant::find($entityId);
+    //                 break;
+    //             default:
+    //                 return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+    //         }
+    //         if (!$entity) {
+    //             return response()->json(['success' => false, 'message' => "Entity not found for type: $entityType"], 400);
+    //         }
+
+    //         Log::info('Entity Details', ['entity' => $entity]);
+
+    //         $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
+    //                                         ->pluck('acknowledgement_no')->toArray();
+    //             // dd($acknowledgementNos);
+    //         $documents = BankCasedata::where('account_no_2', '!=', null)->get()->toArray();
+
+    //             // Process documents in PHP
+    //         $accountNumbers = [];
+    //         foreach ($documents as $doc) {
+    //                 if (isset($doc['account_no_2'])) {
+    //                     // Extract numeric part
+    //                     preg_match('/(\d+)/', $doc['account_no_2'], $matches);
+    //                     if (!empty($matches[1])) {
+    //                         $number = $matches[1];
+    //                         if (!isset($accountNumbers[$number])) {
+    //                             $accountNumbers[$number] = 0;
+    //                         }
+    //                         $accountNumbers[$number]++;
+    //                     }
+    //                 }
+    //             }
+
+    //             // Filter account numbers that repeat more than twice
+    //             $frequentAccountNumbers = array_filter($accountNumbers, function($count) {
+    //                 return $count > 2;
+    //             });
+    //             // dd($documents);
+    //             // Get the keys (account numbers) that have more than two occurrences
+    //             $frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
+    //             $layer1Cases = BankCasedata::where(function($query) use ($entity) {
+    //                 $query->where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant);
+    //             })
+    //             ->whereIn('acknowledgement_no', $acknowledgementNos)
+    //             ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    //             ->where('Layer', 1)
+    //             ->whereNotNull('account_no_2')
+    //             ->where('account_no_2', '!=', '')
+    //             ->get();
+    //         // dd($layer1Cases);
+
+
+    //         $layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+
+    //         // Prepare a list of regular expressions to match account numbers
+    //         $accountNumberPatterns = array_map(function($number) {
+    //             return new Regex("^$number\\b", ''); // Match the start of the string
+    //         }, $frequentAccountNumbersKeys);
+
+
+    //         $otherLayerCases = BankCasedata::where(function($query) use ($entity) {
+    //             $query->where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant);
+    //         })
+    //         ->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos) // Exclude those from layer1
+    //         ->whereIn('acknowledgement_no', $acknowledgementNos) // Consider these acknowledgement numbers
+    //         ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    //         ->where('Layer', '!=', 1)
+    //         ->where(function($query) use ($accountNumberPatterns) {
+    //             foreach ($accountNumberPatterns as $pattern) {
+    //                 $query->orWhere('account_no_2', 'regexp', $pattern);
+    //             }
+    //         })
+    //         ->whereNotNull('account_no_2')
+    //         ->where('account_no_2', '!=', '')
+    //         ->get();
+    //         // dd($otherLayerCases);
+
+    //         // Function to filter duplicates based on acknowledgment number and account number
+    //         $filterDuplicates = function($cases) {
+    //             return $cases->unique(function($case) {
+    //                 return $case->acknowledgement_no . '-' . $case->account_no_2;
+    //             });
+    //         };
+
+    //         // Filter duplicates from both sets of cases
+    //         $layer1Cases = $filterDuplicates($layer1Cases);
+    //         $otherLayerCases = $filterDuplicates($otherLayerCases);
+    //         // dd($otherLayerCases);
+
+    //         // Group otherLayerCases by account number without extra information
+    //         $groupedOtherLayerCases = $otherLayerCases->groupBy(function($case) {
+    //             return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+    //         });
+    //         // dd($groupedOtherLayerCases);
+
+    //         // Filter the grouped cases to ensure valid cases have unique acknowledgment numbers greater than one
+    //         $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
+    //             return $group->pluck('acknowledgement_no')->unique()->count() > 1;
+    //         });
+    //         // dd($validOtherLayerCases);
+
+    //         // Merge layer1Cases and validOtherLayerCases
+    //         $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+
+    //         // Debugging output
+    //         // dd($allCases);
+
+    //             // Group cases by trimmed account_no_2
+    //             $groupedCases = $allCases->groupBy(function($case) {
+    //                 return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+    //             });
+    //             // dd($groupedCases);
+
+    //             // Filter out duplicate acknowledgement_no values within each group
+    //             $groupedCases->transform(function ($group) {
+    //                 // Ensure each group has unique acknowledgement_no values
+    //                 return $group->unique('acknowledgement_no');
+    //             });
+    //             // dd($validCases);
+
+    //             // Flatten the cases for notice data
+    //             $flattenedCases = $groupedCases->flatMap(function ($group) {
+    //                 return $group->map(function ($case) {
+    //                     return [
+    //                         'account_no_2' => $case->account_no_2,
+    //                         'acknowledgement_no' => $case->acknowledgement_no,
+    //                         'bank' => $case->bank,
+    //                         'Layer' => $case->Layer,
+    //                         'date' => now()->format('Y-m-d'),
+    //                         'action_taken_by_bank' => $case->action_taken_by_bank
+    //                     ];
+    //                 });
+    //             });
+    //             // dd($flattenedCases);
+
+    //             Log::info('Flattened Cases', ['flattenedCases' => $flattenedCases]);
+
+    //             if ($flattenedCases->isEmpty()) {
+    //                 return response()->json(['success' => false, 'message' => "No valid case data found to generate notices."], 400);
+    //             }
+
+    //             // Map the flattened cases to the notice data format
+    //             $noticeData = $flattenedCases->map(function ($case) {
+    //                 return [
+    //                     'account_no_2' => preg_replace('/\[\s*Reported\s*\d+\s*times\s*\]/', '', trim($case['account_no_2'])),
+    //                     'acknowledgement_no' => $case['acknowledgement_no'],
+    //                     'bank' => $case['bank'],
+    //                     'state' => 'kerala',
+    //                     'Layer' => $case['Layer'],
+    //                     'date' => $case['date'],
+    //                     'action_taken_by_bank' => $case['action_taken_by_bank']
+    //                 ];
+    //             })->toArray();
+
+    //             Log::info('Notice Data', ['noticeData' => $noticeData]);
+
+    //             if (empty($noticeData)) {
+    //                 return response()->json(['success' => false, 'message' => "No valid case data found to generate notices."], 400);
+    //             }
+
+    //             $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
+
+    //             Notice::create([
+    //                 'user_id' => Auth::user()->id,
+    //                 'ack_number' => $noticeData[0]['acknowledgement_no'],
+    //                 'notice_type' => 'NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023',
+    //                 'type'=>'Mule',
+    //                 'content' => $htmlContent,
+    //                 'type' => 'Mule'
+    //             ]);
+
+    //             return response()->json(['success' => true]);
+    //         } catch (\Exception $e) {
+    //             Log::error('Error generating notice: ' . $e->getMessage());
+
+    //             return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
+    //         }
+    // }
+
+
+
+public function generateMuleNotice(Request $request)
+    {
         try {
             // dd("hi");
             $sourceType = $request->input('source_type');
@@ -680,110 +903,112 @@ public function follow(Request $request, $id)
             $acknowledgementNos = Complaint::whereBetween('entry_date', [$fromDateStart, $toDateEnd])
                                             ->pluck('acknowledgement_no')->toArray();
                 // dd($acknowledgementNos);
-            $documents = BankCasedata::where('account_no_2', '!=', null)->get()->toArray();
+            // Fetch all documents with account_no_2
+$documents = BankCasedata::whereNotNull('account_no_2')
+->where('account_no_2', '!=', '')
+->get();
+// dd($documents);
 
-                // Process documents in PHP
-            $accountNumbers = [];
-            foreach ($documents as $doc) {
-                    if (isset($doc['account_no_2'])) {
-                        // Extract numeric part
-                        preg_match('/(\d+)/', $doc['account_no_2'], $matches);
-                        if (!empty($matches[1])) {
-                            $number = $matches[1];
-                            if (!isset($accountNumbers[$number])) {
-                                $accountNumbers[$number] = 0;
-                            }
-                            $accountNumbers[$number]++;
-                        }
-                    }
-                }
+// Count occurrences of account_no_2 with different acknowledgment numbers
+$accountCounts = [];
+foreach ($documents as $doc) {
+preg_match('/(\d+)/', $doc->account_no_2, $matches);
+if (!empty($matches[1])) {
+$number = $matches[1];
+if (!isset($accountCounts[$number])) {
+$accountCounts[$number] = [];
+}
+$accountCounts[$number][] = $doc->acknowledgement_no;
+}
+}
+// dd($accountCounts);
+
+// Filter account_no_2 that repeat more than twice with different acknowledgment numbers
+$frequentAccountNumbers = array_filter($accountCounts, function($acknos) {
+return count(array_unique($acknos)) > 2;
+});
+// dd($frequentAccountNumbers);
+
+$frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
+// dd($frequentAccountNumbersKeys);
+
 
                 // Filter account numbers that repeat more than twice
-                $frequentAccountNumbers = array_filter($accountNumbers, function($count) {
+                $frequentAccountNumbers = array_filter($frequentAccountNumbersKeys, function($count) {
                     return $count > 2;
                 });
-                // dd($documents);
-                // Get the keys (account numbers) that have more than two occurrences
-                $frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
-                $layer1Cases = BankCasedata::where(function($query) use ($entity) {
-                    $query->where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant);
-                })
-                ->whereIn('acknowledgement_no', $acknowledgementNos)
-                ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-                ->where('Layer', 1)
-                ->whereNotNull('account_no_2')
-                ->where('account_no_2', '!=', '')
-                ->get();
-            // dd($layer1Cases);
 
+// dd($frequentAccountNumbers);
+$layer1Cases = BankCasedata::where('Layer', 1)
+    ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    ->whereIn('acknowledgement_no', $acknowledgementNos)
+    ->get();
+    // dd($layer1Cases);
 
-            $layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+$layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+// dd($layer1AcknowledgementNos);
 
-            // Prepare a list of regular expressions to match account numbers
-            $accountNumberPatterns = array_map(function($number) {
-                return new Regex("^$number\\b", ''); // Match the start of the string
-            }, $frequentAccountNumbersKeys);
+$otherLayerCases = BankCasedata::where('Layer', '!=', 1)
+    // ->whereIn('account_no_2', $frequentAccountNumbersKeys)
+    ->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos)
+    ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+    ->whereIn('acknowledgement_no', $acknowledgementNos)
+    ->get();
 
-
-            $otherLayerCases = BankCasedata::where(function($query) use ($entity) {
-                $query->where('bank', $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant);
-            })
-            ->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos) // Exclude those from layer1
-            ->whereIn('acknowledgement_no', $acknowledgementNos) // Consider these acknowledgement numbers
-            ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-            ->where('Layer', '!=', 1)
-            ->where(function($query) use ($accountNumberPatterns) {
-                foreach ($accountNumberPatterns as $pattern) {
-                    $query->orWhere('account_no_2', 'regexp', $pattern);
-                }
-            })
-            ->whereNotNull('account_no_2')
-            ->where('account_no_2', '!=', '')
-            ->get();
             // dd($otherLayerCases);
 
             // Function to filter duplicates based on acknowledgment number and account number
-            $filterDuplicates = function($cases) {
-                return $cases->unique(function($case) {
-                    return $case->acknowledgement_no . '-' . $case->account_no_2;
-                });
-            };
+           // Apply entity filter
+$entityBank = $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant;
 
-            // Filter duplicates from both sets of cases
-            $layer1Cases = $filterDuplicates($layer1Cases);
-            $otherLayerCases = $filterDuplicates($otherLayerCases);
-            // dd($otherLayerCases);
+// Filter Layer 1 cases
+$layer1Cases = $layer1Cases->filter(function ($case) use ($entityBank) {
+    return $case->bank === $entityBank;
+});
 
-            // Group otherLayerCases by account number without extra information
-            $groupedOtherLayerCases = $otherLayerCases->groupBy(function($case) {
-                return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
-            });
+// Filter other layer cases
+$otherLayerCases = $otherLayerCases->filter(function ($case) use ($entityBank) {
+    return $case->bank === $entityBank;
+});
+
+// Remove duplicates based on account_no_2 and acknowledgment_no
+$filterDuplicates = function ($cases) {
+    return $cases->unique(function ($case) {
+        return $case->acknowledgement_no . '-' . $case->account_no_2;
+    });
+};
+
+$layer1Cases = $filterDuplicates($layer1Cases);
+$otherLayerCases = $filterDuplicates($otherLayerCases);
+
+// Group other layer cases by account_no_2
+$groupedOtherLayerCases = $otherLayerCases->groupBy(function ($case) {
+    return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+});
             // dd($groupedOtherLayerCases);
 
-            // Filter the grouped cases to ensure valid cases have unique acknowledgment numbers greater than one
-            $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
-                return $group->pluck('acknowledgement_no')->unique()->count() > 1;
-            });
-            // dd($validOtherLayerCases);
+// Filter valid other layer cases
+$validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
+    return $group->pluck('acknowledgement_no')->unique()->count() >=1;
+});
+// dd($validOtherLayerCases);
 
-            // Merge layer1Cases and validOtherLayerCases
-            $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+// Merge Layer 1 and valid other layer cases
+$allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
+// dd($allCases);
 
-            // Debugging output
-            // dd($allCases);
+// Group by account_no_2 and remove duplicates
+$groupedCases = $allCases->groupBy(function ($case) {
+    return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+});
+// dd($groupedCases);
 
-                // Group cases by trimmed account_no_2
-                $groupedCases = $allCases->groupBy(function($case) {
-                    return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
-                });
-                // dd($groupedCases);
+// Ensure each group is unique by account_no_2
+$uniqueCases = $groupedCases->map(function ($group) {
+    return $group->first();
+});
+// dd($uniqueCases);
 
-                // Filter out duplicate acknowledgement_no values within each group
-                $groupedCases->transform(function ($group) {
-                    // Ensure each group has unique acknowledgement_no values
-                    return $group->unique('acknowledgement_no');
-                });
-                // dd($validCases);
 
                 // Flatten the cases for notice data
                 $flattenedCases = $groupedCases->flatMap(function ($group) {
@@ -843,6 +1068,7 @@ public function follow(Request $request, $id)
                 return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
             }
     }
+
 
         public function againstBankAccount()
         {

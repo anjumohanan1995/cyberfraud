@@ -217,7 +217,6 @@ private function generateNotice($record)
 
 
 
-
     public function getPortalLink($registrar)
     {
         // Fetch the portal link based on the registrar

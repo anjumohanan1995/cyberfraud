@@ -21,7 +21,7 @@ use App\Rules\TransactionIDFormat;
 
 class BankImports implements ToCollection, WithStartRow, WithChunkReading
 {
-    
+
     /**
      * @param Collection $collection
      */
@@ -44,10 +44,10 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
     }
     public function collection(Collection $collection)
     {
-     
+
         $errors = [];
- 
-      
+
+
         $collection->transform(function ($values){
              // Convert the 'entry_date' field
            
@@ -72,7 +72,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'reference_no' => $values[17] ?? null,
                 'remarks' => $values[18] ?? null,
                  'date_of_action' => $values[19] ?? null,
-           
+
                 'action_taken_by_bank_sec' => $values[20] ?? null,
                 'action_taken_name' => $values[21] ?? null,
                 'action_taken_email' => $values[22] ?? null,
@@ -81,18 +81,18 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'com_status'=>1,
             ];
         });
-        
+
         $filteredCollection = $collection->filter(function ($row) {
             return !empty($row['sl_no']);
         });
 
-        $rows = $filteredCollection; 
-        
-        
+        $rows = $filteredCollection;
+
+
         foreach ($rows as $index => $row){
-          
+
             $rowIndex = $index + 2;
-        
+
             $data = [
                 'acknowledgement_no' => $row['acknowledgement_no'] ?? null,
                 'transaction_id_or_utr_no' => $row['transaction_id_or_utr_no'] ?? null,
@@ -121,11 +121,11 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 'action_taken_email' => $row['action_taken_email'] ?? null,
                 'branch_location' => $row['branch_location'] ?? null,
                 'branch_manager_details' => $row['branch_manager_details'] ?? null,
-               
+
             ];
-           
+
             $validator = Validator::make($data, [
-                
+
                 'acknowledgement_no' => ['required',new IntegerWithoutDecimal( $rowIndex),'exists_in_acknowledgement_nos'],
                 'transaction_id_or_utr_no' => ['required',new TransactionIDFormat( $rowIndex)],
                 'Layer' => 'required',
@@ -165,7 +165,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
             $rowIndex++;
 
             if (!empty($errors)) {
-               
+
                 // Create a validator with accumulated errors to throw ValidationException
                 $dummyValidator = Validator::make([], []);
                 foreach ($errors as $rowIndex => $messages) {
@@ -173,13 +173,13 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                         $dummyValidator->errors()->add('row_'.$rowIndex, $message);
                     }
                 }
-                
+
             }
-                  
-          
+
+
         }
         if($errors){
-          
+
             throw new \Illuminate\Validation\ValidationException($dummyValidator);
         }
 
@@ -187,7 +187,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         foreach ($filteredCollection as $collect){
 
-       
+
             // $bank_data = BankCasedata::where('acknowledgement_no', (int)$collect['acknowledgement_no'])->where('transaction_id_sec',(string)$collect['transaction_id_sec'])->first();
 
 
@@ -228,8 +228,8 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
                 $bank_data->save();
 
 
-    
-    
+
+
         }
     }
 
@@ -240,23 +240,23 @@ protected function validationMessages($index)
         'acknowledgement_no.exists_in_acknowledgement_nos' => 'Row ' . ($index) . ': Acknowledgement number not in Primary Data.',
         'transaction_id_or_utr_no.required' => 'Row ' . ($index) . ': Transaction id or UTR number field is required.',
         'transaction_id_or_utr_no.regex' => 'Row ' . $index . ': Transaction/UTR ID is invalid.',
-        
+
         'Layer.required' => 'Row ' . ($index) . ': Layer field is required.',
-        
+
         'Layer.numeric' => 'Row ' . ($index) . ': Layer field is invalid.',
         'action_taken_by_bank.required' => 'Row ' . ($index) . ': Action taken by bank field is required.',
         'bank.required' => 'Row ' . ($index) . ': Bank field is required.',
         'bank.required' => 'Row ' . ($index) . ': Bank field is required.',
         'transaction_date.required' => 'Row ' . ($index) . ': Transaction Date is required.',
-        'transaction_date.valid_date_format' => 'Row ' . ($index) . ': Transaction Date is Invalid.',           
+        'transaction_date.valid_date_format' => 'Row ' . ($index) . ': Transaction Date is Invalid.',
         'transaction_id_sec.regex' => 'Row ' . $index . ': Transaction ID must be alphanumeric.',
-        
+
         'transaction_amount.required' => 'Row ' . ($index) . ': Transaction Amount is required.',
 
         'date_of_action.required' => 'Row ' . $index . ': Date of action is required.',
         'date_of_action.valid_date_format' => 'Row ' . $index . ': Date of action is not in a valid format.',
 
-        
+
     ];
 }
 
@@ -290,18 +290,18 @@ protected function validationMessages($index)
 
         foreach ($formats as $format) {
             try {
-              
+
                 $carbonDate = Carbon::createFromFormat($format, $dateString);
-               
+
                 return $carbonDate->format($targetFormat);
             } catch (\Exception $e) {
-              
+
                 continue;
             }
         }
-  
+
         throw new \Illuminate\Validation\ValidationException("Unable to parse date: '$dateString'");
-     
+
     }
 
     function excelSerialToDate($serial) {
@@ -315,9 +315,9 @@ protected function validationMessages($index)
             return null; // Return null if conversion fails
         }
     }
-   
 
-    
+
+
 
 }
 

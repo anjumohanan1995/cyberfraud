@@ -162,7 +162,9 @@ Route::middleware(['auth'])->group(function () {
 
     //for creating and download excel tmplate of other case data upload
 
-    Route::get('template', [CaseDataController::class, 'createDownloadTemplate'])->name("create-download-template");
+    Route::get('website/template', [CaseDataController::class, 'createWebsiteDownloadTemplate'])->name("create-website-download-template");
+    Route::get('socialmedia/template', [CaseDataController::class, 'createSocialmediaDownloadTemplate'])->name("create-socialmedia-download-template");
+    Route::get('mobile/whatsapp/template', [CaseDataController::class, 'createMobileDownloadTemplate'])->name("create-mobile-download-template");
 
     // for autogenerating case number in upload others case data
     Route::post('get-casenumber', [CaseDataController::class, 'getCaseNumber'])->name("get.casenumber");
