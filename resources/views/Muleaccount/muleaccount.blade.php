@@ -141,8 +141,8 @@
                             <tr>
                                 <th>SL No</th>
                                 <th>Account Number</th>
-                                {{-- <th>Evidence Type</th> --}}
-                                {{-- <th>Url</th> --}}
+                                <th>Bank Name</th>
+                                <th>Status</th>
                                 {{-- <th>Domain</th> --}}
                                 {{-- <th>IP</th> --}}
                                 {{-- <th>Action</th> --}}
@@ -185,6 +185,8 @@
                     columns: [
                         { data: 'id' },
                         { data: 'account_no_2' },
+                        { data: 'bank' },
+                        { data: 'status' },
                     ],
                     order: [0, 'asc'], // Sorting by SL No in ascending order
                     ordering: true

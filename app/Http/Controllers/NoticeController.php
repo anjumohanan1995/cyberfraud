@@ -964,7 +964,7 @@ public function follow(Request $request, $id)
             ->whereIn('acknowledgement_no', $acknowledgementNos)
             ->get();
 
-            
+
         // Function to filter duplicates based on acknowledgment number and account number
         // Apply entity filter
             $entityBank = $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant;
@@ -1125,7 +1125,6 @@ public function follow(Request $request, $id)
             return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
         }
     }
-
 
     public function againstBankAccount()
     {
