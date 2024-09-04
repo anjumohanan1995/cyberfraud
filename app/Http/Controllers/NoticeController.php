@@ -1121,7 +1121,6 @@ public function follow(Request $request, $id)
         }
     }
 
-
     public function againstBankAccount()
     {
         $bank = Bank::get();
