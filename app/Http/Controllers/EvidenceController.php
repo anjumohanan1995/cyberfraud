@@ -105,6 +105,55 @@ class EvidenceController extends Controller
             }
             // dd($request);
             foreach ($request->evidence_type as $key => $type) {
+                $criteria = [];
+                if ($type == 'website') {
+                    $criteria = [
+                        'url' => $request->url[$key],
+                        'domain' => $request->domain[$key],
+                        'ip' => $request->ip[$key],
+                    ];
+                } elseif (in_array($type, ['mobile', 'whatsapp'])) {
+                    $criteria = [
+                        'url' => $request->mobile[$key],
+                        'country_code' => $request->country_code[$key],
+                    ];
+                } else {
+                    $criteria = [
+                        'url' => $request->url[$key],
+                        'domain' => $request->domain[$key],
+                    ];
+                }
+
+                $existingEvidence = Evidence::where('evidence_type', $type)
+                    ->where(function ($query) use ($criteria, $type) {
+                        if ($type == 'website') {
+                            $query->where([
+                                ['url', $criteria['url']],
+                                ['domain', $criteria['domain']],
+                                ['ip', $criteria['ip']]
+                            ]);
+                        } elseif (in_array($type, ['mobile', 'whatsapp'])) {
+                            $query->where([
+                                ['url', $criteria['url']],
+                                ['country_code', $criteria['country_code']]
+                            ]);
+                        } else {
+                            foreach (['url', 'domain'] as $field) {
+                                if (isset($criteria[$field])) {
+                                    $query->where($field, $criteria[$field]);
+                                }
+                            }
+                        }
+                    })
+                    ->exists();
+
+                if ($existingEvidence) {
+                    $errorFields = json_encode($criteria);
+                    $errorMessage = "Duplicate evidence detected in the entry for Evidence " . ($key + 1) . " with fields: " . $errorFields;
+                    return redirect()->back()->with('error', $errorMessage)->withInput();
+                }
+
+            // Create and save the evidence record
                 $evidence = new Evidence();
                 $evidence->evidence_type = $type;
                 // dd($request->evidence_type_id[$key]);
@@ -1106,7 +1155,29 @@ class EvidenceController extends Controller
             $import = new EvidenceBulkImport;
 
             // Run the import process
-            Excel::import($import, $file);
+            // Excel::import($import, $file);
+              $excelFile = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getPathname());
+            $worksheet = $excelFile->getActiveSheet();
+
+            // Check the first row
+            $firstRow = $worksheet->rangeToArray('A1:Z1')[0];  // Adjust range if necessary
+            $firstCellValue = $firstRow[0];
+
+            // If the first row starts with the specified text, delete the row
+            if (stripos($firstCellValue, 'The evidence types should be the following') === 0) {
+                $worksheet->removeRow(1);
+            }
+
+            // Save the modified file
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelFile, 'Xlsx');
+            $tempPath = storage_path('app/uploads/temp_' . time() . '.xlsx');
+            $writer->save($tempPath);
+
+            // Import the modified file
+            Excel::import($import, $tempPath);
+
+            // Delete the temporary file
+            unlink($tempPath);
 
             // Check if there are any custom errors from the import process
             if (!empty($import->getErrors())) {
@@ -1157,7 +1228,9 @@ class EvidenceController extends Controller
         $ack_no = $request->input('ack_no');
         $case_no = $request->input('case_no');
         $evidence_type_ncrp = $request->input('evidence_type_ncrp');
+        // dd($evidence_type_ncrp);
         $evidence_type_ncrp_name = Evidence::whereNull('deleted_at')
+                                            ->whereNotNull('evidence_type_id')
                                             ->where('evidence_type_id', $evidence_type_ncrp)
                                             ->whereNotIn('evidence_type', ['mobile', 'whatsapp'])
                                             ->pluck('evidence_type')
@@ -1426,7 +1499,7 @@ class EvidenceController extends Controller
             ['1216212', 'https://www.instagram.com', 'instagram.com','Hosting','TK0052','TK0053','TK0054','Facebook','Fraud'],
 
         ];
-        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'social-media.xlsx');
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }
@@ -1458,7 +1531,7 @@ class EvidenceController extends Controller
 
 
         ];
-        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'mobile.xlsx');
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }
@@ -1484,7 +1557,7 @@ class EvidenceController extends Controller
             ['12162123', 'https://www.google.co.in', 'google.co.in','142.250.193.132','GoDaddy','Domain registration','Escalated','TK0016','TK0017','TK0018','Website','Phishing'],
 
         ];
-        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'template.xlsx');
+        return Excel::download(new SampleExport($firstRow,$additionalRowsData), 'website.xlsx');
         // return Excel::download(new SampleExport($additionalRowsData), 'template.xlsx');
 
     }

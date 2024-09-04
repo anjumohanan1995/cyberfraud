@@ -153,7 +153,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                                             <div class="form-group">
                                                 <label for="notice_type">Notice Type:</label><br>
                                                 <select class="form-control" id="notice_type">
-                                                    <option value="">--Select--</option>
+                                                    <option value="Notice U/s 94 of Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS)">--Select--</option>
                                                     <option value="Notice U/s 94 of Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS)">Notice U/s 94 of Bharatiya Nagarik Suraksha Sanhita, 2023 (BNSS)</option>
                                                     {{-- <option value="immediate_intervention">Notice for immediate intervention to prevent cyber fraud</option> --}}
                                                 </select>

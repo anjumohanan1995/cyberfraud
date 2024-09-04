@@ -13,7 +13,7 @@ use Excel;
 use App\Imports\RegistrarImport;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
-
+use MongoDB\BSON\Regex;
 
 class SourceTypeController extends Controller
 {
@@ -368,7 +368,9 @@ class SourceTypeController extends Controller
             ], 422);
         }
 
-        $existingBank = Bank::where('bank', $request->name)->first();
+        // Convert the bank name to lowercase for case-insensitive comparison
+        $existingBank = Bank::where('bank', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
+        // dd(existingBank);
         if ($existingBank) {
             return response()->json([
                 'errors' => ['name' => ['The bank already exists.']]
@@ -393,21 +395,29 @@ class SourceTypeController extends Controller
 
     public function bankupdate(Request $request, $id)
     {
+        // Validate basic input fields
         $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('banks', 'bank')->ignore($id)
-            ],
+            'name' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
         ]);
 
+        // Case-insensitive uniqueness check, ignoring the current record
+        $existingBank = Bank::where('_id', '!=', $id)
+            ->where('bank', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
+            ->first();
+
+        if ($existingBank) {
+            return redirect()->back()->withErrors(['name' => 'The bank already exists.'])->withInput();
+        }
+
+        // Find the bank by ID
         $data = Bank::findOrFail($id);
 
+        // Update bank fields
         $data->bank = $request->name;
         $data->status = $request->status;
 
+        // Save updated data
         $data->save();
 
         return redirect()->route('bank.create')->with('success', 'Bank updated successfully!');
@@ -422,11 +432,11 @@ class SourceTypeController extends Controller
         return response()->json(['success' => 'Bank successfully deleted!']);
     }
 
+
     public function insuranceCreate()
     {
         return view("dashboard.user-management.insurance.create");
     }
-
 
     public function getinsurance(Request $request)
     {
@@ -443,7 +453,6 @@ class SourceTypeController extends Controller
         $columnName = $columnName_arr[$columnIndex]['data'];
         $columnSortOrder = $order_arr[0]['dir'];
         $searchValue = $search_arr['value'];
-
 
         $query = Insurance::where('deleted_at', null);
 
@@ -501,7 +510,7 @@ class SourceTypeController extends Controller
             ], 422);
         }
 
-        $existinginsurance = Insurance::where('insurance', $request->name)->first();
+        $existinginsurance = Insurance::where('insurance', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
         if ($existinginsurance) {
             return response()->json([
                 'errors' => ['name' => ['The Insurance already exists.']]
@@ -531,10 +540,19 @@ class SourceTypeController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('insurances', 'insurance')->ignore($id)
+                // Rule::unique('insurances', 'insurance')->ignore($id)
             ],
             'status' => 'required|in:active,inactive',
         ]);
+
+        $existingInsurance = Insurance::where('_id', '!=', $id)
+            ->where('insurance', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
+            ->first();
+
+        if ($existingInsurance) {
+            return redirect()->back()->withErrors(['name' => 'The insurance already exists.'])->withInput();
+        }
+
 
         $data = Insurance::findOrFail($id);
 
@@ -575,7 +593,6 @@ class SourceTypeController extends Controller
         $columnName = $columnName_arr[$columnIndex]['data'];
         $columnSortOrder = $order_arr[0]['dir'];
         $searchValue = $search_arr['value'];
-
 
         $query = Merchant::where('deleted_at', null);
 
@@ -633,7 +650,9 @@ class SourceTypeController extends Controller
             ], 422);
         }
 
-        $existingMerchant = Merchant::where('Merchant', $request->name)->first();
+        $existingMerchant = Merchant::where('merchant', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
+        // $existingBank = Bank::where('bank', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
+
         if ($existingMerchant) {
             return response()->json([
                 'errors' => ['name' => ['The Merchant already exists.']]
@@ -667,6 +686,14 @@ class SourceTypeController extends Controller
             ],
             'status' => 'required|in:active,inactive',
         ]);
+
+        $existingMerchant = Merchant::where('_id', '!=', $id)
+            ->where('maerchant', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
+            ->first();
+
+        if ($existingMerchant) {
+            return redirect()->back()->withErrors(['name' => 'The bank already exists.'])->withInput();
+        }
 
         $data = Merchant::findOrFail($id);
 
@@ -708,7 +735,6 @@ class SourceTypeController extends Controller
         $columnSortOrder = $order_arr[0]['dir'];
         $searchValue = $search_arr['value'];
 
-
         $query = Wallet::where('deleted_at', null);
 
         if (!empty($searchValue)) {
@@ -722,7 +748,7 @@ class SourceTypeController extends Controller
         $totalRecordswithFilter = $query->count();
 
         $records = $query->orderBy($columnName, $columnSortOrder) // Apply sorting here
-            ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
+            // ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
             ->skip($start)
             ->take($rowperpage)
             ->get();
@@ -732,7 +758,7 @@ class SourceTypeController extends Controller
 
         foreach($records as $record){
             $i++;
-            $id = $record->id;
+            $id = $record->_id;
             $name = $record->wallet;
             $edit = '<a  href="' . url('wallet/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
 
@@ -764,8 +790,7 @@ class SourceTypeController extends Controller
                 'errors' => $validate->errors()
             ], 422);
         }
-
-        $existingwallet = Wallet::where('wallet', $request->name)->first();
+        $existingwallet = Wallet::where('wallet', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
         if ($existingwallet) {
             return response()->json([
                 'errors' => ['name' => ['The wallet already exists.']]
@@ -799,6 +824,14 @@ class SourceTypeController extends Controller
             ],
             'status' => 'required|in:active,inactive',
         ]);
+
+        $existingWallet = Wallet::where('_id', '!=', $id)
+            ->where('wallet', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
+            ->first();
+
+        if ($existingWallet) {
+            return redirect()->back()->withErrors(['name' => 'The Wallet already exists.'])->withInput();
+        }
 
         $data = Wallet::findOrFail($id);
 
