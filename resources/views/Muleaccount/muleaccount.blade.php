@@ -141,8 +141,8 @@
                             <tr>
                                 <th>SL No</th>
                                 <th>Account Number</th>
-                                {{-- <th>Evidence Type</th> --}}
-                                {{-- <th>Url</th> --}}
+                                <th>Bank Name</th>
+                                <th>Notice Status</th>
                                 {{-- <th>Domain</th> --}}
                                 {{-- <th>IP</th> --}}
                                 {{-- <th>Action</th> --}}

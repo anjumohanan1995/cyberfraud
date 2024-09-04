@@ -24,98 +24,96 @@ class DashboardPagesController extends Controller
     // $currentDate = now()->startOfDay();
     // $nextDate = now()->addDay()->startOfDay();
 
-    // Create MongoDB UTCDateTime objects for the date range
-    // $currentDateUTC = new \MongoDB\BSON\UTCDateTime($currentDate->timestamp * 1000);
-    // $nextDateUTC = new \MongoDB\BSON\UTCDateTime($nextDate->timestamp * 1000);
+    // Get acknowledgment numbers from Complaint model
+    $acknowledgementNos = Complaint::pluck('acknowledgement_no')->toArray();
 
-    // $newComplaints = Complaint::where('entry_date', '>=', $currentDateUTC)
-    //                            ->where('entry_date', '<', $nextDateUTC)
-    //                            ->groupBy('acknowledgement_no')
-    //                            ->get()
-    //                            ->count();
-    // dd($newComplaints);
+    // Retrieve documents with non-null account_no_2
+    $documents = BankCasedata::whereNotNull('account_no_2')
+        ->where('account_no_2', '!=', '')
+        ->get();
 
-// Exclude specific values from action_taken_by_bank
-// $filteredQuery = BankCasedata::whereNull('deleted_at')
-//     ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-//     ->where(function($query) {
-//         $query->whereRaw(['$expr' => ['$ne' => [['$trim' => ['input' => ['$toLower' => '$action_taken_by_bank']]], ""]]]);
-//     });
-
-// Retrieve all documents with non-null account_no_2
-$documents = BankCasedata::whereNotNull('account_no_2')
-->where(function($query) {
-    $query->whereRaw([
-        'acknowledgement_no' => [
-            '$in' => Complaint::pluck('acknowledgement_no')->toArray()
-        ]
-    ]);
-})
-->get();
-
-$accountNumbers = [];
-foreach ($documents as $doc) {
-    if (isset($doc['account_no_2'])) {
-        preg_match('/(\d+)/', $doc['account_no_2'], $matches);
+    // Count occurrences of account_no_2 with different acknowledgment numbers
+    $accountCounts = [];
+    foreach ($documents as $doc) {
+        preg_match('/(\d+)/', $doc->account_no_2, $matches);
         if (!empty($matches[1])) {
             $number = $matches[1];
-            $accountNumbers[$number] = ($accountNumbers[$number] ?? 0) + 1;
+            if (!isset($accountCounts[$number])) {
+                $accountCounts[$number] = [];
+            }
+            $accountCounts[$number][] = $doc->acknowledgement_no;
         }
     }
-}
 
-$frequentAccountNumbers = array_filter($accountNumbers, function ($count) {
-    return $count > 2;
-});
+    // Filter account_no_2 that repeat more than twice with different acknowledgment numbers
+    $frequentAccountNumbers = array_filter($accountCounts, function($acknos) {
+        return count(array_unique($acknos)) > 2;
+    });
+    $frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
 
-$frequentAccountNumbersKeys = array_keys($frequentAccountNumbers);
+    // Get Layer 1 cases
+    $layer1Cases = BankCasedata::where('Layer', 1)
+        ->whereNotNull('account_no_2')
+        ->where('account_no_2', '!=', '')
+        ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+        ->whereIn('acknowledgement_no', $acknowledgementNos)
+        ->get();
 
-// Fetch Layer 1 cases
-$layer1Cases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-    ->where('Layer', 1)
-    ->whereNotNull('account_no_2')
-    ->where('account_no_2', '!=', '')
-    ->get();
+    // Get patterns for frequent account numbers
+    $accountNumberPatterns = array_map(function($number) {
+        return new Regex("^$number\\b", ''); // Match the start of the string
+    }, $frequentAccountNumbersKeys);
 
-$layer1AcknowledgementNos = $layer1Cases->pluck('acknowledgement_no')->toArray();
+    // Get other layer cases
+    $otherLayerCases = BankCasedata::where('Layer', '!=', 1)
+        ->where(function($query) use ($accountNumberPatterns) {
+            foreach ($accountNumberPatterns as $pattern) {
+                $query->orWhere('account_no_2', 'regexp', $pattern);
+            }
+        })
+        ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
+        ->whereNotNull('account_no_2')
+        ->where('account_no_2', '!=', '')
+        ->whereIn('acknowledgement_no', $acknowledgementNos)
+        ->get();
 
-$accountNumberPatterns = array_map(function ($number) {
-    return "^$number\\b";
-}, $frequentAccountNumbersKeys);
+    // Get withdrawal cases
+    $withdrawalCases = BankCasedata::where('Layer', '!=', 1)
+        ->whereNotNull('account_no_2')
+        ->where('account_no_2', '!=', '')
+        ->whereIn('action_taken_by_bank', ['withdrawal through atm', 'cash withdrawal through cheque'])
+        ->whereIn('acknowledgement_no', $acknowledgementNos)
+        ->get();
 
-// Fetch other layer cases
-$otherLayerCases = BankCasedata::whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
-    ->whereNotIn('acknowledgement_no', $layer1AcknowledgementNos)
-    ->where('Layer', '!=', 1)
-    ->where(function ($query) use ($accountNumberPatterns) {
-        foreach ($accountNumberPatterns as $pattern) {
-            $query->orWhere('account_no_2', 'regexp', $pattern);
-        }
-    })
-    ->whereNotNull('account_no_2')
-    ->where('account_no_2', '!=', '')
-    ->get();
-
+    // Remove duplicates based on account_no_2 and acknowledgment_no
     $filterDuplicates = function ($cases) {
         return $cases->unique(function ($case) {
             return $case->acknowledgement_no . '-' . $case->account_no_2;
         });
     };
 
+    $layer1Cases = $filterDuplicates($layer1Cases);
+    $otherLayerCases = $filterDuplicates($otherLayerCases);
+    $withdrawalCases = $filterDuplicates($withdrawalCases);
 
-$layer1Cases = $filterDuplicates($layer1Cases);
-$otherLayerCases = $filterDuplicates($otherLayerCases);
+    // Group other layer cases by account_no_2
+    $groupedOtherLayerCases = $otherLayerCases->groupBy(function ($case) {
+        return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+    });
 
-// Group other layer cases by account_no_2
-$groupedOtherLayerCases = $otherLayerCases->groupBy(function ($case) {
-    return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
-});
+    // Filter valid other layer cases
+    $validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
+        return $group->pluck('acknowledgement_no')->unique()->count() >= 1;
+    });
 
-// Filter to keep only groups with more than one unique acknowledgement_no
-$validOtherLayerCases = $groupedOtherLayerCases->filter(function ($group) {
-    return $group->pluck('acknowledgement_no')->unique()->count() > 1;
-});
-// dd($validOtherLayerCases);
+    // Merge Layer 1 and valid other layer cases
+    $merge = $layer1Cases->merge($withdrawalCases);
+    $allCases = $merge->merge($validOtherLayerCases->flatten(1));
+
+    // Group by account_no_2 and remove duplicates
+    $groupedCases = $allCases->groupBy(function ($case) {
+        return preg_replace('/\s*\[.*\]$/', '', trim($case->account_no_2));
+    });
 
 // Merge layer 1 and valid other layer cases
 $allCases = $layer1Cases->merge($validOtherLayerCases->flatten(1));
@@ -139,7 +137,37 @@ if (!empty($searchValue)) {
     });
 }
 
-$muleAccountCount = $uniqueCases->count();
+    // Filter cases based on Complaint model and Layer
+    $filteredCases = $uniqueCases->filter(function ($item) use ($acknowledgementNos) {
+        // Extract numeric part of account_no_2 for comparison
+        $cleanedAccountNo2 = preg_replace('/\s*\[.*\]$/', '', $item->account_no_2);
+        $cleanedAccountNo2 = trim($cleanedAccountNo2);
+
+        if ($item->Layer === 1) {
+            // Check if the cleaned account_no_2 and acknowledgement_no from the filteredCases exist in the Complaint model
+            $complaintExists = Complaint::where('acknowledgement_no', $item->acknowledgement_no)
+                ->where('account_id', $cleanedAccountNo2)
+                ->exists();
+
+            // If not found in Complaint, keep this record
+            return !$complaintExists;
+        } else {
+            // For other layers, include all records
+            return true;
+        }
+    })->values();
+
+    // Include count of filtered cases
+    $muleAccountCount = $filteredCases->count();
+
+    // Apply search filter if search value is present
+    if (!empty($searchValue)) {
+        $filteredCases = $filteredCases->filter(function ($item) use ($searchValue) {
+            return stripos($item->account_no_2, $searchValue) !== false;
+        });
+    }
+
+    $totalRecords = $filteredCases->count();
 // Count the number of unique cases
 
 

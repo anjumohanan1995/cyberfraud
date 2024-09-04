@@ -108,7 +108,7 @@ class AppServiceProvider extends ServiceProvider
             //  $value = str_replace('/', '-', $value);
             
             // }              
-           
+          
            $formats = [
              
                'd/m/Y H:i:s',
@@ -126,7 +126,8 @@ class AppServiceProvider extends ServiceProvider
                 'd/m/Y',
                 'd-m-Y H:i:s A',
                 'Y-m-d H:i:s',
-                'd/m/Y G:i:s'
+                'd/m/Y G:i:s',
+                'd-m-y H:i:s',
                      
               
            ];
@@ -150,7 +151,6 @@ class AppServiceProvider extends ServiceProvider
             
              return $date->format($format) == $value;
             } catch (\Exception $e) {
-
                 continue;
             }
         }

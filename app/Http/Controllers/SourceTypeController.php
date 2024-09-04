@@ -748,7 +748,7 @@ class SourceTypeController extends Controller
         $totalRecordswithFilter = $query->count();
 
         $records = $query->orderBy($columnName, $columnSortOrder) // Apply sorting here
-            ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
+            // ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
             ->skip($start)
             ->take($rowperpage)
             ->get();
@@ -758,7 +758,7 @@ class SourceTypeController extends Controller
 
         foreach($records as $record){
             $i++;
-            $id = $record->id;
+            $id = $record->_id;
             $name = $record->wallet;
             $edit = '<a  href="' . url('wallet/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
 
