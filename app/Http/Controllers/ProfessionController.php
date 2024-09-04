@@ -108,10 +108,10 @@ class ProfessionController extends Controller
             // Add more validation rules as needed
         ]);
 
-        if ($validate->fails()) {
-            //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
-        }
+        // if ($validate->fails()) {
+        //     //dd($validate);
+        //     return Redirect::back()->withInput()->withErrors($validate);
+        // }
 
 
         // Find the role by its ID.
