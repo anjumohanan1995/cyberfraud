@@ -742,7 +742,8 @@ class CaseDataController extends Controller
                 if (!empty($filterConditions)) {
                     $pipeline[] = ['$match' => ['$and' => $filterConditions]];
                 }
-
+                $CUser = Auth::id();
+                $pipeline[] = ['$match' => ['assigned_to' => $CUser]];
                 if (!empty($searchValue)) {
                     $pipeline[0]['$match']['$or'] = [
                         ['district' => ['$regex' => $searchValue, '$options' => 'i']],
@@ -829,41 +830,41 @@ class CaseDataController extends Controller
             // }
 
 
-                 $CUser = Auth::id();
-                 if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
-                //     if ($hasShowSelfAssignPermission) {
-                     $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                         <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
-                         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
-                         </div>
-                     </div>';
-                   //  }
-                } elseif ($record['assigned_to'] == $CUser) {
-                //     if ($hasShowSelfAssignPermission) {
-                    $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                        <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
-                    </div>';
-                //     }
-                } elseif ($record['assigned_to'] == null) {
-                //     if ($hasShowSelfAssignPermission) {
-                    $edit .= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                         <form action="" method="GET">
-                        <button data-id="' . $record['acknowledgement_no'] . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
-                        </form>
-                     </div>';
-                //     }
 
-                } elseif($record['assigned_to']) {
-                    dd($record['assigned_to']);
-                    $user = User::find($record['assigned_to']);
-                   // dd($user);
-                //     if ($user != null) {
-                        $edit .= '<p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
-                        <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                        <p class="text-success">Assigned To: ' . $user->name . '</p>
-                        </div>';
-                //     }
-                }
+                //  if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
+                // //     if ($hasShowSelfAssignPermission) {
+                //      $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                //          <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                //          <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                //          </div>
+                //      </div>';
+                //    //  }
+                // } elseif ($record['assigned_to'] == $CUser) {
+                // //     if ($hasShowSelfAssignPermission) {
+                //     $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                //         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                //     </div>';
+                // //     }
+                // } elseif ($record['assigned_to'] == null) {
+                // //     if ($hasShowSelfAssignPermission) {
+                //     $edit .= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                //          <form action="" method="GET">
+                //         <button data-id="' . $record['acknowledgement_no'] . '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                //         </form>
+                //      </div>';
+                // //     }
+
+                // } elseif($record['assigned_to']) {
+                //     dd($record['assigned_to']);
+                //     $user = User::find($record['assigned_to']);
+                //    // dd($user);
+                // //     if ($user != null) {
+                //         $edit .= '<p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                //         <div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                //         <p class="text-success">Assigned To: ' . $user->name . '</p>
+                //         </div>';
+                // //     }
+                // }
 
 
             $data_arr[] = [
@@ -1333,7 +1334,7 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
 
     // If no children are found in the current layer, and we're not at the first layer
     if ($children->isEmpty()) {
-        
+
 
         // Check in the previous layer (Layer 1) itself for the same transaction ID
         $sameLayerMatches = BankCaseData::where('Layer', $currentLayer - 1 )
@@ -1343,23 +1344,23 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
 
         foreach ($sameLayerMatches as $match){
             // Calculate the dispute amount as if it's a child in Layer 2
-           
+
             if ($capitalAmount <= 0){
                 break; // If capital amount is zero or negative, stop processing further matches
             }
 
             if($match->transaction_amount <= $capitalAmount){
-                
+
                 $disputeAmount = $match->transaction_amount;
                 $capitalAmount -= $disputeAmount;
             } else{
-               
+
                 $disputeAmount = $capitalAmount;
                 $capitalAmount = 0; // Set to zero to stop further processing
             }
 
             // Update the match's dispute_amount only if it hasn't been updated yet
-           
+
             if (!isset($updatedObjectIds[$match->_id])){
                 $match->dispute_amount = $disputeAmount;
                 $match->save();
@@ -1371,7 +1372,7 @@ function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$upd
         }
     }
     else{
-       
+
         $recursiveData = [];
         foreach ($children as $child) {
 
@@ -1894,6 +1895,319 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
         //dd($source);
        return view('dashboard.case-data-list.case-data-list-others', compact('source'));
     }
+    public function othersSelfIndex(){
+        $source=SourceType::where('status', 'active')->whereNull('deleted_at')->where('name', '!=', 'NCRP')->get();
+        //dd($source);
+       return view('dashboard.case-data-list.othersSelf', compact('source'));
+    }
+
+    public function OthersSelfAssigned(Request $request){
+        // dd($request);
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows display per page.
+
+        $columnIndex_arr = $request->get('order', 'asc');
+        //dd($columnIndex_arr);
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+
+        $columnIndex = $columnIndex_arr[0]['column']; // Column index.
+        $columnName = $columnName_arr[$columnIndex]['data']; // Column name.
+        $columnSortOrder = $order_arr[0]['dir']; // asc or desc.
+        $searchValue = $search_arr['value']; // Search value.
+        // dd($searchValue);
+        $source_types = SourceType::all();
+        $casenumber = $request->casenumber;
+        $domain = $request->domain;
+        $url = $request->url;
+        $registrar = $request->registrar;
+        $ip = $request->ip;
+        $source_type = $request->source_type;
+
+        // dd($source_type);
+        // dd($searchValue, $casenumber, $url, $domain, $registrar, $ip);
+        $pipeline = [];
+
+        // Build the $match stage for search filters
+        $matchStage = [];
+
+        if (!empty($searchValue)) {
+            $matchStage['$or'] = [
+                ['case_number' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['url' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['domain' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['registrar' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['remarks' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['ip' => ['$regex' => $searchValue, '$options' => 'i']],
+                ['source.name' => ['$regex' => $searchValue, '$options' => 'i']]  // Search by source name
+            ];
+        }
+
+        // Add additional match conditions for filters
+        if (isset($casenumber)) {
+            $matchStage['case_number'] = $casenumber;
+        }
+        //need to check status is 1
+        if (isset($url)) {
+            $matchStage['url'] = $url;
+        }
+        if (isset($domain)) {
+            $matchStage['domain'] = $domain;
+        }
+        if (isset($registrar)) {
+            $matchStage['registrar'] = $registrar;
+        }
+        if (isset($ip)) {
+            $matchStage['ip'] = $ip;
+        }
+        if (isset($source_type)) {
+            $matchStage['source_type'] = $source_type;
+        }
+
+        if (!empty($matchStage)) {
+            $pipeline[] = ['$match' => $matchStage];
+        }
+
+        // Add the $lookup stage to join sourcetype with complaint_others based on the source_type field
+        $pipeline[] = [
+            '$lookup' => [
+                'from' => 'sourcetype',  // Name of the sourcetype collection
+                'localField' => 'source_type',  // Field in complaint_others
+                'foreignField' => '_id',  // Field in sourcetype
+                'as' => 'source'
+            ]
+        ];
+
+        // Unwind the source array to flatten the results
+        $pipeline[] = [
+            '$unwind' => [
+                'path' => '$source',
+                'preserveNullAndEmptyArrays' => true
+            ]
+        ];
+        $CUser =Auth::user()->id;
+    $pipeline[] = ['$match' => ['assigned_to' => $CUser]];
+        // Group the results by case_number and aggregate other fields
+        $pipeline[] = [
+            '$group' => [
+                '_id' => '$case_number',
+                'source_type' => ['$addToSet' => '$source_type'],
+                'source_name' => ['$first' => '$source.name'],  // Group source name from sourcetype
+                'url' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$url',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'domain' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$domain',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'ip' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$ip',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'registrar' => [
+                    '$addToSet' => [
+                        '$cond' => [
+                            'if' => ['$eq' => ['$status', 1]],
+                            'then' => '$registrar',
+                            'else' => null
+                        ]
+                    ]
+                ],
+                'registry_details' => ['$addToSet' => '$registry_details'],
+                'remarks' => ['$addToSet' => '$remarks'],
+                'assigned_to' => ['$first' => '$assigned_to'],
+                'case_status' => ['$first' => '$case_status'],
+                'status' => ['$first' => '$status'],
+                'created_at' => ['$first' => '$created_at'],
+            ]
+        ];
+
+
+
+        // Sort stage (optional)
+        $pipeline[] = ['$sort' => ['created_at' => -1]];
+
+        // Pagination stages
+        $pipeline[] = ['$skip' => (int)$start];
+        $pipeline[] = ['$limit' => (int)$rowperpage];
+
+        // Execute the aggregation query
+        $complaints = ComplaintOthers::raw(function($collection) use ($pipeline) {
+            return $collection->aggregate($pipeline);
+        });
+
+
+        $distinctCaseNumbers = ComplaintOthers::raw(function($collection) use ($casenumber, $url, $domain, $registrar, $ip, $source_type) {
+            $pipeline = [];
+
+
+            // Build the $match stage
+            $matchStage = [];
+
+            if (!empty($casenumber)) {
+                $matchStage['case_number'] = $casenumber;
+            }
+            if (!empty($url)) {
+                $matchStage['url'] = $url;
+            }
+            if (!empty($domain)) {
+                $matchStage['domain'] = $domain;
+            }
+            if (!empty($registrar)) {
+                $matchStage['registrar'] = $registrar;
+            }
+            if (!empty($ip)) {
+                $matchStage['ip'] = $ip;
+            }
+            if (!empty($source_type)) {
+                $matchStage['source_type'] = $source_type;
+            }
+
+            if (!empty($matchStage)) {
+                $pipeline[] = ['$match' => $matchStage];
+            }
+
+            // Group by case_number
+            $pipeline[] = [
+                '$group' => [
+                    '_id' => '$case_number'
+                ]
+            ];
+
+            // Execute the aggregation pipeline
+            return $collection->aggregate($pipeline);
+        });
+
+
+
+        //dd($complaints);
+        //  dd($distinctCaseNumbers);
+
+
+
+        $totalRecords = count($distinctCaseNumbers);
+        $data_arr = array();
+        $i = $start;
+        // dd($totalRecords);
+
+
+        $totalRecordswithFilter =  $totalRecords;
+        foreach($complaints as $record){
+         //dd($record);
+            $i++;
+            $url = "";$domain="";$ip="";$registrar="";$remarks=""; $source_type="";
+
+            $case_number = '<a href="' . route('other-case-details', ['id' => Crypt::encryptString($record->_id)]) . '">'.$record->_id.'</a>';
+
+            // foreach ($record->url as $item) {
+            //     $url .= $item."<br>";
+            // }
+        //dd($record->status);
+           // if($record->status === 1) { // Check if status is 1
+               // dd($record->url);
+                foreach ($record->url as $item) {
+                    $url .= $item."<br>";
+                }
+          //  }
+            foreach ($record->source_type as $item) {
+                foreach($source_types as $st){
+                    if($st->_id == $item){
+                        $source_type .= $st->name."<br>";
+                    }
+                }
+            }
+            foreach ($record->domain as $item) {
+                $domain .= $item."<br>";
+            }
+            foreach ($record->ip as $item) {
+                $ip .= $item."<br>";
+            }
+            foreach ($record->registrar as $item) {
+                $registrar .= $item."<br>";
+            }
+            foreach ($record->remarks as $item) {
+                $remarks .= $item."<br>";
+            }
+            $caseNo = $record->_id;
+            //dd($caseNo);
+            $CUser =Auth::user()->id;
+                    //dd($record);
+            if(($record->assigned_to == $CUser) && ($record->case_status != null)) {
+                $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                            <div><p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>
+                            <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                            </div>
+                        </div>';
+            }elseif($record->assigned_to == $CUser){
+
+                $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
+                    </div>';
+            } elseif($record->assigned_to == null) {
+                            //dd($casenumber);
+                    $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                               <form action="" method="GET">
+                               <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+                               </form>
+                               </div>';
+                        } else {
+                           $user = User::find($record->assigned_to);
+                          // dd($user);
+                           if($user != null){
+                        if($record->case_status != null){
+                            $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
+                        }
+                           $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                           <p class="text-success">Assigned To: '. $user->name.'</p>
+                           </div>';
+                        }
+                        }
+
+            $data_arr[] = array(
+                    "id" => $i,
+                    "source_type" => $source_type,
+                    "case_number" => $case_number,
+                    "url" => $url,
+                    "domain" => $domain,
+                    "ip" => $ip,
+                    "registrar"=>$registrar,
+                    "remarks" => $remarks,
+                    "action" => $edit
+                    );
+
+        }
+        //dd($data_arr);
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        return response()->json($response);
+
+
+    }
+
+
 
     public function getDatalistOthers(Request $request){
         // dd($request);
@@ -2112,7 +2426,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
             // foreach ($record->url as $item) {
             //     $url .= $item."<br>";
             // }
-//dd($record->status);
+        //dd($record->status);
            // if($record->status === 1) { // Check if status is 1
                // dd($record->url);
                 foreach ($record->url as $item) {
@@ -2186,7 +2500,7 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                     );
 
         }
-//dd($data_arr);
+        //dd($data_arr);
         $response = array(
             "draw" => intval($draw),
             "iTotalRecords" => $totalRecords,

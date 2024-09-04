@@ -389,7 +389,7 @@ public function getBankDetailsByDate(Request $request)
                         'wrong transaction',
                         'withdrawal through pos'
                     ])) {
-                        $results[$district]['total_amount_lost_from_eco'] += $data->transaction_amount;
+                        $results[$district]['total_amount_lost_from_eco'] += $data->dispute_amount;
                     }
                     $results[$district]['total_holds'] = $results[$district]['actual_amount_hold_on'] + $results[$district]['hold_amount_otherthan'];
                     $results[$district]['amount_for_pending_action'] = $results[$district]['actual_amount'] - $results[$district]['total_holds'] - $results[$district]['total_amount_lost_from_eco'];

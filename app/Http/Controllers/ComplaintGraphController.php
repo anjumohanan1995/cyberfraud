@@ -143,7 +143,7 @@ public function chartData(Request $request)
 
         // Adjust end date to include only until the end of the day
         $adjustedEndDate = $endDate->copy()->endOfDay();
-$adjustedStartDate = $endDate->copy()->startOfDay();
+  $adjustedStartDate = $endDate->copy()->startOfDay();
         return $collection->aggregate([
             ['$match' => [
                 'entry_date' => [
