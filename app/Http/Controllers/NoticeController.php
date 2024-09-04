@@ -934,6 +934,8 @@ public function follow(Request $request, $id)
         // dd($frequentAccountNumbers);
 
         $layer1Cases = BankCasedata::where('Layer', 1)
+            ->whereNotNull('account_no_2')
+            ->where('account_no_2', '!=', '')
             ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
             ->whereIn('acknowledgement_no', $acknowledgementNos)
             ->get();
@@ -949,6 +951,8 @@ public function follow(Request $request, $id)
         // dd($accountNumberPatterns);
 
         $otherLayerCases = BankCasedata::where('Layer', '!=', 1)
+            ->whereNotNull('account_no_2')
+            ->where('account_no_2', '!=', '')
             ->where(function($query) use ($accountNumberPatterns) {
                 foreach ($accountNumberPatterns as $pattern) {
                     $query->orWhere('account_no_2', 'regexp', $pattern);
@@ -956,15 +960,18 @@ public function follow(Request $request, $id)
                 })
             ->whereNotIn('action_taken_by_bank', ['other', 'wrong transaction'])
             ->whereIn('acknowledgement_no', $acknowledgementNos)
+
             ->get();
 
         // dd($otherLayerCases);
         $withdrawalCases = BankCasedata::where('Layer','!=', 1)
+            ->whereNotNull('account_no_2')
+            ->where('account_no_2', '!=', '')
             ->whereIn('action_taken_by_bank', ['withdrawal through atm', 'cash withdrawal through cheque'])
             ->whereIn('acknowledgement_no', $acknowledgementNos)
             ->get();
 
-            
+
         // Function to filter duplicates based on acknowledgment number and account number
         // Apply entity filter
             $entityBank = $entity->bank ?? $entity->wallet ?? $entity->insurance ?? $entity->merchant;
@@ -1067,16 +1074,6 @@ public function follow(Request $request, $id)
 
             $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
 
-            Notice::create([
-                'user_id' => Auth::user()->id,
-                'ack_number' => $noticeData[0]['acknowledgement_no'],
-                'notice_type' => 'NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023',
-                'type'=>'Mule',
-                'content' => $htmlContent,
-                'type' => 'Mule',
-
-            ]);
-
             // Notice::create([
             //     'user_id' => Auth::user()->id,
             //     'ack_number' => $noticeData[0]['acknowledgement_no'],
@@ -1084,10 +1081,8 @@ public function follow(Request $request, $id)
             //     'type'=>'Mule',
             //     'content' => $htmlContent,
             //     'type' => 'Mule',
-            //     'account_no'=> preg_replace('/\[\s*Reported\s*\d+\s*times\s*\]/', '', trim($noticeData[0]['account_no_2'])),
-            //     'bank'=> $noticeData[0]['bank']
-            // ]);
 
+            // ]);
 
             // Extract and process ack_number, ensuring it's a comma-separated string
             $ack_numbers = [];
