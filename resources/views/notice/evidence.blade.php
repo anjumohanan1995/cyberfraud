@@ -490,7 +490,7 @@ $(document).ready(function(){
                         return '<li>' + error + '</li>';
                     }).join('') + '</ul>').show();
                 }  else  {
-                    alert("Data submitted successfully");
+                    // alert("Data submitted successfully");
                     // Handle successful response and show modals based on conditions
                     // Your existing logic to show modals based on the response
 

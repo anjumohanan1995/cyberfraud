@@ -23,7 +23,7 @@ use Illuminate\Support\Str;
 class ComplaintController extends Controller
 {
     public function importComplaints()
-    {   
+    {
         // Fetch only active source types from the database
         $sourceTypes = SourceType::where('status', 'active')->get();
         $upload_id = session('upload_id');
@@ -60,7 +60,31 @@ class ComplaintController extends Controller
                 }
                 try {
                     $importer = new ComplaintImportOthers($source_type, $request->case_number, $fileName);
-                    FacadesExcel::import($importer, $request->complaint_file);
+                    // FacadesExcel::import($importer, $request->complaint_file);
+
+                    // Load the Excel file
+                    $excelFile = \PhpOffice\PhpSpreadsheet\IOFactory::load($request->complaint_file->getPathname());
+                    $worksheet = $excelFile->getActiveSheet();
+
+                    // Check the first row
+                    $firstRow = $worksheet->rangeToArray('A1:Z1')[0];  // Adjust range if necessary
+                    $firstCellValue = $firstRow[0];
+
+                    // If the first row starts with the specified text, delete the row
+                    if (stripos($firstCellValue, 'The evidence types should be the following') === 0) {
+                        $worksheet->removeRow(1);
+                    }
+
+                    // Save the modified file
+                    $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelFile, 'Xlsx');
+                    $tempPath = storage_path('app/uploads/temp_' . time() . '.xlsx');
+                    $writer->save($tempPath);
+
+                    // Import the modified file
+                    FacadesExcel::import($importer, $tempPath);
+
+                    // Delete the temporary file
+                    unlink($tempPath);
 
                     return redirect()->back()->with('success', 'Form submitted successfully!');
                 } catch (\Exception $e) {
@@ -89,14 +113,14 @@ class ComplaintController extends Controller
 
                         // return redirect()->back()->with('success', 'Uploading...')->with('redirected', true);
                         return redirect()->back()->with('redirected', true);
-                        
+
                         UploadErrors::where('upload_id', $uploadId)->delete();
-                        
+
                     } catch (\Illuminate\Validation\ValidationException $e){
                         // Show all validation errors
 
                         return redirect()->back()->withErrors($e->errors())->withInput();
-                    } 
+                    }
                     catch (\Exception $e){
                         Log::error($e->getMessage());
 

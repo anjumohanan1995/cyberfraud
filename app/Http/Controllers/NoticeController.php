@@ -375,7 +375,9 @@ $evidenceTypeCounts = [];
                 'ack_no' => $ackNo,
                 'urls' => $item['url'] ?? '',
                 'domain_name' => $item['domain'] ?? '',
-                'domain_id' => $item['registry_details'] ?? ''
+                'domain_id' => $item['registry_details'] ?? '',
+                'ip' => $item['ip'] ?? '',
+                'evidence_type' => $evidenceType,
             ];
         }
         } else if ($evidenceType !== "mobile" && $evidenceType !== "website" && $evidenceType !== "whatsapp") {
@@ -487,37 +489,102 @@ $evidenceTypeCounts = [];
 
         // print_r($combinedHtmlContent);
 
-        // Build the criteria array based on the source_type
-        $criteria = [
-            'user_id' => Auth::user()->id,
-            'url' => $notice['urls'], // Store URLs as a comma-separated string
-            'notice_type' => $noticeType,
-            'type' => 'Evidence'
-        ];
+       // Build the criteria array based on the source_type
+       $criteria = [
+        'user_id' => Auth::user()->id,
+        'url' => is_array($notice['urls']) ? implode(', ', $notice['urls']) : $notice['urls'],
+        'notice_type' => $noticeType,
+        'source_type' => $source_type,
+        'type' => 'Evidence',
+    ];
 
-        // Add the conditionally required field
-        if ($source_type == "ncrp") {
-            $criteria['ack_number'] = $notice['ack_no'];
-        } else {
-            $criteria['case_number'] = $notice['ack_no'];
-        }
-// dd($criteria);
+    // dd($notice['evidence_type']);
 
-        // Save the notice content to MongoDB
-        // Notice::updateOrCreate(
-            // $criteria,
-
-            Notice::create(array_merge($criteria, [
-                'content' => $combinedHtmlContent,
-                // Add additional fields if needed
-            ])
-        );
-        // dd("sucess");
+    // Add evidence_type if it exists in the notice
+    if (isset($notice['evidence_type'])) {
+        $criteria['evidence_type'] = $notice['evidence_type'];
     }
-    // dd();
-    // dd("sucess");
 
-    return redirect()->route('notices.index')->with('success', 'Notices generated and saved successfully.');
+    // Add domain if it exists in the notice
+    if (isset($notice['domain_name'])) {
+        $criteria['domain'] = $notice['domain_name'];
+    } elseif (isset($notice['domains'])) {
+        $criteria['domain'] = implode(', ', $notice['domains']);
+    }
+
+    if ($notice['evidence_type'] == "website") {
+        if (isset($notice['ip'])) {
+            $criteria['ip'] = $notice['ip'];
+        }
+    } else {
+        // Add IP or category based on source_type
+        if ($source_type == "ncrp" || $source_type != "ncrp") {
+            if (isset($notice['categories'])) {
+                $criteria['ip'] = implode(', ', $notice['categories']);
+            }
+        }
+    }
+
+
+    // Add the conditionally required field
+    if ($source_type == "ncrp") {
+        $criteria['ack_number'] = $notice['ack_no'];
+    } else {
+        $criteria['case_number'] = $notice['ack_no'];
+    }
+// dd($evidenceType);
+
+
+    $evidenceType = $notice['evidence_type'];
+    // Check if a similar notice already exists
+    $existingNotice = Notice::where('notice_type', $noticeType)
+        ->where(function($query) use ($criteria, $evidenceType, $noticeType) {
+            if (strpos($noticeType, 'website') !== false && $evidenceType == "website") {
+                // For website notices, check if all three (url, domain, ip) match
+                $query->where([
+                    ['url', $criteria['url']],
+                    ['domain', $criteria['domain']],
+                    ['ip', $criteria['ip']]
+                ]);
+            } elseif (strpos($noticeType, 'social media') !== false) {
+                // For social media notices, use OR condition
+                if (isset($criteria['url'])) {
+                    $query->orWhere('url', $criteria['url']);
+                }
+                if (isset($criteria['domain'])) {
+                    $query->orWhere('domain', $criteria['domain']);
+                }
+                if (isset($criteria['ip'])) {
+                    $query->orWhere('ip', $criteria['ip']);
+                }
+            } else {
+                // For other types, use exact match on all available criteria
+                foreach (['url', 'domain', 'ip'] as $field) {
+                    if (isset($criteria[$field])) {
+                        $query->where($field, $criteria[$field]);
+                    }
+                }
+            }
+        })->exists();
+    // Save the notice content to MongoDB
+    // Notice::updateOrCreate(
+        // $criteria,
+
+    if (!$existingNotice) {
+        Notice::create(array_merge($criteria, [
+            'content' => $combinedHtmlContent,
+            // Add additional fields if needed
+        ]));
+    } else {
+        // Optionally, you can log or handle the case when a duplicate is found
+        Log::info('Duplicate notice found. Not creating a new one.', $criteria);
+    }
+    // dd("sucess");
+}
+// dd();
+// dd("sucess");
+
+return redirect()->route('notices.index')->with('success', 'Notices generated and saved successfully.');
 }
 
 

@@ -27,7 +27,11 @@ class Notice extends Eloquent
         'assing_to_user_id',
         'type',
         'account_no',
-        'bank'
+        'bank',
+        'evidence_type',
+        'ip',
+        'domain',
+        'source_type'
 
 
 

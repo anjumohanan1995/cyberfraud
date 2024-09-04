@@ -142,7 +142,7 @@
                                 <th>SL No</th>
                                 <th>Account Number</th>
                                 <th>Bank Name</th>
-                                <th>Status</th>
+                                <th>Notice Status</th>
                                 {{-- <th>Domain</th> --}}
                                 {{-- <th>IP</th> --}}
                                 {{-- <th>Action</th> --}}
