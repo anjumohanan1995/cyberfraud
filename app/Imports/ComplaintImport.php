@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use App\Rules\IntegerWithoutDecimal;
 use App\Rules\TransactionIDFormat;
 use Maatwebsite\Excel\Facades\Excel as FacadesExcel;
-
+use Illuminate\Support\Facades\DB;
 
 use App\Hospital;
 use Auth;
@@ -63,9 +63,10 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
      *
      * @return \Illuminate\Database\Eloquent\Model|null
      */
+ 
     public function collection(Collection $collection)
     {
-
+       
         $errors = [];
 
         $chunkStartRow = $this->currentChunkIndex * $this->chunkSize() + $this->startRow();
@@ -111,11 +112,20 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
         $rows = $filteredCollection;
 
         foreach ($rows as $index => $row){
-            
+           
             $parts = explode(' ', $row['entry_date']);
             if (count($parts) == 2){
+               
                 list($datePart, $timePart) = $parts;
-                $timeParts = explode(':', $timePart); 
+                $datePart = str_replace('/', '-', $datePart); 
+                list($day, $month, $year) = explode('-', $datePart);
+                if (strlen($year) == 2) {
+                    $year = $year < 50 ? '20' . $year : '19' . $year;
+                    $datePart = sprintf('%02d-%02d-%04d', $day, $month, $year);
+                }
+                
+                
+                $timeParts = explode(':', $timePart);  
                 if (count($timeParts) == 3){
 
                     list($hour, $minute, $second) = $timeParts;
@@ -134,12 +144,12 @@ class ComplaintImport implements ToCollection, WithStartRow,WithChunkReading
             
                     // Append ":00" as seconds
                     $formattedTimePart = "{$hour}:{$minute}:00";
-                    $row['entry_date'] = "{$datePart} {$formattedTimePart}";
+                    $row['entry_date'] = "{$datePart} {$formattedTimePart}"; 
+                    
                 }
-            
-            }
            
-
+            }
+            
             $rowIndex = $chunkStartRow + $index;
 
             if($row['date_of_action'] === 'N/A'){

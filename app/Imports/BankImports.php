@@ -47,6 +47,7 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
         $errors = [];
 
+       
 
         $collection->transform(function ($values){
              // Convert the 'entry_date' field
@@ -227,11 +228,127 @@ class BankImports implements ToCollection, WithStartRow, WithChunkReading
 
                 $bank_data->save();
 
+        }
+     
+// ============================FOR FINDONG DESPUTED AMOUNT=======================================
 
+
+
+
+function processChildren($transactionIdSec, $capitalAmount, $currentLayer, &$updatedObjectIds){
+
+    // Fetch children that match the criteria and haven't been updated yet
+    $samelayer_children = BankCaseData::where('Layer', $currentLayer - 1)
+        ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
+        ->whereNotIn('_id', array_keys($updatedObjectIds)) // Use keys here directly
+        ->get();
+
+    $nextlayer_children = BankCaseData::where('Layer', $currentLayer)
+    ->where('transaction_id_or_utr_no', 'like', '%' . $transactionIdSec . '%')
+    ->whereNotIn('_id', array_keys($updatedObjectIds)) // Use keys here directly
+    ->get();
+       
+
+    if(!$samelayer_children->isEmpty()){
+        $recursiveData = [];
+        foreach ($samelayer_children as $child) {
+           
+            // If capitalAmount is zero or less, stop further processing
+            if ($capitalAmount <= 0) {
+                break;
+            }
+    
+            // Calculate dispute amount based on the capital amount
+            $disputeAmount = min($child->transaction_amount, $capitalAmount);
+            $capitalAmount -= $disputeAmount;
+    
+            // Save the dispute amount and mark this record as processed
+            if (!isset($updatedObjectIds[$child->_id])) {
+                $child->dispute_amount = $disputeAmount;
+                $child->save();
+                $updatedObjectIds[$child->_id] = true;
+            }
+    
+            $recursiveData[] = [
+                'transaction_id_sec' => $child->transaction_id_sec,
+                'dispute_amount' => $disputeAmount,
+                'id' => $child->_id
+            ];
+    
+    
+        }
+       
+        foreach ($recursiveData as $data){
+      
+           processChildren($data['transaction_id_sec'], $data['dispute_amount'], $currentLayer + 1, $updatedObjectIds);
+                     
+        }
+    }
+    
+    
+    if (!$nextlayer_children->isEmpty()){
+        $recursiveData = [];
+        foreach ($nextlayer_children as $child) {
+           
+            // If capitalAmount is zero or less, stop further processing
+            if ($capitalAmount <= 0) {
+                break;
+            }
+    
+            // Calculate dispute amount based on the capital amount
+            $disputeAmount = min($child->transaction_amount, $capitalAmount);
+            $capitalAmount -= $disputeAmount;
+    
+            // Save the dispute amount and mark this record as processed
+            if (!isset($updatedObjectIds[$child->_id])) {
+                $child->dispute_amount = $disputeAmount;
+                $child->save();
+                $updatedObjectIds[$child->_id] = true;
+            }
+            $recursiveData[] = [
+                'transaction_id_sec' => $child->transaction_id_sec,
+                'dispute_amount' => $disputeAmount,
+                'id' => $child->_id
+            ];
+        }
+       
+        foreach ($recursiveData as $data){
+          
+           processChildren($data['transaction_id_sec'], $data['dispute_amount'], $currentLayer + 1, $updatedObjectIds);
+                  
+          }
+
+    }
+    
+
+}
+
+$updatedObjectIds = [];  // Initialize as an empty array
+
+$layer1Records = BankCaseData::where('Layer', 1)
+    ->where('acknowledgement_no', (int)$collect['acknowledgement_no'])
+    ->where('com_status', 1)
+    ->get();
+
+foreach ($layer1Records as $layer1Record){
+
+    if (!isset($updatedObjectIds[$layer1Record->_id])) {
+        $layer1Record->dispute_amount = $layer1Record->transaction_amount;
+        $layer1Record->save();
+        $updatedObjectIds[$layer1Record->_id] = true;
+        processChildren($layer1Record->transaction_id_sec, $layer1Record->transaction_amount, 2, $updatedObjectIds);
+    }
+}
+
+
+
+
+
+
+//================================FOR FINDING DESPUTE AMOUNT====================================
 
 
         }
-    }
 
 protected function validationMessages($index)
 {
@@ -316,6 +433,10 @@ protected function validationMessages($index)
         }
     }
 
+
+    public function helperFunction($akcno){
+       
+    }
 
 
 
