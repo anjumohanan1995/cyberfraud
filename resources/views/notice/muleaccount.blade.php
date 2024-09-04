@@ -121,8 +121,8 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                             <label for="bank">Bank:</label>
                             <select class="form-control" id="bank" name="bank_id">
                                 <option value="">--Select--</option>
-                                @foreach ($bank as $bank)
-                                    <option value="{{ $bank->_id }}"> {{ $bank->bank }} </option>
+                                @foreach ($matchedData['bank'] as $bank)
+                                    <option value="{{ $bank->_id }}">{{ $bank->bank }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -131,8 +131,8 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                             <label for="wallet">Wallet:</label>
                             <select class="form-control" id="wallet" name="wallet_id">
                                 <option value="">--Select--</option>
-                                @foreach ($wallet as $wallet)
-                                    <option value="{{ $wallet->_id }}"> {{ $wallet->wallet }} </option>
+                                @foreach ($matchedData['wallet'] as $wallet)
+                                    <option value="{{ $wallet->_id }}">{{ $wallet->wallet }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -141,8 +141,8 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                             <label for="insurance">Insurance:</label>
                             <select class="form-control" id="insurance" name="insurance_id">
                                 <option value="">--Select--</option>
-                                @foreach ($insurance as $insurance)
-                                    <option value="{{ $insurance->_id }}"> {{ $insurance->insurance }} </option>
+                                @foreach ($matchedData['insurance'] as $insurance)
+                                    <option value="{{ $insurance->_id }}">{{ $insurance->insurance }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -151,11 +151,13 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                             <label for="merchant">Merchant:</label>
                             <select class="form-control" id="merchant" name="merchant_id">
                                 <option value="">--Select--</option>
-                                @foreach ($merchant as $merchant)
-                                    <option value="{{ $merchant->_id }}"> {{ $merchant->merchant }} </option>
+                                @foreach ($matchedData['merchant'] as $merchant)
+                                    <option value="{{ $merchant->_id }}">{{ $merchant->merchant }}</option>
                                 @endforeach
                             </select>
                         </div>
+
+
 
                         <button type="button" class="btn btn-primary" id="submitBank">Submit</button>
                     </form>
