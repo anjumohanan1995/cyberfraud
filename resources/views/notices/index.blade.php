@@ -39,6 +39,35 @@
 
                     <div class="container">
                         <h1>Notices List</h1>
+                        <form action="{{ url()->current() }}" method="GET">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" placeholder="Search By Account No." id="account_no" name="account_no" value="{{ request('account_no') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" placeholder="Search By Acknowledgement No." id="ack_no" name="ack_no" value="{{ request('ack_no') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        {{-- <input type="text" class="form-control"  placeholder="Search By Evidence Type"> --}}
+                                        <select name="evidence_type" id="evidence_type" class="form-control">
+                                            <option value="">--Select By Evidence Type--</option>
+                                            @foreach($evidence as $evidence)
+                                                <option value="{{$evidence->name}}">{{$evidence->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <button class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+
                         {{-- <table id="noticesTable" class="display">
                             <thead>
                                 <tr>

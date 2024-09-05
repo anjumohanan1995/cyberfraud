@@ -589,39 +589,140 @@ return redirect()->route('notices.index')->with('success', 'Notices generated an
 
 
 
-public function Notices()
-{
-    // $currentUserId = Auth::user()->id; // Get the current authenticated user's ID
-    // $isSuperAdmin = Auth::user()->role === 'super_admin';
-    // // dd($currentUserId);
+// public function Notices()
+// {
+//     // $currentUserId = Auth::user()->id; // Get the current authenticated user's ID
+//     // $isSuperAdmin = Auth::user()->role === 'super_admin';
+//     // // dd($currentUserId);
 
-    // // Fetch notices based on the presence of `assing_by_user_id` field
-    // $notices = Notice::where(function ($query) use ($currentUserId) {
-    //     // Show notices where `assing_by_user_id` matches the current user's ID or where it is not present
-    //     $query->where('assing_to_user_id', $currentUserId)
-    //           ->orWhereNull('assing_to_user_id');
-    // })
-    // ->orderBy('created_at', 'desc')
-    // ->get();
-    // // dd($notices);
+//     // // Fetch notices based on the presence of `assing_by_user_id` field
+//     // $notices = Notice::where(function ($query) use ($currentUserId) {
+//     //     // Show notices where `assing_by_user_id` matches the current user's ID or where it is not present
+//     //     $query->where('assing_to_user_id', $currentUserId)
+//     //           ->orWhereNull('assing_to_user_id');
+//     // })
+//     // ->orderBy('created_at', 'desc')
+//     // ->get();
+//     // // dd($notices);
 
-            $currentUser = Auth::user(); // Get the current authenticated user
-            $currentUserId = $currentUser->id; // Get the current user's ID
-            $isSuperAdmin = $currentUser->role === 'Super Admin'; // Check if the user is a super admin
+//             $currentUser = Auth::user(); // Get the current authenticated user
+//             $currentUserId = $currentUser->id; // Get the current user's ID
+//             $isSuperAdmin = $currentUser->role === 'Super Admin'; // Check if the user is a super admin
 
-            // Fetch notices based on the user's role
-            $notices = Notice::when(!$isSuperAdmin, function ($query) use ($currentUserId) {
-                $query->where(function ($query) use ($currentUserId) {
-                    // Show notices where `assing_to_user_id` matches the current user's ID or where it is not present
-                    $query->where('assing_to_user_id', $currentUserId)
-                        ->orWhereNull('assing_to_user_id');
+//             // Fetch notices based on the user's role
+//             $notices = Notice::when(!$isSuperAdmin, function ($query) use ($currentUserId) {
+//                 $query->where(function ($query) use ($currentUserId) {
+//                     // Show notices where `assing_to_user_id` matches the current user's ID or where it is not present
+//                     $query->where('assing_to_user_id', $currentUserId)
+//                         ->orWhereNull('assing_to_user_id');
+//                 });
+//             })
+//             ->orderBy('created_at', 'desc')
+//             ->get();
+
+//     return view('notices.index', compact('notices')); // Pass the data to the view
+// }\
+
+        // public function Notices(Request $request)
+        // {
+        //     $currentUser = Auth::user();
+        //     $currentUserId = $currentUser->id;
+        //     $isSuperAdmin = $currentUser->role === 'Super Admin';
+
+        //     // Get the account_no and ack_no filters (single values)
+        //     $accountNoFilter = $request->input('account_no');
+        //     $ackNoFilter = $request->input('ack_no');
+
+        //     // Fetch notices and apply filters
+        //     $notices = Notice::when(!$isSuperAdmin, function ($query) use ($currentUserId) {
+        //             $query->where(function ($query) use ($currentUserId) {
+        //                 $query->where('assing_to_user_id', $currentUserId)
+        //                     ->orWhereNull('assing_to_user_id');
+        //             });
+        //         })
+        //         // Apply account_no filter if it exists
+        //         ->when($accountNoFilter, function ($query) use ($accountNoFilter) {
+        //             $query->where('account_no', $accountNoFilter);  // Direct comparison for single account_no
+        //         })
+        //         // Apply ack_no filter if it exists
+        //         ->when($ackNoFilter, function ($query) use ($ackNoFilter) {
+        //             $query->where('ack_number', $ackNoFilter);  // Direct comparison for single ack_no
+        //         })
+        //         ->orderBy('created_at', 'desc')
+        //         ->get();
+
+        //     return view('notices.index', compact('notices'));
+        // }
+
+        // In your controller or service
+        public function Notices(Request $request)
+        {
+            $currentUser = Auth::user();
+            $currentUserId = $currentUser->id;
+            $isSuperAdmin = $currentUser->role === 'Super Admin';
+            $evidence=EvidenceType::get();
+
+            // Get the filters from the request
+            $accountNoFilter = $request->input('account_no');
+            $ackNoFilter = $request->input('ack_no');
+            $evidenceTypeFilter = $request->input('evidence_type');
+
+            // Ensure filters are valid strings, default to null if empty
+            $accountNoFilter = !empty($accountNoFilter) ? $accountNoFilter : null;
+            $ackNoFilter = !empty($ackNoFilter) ? $ackNoFilter : null;
+            $evidenceTypeFilter = !empty($evidenceTypeFilter) ? $evidenceTypeFilter : null;
+
+            // Construct the query
+            $query = Notice::where(function ($query) use ($currentUserId, $isSuperAdmin) {
+                if (!$isSuperAdmin) {
+                    $query->where(function ($query) use ($currentUserId) {
+                        $query->where('assing_to_user_id', $currentUserId)
+                              ->orWhereNull('assing_to_user_id');
+                    });
+                }
+            });
+
+            // Apply account_no filter if valid
+            if ($accountNoFilter) {
+                $query->where(function ($query) use ($accountNoFilter) {
+                    $query->where('account_no', $accountNoFilter) // Exact match
+                          ->orWhere(function ($query) use ($accountNoFilter) {
+                              $query->where('account_no', 'like', "%$accountNoFilter%"); // Check within comma-separated list
+                          });
                 });
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+            }
 
-    return view('notices.index', compact('notices')); // Pass the data to the view
-}
+            // Apply ack_no filter if valid
+            if ($ackNoFilter) {
+                $query->where(function ($query) use ($ackNoFilter) {
+                    $query->where('ack_number', $ackNoFilter) // Exact match
+                          ->orWhere(function ($query) use ($ackNoFilter) {
+                              $query->where('ack_number', 'like', "%$ackNoFilter%"); // Check within comma-separated list
+                          });
+                });
+            }
+
+            if ($evidenceTypeFilter) {
+                $query->where(function ($query) use ($evidenceTypeFilter) {
+                    $query->where('evidence_type', $evidenceTypeFilter) // Exact match
+                          ->orWhere(function ($query) use ($evidenceTypeFilter) {
+                              $query->where('evidence_type', 'like', "%$evidenceTypeFilter%"); // Check within comma-separated list
+                          });
+                });
+            }
+
+            // Execute the query
+            $notices = $query->orderBy('created_at', 'desc')->get();
+
+            return view('notices.index', compact('notices','evidence'));
+        }
+
+
+
+
+
+
+
 
     public function showNotice($id)
     {
@@ -1582,12 +1683,12 @@ public function againstMuleAccount()
             $filteredRepeatNotice = $filteredRepeatNotice->values();
 
             // dd($filteredRepeatNotice);
-
-            Log::info('Filtered Repeat Notices', ['filteredRepeatNotice' => $filteredRepeatNotice]);
-
             if ($filteredRepeatNotice->isEmpty()) {
                 return response()->json(['success' => false, 'message' => 'Notice has already been generated for this account.'], 400);
             }
+
+            Log::info('Filtered Repeat Notices', ['filteredRepeatNotice' => $filteredRepeatNotice]);
+
 
             // Map the flattened cases to the notice data format
             $noticeData = $filteredRepeatNotice->map(function ($case) {
