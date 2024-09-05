@@ -686,7 +686,7 @@ $(document).ready(function(){
                 _token: "{{ csrf_token() }}"
             },
             success: function(response) {
-                alert("Data submitted successfully");
+                // alert("Data submitted successfully");
 
                 var data = response.data;
                 var source_type = response.source_type;
@@ -741,15 +741,47 @@ $(document).ready(function(){
                     _token: "{{ csrf_token() }}"
                 },
                 success: function(response) {
-                    alert("Notice generated successfully");
-                    // location.reload();
-                    // Process the response if needed
-                },
-                error: function(xhr, status, error) {
-                    alert("An error occurred while generating notice");
-                }
-            });
+            // Check if response.success is defined and true
+            if (response && response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message || "Notice generated successfully",
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // Handle undefined response or missing success field
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Evidence Found',
+                    text: response.message || "No such evidence exists",
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            }
+        },
+        error: function(xhr) {
+            if (xhr.status === 409) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Duplicate Notice',
+                    text: xhr.responseJSON.message,
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: "An error occurred while generating the notice",
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            }
         }
+    });
+}
 
     </script>
 

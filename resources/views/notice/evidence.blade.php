@@ -603,21 +603,47 @@ $(document).ready(function(){
                 _token: "{{ csrf_token() }}"
             },
             success: function(response) {
-            if (response.success) {
-                alert(response.message); // Success message
+            // Check if response.success is defined and true
+            if (response && response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message || "Notice generated successfully",
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
             } else {
-                alert(response.message); // Error message when `success` is false
+                // Handle undefined response or missing success field
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Evidence Found',
+                    text: response.message || "No such evidence exists",
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         },
         error: function(xhr) {
             if (xhr.status === 409) {
-                alert(xhr.responseJSON.message); // Notice already generated
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Duplicate Notice',
+                    text: xhr.responseJSON.message,
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
             } else {
-                alert("An error occurred while generating the notice");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: "An error occurred while generating the notice",
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         }
-        });
-    }
+    });
+}
 
 });
 </script>
