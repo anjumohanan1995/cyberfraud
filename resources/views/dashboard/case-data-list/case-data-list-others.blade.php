@@ -143,6 +143,7 @@ $user = Auth::user();
                                             <th>IP\ Modus Keyword</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
+                                           @if($hasOthersSelfAssign) <th>Actions</th>@endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -234,8 +235,10 @@ $user = Auth::user();
                     },
                     {
                         data: 'remarks'
-                    }
-
+                    },
+                   @if($hasOthersSelfAssign) {
+                        data: 'action'
+                    }@endif
 
                 ],
                 "order": [0, 'desc'],

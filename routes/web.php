@@ -218,8 +218,11 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     Route::get('self-assigned-ncrp-data', [CaseDataController::class, 'selfAssignedIndex'])->name('self-assigned-ncrp');
     Route::get('ncrp-self-assigned-list', [CaseDataController::class, 'ncrpSelfAssigned'])->name("ncrp.self-assigned");
-    Route::get('self-assigned-others-data', [CaseDataController::class, 'OthersSelfAssigned'])->name('self-assigned-others');
-    Route::get('others-self-assigned-list', [CaseDataController::class, 'othersSelfIndex'])->name("self-assigned-others");
+
+    Route::get('self-assigned-others-data', [CaseDataController::class, 'getDatalistSelfOthers'])->name("self.assigned.others.data");
+    Route::get('others-self-assigned-list', [CaseDataController::class, 'othersSelfIndex'])->name("self.assigned.others");
+
+
 
 
     Route::post('fir-upload', [CaseDataController::class, 'firUpload'])->name('fir_file.upload');

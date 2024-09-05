@@ -131,7 +131,7 @@ $user = Auth::user();
 
 
                             <div class="table-responsive mb-0">
-                                <table id="complaints"
+                                <table id="self-complaints"
                                     class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
                                     <thead>
                                         <tr>
@@ -143,6 +143,7 @@ $user = Auth::user();
                                             <th>IP\ Modus Keyword</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
+                                           {{-- @if($hasOthersSelfAssign) <th>Actions</th>@endif --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -191,7 +192,7 @@ $user = Auth::user();
 
      <script>
         $(document).ready(function(){
-            var table = $('#complaints').DataTable({
+            var table = $('#self-complaints').DataTable({
                 stateSave: true,
                 processing: true,
                 serverSide: true,
@@ -203,7 +204,7 @@ $user = Auth::user();
                     'pdfHtml5'
                 ],
                 "ajax": {
-                    "url": "{{ route('get.datalist.others')}}",
+                    "url": "{{ route('self.assigned.others.data')}}",
                     "data": function(d) {
                         return $.extend({}, d, {});
                     }
@@ -235,7 +236,9 @@ $user = Auth::user();
                     {
                         data: 'remarks'
                     },
-
+                //    @if($hasOthersSelfAssign) {
+                //         data: 'action'
+                //     }@endif
 
                 ],
                 "order": [0, 'desc'],
@@ -304,7 +307,7 @@ $user = Auth::user();
 
     $(document).ready(function() {
     // Initialize the DataTable first if not already done
-    var table = $('#complaints').DataTable();
+    var table = $('#self-complaints').DataTable();
 
     // Bind the submit event handler to the form
     $('#complaint-form').on('submit', function(event) {
@@ -319,7 +322,7 @@ $user = Auth::user();
         var source_type = $("#source_type").val();
 
         // Construct the URL with query parameters
-        var requestUrl = "{{ route('get.datalist.others') }}?casenumber=" + casenumber +
+        var requestUrl = "{{ route('self.assigned.others.data') }}?casenumber=" + casenumber +
                          "&url=" + urlValue + "&domain=" + domain +
                          "&registrar=" + registrar + "&ip=" + ip + "&source_type=" + source_type;
 

@@ -116,15 +116,23 @@ class PermissionSeeder extends Seeder
                 'sub_permission' => json_encode([]),
             ],
             [
+                'name' => 'Self Assigned Casedata Management',
+                'sub_permission' => json_encode([
+                    '1' => 'View Self Assigned NCRP Casedata',
+                    '2' => 'View Self Assigned Others Casedata'
+                ]),
+            ],
+            [
                 'name' => 'Reports Management',
                 'sub_permission' => json_encode([
                     '1' => 'NCRP CSV Download',
                     '2' => 'Other CSV Download',
                     '3' => 'NCRP Excel Download',
                     '4' => 'Other Excel Download',
-                    '5' => 'View NCRP/Others Report',
+                    '5' => 'View Evidence Based Casedata',
+                    '6' => 'View Bank Action Based Casedata',
                     '6' => 'View Daily Bank Reports',
-                    '7' => 'View Above One Lakh Report'
+                    '7' => 'View Amount wise Report'
 
                 ]),
             ],
