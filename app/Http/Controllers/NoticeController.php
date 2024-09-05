@@ -1412,7 +1412,9 @@ public function againstMuleAccount()
         // dd($accountNumberPatterns);
 
         $otherLayerCases = BankCasedata::where('Layer', '!=', 1)
-            ->where(function($query) use ($accountNumberPatterns) {
+        ->whereNotNull('account_no_2')
+        ->where('account_no_2', '!=', '')
+        ->where(function($query) use ($accountNumberPatterns) {
                 foreach ($accountNumberPatterns as $pattern) {
                     $query->orWhere('account_no_2', 'regexp', $pattern);
                     }
@@ -1423,6 +1425,8 @@ public function againstMuleAccount()
 
         // dd($otherLayerCases);
         $withdrawalCases = BankCasedata::where('Layer','!=', 1)
+            ->whereNotNull('account_no_2')
+            ->where('account_no_2', '!=', '')
             ->whereIn('action_taken_by_bank', ['withdrawal through atm', 'cash withdrawal through cheque'])
             ->whereIn('acknowledgement_no', $acknowledgementNos)
             ->get();
@@ -1542,7 +1546,7 @@ public function againstMuleAccount()
             // Filter flattened cases where cleaned account_no_2 is not in the individual account numbers
             $repeatNotice = $flattenedCases->whereNotIn('account_no_2', $individualAccountNos);
 
-            dd($repeatNotice);
+            // dd($repeatNotice);
 
             // Log the filtered repeat notices
             Log::info('Repeat Notices', ['repeatNotice' => $repeatNotice]);
@@ -1606,16 +1610,6 @@ public function againstMuleAccount()
             $htmlContent = View::make('notices.muleaccount', ['notice' => $noticeData])->render();
             // dd($htmlContent);
 
-            Notice::create([
-                'user_id' => Auth::user()->id,
-                'ack_number' => $noticeData[0]['acknowledgement_no'],
-                'notice_type' => 'NOTICE U/s 168 of BHARATIYA NAGARIK SURAKSHA SANHITA (BNSS)-2023',
-                'type'=>'Mule',
-                'content' => $htmlContent,
-                'type' => 'Mule',
-
-            ]);
-
             // Notice::create([
             //     'user_id' => Auth::user()->id,
             //     'ack_number' => $noticeData[0]['acknowledgement_no'],
@@ -1624,7 +1618,6 @@ public function againstMuleAccount()
             //     'content' => $htmlContent,
             //     'type' => 'Mule',
             // ]);
-
 
             // Extract and process ack_number, ensuring it's a comma-separated string
             $ack_numbers = [];
@@ -1661,7 +1654,6 @@ public function againstMuleAccount()
             return response()->json(['success' => false, 'error' => 'An error occurred while generating the notice.'], 500);
         }
     }
-
 
     public function againstBankAccount()
     {
