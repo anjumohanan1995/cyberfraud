@@ -575,11 +575,10 @@ $evidenceTypeCounts = [];
             'content' => $combinedHtmlContent,
             // Add additional fields if needed
         ]));
+        return response()->json(['success' => true, 'message' => 'Notice generated successfully']);
     } else {
-        // Optionally, you can log or handle the case when a duplicate is found
-        Log::info('Duplicate notice found. Not creating a new one.', $criteria);
+        return response()->json(['success' => false, 'message' => 'Notice already generated'], 409);
     }
-    // dd("sucess");
 }
 // dd();
 // dd("sucess");

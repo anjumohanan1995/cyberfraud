@@ -603,13 +603,19 @@ $(document).ready(function(){
                 _token: "{{ csrf_token() }}"
             },
             success: function(response) {
-                alert("Notice generated successfully");
-                // location.reload();
-                // Process the response if needed
-            },
-            error: function(xhr, status, error) {
-                alert("An error occurred while generating notice");
+            if (response.success) {
+                alert(response.message); // Success message
+            } else {
+                alert(response.message); // Error message when `success` is false
             }
+        },
+        error: function(xhr) {
+            if (xhr.status === 409) {
+                alert(xhr.responseJSON.message); // Notice already generated
+            } else {
+                alert("An error occurred while generating the notice");
+            }
+        }
         });
     }
 
