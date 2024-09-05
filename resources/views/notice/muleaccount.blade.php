@@ -234,7 +234,8 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                     }
                 },
                 error: function(xhr) {
-                    toastr.error("No data found for the given criteria.");
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "No data found for the given criteria.";
+                    toastr.error(errorMessage);
                 }
             });
         });

@@ -247,40 +247,41 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                         toastr.error(response.message || "Failed to generate notice.");
                     }
                 },
-            error: function(xhr, status, error) {
-                toastr.error('An error occurred while submitting the form.');
-            }
+                error: function(xhr) {
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : "No data found for the given criteria.";
+                    toastr.error(errorMessage);
+                }
+            });
         });
     });
-});
 
 
-        function showDropdown() {
-            var transactionType = $('#transaction_type').val();
-            $('#bankDropdown').hide();
-            $('#walletDropdown').hide();
-            $('#insuranceDropdown').hide();
-            $('#merchantDropdown').hide();
+    function showDropdown() {
+        var transactionType = $('#transaction_type').val();
+        $('#bankDropdown').hide();
+        $('#walletDropdown').hide();
+        $('#insuranceDropdown').hide();
+        $('#merchantDropdown').hide();
 
-            if (transactionType === 'bank') {
-                $('#bankDropdown').show();
-            } else if (transactionType === 'wallet') {
-                $('#walletDropdown').show();
-            } else if (transactionType === 'insurance') {
-                $('#insuranceDropdown').show();
-            } else if (transactionType === 'merchant') {
-                $('#merchantDropdown').show();
-            }
+        if (transactionType === 'bank') {
+            $('#bankDropdown').show();
+        } else if (transactionType === 'wallet') {
+            $('#walletDropdown').show();
+        } else if (transactionType === 'insurance') {
+            $('#insuranceDropdown').show();
+        } else if (transactionType === 'merchant') {
+            $('#merchantDropdown').show();
         }
+    }
 
-        function closeModal() {
-            $('#evidenceModal').modal('hide');
-            $('#evidenceForm')[0].reset();
-            $('#bankDropdown').hide();
-            $('#walletDropdown').hide();
-            $('#insuranceDropdown').hide();
-            $('#merchantDropdown').hide();
-        }
+    function closeModal() {
+        $('#evidenceModal').modal('hide');
+        $('#evidenceForm')[0].reset();
+        $('#bankDropdown').hide();
+        $('#walletDropdown').hide();
+        $('#insuranceDropdown').hide();
+        $('#merchantDropdown').hide();
+    }
     </script>
 
     <!-- jQuery to trigger the modal on page load -->

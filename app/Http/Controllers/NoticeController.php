@@ -1583,7 +1583,11 @@ public function againstMuleAccount()
 
             // dd($filteredRepeatNotice);
 
+            Log::info('Filtered Repeat Notices', ['filteredRepeatNotice' => $filteredRepeatNotice]);
 
+            if ($filteredRepeatNotice->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'Notice has already been generated for this account.'], 400);
+            }
 
             // Map the flattened cases to the notice data format
             $noticeData = $filteredRepeatNotice->map(function ($case) {
@@ -1858,6 +1862,10 @@ public function againstMuleAccount()
 
             if ($repeatNotice->isEmpty()) {
                 Log::warning('No cases found where account_no_2 does not match any account number from notices.');
+            }
+
+            if ($repeatNotice->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'Notice has already been generated for this account.'], 400);
             }
 
             $noticeData = $repeatNotice->map(function ($case) {
