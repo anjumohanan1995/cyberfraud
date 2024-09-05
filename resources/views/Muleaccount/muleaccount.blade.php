@@ -185,6 +185,8 @@
                     columns: [
                         { data: 'id' },
                         { data: 'account_no_2' },
+                        { data: 'bank' },
+                        { data: 'status' },
                     ],
                     order: [0, 'asc'], // Sorting by SL No in ascending order
                     ordering: true
