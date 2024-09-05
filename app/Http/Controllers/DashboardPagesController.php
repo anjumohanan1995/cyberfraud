@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use Illuminate\Support\Facades\DB;
+use MongoDB\BSON\Regex;
 
 class DashboardPagesController extends Controller
 {
