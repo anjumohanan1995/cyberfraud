@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\SourceType;
 use App\Models\EvidenceType;
 use App\Models\Evidence;
@@ -18,15 +19,14 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 use Carbon\Carbon;
 use MongoDB\BSON\UTCDateTime;
 use DateTime;
 use MongoDB;
-use Illuminate\Support\Facades\DB;
-
-
 use MongoDB\BSON\Regex;
+
 class NoticeController extends Controller
 {
     /**
