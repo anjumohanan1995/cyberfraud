@@ -203,7 +203,7 @@ $user = Auth::user();
                     'pdfHtml5'
                 ],
                 "ajax": {
-                    "url": "{{ route('self-assigned-others')}}",
+                    "url": "{{ route('get.datalist.others')}}",
                     "data": function(d) {
                         return $.extend({}, d, {});
                     }
