@@ -134,8 +134,8 @@ public function chartData(Request $request)
     $collection = ($source === 'NCRP') ? Complaint::query() : ComplaintOthers::query();
 
     // Set the start and end dates to UTC explicitly
-    $startDate = Carbon::parse($fromDate)->startOfDay()->timezone('UTC');
-    $endDate = Carbon::parse($toDate)->endOfDay()->timezone('UTC');
+    $startDate = Carbon::parse($fromDate)->startOfDay()->timezone('+05:30');
+    $endDate = Carbon::parse($toDate)->endOfDay()->timezone('+05:30');
 
     // Cases per day grouped by acknowledgement_no within the date range
     $casesPerDayData = $collection->raw(function($collection) use ($startDate, $endDate, $source) {
@@ -143,16 +143,21 @@ public function chartData(Request $request)
 
         // Adjust end date to include only until the end of the day
         $adjustedEndDate = $endDate->copy()->endOfDay();
-  $adjustedStartDate = $endDate->copy()->startOfDay();
+        $adjustedStartDate = $startDate->copy()->startOfDay();
+        $startofendDate = $endDate->copy()->startOfDay();
         return $collection->aggregate([
             ['$match' => [
                 'entry_date' => [
-                    '$gte' => new MongoDB\BSON\UTCDateTime($adjustedStartDate->timestamp * 1000),
+                    '$gte' => new MongoDB\BSON\UTCDateTime($startofendDate->timestamp * 1000),
                     '$lte' => new MongoDB\BSON\UTCDateTime($adjustedEndDate->timestamp * 1000)
                 ]
             ]],
             ['$group' => [
-                '_id' => ['$dateToString' => ['format' => '%Y-%m-%d', 'date' => '$entry_date']],
+                '_id' => ['$dateToString' => [
+                    'format' => '%Y-%m-%d',
+                    'date' => '$entry_date',
+                    'timezone' => '+05:30' // Add the timezone offset here
+                ]],
                 'distinct_acknowledgements' => ['$addToSet' => $groupField]
             ]],
             ['$project' => [
@@ -163,30 +168,32 @@ public function chartData(Request $request)
     });
 
 
+
     $casesPerMonthData = $collection->raw(function($collection) use ($startDate, $endDate, $source) {
         $groupField = ($source === 'NCRP') ? '$acknowledgement_no' : '$case_number';
 
-        // Ensure start and end dates are in the same month
-        if ($startDate->format('Y-m') === $endDate->format('Y-m')) {
-            // Adjust date range to cover the full month if necessary
-            $startDate = $startDate->copy()->startOfMonth();
-            $endDate = $endDate->copy()->endOfMonth();
-        } else {
-            // Otherwise, cover the original date range
-            $startDate = $startDate->copy()->startOfMonth();
-            $endDate = $endDate->copy()->endOfMonth();
-        }
+        // Adjust date range to cover full months
+        $startDate = $startDate->copy()->startOfMonth();
+        $endDate = $endDate->copy()->endOfMonth();
+
+        // Convert to MongoDB BSON UTCDateTime
+        $adjustedStartDate = new MongoDB\BSON\UTCDateTime($startDate->timestamp * 1000);
+        $adjustedEndDate = new MongoDB\BSON\UTCDateTime($endDate->timestamp * 1000);
 
         // Step 1: Aggregate data per month
         $aggregatedData = $collection->aggregate([
             ['$match' => [
                 'entry_date' => [
-                    '$gte' => new MongoDB\BSON\UTCDateTime($startDate->timestamp * 1000),
-                    '$lte' => new MongoDB\BSON\UTCDateTime($endDate->timestamp * 1000)
+                    '$gte' => $adjustedStartDate,
+                    '$lte' => $adjustedEndDate
                 ]
             ]],
             ['$group' => [
-                '_id' => ['$dateToString' => ['format' => '%Y-%m', 'date' => '$entry_date']],
+                '_id' => ['$dateToString' => [
+                    'format' => '%Y-%m',
+                    'date' => '$entry_date',
+                    'timezone' => '+05:30' // Adjust to the local timezone
+                ]],
                 'distinct_acknowledgements' => ['$addToSet' => $groupField],
                 'total_cases' => ['$sum' => 1] // Count total cases per month
             ]],
@@ -219,6 +226,7 @@ public function chartData(Request $request)
         // Step 4: Convert the associative array back to an indexed array
         return array_values($months);
     });
+
 
 
 

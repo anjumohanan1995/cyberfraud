@@ -289,7 +289,7 @@ $user = Auth::user();
                                             <th>Current Status</th>
                                             <th>Date of Action</th>
                                             <th>Action Taken By</th>
-
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -573,7 +573,9 @@ $user = Auth::user();
                     {
                         data: 'action_taken_by_name'
                     },
-
+                    {
+                        data: 'edit'
+                    }
 
                 ],
                 "order": [8, 'asc'],

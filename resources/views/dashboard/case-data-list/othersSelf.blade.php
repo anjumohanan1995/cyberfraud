@@ -143,7 +143,7 @@ $user = Auth::user();
                                             <th>IP\ Modus Keyword</th>
                                             <th>Registrar</th>
                                             <th>Remarks</th>
-                                           {{-- @if($hasOthersSelfAssign) <th>Actions</th>@endif --}}
+                                           <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -236,10 +236,9 @@ $user = Auth::user();
                     {
                         data: 'remarks'
                     },
-                //    @if($hasOthersSelfAssign) {
-                //         data: 'action'
-                //     }@endif
-
+                    {
+                        data: 'action'
+                    }
                 ],
                 "order": [0, 'desc'],
                 'ordering': true
@@ -298,7 +297,17 @@ $user = Auth::user();
                 success: function(data) {
                     //console.log(data.status)
                     //toastr.success(data.status, 'Success!');
-                $('#example').DataTable().ajax.reload();
+                    var table = $('#self-complaints').DataTable();
+    var currentPage = table.page();
+
+    // Reload the table data
+    table.ajax.reload(function() {
+        // Set the page to the previously saved page number
+        table.page(currentPage).draw(false);
+    });
+
+
+                $('#self-complaints').DataTable().ajax.reload();
                 }
             });
         }

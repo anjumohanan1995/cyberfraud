@@ -831,21 +831,22 @@ class CaseDataController extends Controller
 
 
 
-                //  if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
-                // //     if ($hasShowSelfAssignPermission) {
-                //      $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                //          <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
-                //          <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
-                //          </div>
-                //      </div>';
-                //    //  }
-                // } elseif ($record['assigned_to'] == $CUser) {
-                // //     if ($hasShowSelfAssignPermission) {
-                //     $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                //         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
-                //     </div>';
-                // //     }
-                // } elseif ($record['assigned_to'] == null) {
+                 if (($record['assigned_to'] == $CUser) && ($record['case_status'] != null)) {
+                    //if ($hasShowSelfAssignPermission) {
+                     $edit .= '<div class="form-check form-switch1 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                         <div><p class="text-success"><strong>Case Status: ' . $record['case_status'] . '</strong></p>
+                         <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                         </div>
+                     </div>';
+                    // }
+                } elseif ($record['assigned_to'] == $CUser) {
+                     //if ($hasShowSelfAssignPermission) {
+                    $edit .= '<div class="form-check form-switch2 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                        <button class="btn btn-success" data-id="' . $record['acknowledgement_no'] . '" onClick="upStatus(this)" type="button">Update Status</button>
+                    </div>';
+                   // }
+                }
+                //elseif ($record['assigned_to'] == null) {
                 // //     if ($hasShowSelfAssignPermission) {
                 //     $edit .= '<div class="form-check form-switch3 form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                 //          <form action="" method="GET">
@@ -2347,9 +2348,10 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                     <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
                     </div>';
-            } elseif($record->assigned_to == null) {
+            }
+            elseif($record->assigned_to == null) {
                             //dd($casenumber);
-                    $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                    $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                                <form action="" method="GET">
                                <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
                                </form>
@@ -2360,10 +2362,15 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                            if($user != null){
                         if($record->case_status != null){
                             $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
-                        }
-                           $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                            $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+                            <p class="text-success">Assigned To: '. $user->name.'</p>
+                            </div>';
+                        }else{
+                            $edit = '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                            <p class="text-success">Assigned To: '. $user->name.'</p>
                            </div>';
+                        }
+
                         }
                         }
 
@@ -2652,25 +2659,26 @@ $pending_amount = $sum_amount - $hold_amount - $lost_amount;
                 $edit='<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
                     <button  class="btn btn-success"  data-id="' . $caseNo . '" onClick="upStatus(this)" type="button">Update Status</button>
                     </div>';
-            } elseif($record->assigned_to == null) {
-                            //dd($casenumber);
-                    $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                               <form action="" method="GET">
-                               <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
-                               </form>
-                               </div>';
-                        } else {
-                           $user = User::find($record->assigned_to);
-                          // dd($user);
-                           if($user != null){
-                        if($record->case_status != null){
-                            $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
-                        }
-                           $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
-                           <p class="text-success">Assigned To: '. $user->name.'</p>
-                           </div>';
-                        }
-                        }
+                }
+            //  elseif($record->assigned_to == null) {
+            //                 //dd($casenumber);
+            //         $edit= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            //                    <form action="" method="GET">
+            //                    <button data-id="' . $caseNo. '" onClick="selfAssign(this)" class="btn btn-warning btn-sm" type="button">Self Assign</button>
+            //                    </form>
+            //                    </div>';
+            //             } else {
+            //                $user = User::find($record->assigned_to);
+            //               // dd($user);
+            //                if($user != null){
+            //             if($record->case_status != null){
+            //                 $edit = '<p class="text-success"><strong>Case Status: '.$record->case_status.'</strong></p>';
+            //             }
+            //                $edit .= '<div class="form-check form-switch form-switch-sm d-flex justify-content-center align-items-center" dir="ltr">
+            //                <p class="text-success">Assigned To: '. $user->name.'</p>
+            //                </div>';
+            //             }
+            //             }
 
             $data_arr[] = array(
                     "id" => $i,
