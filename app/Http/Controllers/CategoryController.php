@@ -253,6 +253,8 @@ class CategoryController extends Controller
             'status' => $request->input('status'),
         ]);
 
-        return response()->json(['success' => 'Category Added successfully!'], 200);
+        // return response()->json(['success' => 'Category Added successfully!'], 200);
+        return redirect()->route('category.index')->with('success', 'Category Added successfully!');
+
     }
 }

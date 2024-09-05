@@ -90,48 +90,42 @@ class EvidenceTypeController extends Controller
         return view('dashboard.evidencetype.edit', ['data' => $data,]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-         // Validate the incoming request data
-         $request->validate([
-            'name' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive',
-            // Add more validation rules as needed
-        ]);
+public function update(Request $request, $id)
+{
+    // Create a validator instance
+    $validate = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'status' => 'required|in:active,inactive',
+    ]);
 
-        if ($validate->fails()) {
-            //dd($validate);
-            return Redirect::back()->withInput()->withErrors($validate);
-        }
-
-        // Find the role by its ID.
-        $data = EvidenceType::findOrFail($id);
-
-        $newName = strtolower($request->name);
-
-        // Check if the new name already exists for a different record
-        if (EvidenceType::where('deleted_at', null)->where('name', $newName)->where('id', '!=', $id)->exists()) {
-            return redirect()->back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
-        }
-
-        // Update the evidence type with the data from the request
-        $data->name = $newName;
-        $data->status = $request->status;
-
-        // Update other attributes as needed
-        // Save the updated evidence type
-        $data->save();
-
-        // Redirect back with success message
-        return redirect()->route('evidencetype.index')->with('success', 'Evidence Type updated successfully!');
+    // Check if validation fails
+    if ($validate->fails()) {
+        return Redirect::back()->withInput()->withErrors($validate);
     }
+
+    // Find the evidence type by its ID
+    $data = EvidenceType::findOrFail($id);
+
+    $newName = strtolower($request->name);
+
+    // Check if the new name already exists for a different record
+    if (EvidenceType::where('deleted_at', null)
+        ->where('name', $newName)
+        ->where('id', '!=', $id)
+        ->exists()) {
+        return redirect()->back()->withInput()->withErrors(['name' => 'This evidence type name already exists.']);
+    }
+
+    // Update the evidence type with the data from the request
+    $data->name = $newName;
+    $data->status = $request->status;
+
+    // Save the updated evidence type
+    $data->save();
+
+    // Redirect back with success message
+    return redirect()->route('evidencetype.index')->with('success', 'Evidence Type updated successfully!');
+}
 
     /**
      * Remove the specified resource from storage.

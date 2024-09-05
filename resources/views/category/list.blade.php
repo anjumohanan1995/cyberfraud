@@ -37,15 +37,27 @@
                                 <h4 class="card-title mg-b-10">
                                     Add Category
                                 </h4>
-
                                 @if (session('success'))
+                                    <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                @endif
+
+                                <!-- Add a hidden element to hold the success message -->
+                                <div id="hidden-success-message" style="display: none;">{{ session('success') }}</div>
+
+
+                                {{-- @if (session('success'))
                                 <div id="success-message"  class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                     {{ session('success') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-                                @endif
+                                @endif --}}
 
                                 <div class="col-md-9"></div>
                                 {{-- <div class="col-md-2 text-center">
@@ -166,7 +178,7 @@ $(document).ready(function(){
                 if (successMessage) {
 
                     $('#success-message').html(successMessage); // Update message
-                    $('#success-message').fadeIn(); // Show the message
+                    // $('#success-message').fadeIn(); // Show the message
                 }
             },
             error: function(xhr, status, error) {

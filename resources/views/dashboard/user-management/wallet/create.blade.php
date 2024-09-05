@@ -15,6 +15,12 @@ $hasAddSTPermission = $sub_permissions && in_array('Add Source Type', $sub_permi
 $hasEditSTPermission = $sub_permissions && in_array('Edit Source Type', $sub_permissions) || $user->role == 'Super Admin';
 $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub_permissions) || $user->role == 'Super Admin';
 @endphp
+<style>
+   #success-message {
+    display: none; /* Hidden by default */
+}
+
+    </style>
 
 <div class="container-fluid">
     <div class="breadcrumb-header justify-content-between">
@@ -41,14 +47,22 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
                         <div class="m-4 d-flex justify-content-between">
                             <h4 class="card-title mg-b-10">Add Wallet!</h4>
 
+
                             @if (session('success'))
-                                <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert">
-                                    {{ session('success') }}
+                                    <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                @endif
+                                <div id="success-message" class="alert alert-success alert-dismissible fade" role="alert" style="display: block;">
+                                    Test success message
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-                            @endif
+
 
                             @if ($errors->any())
                                 <div id="error-message" class="alert alert-danger alert-dismissible fade show w-100" role="alert">
@@ -113,8 +127,17 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    console.log('JavaScript loaded!');
+    $(document).ready(function() {
+    console.log('jQuery is loaded!');
+});
+
+    </script>
 
 <script>
+
 $(document).ready(function() {
     var table = $('#example').DataTable({
         processing: true,
@@ -141,45 +164,64 @@ $(document).ready(function() {
     });
 
     $('#sourceTypeForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent the default form submission
+    e.preventDefault(); // Prevent the default form submission
+    // alert('Form submitted!'); // Should show an alert if the form is submitted
 
-        $.ajax({
-            url: "{{ route('wallet.store') }}",
-            type: 'POST',
-            data: $(this).serialize(), // Serialize form data
-            success: function(response) {
-                console.log('Success:', response); // Log success response
-                table.ajax.reload(null, false); // false to keep the current page
-                $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
-                $('#sourceTypeForm')[0].reset(); // Reset the form
-                $('#name-error').html('').hide(); // Clear name error
-                $('#status-error').html('').hide();// Hide error messages
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', xhr.responseText); // Log error response
+    $.ajax({
+        url: "{{ route('wallet.store') }}",
+        type: 'POST',
+        data: $(this).serialize(), // Serialize form data
+        success: function(response) {
+    // alert(JSON.stringify(response)); // Alert with JSON string
+    console.log('Success response:', JSON.stringify(response, null, 2)); // Log JSON string with indentation
 
+    // Clear any previous success or error messages
+    $('#success-message').hide().html('');
 
-                $('#name-error').html('').hide(); // Clear previous name error
-                $('#status-error').html('').hide(); // Clear previous status error
+    if (response.success) {
+        console.log('Success message found:', response.success);
+        // Display the success message
+        $('#success-message').html(response.success).show();
+    } else {
+        console.log('No success message in response!');
+    }
 
-                if (xhr.responseJSON.errors) {
-                    $.each(xhr.responseJSON.errors, function(field, messages) {
-                        var errorHtml = '<div class="text-danger">';
-                        $.each(messages, function(index, message) {
-                            errorHtml += '<li>' + message + '</li>';
-                        });
-                        errorHtml += '</div>';
-              // Display error messages below the respective input field
-              if (field === 'name') {
-                            $('#name-error').html(errorHtml).show();
-                        } else if (field === 'status') {
-                            $('#status-error').html(errorHtml).show();
-                        }
+    // Reset the form
+    $('#sourceTypeForm')[0].reset();
+
+    // Clear name and status errors
+    $('#name-error').html('').hide();
+    $('#status-error').html('').hide();
+
+    // Reload DataTable
+    table.ajax.reload(null, false); // false to keep the current page
+},
+
+        error: function(xhr, status, error) {
+            console.error('Error response:', xhr.responseText); // Log error response
+
+            $('#name-error').html('').hide(); // Clear previous name error
+            $('#status-error').html('').hide(); // Clear previous status error
+
+            if (xhr.responseJSON.errors) {
+                $.each(xhr.responseJSON.errors, function(field, messages) {
+                    var errorHtml = '<div class="text-danger">';
+                    $.each(messages, function(index, message) {
+                        errorHtml += '<li>' + message + '</li>';
                     });
-                                }
+                    errorHtml += '</div>';
+
+                    // Display error messages below the respective input field
+                    if (field === 'name') {
+                        $('#name-error').html(errorHtml).show();
+                    } else if (field === 'status') {
+                        $('#status-error').html(errorHtml).show();
+                    }
+                });
             }
-        });
+        }
     });
+});
 
     $(document).on('click', '.delete-btn', function() {
         var Id = $(this).data('id');
@@ -204,5 +246,6 @@ $(document).ready(function() {
         }
     });
 });
+
 </script>
 @endsection

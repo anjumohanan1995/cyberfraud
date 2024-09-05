@@ -748,7 +748,7 @@ class SourceTypeController extends Controller
         $totalRecordswithFilter = $query->count();
 
         $records = $query->orderBy($columnName, $columnSortOrder) // Apply sorting here
-            // ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
+            ->orderBy('created_at', 'desc') // Sort by created_at as secondary order
             ->skip($start)
             ->take($rowperpage)
             ->get();
@@ -779,33 +779,46 @@ class SourceTypeController extends Controller
     }
 
     public function walletstore(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'name' => 'required|unique:wallets,wallet',
-            'status' => 'required|in:active,inactive',
-        ]);
+{
+    // Validate the input
+    $validate = Validator::make($request->all(), [
+        'name' => 'required',
+        'status' => 'required|in:active,inactive',
+    ]);
 
-        if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
-        }
-        $existingwallet = Wallet::where('wallet', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
-        if ($existingwallet) {
-            return response()->json([
-                'errors' => ['name' => ['The wallet already exists.']]
-            ], 422);
-        }
-
-        wallet::create([
-            'wallet' => $request->input('name'),
-            'status' => $request->input('status'),
-        ]);
-
+    if ($validate->fails()) {
         return response()->json([
-            'success' => 'Wallet Added Successfully.'
-        ]);
+            'errors' => $validate->errors()
+        ], 422);
     }
+
+    // Check for existing wallet that is not soft-deleted
+    $existingWallet = Wallet::whereNull('deleted_at')
+        ->where('wallet', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))
+        ->first();
+
+    if ($existingWallet) {
+        return response()->json([
+            'errors' => ['name' => ['The wallet name has already been taken.']]
+        ], 422);
+    }
+
+    // Create new wallet entry
+    Wallet::create([
+        'wallet' => $request->input('name'),
+        'status' => $request->input('status'),
+    ]);
+
+    return response()->json([
+        'success' => 'Wallet added successfully.'
+    ]);
+    // return redirect()->route('wallet.create')->with('success', 'Wallet added successfully!');
+
+
+
+}
+
+
 
     public function walletedit($id)
     {
@@ -846,9 +859,7 @@ class SourceTypeController extends Controller
     public function destroywallet($id)
     {
         $data = Wallet::findOrFail($id);
-
         $data->delete();
-
         return response()->json(['success' => 'Wallet successfully deleted!']);
     }
 
