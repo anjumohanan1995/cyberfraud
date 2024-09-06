@@ -125,6 +125,7 @@ class EvidenceController extends Controller
                 }
 
                 $existingEvidence = Evidence::where('evidence_type', $type)
+                    ->where('ack_no', $ack_no)
                     ->where(function ($query) use ($criteria, $type) {
                         if ($type == 'website') {
                             $query->where([
@@ -147,11 +148,16 @@ class EvidenceController extends Controller
                     })
                     ->exists();
 
-                if ($existingEvidence) {
-                    $errorFields = json_encode($criteria);
-                    $errorMessage = "Duplicate evidence detected in the entry for Evidence " . ($key + 1) . " with fields: " . $errorFields;
-                    return redirect()->back()->with('error', $errorMessage)->withInput();
-                }
+                    if ($existingEvidence) {
+                        // Format the criteria for a more readable error message
+                        $formattedCriteria = collect($criteria)->filter()->map(function($value, $key) {
+                            return ucfirst(str_replace('_', ' ', $key)) . ": " . $value;
+                        })->implode('<br>'); // Add line breaks between each field
+
+                        $errorMessage = "Duplicate evidence detected for entry at position " . ($key + 1) . ".<br><strong>The following fields already exist for this acknowledgement number:</strong><br>" . $formattedCriteria;
+
+                        return redirect()->back()->with('error', $errorMessage)->withInput();
+                    }
 
             // Create and save the evidence record
                 $evidence = new Evidence();

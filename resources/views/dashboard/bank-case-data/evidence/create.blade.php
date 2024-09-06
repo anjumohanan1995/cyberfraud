@@ -97,11 +97,12 @@ $filteredEvidenceTypes = array_filter($evidenceTypes->pluck('name')->toArray(), 
                             </div>
                         @endif
 
-                        @if (session('error'))
-                            <div class="alert alert-danger col-6">
-                                {{ session('error') }}
-                            </div>
-                        @endif
+                        @if(session('error'))
+                        <div class="alert alert-danger">
+                            {!! session('error') !!}
+                        </div>
+                    @endif
+
                             <div class="table-responsive mb-0">
                                 <form id="evidenceForm" action="{{ route('evidence.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
