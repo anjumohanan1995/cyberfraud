@@ -41,7 +41,7 @@
     $hasViewAmountwiseReportsPermission = in_array('View Amount wise Report', $sub_permissions);
 
     $hasEvidenceTypePermission = in_array('Evidence Type Management', $permissions);
-    $hasNoticeViewPermission = in_array('Notice View', $sub_permissions) || $user->role == 'Super Admin';
+    $hasNoticeViewPermission = in_array('Notice View', $sub_permissions);
     if ($sub_permissions) {
     $hasUploadPrimaryDataPermission = in_array('Upload Primary Data', $sub_permissions);
     $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions);

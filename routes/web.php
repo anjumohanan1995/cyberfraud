@@ -217,10 +217,10 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
     Route::get('self-assigned-ncrp-data', [CaseDataController::class, 'selfAssignedIndex'])->name('self-assigned-ncrp');
-    Route::get('ncrp-self-assigned-list', [CaseDataController::class, 'ncrpSelfAssigned'])->name("ncrp.self-assigned");
+    Route::get('ncrp-self-assigned-list', [CaseDataController::class, 'ncrpSelfAssigned'])->name("ncrp.self-assigned")->middleware('check.permission:View Self Assigned NCRP Casedata');
 
     Route::get('self-assigned-others-data', [CaseDataController::class, 'getDatalistSelfOthers'])->name("self.assigned.others.data");
-    Route::get('others-self-assigned-list', [CaseDataController::class, 'othersSelfIndex'])->name("self.assigned.others");
+    Route::get('others-self-assigned-list', [CaseDataController::class, 'othersSelfIndex'])->name("self.assigned.others")->middleware('check.permission:View Self Assigned Others Casedata');
 
 
 
@@ -294,7 +294,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     Route::post('/evidence/store', [EvidenceController::class, 'storeEvidence'])->name('evidenceStore');
     Route::post('/generate/notice', [NoticeController::class, 'generateNotice'])->name('generate.notice');
-    Route::get('/notices', [NoticeController::class, 'Notices'])->name('notices.index');
+    Route::get('/notices', [NoticeController::class, 'Notices'])->name('notices.index')->middleware('check.permission:Notice View');
     Route::get('/notices/{id}', [NoticeController::class, 'showNotice'])->name('notices.show');
     Route::get('/notices/{id}/edit', [NoticeController::class, 'editNoticeView'])->name('notices.edit');
     Route::put('/notices/{id}', [NoticeController::class, 'updateNotice'])->name('notices.update');
@@ -307,10 +307,10 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
 //Route for bank Reports
-Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports');
+Route::get('/bank-daily-reports', [BankReportController::class, 'index'])->name('bank-daily-reports')->middleware('check.permission:View Daily Bank Reports');
 Route::get('/bank-reports', [BankReportController::class, 'getBankDetailsByDate'])->name('bank-daily-reports.index');
 
-Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh');
+Route::get('/above-one-lakh', [BankReportController::class, 'aboveIndex'])->name('above-one-lakh')->middleware('check.permission:View Amount wise Report');
 Route::get('/above-report-data', [BankReportController::class, 'getAboveData'])->name('aboveReport');
 
 

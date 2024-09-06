@@ -531,19 +531,20 @@
                                  <div class="col-md-3">
                                 <select id="sourceTeam" class="form-select"><option value="NCRP" selected>NCRP</option>
                                  <option value="Others">Others</option>
-                             </select></div>
-                                 <div class="col-md-3"> <button onclick="fetchData()">Get Stats</button></div>
+                             </select>
+                            </div>
+                                 <div class="col-md-3"> <button onclick="getDatas()">Get Stats</button></div>
                               </div>
 
 
 
 
 
-                                <div class="loader-container" id="loader">
+                                {{-- <div class="loader-container" id="loader">
                                     <div class="loader"></div>
-                                </div>
+                                </div> --}}
 
-                                <div id="team-chart"></div>
+                                <div id="team-charts"></div>
                             </div>
                         </div>
                     </div>
@@ -704,9 +705,10 @@
 
 
 <script>
+
     let chart; // Variable to store the chart instance
 
-    function fetchData() {
+    function getDatas() {
     const startDate = document.getElementById('start_date').value;
     const endDate = document.getElementById('end_date').value;
     const sourceType = document.getElementById('sourceTeam').value;
@@ -793,7 +795,7 @@
                 chart.destroy(); // Destroy existing chart instance
             }
 
-            chart = new ApexCharts(document.querySelector("#team-chart"), options);
+            chart = new ApexCharts(document.querySelector("#team-charts"), options);
             chart.render();
 
         })
@@ -802,7 +804,7 @@
         });
 }
 
-window.onload = fetchData;
+window.onload = getDatas;
 
 </script>
 
