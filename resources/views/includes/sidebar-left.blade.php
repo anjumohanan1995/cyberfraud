@@ -22,32 +22,40 @@
     $hasNCRPCasePermission = in_array('NCRP Case Data Management', $permissions);
     $hasOtherCasePermission = in_array('Other Case Data Management', $permissions);
     $hasSelfAssignedCasedataManagementPermission = in_array('Self Assigned Casedata Management', $permissions);
-    $hasViewSelfAssignedNCRPCasedataPermission = in_array('View Self Assigned NCRP Casedata', $sub_permissions);
-    $hasViewSelfAssignedOthersCasedataPermission = in_array('View Self Assigned Others Casedata', $sub_permissions);
-
-
     $hasSourceTypeManagementPermission = in_array('Source Type Management', $permissions);
     $hasNoticeManagementPermission = in_array('Notice Management', $permissions);
-    $hasAgainstEvidencePermission = in_array('Against Evidence Permission', $sub_permissions);
-    $hasAgainstBankManagement = in_array('Against Bank Management', $sub_permissions);
-    $hasAgainstMuleAccountManagement = in_array('Against Mule Account Management', $sub_permissions);
     $hasEvidenceManagementPermission = in_array('Evidence Management', $permissions);
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
-
     $hasReportsPermission = in_array('Reports Management', $permissions);
-    $hasViewEvidenceBasedCasedataPermission = in_array('View Evidence Based Casedata', $sub_permissions);
-    $hasViewBankActionBasedCasedataReports = in_array('View Bank Action Based Casedata', $sub_permissions);
-    $hasViewDailyBankPermission = in_array('View Daily Bank Reports', $sub_permissions);
-    $hasViewAmountwiseReportsPermission = in_array('View Amount wise Report', $sub_permissions);
-
     $hasEvidenceTypePermission = in_array('Evidence Type Management', $permissions);
-    $hasNoticeViewPermission = in_array('Notice View', $sub_permissions);
+
     if ($sub_permissions) {
-    $hasUploadPrimaryDataPermission = in_array('Upload Primary Data', $sub_permissions);
-    $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions);
+        $hasUploadPrimaryDataPermission = in_array('Upload Primary Data', $sub_permissions);
+        $hasUploadBankActionPermission = in_array('Upload Bank Action', $sub_permissions);
+        $hasViewSelfAssignedNCRPCasedataPermission = in_array('View Self Assigned NCRP Casedata', $sub_permissions);
+        $hasViewSelfAssignedOthersCasedataPermission = in_array('View Self Assigned Others Casedata', $sub_permissions);
+        $hasAgainstEvidencePermission = in_array('Against Evidence Permission', $sub_permissions);
+        $hasAgainstBankManagement = in_array('Against Bank Management', $sub_permissions);
+        $hasAgainstMuleAccountManagement = in_array('Against Mule Account Management', $sub_permissions);
+        $hasNoticeViewPermission = in_array('Notice View', $sub_permissions);
+        $hasViewEvidenceBasedCasedataPermission = in_array('View Evidence Based Casedata', $sub_permissions);
+        $hasViewBankActionBasedCasedataReports = in_array('View Bank Action Based Casedata', $sub_permissions);
+        $hasViewDailyBankPermission = in_array('View Daily Bank Reports', $sub_permissions);
+        $hasViewAmountwiseReportsPermission = in_array('View Amount wise Report', $sub_permissions);
+
     } else{
         $hasUploadPrimaryDataPermission = false;
         $hasUploadBankActionPermission = false;
+        $hasViewSelfAssignedNCRPCasedataPermission = false;
+        $hasViewSelfAssignedOthersCasedataPermission = false;
+        $hasAgainstEvidencePermission = false;
+        $hasAgainstBankManagement = false;
+        $hasAgainstMuleAccountManagement = false;
+        $hasNoticeViewPermission = false;
+        $hasViewEvidenceBasedCasedataPermission = false;
+        $hasViewBankActionBasedCasedataReports = false;
+        $hasViewDailyBankPermission = false;
+        $hasViewAmountwiseReportsPermission = false;
     }
 
     @endphp

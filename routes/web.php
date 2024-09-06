@@ -115,7 +115,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     //bank case status route starts here.
-    Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index")->middleware('check.permission:Upload NCRP Case Data Management,Upload Bank Action');
+    Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index")->middleware('check.permission:Upload Bank Action');
     Route::post('bank-case-data/store', [BankCasedataController::class, 'store'])->name("bank-case-data.store");
 
     Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
@@ -126,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('police_stations', PoliceStationsController::class);
     Route::get('police_stations-list/get', [PoliceStationsController::class, 'getpolice_stations'])->name("get.police_stations");
 
-    Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints")->middleware('check.permission:Upload NCRP Case Data Management,Upload Primary Data');
+    Route::get('import-complaints', [ComplaintController::class, 'importComplaints'])->name("import.complaints")->middleware('check.permission:Upload Primary Data');
     Route::post('complaintStore', [ComplaintController::class, 'complaintStore'])->name("complaints.store");
 
     Route::get('/no-permission', function () {
@@ -193,8 +193,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
 
     Route::get('reports', [ReportsController::class, 'index'])->name("reports.index")->middleware('check.permission:Reports Management');
-    Route::get('evidence-reports', [ReportsController::class, 'evidenceReportsIndex'])->name("evidence.reports.index")->middleware('check.permission:Reports Management');
-    Route::get('bank-action-reports', [ReportsController::class, 'bankReportsIndex'])->name("bank.reports.index")->middleware('check.permission:Reports Management');
+    Route::get('evidence-reports', [ReportsController::class, 'evidenceReportsIndex'])->name("evidence.reports.index")->middleware('check.permission:View Evidence Based Casedata');
+    Route::get('bank-action-reports', [ReportsController::class, 'bankReportsIndex'])->name("bank.reports.index")->middleware('check.permission:View Bank Action Based Casedata');
     // Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-ncrp', [ReportsController::class, 'getDatalistNcrp'])->name("get.datalist.ncrp");
     Route::get('get-datalist-bank', [ReportsController::class, 'getDatalistBank'])->name("get.datalist.bank");
@@ -216,8 +216,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
 
 
-    Route::get('self-assigned-ncrp-data', [CaseDataController::class, 'selfAssignedIndex'])->name('self-assigned-ncrp');
-    Route::get('ncrp-self-assigned-list', [CaseDataController::class, 'ncrpSelfAssigned'])->name("ncrp.self-assigned")->middleware('check.permission:View Self Assigned NCRP Casedata');
+    Route::get('self-assigned-ncrp-data', [CaseDataController::class, 'selfAssignedIndex'])->name('self-assigned-ncrp')->middleware('check.permission:View Self Assigned NCRP Casedata');
+    Route::get('ncrp-self-assigned-list', [CaseDataController::class, 'ncrpSelfAssigned'])->name("ncrp.self-assigned");
 
     Route::get('self-assigned-others-data', [CaseDataController::class, 'getDatalistSelfOthers'])->name("self.assigned.others.data");
     Route::get('others-self-assigned-list', [CaseDataController::class, 'othersSelfIndex'])->name("self.assigned.others")->middleware('check.permission:View Self Assigned Others Casedata');
@@ -238,7 +238,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
 
     //notice module
 
-    Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence')->middleware('check.permission:Notice Management,Against Evidence Permission');
+    Route::get('notice', [NoticeController::class,'againstEvidence'])->name('notice.evidence')->middleware('check.permission:Against Evidence Permission');
 
     Route::get('evidence-list-notice', [NoticeController::class,'evidenceListNotice'])->name('get_evidence_list_notice');
 
@@ -322,10 +322,10 @@ Route::get('/complaint-filters', [ComplaintStatController::class, 'getAvailableF
 //Route::get('/verfiy-otp',[AuthController::class, 'verifyOtp'])->name('verify-otp')->middleware('auth');
 
 // mule account notice
-Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name('notice.mule.account');
+Route::get('mule-notice', [NoticeController::class,'againstMuleAccount'])->name('notice.mule.account')->middleware('check.permission:Against Mule Account Management');
 Route::post('/generate/mule/notice', [NoticeController::class, 'generateMuleNotice'])->name('generate.mule.notice');
 
-Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name('notice.bank');
+Route::get('bank-notice', [NoticeController::class,'againstBankAccount'])->name('notice.bank')->middleware('check.permission:Against Bank Management');
 Route::post('/generate/bankacc/notice', [NoticeController::class, 'generateBankAccNotice'])->name('generate.bank.acc.notice');
 Route::post('/generate/bankack/notice', [NoticeController::class, 'generateBankAckNotice'])->name('generate.bank.ack.notice');
 
