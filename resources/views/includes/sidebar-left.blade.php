@@ -357,10 +357,10 @@
             <ul class="slide-menu">
                 @if ($hasViewEvidenceBasedCasedataPermission)
                 <li>
-                    <a class="slide-item" href="{{ Route('evidence.reports.index') }}">Evidence based Case Data</a>
+                    <a class="slide-item" href="{{ route('evidence.reports.index') }}">Evidence based Case Data</a>
                 </li>@endif
                 @if($hasViewBankActionBasedCasedataReports)<li>
-                    <a class="slide-item" href="{{ Route('bank.reports.index') }}">Bank Action based Case Data</a>
+                    <a class="slide-item" href="{{ route('bank.reports.index') }}">Bank Action based Case Data</a>
                 </li>
                 @endif
                 @if($hasViewDailyBankPermission)

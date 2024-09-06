@@ -684,11 +684,11 @@ $(document).ready(function(){
     });
     </script>
 
-<script>
+{{-- <script>
     function closeModal() {
         window.location.href = "{{ route('notices.index') }}";
     }
-</script>
+</script> --}}
 
 
 <!-- jQuery to trigger the modal on page load -->

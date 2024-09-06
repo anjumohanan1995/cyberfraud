@@ -227,7 +227,7 @@ if ($sub_permissions || $user->role == 'Super Admin') {
                     if (response.success) {
                         toastr.success("Notice created successfully!");
                         $('#evidenceModal').modal('hide');
-                        window.location.href = "{{ route('notices.index') }}";
+                        // window.location.href = "{{ route('notices.index') }}";
 
                     } else {
                         toastr.error(response.message || "Failed to generate notice.");
@@ -267,11 +267,11 @@ if ($sub_permissions || $user->role == 'Super Admin') {
         });
     </script>
 
-    <script>
+    {{-- <script>
         function closeModal() {
             window.location.href = "{{ route('notices.index') }}";
         }
-    </script>
+    </script> --}}
 
 
 @endsection
