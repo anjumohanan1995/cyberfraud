@@ -42,17 +42,27 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
             <div class="col-md-12 col-xl-12">
                 <div class="card overflow-hidden review-project">
                     <div class="card-body">
+                        <div id="hidesuccess">
+                            @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            @endif
+
+                            </div>
+
+                            <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert" style="display: none;">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                         <div class="m-4 d-flex justify-content-between">
                             <h4 class="card-title mg-b-10">Add Source Type!</h4>
 
-                            @if (session('success'))
-                                <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert">
-                                    {{ session('success') }}
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            @endif
 
                             <div class="col-md-9"></div>
                         </div>
@@ -144,13 +154,16 @@ $(document).ready(function() {
         $.ajax({
             url: "{{ route('sourcetype.store') }}",
             type: 'POST',
+            dataType: 'json',
             data: $(this).serialize(), // Serialize form data
             success: function(response) {
-                // Reload DataTable to show the new record
-                table.ajax.reload(null, false); // false to keep the current page
+                // alert(response)
+            // console.log(response.success);
+                $('#hidesuccess').hide();
                 $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
-                $('#sourceTypeForm')[0].reset(); // Reset the form
-            },
+                table.ajax.reload(); // Reload DataTable
+                // windows.location.reload();
+                },
             error: function(xhr, status, error) {
                 var errors = xhr.responseJSON.errors;
                 $.each(errors, function(key, value) {
@@ -173,8 +186,10 @@ $(document).ready(function() {
                     _method: 'DELETE'
                 },
                 success: function(response) {
+                    console.log(response);
                     $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
                     table.ajax.reload(); // Reload DataTable
+                    windows.location.reload();
                 },
                 error: function(xhr, status, error) {
                     console.error(xhr.responseText);

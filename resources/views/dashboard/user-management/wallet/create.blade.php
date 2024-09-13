@@ -44,19 +44,37 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
             <div class="col-md-12 col-xl-12">
                 <div class="card overflow-hidden review-project">
                     <div class="card-body">
+                        <div id="hidesuccess">
+                            @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            @endif
+
+                            </div>
+
+                            <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert" style="display: none;">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                         <div class="m-4 d-flex justify-content-between">
                             <h4 class="card-title mg-b-10">Add Wallet!</h4>
 
 
-                            @if (session('success'))
+                            {{-- @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                @endif
-                                <div id="success-message" class="alert alert-success alert-dismissible fade" role="alert" style="display: block;">
+                                @endif --}}
+                                {{-- <div id="success-message" class="alert alert-success alert-dismissible fade" role="alert" style="display: block;">
                                     Test success message
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
@@ -75,7 +93,7 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-                            @endif
+                            @endif --}}
                         </div>
 
                         <div class="table-responsive mb-0">
@@ -172,30 +190,14 @@ $(document).ready(function() {
         type: 'POST',
         data: $(this).serialize(), // Serialize form data
         success: function(response) {
-    // alert(JSON.stringify(response)); // Alert with JSON string
-    console.log('Success response:', JSON.stringify(response, null, 2)); // Log JSON string with indentation
-
-    // Clear any previous success or error messages
-    $('#success-message').hide().html('');
-
-    if (response.success) {
-        console.log('Success message found:', response.success);
-        // Display the success message
-        $('#success-message').html(response.success).show();
-    } else {
-        console.log('No success message in response!');
-    }
-
-    // Reset the form
-    $('#sourceTypeForm')[0].reset();
-
-    // Clear name and status errors
-    $('#name-error').html('').hide();
-    $('#status-error').html('').hide();
-
-    // Reload DataTable
-    table.ajax.reload(null, false); // false to keep the current page
-},
+                // alert(response)
+            // console.log(response.success);
+                $('#hidesuccess').hide();
+                $('#example').DataTable().ajax.reload();
+                $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                // table.ajax.reload(); // Reload DataTable
+                // windows.location.reload();
+                },
 
         error: function(xhr, status, error) {
             console.error('Error response:', xhr.responseText); // Log error response
@@ -236,11 +238,14 @@ $(document).ready(function() {
                     _method: 'DELETE'
                 },
                 success: function(response) {
+                    console.log(response);
+                    $('#example').DataTable().ajax.reload();
                     $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
-                    table.ajax.reload(); // Reload DataTable
+                    // table.ajax.reload(); // Reload DataTable
+                    // windows.location.reload();
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error:', xhr.responseText); // Log error response
+                    console.error(xhr.responseText);
                 }
             });
         }

@@ -60,7 +60,8 @@ class EvidenceTypeController extends Controller
             'status' => $request->input('status'),
         ]);
 
-        return redirect()->route('evidencetype.index')->with('success','Evidence Type Added successfully.');
+        // return redirect()->route('evidencetype.index')->with('success','Evidence Type Added successfully.');
+        return response()->json(['success' => 'Evidence Type Added successfully!']);
 
 
     }

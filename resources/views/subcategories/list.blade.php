@@ -33,6 +33,24 @@
                 <div class="col-md-12 col-xl-12">
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
+                            <div id="hidesuccess">
+                                @if (session('success'))
+                                <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                @endif
+
+                                </div>
+
+                                <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert" style="display: none;">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add SubCategory
@@ -161,13 +179,15 @@ $(document).ready(function(){
                 status:status,
             },
             success: function(response) {
-              //  console.log(response);
-                $('#category').val('');
-                $('#subcategory').val('');
-                subcategoryTable.ajax.reload(null, false);
-
-            },
-            error: function(xhr, status, error) {
+                // alert(response)
+            // console.log(response.success);
+                $('#hidesuccess').hide();
+                $('#subcategorylist').DataTable().ajax.reload();
+                $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                // table.ajax.reload(); // Reload DataTable
+                // windows.location.reload();
+                },
+                error: function(xhr, status, error) {
                 var errors = xhr.responseJSON.errors;
                 $.each(errors, function(key, value) {
                     $('#' + key).after('<div class="text-danger">' + value + '</div>');
@@ -188,15 +208,15 @@ $(document).on('click', '.delete-btn', function(){
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-           // console.log(response);
-            subcategoryTable.ajax.reload(null, false);
-            $('#success-message').html('<div id="success-message"  class="alert alert-success alert-dismissible fade show w-100" role="alert">'+response.success +' <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-
-        },
-        error: function(xhr, status, error) {
-            console.error(xhr.responseText);
-            alert('Error deleting subcategory');
-        }
+                    console.log(response);
+                    $('#subcategorylist').DataTable().ajax.reload();
+                    $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                    // table.ajax.reload(); // Reload DataTable
+                    // windows.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
     });
    }
 

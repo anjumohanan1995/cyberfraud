@@ -63,7 +63,9 @@ class ModusController extends Controller
             'status' => $request->input('status'),
         ]);
 
-        return redirect()->back()->with('success', 'Modus Added successfully!');
+        // return redirect()->back()->with('success', 'Modus Added successfully!');
+        return response()->json(['success' => 'Modus Added successfully!']);
+
     }
 
     /**

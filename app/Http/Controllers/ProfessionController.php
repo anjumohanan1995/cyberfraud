@@ -62,7 +62,8 @@ class ProfessionController extends Controller
         ]);
 
 
-        return redirect()->route('profession.index')->with('success','Profession Added successfully.');
+        // return redirect()->route('profession.index')->with('success','Profession Added successfully.');
+        return response()->json(['success' => 'Profession Added successfully.']);
 
 
     }

@@ -41,6 +41,24 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
             <div class="col-md-12 col-xl-12">
                 <div class="card overflow-hidden review-project">
                     <div class="card-body">
+                        <div id="hidesuccess">
+                            @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            @endif
+
+                            </div>
+
+                            <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert" style="display: none;">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                         <!-- Evidence Type Management -->
                         <div class="m-4 d-flex justify-content-between">
                             <h4 class="card-title mg-b-10">Add Evidence Type!</h4>
@@ -73,14 +91,14 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>
-                    @if (session('success'))
+                    {{-- @if (session('success'))
                         <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert">
                             {{ session('success') }}
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                    @endif
+                    @endif --}}
                     <div class="table-responsive mb-0">
                         <table id="example" class="table table-hover table-bordered mb-0">
                             <thead>
@@ -131,23 +149,15 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function(response) {
-                    // Clear form fields and errors
-                    // $('#addEvidenceTypeForm')[0].reset();
-                    // $('#nameError').text('');
-                    // $('#statusError').text('');
-
-                    // // Show success message
-                    // $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
-
-                    // // Reload DataTable
-                    // table.ajax.reload();
-
-                            // Reload DataTable to show the new record
-                table.ajax.reload(null, false); // false to keep the current page
+                // alert(response)
+            // console.log(response.success);
+                $('#hidesuccess').hide();
+                $('#example').DataTable().ajax.reload();
                 $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
-                $('#sourceTypeForm')[0].reset(); // Reset the form
+                // table.ajax.reload(); // Reload DataTable
+                // windows.location.reload();
                 },
-                error: function(xhr, status, error) {
+            error: function(xhr, status, error) {
                 var errors = xhr.responseJSON.errors;
                 $.each(errors, function(key, value) {
                     $('#' + key).after('<div class="text-danger">' + value + '</div>');
@@ -170,12 +180,15 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                         _method: 'DELETE'
                     },
                     success: function(response) {
-                        $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' + '<span aria-hidden="true">&times;</span>' + '</button>').show();
-                        table.ajax.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
+                    console.log(response);
+                    $('#example').DataTable().ajax.reload();
+                    $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                    // table.ajax.reload(); // Reload DataTable
+                    // windows.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
                 });
             }
         });

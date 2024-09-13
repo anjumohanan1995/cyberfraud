@@ -33,21 +33,40 @@
                 <div class="col-md-12 col-xl-12">
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
+                        <div id="hidesuccess">
+                            @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            @endif
+
+                            </div>
+
+                            <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert" style="display: none;">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+
                             <div class=" m-4 d-flex justify-content-between">
                                 <h4 class="card-title mg-b-10">
                                     Add Category
                                 </h4>
-                                @if (session('success'))
+                                {{-- @if (session('success'))
                                     <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                @endif
+                                @endif --}}
 
                                 <!-- Add a hidden element to hold the success message -->
-                                <div id="hidden-success-message" style="display: none;">{{ session('success') }}</div>
+                                {{-- <div id="hidden-success-message" style="display: none;">{{ session('success') }}</div> --}}
 
 
                                 {{-- @if (session('success'))
@@ -171,16 +190,14 @@ $(document).ready(function(){
                 status: status,
             },
             success: function(response) {
-                //console.log(response);
-                $('#name').val('');
-                categoryTable.ajax.reload(null, false);
-                var successMessage = "{{ session('success') }}";
-                if (successMessage) {
-
-                    $('#success-message').html(successMessage); // Update message
-                    // $('#success-message').fadeIn(); // Show the message
-                }
-            },
+                // alert(response)
+            // console.log(response.success);
+                $('#hidesuccess').hide();
+                $('#category').DataTable().ajax.reload();
+                $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                // table.ajax.reload(); // Reload DataTable
+                // windows.location.reload();
+                },
             error: function(xhr, status, error) {
                 var errors = xhr.responseJSON.errors;
                 $.each(errors, function(key, value) {
@@ -201,14 +218,15 @@ $(document).on('click', '.delete-btn', function() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
         success: function(response) {
-            //console.log(response);
-            categoryTable.ajax.reload(null, false);
-            alert('Category deleted successfully');
-        },
-        error: function(xhr, status, error) {
-            console.error(xhr.responseText);
-            alert('Error deleting category');
-        }
+                    console.log(response);
+                    $('#category').DataTable().ajax.reload();
+                    $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                    // table.ajax.reload(); // Reload DataTable
+                    // windows.location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
     });
 }
 })

@@ -70,8 +70,8 @@ class SourceTypeController extends Controller
             'status' => $request->input('status'),
         ]);
 
-
-        return redirect()->route('sourcetype.create')->with('success','Source Type Added successfully.');
+        // Redirect back with a success message
+        return response()->json(['success' => 'Source Type Added successfully.']);
 
 
     }
@@ -362,14 +362,14 @@ class SourceTypeController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
-        }
+        // if ($validate->fails()) {
+        //     return response()->json([
+        //         'errors' => $validate->errors()
+        //     ], 422);
+        // }
 
         // Convert the bank name to lowercase for case-insensitive comparison
-        $existingBank = Bank::where('bank', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
+        $existingBank = Bank::where('deleted_at', null)->where('bank', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
         // dd(existingBank);
         if ($existingBank) {
             return response()->json([
@@ -382,9 +382,10 @@ class SourceTypeController extends Controller
             'status' => $request->input('status'),
         ]);
 
-        return response()->json([
-            'success' => 'Bank Added Successfully.'
-        ]);
+        // return response()->json([
+        //     'success' => 'Bank Added Successfully.'
+        // ]);
+        return response()->json(['success' => 'Bank Added successfully!']);
     }
 
     public function bankedit($id)
@@ -402,7 +403,7 @@ class SourceTypeController extends Controller
         ]);
 
         // Case-insensitive uniqueness check, ignoring the current record
-        $existingBank = Bank::where('_id', '!=', $id)
+        $existingBank = Bank::where('deleted_at', null)->where('_id', '!=', $id)
             ->where('bank', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
             ->first();
 
@@ -500,7 +501,7 @@ class SourceTypeController extends Controller
     public function insurancestore(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'name' => 'required|unique:insurances,insurance',
+            'name' => 'required',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -510,7 +511,7 @@ class SourceTypeController extends Controller
             ], 422);
         }
 
-        $existinginsurance = Insurance::where('insurance', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
+        $existinginsurance = Insurance::where('deleted_at', null)->where('insurance', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
         if ($existinginsurance) {
             return response()->json([
                 'errors' => ['name' => ['The Insurance already exists.']]
@@ -545,7 +546,7 @@ class SourceTypeController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        $existingInsurance = Insurance::where('_id', '!=', $id)
+        $existingInsurance = Insurance::where('deleted_at', null)->where('_id', '!=', $id)
             ->where('insurance', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
             ->first();
 
@@ -575,7 +576,7 @@ class SourceTypeController extends Controller
 
     public function merchantCreate()
     {
-        return view("dashboard.user-management.Merchant.create");
+        return view("dashboard.user-management.merchant.create");
     }
 
     public function getmerchant(Request $request)
@@ -640,7 +641,7 @@ class SourceTypeController extends Controller
     public function merchantstore(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'name' => 'required|unique:merchants,merchant',
+            'name' => 'required',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -650,7 +651,7 @@ class SourceTypeController extends Controller
             ], 422);
         }
 
-        $existingMerchant = Merchant::where('merchant', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
+        $existingMerchant = Merchant::where('deleted_at', null)->where('merchant', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
         // $existingBank = Bank::where('bank', 'regex', new \MongoDB\BSON\Regex('^' . preg_quote($request->name) . '$', 'i'))->first();
 
         if ($existingMerchant) {
@@ -672,7 +673,7 @@ class SourceTypeController extends Controller
     public function merchantedit($id)
     {
         $data = Merchant::findOrFail($id);
-        return view('dashboard.user-management.Merchant.edit', ['data' => $data,]);
+        return view('dashboard.user-management.merchant.edit', ['data' => $data,]);
     }
 
     public function merchantupdate(Request $request, $id)
@@ -682,17 +683,17 @@ class SourceTypeController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('merchants', 'merchant')->ignore($id)
+                // Rule::unique('merchants', 'merchant')->ignore($id)
             ],
             'status' => 'required|in:active,inactive',
         ]);
 
-        $existingMerchant = Merchant::where('_id', '!=', $id)
-            ->where('maerchant', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
+        $existingMerchant = Merchant::where('deleted_at', null)->where('_id', '!=', $id)
+            ->where('merchant', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
             ->first();
 
         if ($existingMerchant) {
-            return redirect()->back()->withErrors(['name' => 'The bank already exists.'])->withInput();
+            return redirect()->back()->withErrors(['name' => 'The Merchant already exists.'])->withInput();
         }
 
         $data = Merchant::findOrFail($id);
@@ -833,12 +834,12 @@ class SourceTypeController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('wallets', 'wallet')->ignore($id)
+                // Rule::unique('wallets', 'wallet')->ignore($id)
             ],
             'status' => 'required|in:active,inactive',
         ]);
 
-        $existingWallet = Wallet::where('_id', '!=', $id)
+        $existingWallet = Wallet::where('deleted_at', null)->where('_id', '!=', $id)
             ->where('wallet', 'regex', new Regex('^' . preg_quote($request->name) . '$', 'i'))
             ->first();
 

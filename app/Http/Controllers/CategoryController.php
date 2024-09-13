@@ -65,7 +65,8 @@ class CategoryController extends Controller
         ]);
 
 
-        return redirect()->back()->with('success', 'Category Added successfully!');
+        // return redirect()->back()->with('success', 'Category Added successfully!');
+        return response()->json(['success' => 'Category Added successfully.']);
     }
 
     /**
@@ -254,7 +255,6 @@ class CategoryController extends Controller
         ]);
 
         // return response()->json(['success' => 'Category Added successfully!'], 200);
-        return redirect()->route('category.index')->with('success', 'Category Added successfully!');
-
+        return response()->json(['success' => 'Category Added successfully.']);
     }
 }

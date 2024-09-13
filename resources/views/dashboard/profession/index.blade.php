@@ -33,16 +33,34 @@
                 <div class="col-md-12 col-xl-12">
                     <div class="card overflow-hidden review-project">
                         <div class="card-body">
+                            <div id="hidesuccess">
+                                @if (session('success'))
+                                <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                @endif
+
+                                </div>
+
+                                <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert" style="display: none;">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
                           <div class=" m-4 d-flex justify-content-between">
 
-                                @if (session('success'))
+                                {{-- @if (session('success'))
                                     <div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                                         {{ session('success') }}
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                @endif
+                                @endif --}}
                                 <div class="alert alert-success-one alert-dismissible fade show w-100" role="alert" style="display:none">
 
                                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -152,15 +170,14 @@
             method: $(this).attr('method'),
             data: $(this).serialize(), // Serialize form data
             success: function(response) {
-                // Show success message
-                $('.alert-success-one').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' + '<span aria-hidden="true">&times;</span>' + '</button>').show();
-
-                // Clear form fields
-                $('#professionForm')[0].reset();
-
-                // Redraw the DataTable to reflect the new data
-                table.ajax.reload();
-            },
+                // alert(response)
+            // console.log(response.success);
+                $('#hidesuccess').hide();
+                $('#example').DataTable().ajax.reload();
+                $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                // table.ajax.reload(); // Reload DataTable
+                // windows.location.reload();
+                },
             error: function(xhr, status, error) {
                 var errors = xhr.responseJSON.errors;
                 $.each(errors, function(key, value) {
@@ -184,14 +201,13 @@
                     _method: 'DELETE' // Override method to DELETE
                 },
                 success: function(response) {
-                    // Show success message
-                    $('.alert-success-one').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' + '<span aria-hidden="true">&times;</span>' + '</button>').show();
-
-                    // Redraw the DataTable to reflect the deletion
-                    table.ajax.reload();
+                    console.log(response);
+                    $('#example').DataTable().ajax.reload();
+                    $('#success-message').html(response.success + '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>').show();
+                    // table.ajax.reload(); // Reload DataTable
+                    // windows.location.reload();
                 },
                 error: function(xhr, status, error) {
-                    // Handle error response
                     console.error(xhr.responseText);
                 }
             });
