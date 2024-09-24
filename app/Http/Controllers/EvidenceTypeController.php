@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\EvidenceType;
+use App\Models\RolePermission;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Auth;
 
 class EvidenceTypeController extends Controller
 {
@@ -144,7 +147,15 @@ public function update(Request $request, $id)
     }
 
     public function getevidencetype(Request $request)
-{
+    {
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteETPermission = $sub_permissions && in_array('Delete Evidence Type', $sub_permissions) || $user->role == 'Super Admin';
+
     $draw = $request->get('draw');
     $start = $request->get("start");
     $rowperpage = $request->get("length"); // Rows display per page
@@ -193,7 +204,10 @@ public function update(Request $request, $id)
         $id = $record->id;
         $name = $record->name;
 
-        $edit = '<a href="' . url('evidencetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
+        $edit = '<a href="' . url('evidencetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+        if ($hasDeleteETPermission) {
+            $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
+        }
 
         $data_arr[] = [
             "id" => $i,

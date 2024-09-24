@@ -83,7 +83,7 @@
         <!-- /breadcrumb -->
         <!-- main-content-body -->
         <div class="main-content-body">
-            
+
 
 
             <!-- row -->
@@ -628,7 +628,7 @@
           </div>
         </div>
         <div class="modal-footer">
-        
+
           <button type="submit" class="btn btn-success btn-sm ">Update</button>
         </div>
       </form>
@@ -658,11 +658,11 @@
             <option value="transaction put on hold"> transaction put on hold </option>
             <option value="other"> other </option>
             </select>
-        
+
           </div>
         </div>
         <div class="modal-footer">
-        
+
           <button type="submit" class="btn btn-success btn-sm ">Update</button>
         </div>
       </form>
@@ -964,15 +964,15 @@ $(document).ready(function() {
     $('.disputeAmountLink').on('click', function(e) {
         e.preventDefault();
         var objectId = $(this).data('objectid');
-        
+
         $('#modalObjectIdInput').val(objectId);
-        
-     
+
+
         $('#disputeModal').modal('show');
     });
 
         $('.changeBankAction').on('click', function(e) {
-        e.preventDefault(); 
+        e.preventDefault();
         var objectId = $(this).data('objectid');
         var bankstatus = $(this).data('bankstatus');
 

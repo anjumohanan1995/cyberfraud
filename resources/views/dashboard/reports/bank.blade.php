@@ -8,10 +8,8 @@ $user = Auth::user();
             $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
             $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
             if ($sub_permissions || $user->role == 'Super Admin') {
-                $hasNCRPCSVPermission = in_array('NCRP CSV Download', $sub_permissions);
-                $hasOthersCSVPermission = in_array('Other CSV Download', $sub_permissions);
-                $hasNCRPExcelPermission = in_array('NCRP Excel Download', $sub_permissions);
-                $hasOthersExcelPermission = in_array('Other Excel Download', $sub_permissions);
+                $hasBankCSVPermission = in_array('Bank Action CSV Download', $sub_permissions);
+                $hasBankExcelPermission = in_array('Bank  Action Excel Download', $sub_permissions);
             } else{
                     $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
                 }
@@ -184,9 +182,11 @@ $user = Auth::user();
                                                                     <div class="col-md-12 text-right">
                                                                         <button type="submit" class="btn btn-primary">Submit</button>
                                                                         <!-- CSV Download Button -->
-                                                                        @if($hasNCRPCSVPermission)<a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>@endif
+                                                                        @if($hasBankCSVPermission)<a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>@endif
                                                                         <!-- Excel Download Button -->
-                                                                        @if($hasNCRPExcelPermission)<a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>@endif
+                                                                        @if($hasBankExcelPermission)
+                                                                        <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             </form>

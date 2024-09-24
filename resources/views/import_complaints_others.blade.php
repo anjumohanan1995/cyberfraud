@@ -7,8 +7,8 @@ $user = Auth::user();
             $permission = RolePermission::where('role', $role)->first();
             $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
             $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
-            if ($sub_permissions || $user->role == 'Super Admin') {
-                $hasUploadOtherPermission = in_array('Upload Other Case Data Management', $sub_permissions) || $user->role == 'Super Admin';
+            if ($permissions || $user->role == 'Super Admin') {
+                $hasUploadOtherPermission = in_array('Upload Other Case Data Management', $permissions) || $user->role == 'Super Admin';
                 } else{
                     $hasUploadOtherPermission = false;
                 }

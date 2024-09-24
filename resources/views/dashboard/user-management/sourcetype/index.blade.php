@@ -13,11 +13,19 @@ $user = Auth::user();
                 $hasAddSubCategoryPermission = in_array('Add Subcategory', $sub_permissions);
                 $hasAddProfessionPermission = in_array('Add Profession', $sub_permissions);
                 $hasAddModusPermission = in_array('Add Modus', $sub_permissions);
-                $hasUploadRegistrarPermission = in_array('Upload registrar', $sub_permissions);
+                $hasUploadRegistrarPermission = in_array('Upload Registrar', $sub_permissions);
                 $hasEditSTPermission = in_array('Edit source Type', $sub_permissions);
                 $hasDeleteSTPermission = in_array('Delete Source Type', $sub_permissions);
+                $hasAddBankPermission = in_array('Add Bank', $sub_permissions);
+                $hasAddWalletPermission = in_array('Add Wallet', $sub_permissions);
+                $hasAddMerchantPermission = in_array('Add Merchant', $sub_permissions);
+                $hasAddInsurancePermission = in_array('Add Insurance', $sub_permissions);
+                $hasAddEvidenceTPermission = in_array('Add Evidence Type', $sub_permissions);
+
+
             } else{
-                $hasAddSTPermission = $hasAddCategoryPermission = $hasAddSubCategoryPermission = $hasAddProfessionPermission = $hasAddModusPermission = $hasUploadRegistrarPermission = $hasEditSTPermission = $hasDeleteSTPermission = false;
+                $hasAddSTPermission = $hasAddCategoryPermission = $hasAddSubCategoryPermission = $hasAddProfessionPermission = $hasAddModusPermission = $hasUploadRegistrarPermission = $hasEditSTPermission =$hasAddEvidenceTPermission =
+                $hasAddBankPermission = $hasAddWalletPermission = $hasAddMerchantPermission = $hasAddInsurancePermission = $hasDeleteSTPermission = false;
                 }
 
 @endphp
@@ -104,7 +112,6 @@ $user = Auth::user();
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ route('subcategory.create') }}">
-
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3> <p class="mb-0 tx-12">SubCategory</p>
                                         </a>
                                     </div>
@@ -131,61 +138,67 @@ $user = Auth::user();
                                 </div>
                                 @endif
 
-                                {{-- @if ($hasAddModusPermission) --}}
+                                @if ($hasAddEvidenceTPermission)
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('evidencetype') }}">
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>  <p class="mb-0 tx-12"> Evidence Type </p>
-
                                         </a>
                                     </div>
                                 </div>
-                                {{-- @endif --}}
+                                @endif
 
 
-
+                                @if ($hasAddBankPermission)
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('bank-create') }}">
-                                            <p class="mb-0 tx-12"> Bank </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <p class="mb-0 tx-12"> Bank </p>
                                         </a>
                                     </div>
                                 </div>
+                                @endif
 
+                                @if ($hasAddWalletPermission)
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('wallet-create') }}">
-                                            <p class="mb-0 tx-12"> Wallet </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <p class="mb-0 tx-12"> Wallet </p>
                                         </a>
                                     </div>
                                 </div>
+                                @endif
 
+                                @if ($hasAddInsurancePermission)
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('insurance-create') }}">
-                                            <p class="mb-0 tx-12"> Insurance </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <p class="mb-0 tx-12"> Insurance </p>
                                         </a>
                                     </div>
                                 </div>
+                                @endif
 
+                                @if ($hasAddMerchantPermission)
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('merchant-create') }}">
-                                            <p class="mb-0 tx-12"> Merchants </p>
                                             <h3 class="mb-0"><i class="fa fa-plus"></i></h3>
+                                            <p class="mb-0 tx-12"> Merchants </p>
                                         </a>
                                     </div>
                                 </div>
+                                @endif
 
                                 @if($hasUploadRegistrarPermission)
                                 <div class="col-md-2 text-center mb-3 float-left">
                                     <div class="task-box danger mb-0">
                                         <a class="text-white" href="{{ url('upload-registrar') }}">
-                                            <p class="mb-0 tx-12"> Registrar upload </p>
                                             <h3 class="mb-0"><i class="fa fa-upload"></i></h3>
+                                            <p class="mb-0 tx-12"> Registrar upload </p>
                                         </a>
                                     </div>
                                 </div>

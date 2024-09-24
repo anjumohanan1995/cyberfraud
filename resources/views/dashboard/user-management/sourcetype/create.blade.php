@@ -102,9 +102,7 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
                                         <tr>
                                             <th>SL No</th>
                                             <th>NAME</th>
-                                            @if($hasEditSTPermission || $hasDeleteSTPermission)
                                                 <th>ACTION</th>
-                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -141,7 +139,7 @@ $(document).ready(function() {
         columns: [
             { data: 'id' },
             { data: 'name' },
-            @if($hasEditSTPermission || $hasDeleteSTPermission) { data: 'edit' } @endif
+           { data: 'edit' }
         ],
         order: [[0, 'desc']],
         ordering: true

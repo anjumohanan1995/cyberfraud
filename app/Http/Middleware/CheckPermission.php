@@ -30,7 +30,11 @@ class CheckPermission
             return redirect('/no-permission');
         }
 
-        if ($subPermission && !in_array($subPermission, $subPermissions) && $role !== 'Admin') {
+        // if ($subPermission && !in_array($subPermission, $subPermissions) && $role !== 'Admin') {
+        //     return redirect('/no-permission');
+        // }
+
+        if ($subPermission && (!is_array($subPermissions) || !in_array($subPermission, $subPermissions)) && $role !== 'Admin') {
             return redirect('/no-permission');
         }
 

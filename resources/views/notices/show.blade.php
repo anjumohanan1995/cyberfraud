@@ -1,7 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasUpdateButtonPermission = in_array('Edit Notice', $sub_permissions);
+                } else{
+                    $hasUpdateButtonPermission = false;
+                }
 
+@endphp
 <style>
     .modal {
         display: none;
@@ -161,7 +175,9 @@
         </div>
         <span class="custom-dropdown w-auto">
         <a href="{{ route('notices.index') }}" class="btn btn-secondary w-auto me-2">Back to List</a>
+            @if($hasUpdateButtonPermission)
                     <a href="{{ route('notices.edit', $notice->id) }}" class="btn btn-success w-auto me-2">Update</a>
+            @endif
                     <a href="#" class="btn btn-primary w-auto me-2" onclick="downloadContent()">Download Content</a>
                     {{-- <a href="#" class="btn btn-info w-auto me-2" onclick="approveContent()">Approve</a> --}}
 

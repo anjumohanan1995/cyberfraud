@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Category;
-use Illuminate\Support\Facades\Redirect;
+use App\Models\RolePermission;
 
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class CategoryController extends Controller
 {
@@ -152,6 +155,14 @@ class CategoryController extends Controller
 
     public function getCategories(Request $request){
 
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteCategoryPermission = $sub_permissions && in_array('Delete Category', $sub_permissions) || $user->role == 'Super Admin';
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -208,8 +219,10 @@ class CategoryController extends Controller
             $id = $record->id;
             $name = $record->name;
             $status = $record->status == 1 ? 'Active' : 'Inactive';
-            $edit = '<a  href="' . url('category/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
-
+            $edit = '<a  href="' . url('category/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+            if ($hasDeleteCategoryPermission) {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            }
             $data_arr[] = array(
                 "id" => $i,
                 "name" => $name,

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-
-use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\SubCategory;
+use App\Models\RolePermission;
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 class SubCategoryController extends Controller
 {
     /**
@@ -142,6 +145,14 @@ class SubCategoryController extends Controller
 
     }
     public function getSubCategories(Request $request){
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteSubCategoryPermission = $sub_permissions && in_array('Delete Subcategory', $sub_permissions) || $user->role == 'Super Admin';
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -195,8 +206,10 @@ class SubCategoryController extends Controller
             $category = $record->category->name;
             $subcategory = $record->subcategory;
             $status = $record->status == 1 ? 'Active' : 'Inactive';
-            $edit = '<a  href="' . url('subcategory/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
-
+            $edit = '<a  href="' . url('subcategory/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+            if ($hasDeleteSubCategoryPermission) {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            }
             $data_arr[] = array(
                 "id" => $i,
                 "category" => $category,

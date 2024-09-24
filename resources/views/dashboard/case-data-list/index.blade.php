@@ -124,8 +124,8 @@ $user = Auth::user();
 
                                         </div>
                                     </div>
-                                    @endif
-@if ($hasShowBankPermission)
+                                    {{-- @endif
+@if ($hasShowBankPermission) --}}
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="options">Bank/Wallet/Merchant/Insurance:</label>
@@ -148,7 +148,7 @@ $user = Auth::user();
                                         </div>
                                     </div>
 @endif
-@if($hasShowFilledByPermission)
+@if($hasShowComplaintRepoPermission)
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="filled_by_who">Complaint Reported:</label>

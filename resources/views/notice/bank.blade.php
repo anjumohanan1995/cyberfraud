@@ -11,13 +11,13 @@ $permissions = $permission && is_string($permission->permission) ? json_decode($
 $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
 $hasShowESTFPermission = $hasShowETFPermission = $hasShowStatusFPermission = $hasShowNoticeTypePermission = $hasGenerateTokenPermission = false;
 
-if ($sub_permissions || $user->role == 'Super Admin') {
-    $hasShowESTFPermission = in_array('Show Evidence Source Type Filter', $sub_permissions);
-    $hasShowETFPermission = in_array('Show Evidence Type Filter', $sub_permissions);
-    $hasShowStatusFPermission = in_array('Show Notice Status Filter', $sub_permissions);
-    $hasShowNoticeTypePermission = in_array('Show Notice Type Filter', $sub_permissions);
-    $hasGenerateTokenPermission = in_array('Generate Token', $sub_permissions);
-}
+// if ($sub_permissions || $user->role == 'Super Admin') {
+//     $hasShowESTFPermission = in_array('Show Evidence Source Type Filter', $sub_permissions);
+//     $hasShowETFPermission = in_array('Show Evidence Type Filter', $sub_permissions);
+//     $hasShowStatusFPermission = in_array('Show Notice Status Filter', $sub_permissions);
+//     $hasShowNoticeTypePermission = in_array('Show Notice Type Filter', $sub_permissions);
+//     // $hasGenerateTokenPermission = in_array('Generate Token', $sub_permissions);
+// }
 @endphp
 
 @section('content')

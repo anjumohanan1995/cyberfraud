@@ -14,8 +14,9 @@ $user = Auth::user();
                 $hasShowOtherETFilter = in_array('Show Others Evidence Type Filter', $sub_permissions);
                 $hasViewNCRPStatus = in_array('View / Update NCRP Evidence Status', $sub_permissions);
                 $hasViewOtherStatus = in_array('View / Update Others Evidence Status', $sub_permissions);
+                $hasBulkUploadStatus = in_array('NCRP Bulk Upload', $sub_permissions);
             } else{
-                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission =  $hasBulkUploadStatus =false;
                 }
 
 @endphp
@@ -207,12 +208,12 @@ $user = Auth::user();
                                                                 </div>
                                                             </form>
                                                             <div class="table-responsive">
-
+                                                                @if($hasBulkUploadStatus)
                                                             <a class="align-items-center justify-content-center btn btn-primary m-5"
                                                             data-toggle="tooltip" data-placement="top" title="View Evidence"
                                                             href="{{ route('evidence.bulk.import')}}">
                                                             <i class="ti ti-upload"></i> Bulk Upload </a>
-
+                                                                @endif
                                                                 <table id="ncrp" class="table table-hover table-bordered mb-0 text-md-nowrap text-lg-nowrap text-xl-nowrap table-striped">
 
                                                                 {{-- <button class="btn btn-success btn-small status_recheck" style="margin-bottom:5px;margin-left:5px" data-type="ncrp" title="NCRP Recheck"> Recheck <i class="fa fa-sync" ></i></button> --}}

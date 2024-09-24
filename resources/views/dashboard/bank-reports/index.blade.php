@@ -1,5 +1,21 @@
 @extends('layouts.app')
 @section('content')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasDailyCSVPermission = in_array('Daily Bank CSV Download', $sub_permissions);
+                $hasDailyExcelPermission = in_array('Daily Bank Excel Download', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
+
+@endphp
 <div class="container-fluid">
     <div class="breadcrumb-header justify-content-between">
         <div>
@@ -134,7 +150,7 @@
             document.getElementById('hold_other_than').textContent = formattedDate;
             document.getElementById('total_hold_on').textContent = formattedDate;
             document.getElementById('amount_lost_from_eco').textContent = formattedDate;
-            
+
         var table = $('#example').DataTable({
             processing: true,
             serverSide: true,
@@ -146,10 +162,17 @@
                 }
             },
             dom: 'Bfrtip',
- buttons: [
-    { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
-    { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
- ],
+            buttons: [
+                @if($hasDailyCSVPermission)
+                { extend: 'csv', className: 'csv-btn', text: 'Download CSV' },
+                @endif
+
+                @if($hasDailyExcelPermission)
+                { extend: 'excel', className: 'excel-btn', text: 'Download Excel' },
+                @endif
+
+            ],
+
             columns: [
                 {
                     "data": null, "render": function (data, type, full, meta) {

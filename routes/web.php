@@ -89,21 +89,43 @@ Route::middleware(['auth'])->group(function () {
 
 
     //users route starts here.
-    Route::resource('users', UsersController::class)->middleware('check.permission:User Management');
+    // Route::resource('users', UsersController::class)->middleware('check.permission:User Management');
+
+    Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
+        Route::get('/', [UsersController::class, 'index'])->name('index')->middleware('check.permission:User Management');
+
+        Route::get('/create', [UsersController::class, 'create'])->name('create')->middleware('check.permission:User Management,Add User');
+        Route::post('/', [UsersController::class, 'store'])->name('store')->middleware('check.permission:User Management,Add User');
+
+        Route::get('/{user}/edit', [UsersController::class, 'edit'])->name('edit')->middleware('check.permission:User Management,Edit User');
+        Route::put('/{user}', [UsersController::class, 'update'])->name('update')->middleware('check.permission:User Management,Edit User');
+
+        Route::delete('/{user}', [UsersController::class, 'destroy'])->name('destroy')->middleware('check.permission:User Management,Delete User');
+    });
+
     //profile
     Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
     Route::get('users-management/users-list/get', [UsersController::class, 'getUsersList'])->name("get.users-list");
 
-    Route::resource('roles', RoleController::class)->middleware('check.permission:Role Management');
+    // Route::resource('roles', RoleController::class)->middleware('check.permission:Role Management');
+    Route::group(['prefix' => 'roles', 'as' => 'roles.'], function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index')->middleware('check.permission:Role Management');
+        Route::get('/create', [RoleController::class, 'create'])->name('create')->middleware('check.permission:Role Management,Add Role');
+        Route::post('/', [RoleController::class, 'store'])->name('store')->middleware('check.permission:Role Management,Add Role');
+
+        Route::get('/{role}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('check.permission:Role Management,Edit Role');
+        Route::put('/{role}', [RoleController::class, 'update'])->name('update')->middleware('check.permission:Role Management,Edit Role');
+
+        Route::delete('/{role}', [RoleController::class, 'destroy'])->name('destroy')->middleware('check.permission:Role Management,Delete Role');
+    });
+
+
     Route::get('users-management/roles-list/get', [RoleController::class, 'getRoles'])->name("get.roles");
 
     Route::get('/roles/{id}/editPermission', [RoleController::class, 'editPermission'])->name('edit-rolePermission')->middleware('check.permission:Role Management');
     Route::post('/roles/addPermission/{id}', [RoleController::class, 'addPermission'])->name('roles.permission.store')->middleware('check.permission:Role Management');
 
-
-
-
-    Route::resource('modus', ModusController::class);
+    // Route::resource('modus', ModusController::class);
     Route::get('modus-list/get', [ModusController::class, 'getModus'])->name("get.modus");
 
     //permmission route starts here.
@@ -118,7 +140,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('bank-case-data', [BankCasedataController::class, 'index'])->name("bank-case-data.index")->middleware('check.permission:Upload NCRP Case Data Management,Upload Bank Action');
     Route::post('bank-case-data/store', [BankCasedataController::class, 'store'])->name("bank-case-data.store");
 
-    Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission']);
+    Route::get('/subpermissions/{id}', [PermissionController::class, 'addSubpermission'])->middleware('check.permission:Permission Management');
     Route::post('users-management/subpermissions', [PermissionController::class, 'storeSubPermissions'])->name("subpermissions.store");
     Route::post('users-management/subpermissions/{id}', [PermissionController::class, 'deleteSubPermissions'])->name("subpermissions.destroy");
 
@@ -171,8 +193,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('get-casenumber', [CaseDataController::class, 'getCaseNumber'])->name("get.casenumber");
 
     //for other case data details innerpage
-    Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details")->middleware('no-cache');
-    Route::get('edit-others-caseData/{id}', [CaseDataController::class, 'editotherCaseDetails'])->name("edit-others-caseData");
+    Route::get('other-case-details/{id}', [CaseDataController::class, 'otherCaseDetails'])->name("other-case-details")->middleware(['no-cache','check.permission:Other Case Data Management']);
+    Route::get('edit-others-caseData/{id}', [CaseDataController::class, 'editotherCaseDetails'])->name("edit-others-caseData")->middleware('check.permission:Other Case Data Management,Edit Other Case Data');
     Route::put('others-caseData-update/{id}', [CaseDataController::class, 'updateotherCaseDetails'])->name("case-data-others.update");
 
     //for casenumber auto generate
@@ -181,10 +203,22 @@ Route::middleware(['auth'])->group(function () {
     //collection drop controller
     Route::get('drop-collection', [DropCollectionController::class, 'dropCollection']);
 
+    // Route::resource('sourcetype', SourceTypeController::class)->middleware('check.permission:Masters Management');
 
-    Route::resource('sourcetype', SourceTypeController::class)->middleware('check.permission:Source Type Management');
+    Route::group(['prefix' => 'sourcetype', 'as' => 'sourcetype.'], function () {
+        Route::get('/', [SourceTypeController::class, 'index'])->name('index')->middleware('check.permission:Masters Management');
+        Route::get('/create', [SourceTypeController::class, 'create'])->name('create')->middleware('check.permission:Masters Management,Add Source Type');
+        Route::post('/', [SourceTypeController::class, 'store'])->name('store')->middleware('check.permission:Masters Management,Add Source Type');
+
+        Route::get('/{role}/edit', [SourceTypeController::class, 'edit'])->name('edit')->middleware('check.permission:Masters Management,Add Source Type');
+        Route::put('/{role}', [SourceTypeController::class, 'update'])->name('update')->middleware('check.permission:Masters Management,Add Source Type');
+
+        Route::delete('/{role}', [SourceTypeController::class, 'destroy'])->name('destroy')->middleware('check.permission:Masters Management,Delete Source Type');
+    });
+    // Route::get('sourcetype/{role}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('check.permission:Masters Management,Add Source Type');
+
     Route::get('users-management/sourcetype-list/get', [SourceTypeController::class, 'getsourcetype'])->name("get.sourcetype");
-    Route::get('upload-registrar', [SourceTypeController::class, 'uploadRegistrar'])->name("upload-registrar")->middleware('check.permission:Source Type Management,Upload registrar');
+    Route::get('upload-registrar', [SourceTypeController::class, 'uploadRegistrar'])->name("upload-registrar")->middleware('check.permission:Masters Management,Upload Registrar');
     Route::post('registrarStore', [SourceTypeController::class, 'registrarStore'])->name("registrar.store");
 
 //dashboard graph
@@ -204,16 +238,16 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::resource('evidencetype', EvidenceTypeController::class)->middleware('check.permission:Evidence Type Management');
     Route::get('evidencetype-list/get', [EvidenceTypeController::class, 'getevidencetype'])->name("get.evidencetype");
 
-    Route::resource('profession', ProfessionController::class)->middleware('check.permission:Source Type Management,Add Profession');
+    Route::resource('profession', ProfessionController::class)->middleware('check.permission:Masters Management,Add Profession');
     Route::get('profession-list/get', [ProfessionController::class, 'getprofession'])->name("get.profession");
 
 
 //evidence
     // Route::resource('evidence', EvidenceController::class);
-    Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create');
+    Route::get('bank-case-data/evidence/create/{acknowledgement_no}', [EvidenceController::class, 'create'])->name('evidence.create')->middleware('check.permission:NCRP Case Data Management,Add Evidence');
     Route::post('/evidence', [EvidenceController::class, 'store'])->name('evidence.store');
     Route::delete('/evidence/{id}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
-    Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index');
+    Route::get('evidence/index/{acknowledgement_no}', [EvidenceController::class, 'index'])->name('evidence.index')->middleware('check.permission:NCRP Case Data Management,View Evidence');
 
 
     Route::get('self-assigned-ncrp-data', [CaseDataController::class, 'selfAssignedIndex'])->name('self-assigned-ncrp')->middleware('check.permission:Self Assigned Casedata Management,View Self Assigned NCRP Casedata');
@@ -247,20 +281,21 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::get('muleaccount-list', [MuleAccountController::class,'muleaccountList'])->name('get_muleaccount_list');
 
     // category module
-    Route::resource('category', CategoryController::class)->middleware('check.permission:Source Type Management');
+    Route::resource('category', CategoryController::class)->middleware('check.permission:Masters Management,Add Category');
+
     Route::get('get-categories', [CategoryController::class,'getCategories'])->name('get.categories');
     Route::post('add-category', [CategoryController::class,'addCategory'])->name('add.category');
 
     //modus module
-    Route::resource('modus', ModusController::class);
+    Route::resource('modus', ModusController::class)->middleware('check.permission:Masters Management,Add Modus');
     Route::get('get-modus', [ModusController::class,'getModus'])->name('get.modus');
     Route::post('add-modus', [ModusController::class,'addModus'])->name('add.modus');
 
     //Sub CAtegory module
 
-    Route::resource('subcategory', SubCategoryController::class)->middleware('check.permission:Source Type Management,Add Subcategory');
+    Route::resource('subcategory', SubCategoryController::class)->middleware('check.permission:Masters Management,Add Subcategory');
     Route::get('get-subcategories', [SubCategoryController::class,'getSubCategories'])->name('get.subcategories');
-    Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory')->middleware('check.permission:Source Type Management,Add Subcategory');
+    Route::post('add-subcategory', [SubCategoryController::class,'addSubCategory'])->name('add.subcategory')->middleware('check.permission:Masters Management,Add Subcategory');
 
     // Mail Merge
     Route::get('/get-mailmerge-list/{ack_no}', [MailController::class, 'mailMergeList'])->name('get-mailmerge-list')->middleware('check.permission:Evidence Management,Show NCRP mail Merge');
@@ -286,7 +321,7 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     //evidence bulk upload ncrp
 
     // Route::get('evidence.evidenceBulkUploadImport', [EvidenceController::class, 'evidenceBulkUploadImport']);
-    Route::get('/evidence/bulkimport',[EvidenceController::class, 'evidenceBulkImport'])->name('evidence.bulk.import');
+    Route::get('/evidence/bulkimport',[EvidenceController::class, 'evidenceBulkImport'])->name('evidence.bulk.import')->middleware('check.permission:Evidence Management,NCRP Bulk Upload');
     Route::post('evidence/bulk-upload',[EvidenceController::class, 'evidenceBulkUploadFile'])->name('evidence.bulk-upload');
 
     Route::get('/get-portal-link/{registrar}', [MailController::class, 'getPortalLink'])->name('get-portal-link');
@@ -295,8 +330,8 @@ Route::get('/complaints/chart', [ComplaintGraphController::class,'chartData'])->
     Route::post('/evidence/store', [EvidenceController::class, 'storeEvidence'])->name('evidenceStore');
     Route::post('/generate/notice', [NoticeController::class, 'generateNotice'])->name('generate.notice');
     Route::get('/notices', [NoticeController::class, 'Notices'])->name('notices.index')->middleware('check.permission:Notice Management,Notice View');
-    Route::get('/notices/{id}', [NoticeController::class, 'showNotice'])->name('notices.show');
-    Route::get('/notices/{id}/edit', [NoticeController::class, 'editNoticeView'])->name('notices.edit');
+    Route::get('/notices/{id}', [NoticeController::class, 'showNotice'])->name('notices.show')->middleware('check.permission:Notice Management,Notice View');
+    Route::get('/notices/{id}/edit', [NoticeController::class, 'editNoticeView'])->name('notices.edit')->middleware('check.permission:Notice Management,Edit Notice');
     Route::put('/notices/{id}', [NoticeController::class, 'updateNotice'])->name('notices.update');
     Route::post('/notices/{id}/follow', [NoticeController::class, 'follow'])->name('notices.follow');
 
@@ -347,33 +382,33 @@ Route::get('evidence-mobile/template', [EvidenceController::class, 'createEviden
 Route::get('evidence-website/template', [EvidenceController::class, 'createEvidenceWebsiteDownloadTemplate'])->name("create-download-evidence-website-template");
 
 
-Route::get('bank-create', [SourceTypeController::class,'bankCreate'])->name('bank.create');
+Route::get('bank-create', [SourceTypeController::class,'bankCreate'])->name('bank.create')->middleware('check.permission:Masters Management,Add Bank');
 Route::get('users-management/bank-list/get', [SourceTypeController::class, 'getbank'])->name("get.bank");
 Route::post('bank-store', [SourceTypeController::class,'bankstore'])->name('bank.store');
-Route::get('/bank/{id}/edit', [SourceTypeController::class, 'bankedit'])->name('bank.edit');
+Route::get('/bank/{id}/edit', [SourceTypeController::class, 'bankedit'])->name('bank.edit')->middleware('check.permission:Masters Management,Add Bank');
 Route::put('/bank/{id}', [SourceTypeController::class, 'bankupdate'])->name('bank.update');
-Route::delete('/bank/{id}', [SourceTypeController::class, 'destroybank'])->name('bank.destroy');
+Route::delete('/bank/{id}', [SourceTypeController::class, 'destroybank'])->name('bank.destroy')->middleware('check.permission:Masters Management,Delete Bank');
 
-Route::get('insurance-create', [SourceTypeController::class,'insuranceCreate'])->name('insurance.create');
+Route::get('insurance-create', [SourceTypeController::class,'insuranceCreate'])->name('insurance.create')->middleware('check.permission:Masters Management,Add Insurance');
 Route::get('users-management/insurance-list/get', [SourceTypeController::class, 'getinsurance'])->name("get.insurance");
 Route::post('insurance-store', [SourceTypeController::class,'insurancestore'])->name('insurance.store');
-Route::get('/insurance/{id}/edit', [SourceTypeController::class, 'insuranceedit'])->name('insurance.edit');
+Route::get('/insurance/{id}/edit', [SourceTypeController::class, 'insuranceedit'])->name('insurance.edit')->middleware('check.permission:Masters Management,Add Insurance');
 Route::put('/insurance/{id}', [SourceTypeController::class, 'insuranceupdate'])->name('insurance.update');
-Route::delete('/insurance/{id}', [SourceTypeController::class, 'destroyinsurance'])->name('insurance.destroy');
+Route::delete('/insurance/{id}', [SourceTypeController::class, 'destroyinsurance'])->name('insurance.destroy')->middleware('check.permission:Masters Management,Delete Insurance');
 
-Route::get('merchant-create', [SourceTypeController::class,'merchantCreate'])->name('merchant.create');
+Route::get('merchant-create', [SourceTypeController::class,'merchantCreate'])->name('merchant.create')->middleware('check.permission:Masters Management,Add Merchant');
 Route::get('users-management/merchant-list/get', [SourceTypeController::class, 'getmerchant'])->name("get.merchant");
 Route::post('merchant-store', [SourceTypeController::class,'merchantstore'])->name('merchant.store');
-Route::get('/merchant/{id}/edit', [SourceTypeController::class, 'merchantedit'])->name('merchant.edit');
+Route::get('/merchant/{id}/edit', [SourceTypeController::class, 'merchantedit'])->name('merchant.edit')->middleware('check.permission:Masters Management,Add Merchant');
 Route::put('/merchant/{id}', [SourceTypeController::class, 'merchantupdate'])->name('merchant.update');
-Route::delete('/merchant/{id}', [SourceTypeController::class, 'destroymerchant'])->name('merchant.destroy');
+Route::delete('/merchant/{id}', [SourceTypeController::class, 'destroymerchant'])->name('merchant.destroy')->middleware('check.permission:Masters Management,Delete Merchant');
 
-Route::get('wallet-create', [SourceTypeController::class,'walletCreate'])->name('wallet.create');
+Route::get('wallet-create', [SourceTypeController::class,'walletCreate'])->name('wallet.create')->middleware('check.permission:Masters Management,Add Wallet');
 Route::get('users-management/wallet-list/get', [SourceTypeController::class, 'getwallet'])->name("get.wallet");
 Route::post('wallet-store', [SourceTypeController::class,'walletstore'])->name('wallet.store');
-Route::get('/wallet/{id}/edit', [SourceTypeController::class, 'walletedit'])->name('wallet.edit');
+Route::get('/wallet/{id}/edit', [SourceTypeController::class, 'walletedit'])->name('wallet.edit')->middleware('check.permission:Masters Management,Add Wallet');
 Route::put('/wallet/{id}', [SourceTypeController::class, 'walletupdate'])->name('wallet.update');
-Route::delete('/wallet/{id}', [SourceTypeController::class, 'destroywallet'])->name('wallet.destroy');
+Route::delete('/wallet/{id}', [SourceTypeController::class, 'destroywallet'])->name('wallet.destroy')->middleware('check.permission:Masters Management,Delete Wallet');
 
 Route::patch('users/{id}/update-status', [UsersController::class, 'updateStatus']);
 

@@ -1,5 +1,22 @@
 @extends('layouts.app')
 @section('content')
+@php
+use App\Models\RolePermission;
+use Illuminate\Support\Facades\Auth;
+$user = Auth::user();
+            $role = $user->role;
+            $permission = RolePermission::where('role', $role)->first();
+            $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+            $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+            if ($sub_permissions || $user->role == 'Super Admin') {
+                $hasAmountCSVPermission = in_array('Amount wise CSV Download', $sub_permissions);
+                $hasAmountExcelPermission = in_array('Amount wise Excel Download', $sub_permissions);
+            } else{
+                    $hasShowTTypePermission = $hasShowBankPermission = $hasShowFilledByPermission = $hasShowComplaintRepoPermission = $hasShowFIRLodgePermission = $hasShowStatusPermission = $hasShowSearchByPermission = $hasShowSubCategoryPermission = false;
+                }
+
+@endphp
+
 <div class="container-fluid">
     <div class="breadcrumb-header justify-content-between">
         <div>
@@ -78,9 +95,9 @@
                                                 </div>
                                                 <div class="col-md-12 text-right">
                                                     <button type="submit" class="btn btn-primary">Apply Filters</button>
-                                                    <a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>
+                                                    @if($hasAmountCSVPermission)<a href="#" class="btn btn-success" id="csvDownload">Download CSV</a>@endif
                                                     <!-- Excel Download Button -->
-                                                   <a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>
+                                                    @if($hasAmountExcelPermission)<a href="#" class="btn btn-info" id="excelDownload">Download Excel</a>@endif
                                                 </div>
                                             </div>
                                         </form>

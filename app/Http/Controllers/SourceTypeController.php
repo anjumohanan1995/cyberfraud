@@ -6,6 +6,7 @@ use App\Models\Bank;
 use App\Models\Insurance;
 use App\Models\Merchant;
 use App\Models\Wallet;
+use App\Models\RolePermission;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -14,6 +15,7 @@ use App\Imports\RegistrarImport;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 use MongoDB\BSON\Regex;
+use Illuminate\Support\Facades\Auth;
 
 class SourceTypeController extends Controller
 {
@@ -157,6 +159,14 @@ class SourceTypeController extends Controller
     public function getsourcetype(Request $request)
     {
 
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub_permissions) || $user->role == 'Super Admin';
+
         ## Read value
         $draw = $request->get('draw');
         $start = $request->get("start");
@@ -214,7 +224,12 @@ class SourceTypeController extends Controller
                 $id = $record->id;
                 $name = $record->name;
 
-                $edit = '<a  href="' . url('sourcetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                // $edit = '<a  href="' . url('sourcetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                $edit = '<a href="' . url('sourcetype/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+
+                if ($hasDeleteSTPermission) {
+                    $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+                }
 
                 $data_arr[] = array(
                     "id" => $i,
@@ -297,6 +312,14 @@ class SourceTypeController extends Controller
 
     public function getbank(Request $request)
     {
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteBankPermission = $sub_permissions && in_array('Delete Bank', $sub_permissions) || $user->role == 'Super Admin';
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -337,7 +360,11 @@ class SourceTypeController extends Controller
             $i++;
             $id = $record->id;
             $name = $record->bank;
-            $edit = '<a  href="' . url('bank/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            $edit = '<a  href="' . url('bank/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+            if ($hasDeleteBankPermission) {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            }
+
 
             $data_arr[] = array(
                 "id" => $i,
@@ -441,6 +468,14 @@ class SourceTypeController extends Controller
 
     public function getinsurance(Request $request)
     {
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteInsurancePermission = $sub_permissions && in_array('Delete Insurance', $sub_permissions) || $user->role == 'Super Admin';
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -480,8 +515,11 @@ class SourceTypeController extends Controller
             $i++;
             $id = $record->id;
             $name = $record->insurance;
-            $edit = '<a  href="' . url('insurance/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            $edit = '<a  href="' . url('insurance/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
 
+            if ($hasDeleteInsurancePermission) {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            }
             $data_arr[] = array(
                 "id" => $i,
                 "name" => $name,
@@ -581,6 +619,14 @@ class SourceTypeController extends Controller
 
     public function getmerchant(Request $request)
     {
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteMerchantPermission = $sub_permissions && in_array('Delete Merchant', $sub_permissions) || $user->role == 'Super Admin';
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -620,7 +666,11 @@ class SourceTypeController extends Controller
             $i++;
             $id = $record->id;
             $name = $record->merchant;
-            $edit = '<a  href="' . url('merchant/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            $edit = '<a  href="' . url('merchant/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+
+            if ($hasDeleteMerchantPermission) {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            }
 
             $data_arr[] = array(
                 "id" => $i,
@@ -722,6 +772,14 @@ class SourceTypeController extends Controller
 
     public function getwallet(Request $request)
     {
+        $user = Auth::user();
+        $role = $user->role;
+        $permission = RolePermission::where('role', $role)->first();
+        $permissions = $permission && is_string($permission->permission) ? json_decode($permission->permission, true) : ($permission->permission ?? []);
+        $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
+
+        $hasDeleteWalletPermission = $sub_permissions && in_array('Delete Wallet', $sub_permissions) || $user->role == 'Super Admin';
+
         $draw = $request->get('draw');
         $start = $request->get("start");
         $rowperpage = $request->get("length");
@@ -761,7 +819,11 @@ class SourceTypeController extends Controller
             $i++;
             $id = $record->_id;
             $name = $record->wallet;
-            $edit = '<a  href="' . url('wallet/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            $edit = '<a  href="' . url('wallet/'.$id.'/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
+
+            if ($hasDeleteWalletPermission) {
+                $edit .= '<button class="btn btn-danger delete-btn" data-id="'.$id.'">Delete</button>';
+            }
 
             $data_arr[] = array(
                 "id" => $i,

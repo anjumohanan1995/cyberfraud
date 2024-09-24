@@ -105,9 +105,9 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
                                 <tr>
                                     <th>SL No</th>
                                     <th>Name</th>
-                                    @if($hasEditEvidenceTypePermission || $hasDeleteEvidenceTypePermission)
+                                    {{-- @if($hasEditEvidenceTypePermission || $hasDeleteEvidenceTypePermission) --}}
                                         <th>Action</th>
-                                    @endif
+                                    {{-- @endif --}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -135,7 +135,7 @@ $hasDeleteEvidenceTypePermission = $sub_permissions && in_array('Delete Evidence
             columns: [
                 { data: 'id' },
                 { data: 'name' },
-                @if($hasEditEvidenceTypePermission || $hasDeleteEvidenceTypePermission) { data: 'edit' } @endif
+                { data: 'edit' }
             ],
             order: [0, 'desc'],
             ordering: true

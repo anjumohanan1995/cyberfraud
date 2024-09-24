@@ -59,27 +59,6 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
                         <div class="m-4 d-flex justify-content-between">
                             <h4 class="card-title mg-b-10">Add Merchant!</h4>
 
-                            {{-- @if (session('success'))
-                                <div id="success-message" class="alert alert-success alert-dismissible fade show w-100" role="alert">
-                                    {{ session('success') }}
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            @endif
-
-                            @if ($errors->any())
-                                <div id="error-message" class="alert alert-danger alert-dismissible fade show w-100" role="alert">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            @endif --}}
                         </div>
 
                         <div class="table-responsive mb-0">
@@ -115,9 +94,9 @@ $hasDeleteSTPermission = $sub_permissions && in_array('Delete Source Type', $sub
                                         <tr>
                                             <th>SL No</th>
                                             <th>NAME</th>
-                                            @if($hasEditSTPermission || $hasDeleteSTPermission)
+                                            {{-- @if($hasEditSTPermission || $hasDeleteSTPermission) --}}
                                                 <th>ACTION</th>
-                                            @endif
+                                            {{-- @endif --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -152,7 +131,7 @@ $(document).ready(function() {
         columns: [
             { data: 'id' },
             { data: 'name' },
-            @if($hasEditSTPermission || $hasDeleteSTPermission) { data: 'edit' } @endif
+            { data: 'edit' } 
         ],
         order: [[0, 'desc']],
         ordering: true

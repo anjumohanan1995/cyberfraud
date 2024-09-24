@@ -333,7 +333,7 @@ class UsersController extends Controller
         $sub_permissions = $permission && is_string($permission->sub_permissions) ? json_decode($permission->sub_permissions, true) : ($permission->sub_permissions ?? []);
         if ($sub_permissions || $user->role == 'Super Admin') {
             $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
-            $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+            $hasDeleteUserPermission = in_array('User Status', $sub_permissions) || $user->role == 'Super Admin';
             } else{
                 $hasEditUserPermission = false;
                 $hasDeleteUserPermission = false;
@@ -349,22 +349,21 @@ class UsersController extends Controller
             $role = $record->role;
             $status = $record->status; // Get the status field
             $edit = '';
-
+            $statusToggleButton='';
             // Create toggle button for active/inactive status
             $isChecked = $status === 'active' ? 'checked' : '';
-            $statusToggleButton = '
-                <label class="switch">
-                    <input type="checkbox" class="status-toggle" data-id="' . $id . '" ' . $isChecked . '>
-                    <span class="slider round"></span>
-                </label>
-            ';
+
 
             if ($hasEditUserPermission || $user->role == 'Super Admin') {
                 $edit .= '<a href="' . url('users/' . $id . '/edit') . '" class="btn btn-primary edit-btn">Edit</a>&nbsp;&nbsp;';
             }
-            // if ($hasDeleteUserPermission || $user->role == 'Super Admin') {
-            //     $edit .= '<button class="btn btn-danger delete-btn" data-id="' . $id . '">Delete</button>';
-            // }
+            if ($hasDeleteUserPermission || $user->role == 'Super Admin') {
+                $statusToggleButton = '
+                <label class="switch">
+                    <input type="checkbox" class="status-toggle" data-id="' . $id . '" ' . $isChecked . '>
+                    <span class="slider round"></span>
+                </label>
+            ';            }
 
             $data_arr[] = [
                 "id" => $i,

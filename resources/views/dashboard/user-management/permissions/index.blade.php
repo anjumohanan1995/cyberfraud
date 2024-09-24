@@ -87,9 +87,9 @@ $user = Auth::user();
                                         <tr>
                                             <th>SL No</th>
                                             <th>Permission</th>
-                                            @if ($hasShowSubpermissionsPermission || $hasEditPermissionPermission || $hasDeletePermissionPermission)
+                                            {{-- @if ($hasShowSubpermissionsPermission || $hasEditPermissionPermission || $hasDeletePermissionPermission) --}}
                                             <th>ACTION</th>
-                                            @endif
+                                            {{-- @endif --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -132,9 +132,7 @@ $user = Auth::user();
             columns: [
                 { data: 'id' },
                 { data: 'name' },
-                @if ($hasShowSubpermissionsPermission || $hasEditPermissionPermission || $hasDeletePermissionPermission)
                 { data: 'edit' }
-                @endif
 			],
             "order": [0, 'desc'],
             'ordering': true

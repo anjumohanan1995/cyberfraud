@@ -9,7 +9,7 @@
     if ($sub_permissions || $user->role == 'Super Admin') {
     $hasAddUserPermission = in_array('Add User', $sub_permissions) || $user->role == 'Super Admin';
     $hasEditUserPermission = in_array('Edit User', $sub_permissions) || $user->role == 'Super Admin';
-    $hasDeleteUserPermission = in_array('Delete User', $sub_permissions) || $user->role == 'Super Admin';
+    $hasDeleteUserPermission = in_array('User Status', $sub_permissions) || $user->role == 'Super Admin';
     } else{
         $hasAddUserPermission = false;
         $hasEditUserPermission = false;
@@ -153,10 +153,12 @@ input:checked + .slider:before {
                                             <th>NAME</th>
                                             <th>EMAIL</th>
                                             <th>ROLE</th>
-                                            @if ($hasEditUserPermission || $hasDeleteUserPermission)
+                                            @if ($hasEditUserPermission)
                                                 <th>ACTION</th>
                                             @endif
+                                            @if ($hasDeleteUserPermission)
                                             <th>STATUS</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -198,10 +200,12 @@ input:checked + .slider:before {
                 { data: 'name' },
                 { data: 'email' },
                 { data: 'role' },
-                @if ($hasEditUserPermission || $hasDeleteUserPermission)
+                @if ($hasEditUserPermission)
                     { data: 'edit' },
                 @endif
+                @if ( $hasDeleteUserPermission)
                 { data: 'status' },
+                @endif
 
             ],
             "order": [0, 'desc'],

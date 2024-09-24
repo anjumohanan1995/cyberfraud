@@ -22,7 +22,7 @@
     $hasNCRPCasePermission = in_array('NCRP Case Data Management', $permissions);
     $hasOtherCasePermission = in_array('Other Case Data Management', $permissions);
     $hasSelfAssignedCasedataManagementPermission = in_array('Self Assigned Casedata Management', $permissions);
-    $hasSourceTypeManagementPermission = in_array('Source Type Management', $permissions);
+    $hasSourceTypeManagementPermission = in_array('Masters Management', $permissions);
     $hasNoticeManagementPermission = in_array('Notice Management', $permissions);
     $hasEvidenceManagementPermission = in_array('Evidence Management', $permissions);
     $hasMuleAccountPermission = in_array('Mule Account Management', $permissions);
